@@ -1,0 +1,29 @@
+[workspace]
+resolver = "2"
+members = [
+	"bin/*",
+	# "lib/*",
+	"client/rs",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+authors = ["mbecker20 <becker.maxh@gmail.com>"]
+license = "GPL-3.0-or-later"
+repository = "https://github.com/moghtech/cicada"
+# homepage = "https://komo.do"
+
+[profile.release]
+strip = "debuginfo"
+
+[workspace.dependencies]
+cicada_client = { path = "client/rs" }
+
+# MOGH
+serror = { version = "0.5.3", default-features = false }
+derive_default_builder = "0.1.8"
+derive_empty_traits = "0.1.0"
+partial_derive2 = "0.4.3"
+derive_variants = "1.0.0"
+resolver_api = "3.0.0"

@@ -1,0 +1,13 @@
+[package]
+name = "cicada_core"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[[bin]]
+name = "ccore"
+path = "src/main.rs"
+
+[dependencies]

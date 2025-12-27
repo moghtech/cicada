@@ -1,0 +1,13 @@
+[package]
+name = "cicada_periphery"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[[bin]]
+name = "cperiphery"
+path = "src/main.rs"
+
+[dependencies]
