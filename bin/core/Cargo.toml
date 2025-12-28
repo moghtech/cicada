@@ -11,3 +11,27 @@ name = "ccore"
 path = "src/main.rs"
 
 [dependencies]
+# local
+cicada_client.workspace = true
+environment_file.workspace = true
+# mogh
+serror = { workspace = true, features = ["axum"] }
+partial_derive2.workspace = true
+derive_variants.workspace = true
+resolver_api.workspace = true
+# external
+tracing-subscriber.workspace = true
+tower-sessions.workspace = true
+futures-util.workspace = true
+axum-server.workspace = true
+tower-http.workspace = true
+serde_json.workspace = true
+surrealdb.workspace = true
+typeshare.workspace = true
+dotenvy.workspace = true
+tracing.workspace = true
+anyhow.workspace = true
+rustls.workspace = true
+serde.workspace = true
+tokio.workspace = true
+axum.workspace = true

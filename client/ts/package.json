@@ -1,0 +1,19 @@
+{
+  "name": "cicada_client",
+  "version": "2.0.0",
+  "description": "Cicada client package",
+  "homepage": "https://mogh.tech/cicada",
+  "main": "dist/lib.js",
+  "type": "module",
+  "license": "GPL-3.0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}

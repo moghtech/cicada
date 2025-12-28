@@ -1,17 +1,11 @@
 [package]
-name = "cicada_periphery"
+name = "environment_file"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
 license.workspace = true
 repository.workspace = true
-
-[[bin]]
-name = "cperiphery"
-path = "src/main.rs"
+homepage.workspace = true
 
 [dependencies]
-# LOCAL
-cicada_client.workspace = true
-# EXTERNAL
-fuser.workspace = true
+thiserror.workspace = true

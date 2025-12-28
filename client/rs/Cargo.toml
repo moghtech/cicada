@@ -6,4 +6,19 @@ authors.workspace = true
 license.workspace = true
 repository.workspace = true
 
+[features]
+# default = ["blocking"] # use to dev client blocking mode
+blocking = ["reqwest/blocking"]
+
 [dependencies]
+# MOGH
+serror = { workspace = true, features = ["axum"] }
+derive_empty_traits.workspace = true
+resolver_api.workspace = true
+# EXTERNAL
+surrealdb-types.workspace = true
+serde_json.workspace = true
+typeshare.workspace = true
+reqwest.workspace = true
+anyhow.workspace = true
+serde.workspace = true
