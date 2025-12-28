@@ -3,6 +3,7 @@ use resolver_api::{HasResponse, Resolve};
 use serde::{Deserialize, Serialize};
 use typeshare::typeshare;
 
+pub mod filesystem;
 pub mod node;
 
 //

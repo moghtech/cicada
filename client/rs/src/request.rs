@@ -3,7 +3,10 @@ use serde::{Serialize, de::DeserializeOwned};
 use serde_json::json;
 use serror::deserialize_error;
 
-use crate::{CicadaClient, api::read::CicadaReadRequest};
+use crate::{
+  CicadaClient,
+  api::{read::CicadaReadRequest, write::CicadaWriteRequest},
+};
 
 impl CicadaClient {
   #[cfg(not(feature = "blocking"))]
@@ -34,6 +37,41 @@ impl CicadaClient {
   {
     self.post(
       "/read",
+      json!({
+        "type": T::req_type(),
+        "params": request
+      }),
+    )
+  }
+
+  #[cfg(not(feature = "blocking"))]
+  pub async fn write<T>(
+    &self,
+    request: T,
+  ) -> anyhow::Result<T::Response>
+  where
+    T: Serialize + CicadaWriteRequest,
+    T::Response: DeserializeOwned,
+  {
+    self
+      .post(
+        "/write",
+        json!({
+          "type": T::req_type(),
+          "params": request
+        }),
+      )
+      .await
+  }
+
+  #[cfg(feature = "blocking")]
+  pub fn write<T>(&self, request: T) -> anyhow::Result<T::Response>
+  where
+    T: Serialize + CicadaWriteRequest,
+    T::Response: DeserializeOwned,
+  {
+    self.post(
+      "/write",
       json!({
         "type": T::req_type(),
         "params": request

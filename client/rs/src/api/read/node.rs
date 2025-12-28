@@ -5,8 +5,15 @@ use typeshare::typeshare;
 
 use crate::{
   api::read::CicadaReadRequest,
-  entities::{U64, node::NodeRecord},
+  entities::{
+    U64,
+    node::{NodeListItem, NodeRecord},
+  },
 };
+
+fn default_parent() -> u64 {
+  1
+}
 
 //
 
@@ -18,11 +25,18 @@ use crate::{
 #[empty_traits(CicadaReadRequest)]
 #[response(ListNodesResponse)]
 #[error(serror::Error)]
-pub struct ListNodes {}
+pub struct ListNodes {
+  /// Filesystem id
+  pub filesystem: String,
+  /// parent inode number.
+  /// Default: 1 (the root node).
+  #[serde(default = "default_parent")]
+  pub parent: U64,
+}
 
 /// Response for [ListNodes].
 #[typeshare]
-pub type ListNodesResponse = Vec<NodeRecord>;
+pub type ListNodesResponse = Vec<NodeListItem>;
 
 //
 
@@ -35,9 +49,37 @@ pub type ListNodesResponse = Vec<NodeRecord>;
 #[response(GetNodeResponse)]
 #[error(serror::Error)]
 pub struct GetNode {
+  /// Filesystem id
+  pub filesystem: String,
+  /// inode number
   pub ino: U64,
 }
 
 /// Response for [GetNode].
 #[typeshare]
 pub type GetNodeResponse = NodeRecord;
+
+//
+
+/// Find a node using parent inode number and name. Response: [NodeRecord].
+#[typeshare]
+#[derive(
+  Debug, Clone, Serialize, Deserialize, Resolve, EmptyTraits,
+)]
+#[empty_traits(CicadaReadRequest)]
+#[response(FindNodeResponse)]
+#[error(serror::Error)]
+pub struct FindNode {
+  /// Filesystem id
+  pub filesystem: String,
+  /// parent inode number.
+  /// Default: 1 (the root node).
+  #[serde(default = "default_parent")]
+  pub parent: U64,
+  /// file name
+  pub name: String,
+}
+
+/// Response for [FindNode].
+#[typeshare]
+pub type FindNodeResponse = NodeRecord;

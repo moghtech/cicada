@@ -13,6 +13,7 @@ use crate::config::cors_layer;
 
 mod read;
 mod response;
+mod write;
 
 #[derive(serde::Deserialize)]
 struct Variant {
@@ -34,7 +35,7 @@ pub fn app() -> Router {
     // .nest("/auth", auth::router())
     // .nest("/user", user::router())
     .nest("/read", read::router())
-    // .nest("/write", write::router())
+    .nest("/write", write::router())
     // .nest("/listener", listener::router())
     // .nest("/client", ts_client::router())
     .layer(memory_session_layer())
@@ -62,7 +63,7 @@ const MEMORY_SESSION_EXPIRY_SECONDS: i64 = 60;
 
 fn memory_session_layer() -> SessionManagerLayer<MemoryStore> {
   // let config = core_config();
-  let mut layer = SessionManagerLayer::new(MemoryStore::default())
+  let layer = SessionManagerLayer::new(MemoryStore::default())
     .with_expiry(Expiry::OnInactivity(Duration::seconds(
       MEMORY_SESSION_EXPIRY_SECONDS,
     )))

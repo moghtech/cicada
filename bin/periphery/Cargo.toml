@@ -12,6 +12,16 @@ path = "src/main.rs"
 
 [dependencies]
 # LOCAL
-cicada_client.workspace = true
+cicada_client = { workspace = true, features = ["blocking"] }
+config.workspace = true
+logger.workspace = true
 # EXTERNAL
+futures-util.workspace = true
+colored.workspace = true
+tracing.workspace = true
+dotenvy.workspace = true
+anyhow.workspace = true
 fuser.workspace = true
+tokio.workspace = true
+envy.workspace = true
+libc.workspace = true

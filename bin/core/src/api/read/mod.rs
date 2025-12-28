@@ -3,7 +3,8 @@ use std::time::Instant;
 use axum::{Router, extract::Path, routing::post};
 use cicada_client::api::read::{
   GetVersion, GetVersionResponse,
-  node::{GetNode, ListNodes},
+  filesystem::ListFilesystems,
+  node::{FindNode, GetNode, ListNodes},
 };
 use resolver_api::Resolve;
 use serde::{Deserialize, Serialize};
@@ -14,6 +15,7 @@ use typeshare::typeshare;
 
 use crate::api::{Variant, response::Response};
 
+mod filesystem;
 mod node;
 
 pub struct ReadArgs {}
@@ -27,9 +29,13 @@ pub struct ReadArgs {}
 enum ReadRequest {
   GetVersion(GetVersion),
 
+  // ==== FILESYSTEM ====
+  ListFilesystems(ListFilesystems),
+
   // ==== NODE ====
   ListNodes(ListNodes),
   GetNode(GetNode),
+  FindNode(FindNode),
 }
 
 pub fn router() -> Router {
