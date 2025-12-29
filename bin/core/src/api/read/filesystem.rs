@@ -9,10 +9,9 @@ impl Resolve<ReadArgs> for ListFilesystems {
     self,
     _: &ReadArgs,
   ) -> Result<Self::Response, Self::Error> {
-    DB.query("SELECT record::id(id) as id, * FROM Filesystem")
+    DB.select("Filesystem")
       .await
-      .context("Failed to query for filesystems")?
-      .take(0)
+      .context("Failed to query for filesystems")
       .map_err(Into::into)
   }
 }

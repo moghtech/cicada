@@ -49,10 +49,8 @@ pub type ListNodesResponse = Vec<NodeListItem>;
 #[response(GetNodeResponse)]
 #[error(serror::Error)]
 pub struct GetNode {
-  /// Filesystem id
-  pub filesystem: String,
   /// inode number
-  pub ino: U64,
+  pub id: U64,
 }
 
 /// Response for [GetNode].

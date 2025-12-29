@@ -8,7 +8,8 @@ use crate::{
   api::write::CicadaWriteRequest,
   entities::{
     U64,
-    node::{NodeKind, NodeRecord},
+    filesystem::FilesystemId,
+    node::{NodeId, NodeKind, NodeRecord},
   },
 };
 
@@ -34,7 +35,8 @@ fn default_parent() -> u64 {
 #[error(serror::Error)]
 pub struct CreateNode {
   /// The filesystem ID
-  pub filesystem: String,
+  #[serde(skip_serializing_if = "Option::is_none")]
+  pub filesystem: Option<FilesystemId>,
   /// parent inode number.
   /// Default: 1 (the root node).
   #[serde(default = "default_parent")]
@@ -73,10 +75,8 @@ pub type CreateNodeResponse = NodeRecord;
 #[response(UpdateNodeResponse)]
 #[error(serror::Error)]
 pub struct UpdateNode {
-  /// The filesystem ID
-  pub filesystem: String,
-  /// The node to update
-  pub ino: U64,
+  /// The node id
+  pub id: NodeId,
   /// parent inode number.
   #[serde(skip_serializing_if = "Option::is_none")]
   pub parent: Option<U64>,

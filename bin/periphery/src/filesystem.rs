@@ -70,7 +70,7 @@ impl CicadaFs {
       NodeKind::File => (FileType::RegularFile, 0o600),
     };
     FileAttr {
-      ino: node.ino,
+      ino: node.id.0,
       size,
       blocks: size.div_ceil(CicadaFs::BLOCK_SIZE),
       atime: UNIX_EPOCH,
@@ -126,7 +126,7 @@ impl fuser::Filesystem for CicadaFs {
         NodeKind::Folder => FileType::Directory,
         NodeKind::File => FileType::RegularFile,
       };
-      (node.ino, kind, node.name.as_str())
+      (node.id.0, kind, node.name.as_str())
     }));
 
     for (i, (ino, kind, name)) in
@@ -182,10 +182,7 @@ impl fuser::Filesystem for CicadaFs {
       reply.attr(&CicadaFs::TTL, &self.root);
       return;
     }
-    let attr = match cicada().read(GetNode {
-      filesystem: self.filesystem.clone(),
-      ino,
-    }) {
+    let attr = match cicada().read(GetNode { id: ino }) {
       Ok(node) => self.node_to_file_attr(node),
       Err(e) => {
         error!(
@@ -214,10 +211,7 @@ impl fuser::Filesystem for CicadaFs {
       reply.error(ENOENT);
       return;
     }
-    let node = match cicada().read(GetNode {
-      filesystem: self.filesystem.clone(),
-      ino,
-    }) {
+    let node = match cicada().read(GetNode { id: ino }) {
       Ok(node) => node,
       Err(e) => {
         error!(

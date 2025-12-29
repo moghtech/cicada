@@ -20,12 +20,9 @@ pub async fn init() -> anyhow::Result<()> {
 
   DB.use_ns("cicada").use_db("cicada").await?;
 
-  DB.query(tables::INIT_FILESYSTEM_TABLE)
+  DB.query(tables::INIT_TABLES)
     .await
-    .context("Failed to initialize filesystem table")?;
-  DB.query(tables::INIT_NODE_TABLE)
-    .await
-    .context("Failed to initialize node table")?;
+    .context("Failed to initialize tables")?;
 
   Ok(())
 }

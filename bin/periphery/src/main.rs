@@ -42,7 +42,7 @@ async fn app() -> anyhow::Result<()> {
       });
 
     let Some(filesystem) = filesystems.iter().find_map(|fs| {
-      (fs.id == name_or_id || fs.name == name_or_id)
+      (fs.id.0 == name_or_id || fs.name == name_or_id)
         .then(|| fs.clone())
     }) else {
       warn!(
@@ -58,7 +58,7 @@ async fn app() -> anyhow::Result<()> {
     handles.push(tokio::task::spawn_blocking(move || {
       info!("Mounting {filesystem:?} to {mountpoint:?}");
       if let Err(e) =
-        CicadaFs::mount(filesystem.id.clone(), &mountpoint)
+        CicadaFs::mount(filesystem.id.0.clone(), &mountpoint)
       {
         error!(
           "Failed to mount filesystem {} to {mountpoint:?} | {e:#}",

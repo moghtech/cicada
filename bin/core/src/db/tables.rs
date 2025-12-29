@@ -1,4 +1,8 @@
-pub const INIT_FILESYSTEM_TABLE: &str = r#"
+pub const INIT_TABLES: &str = r#"
+-- ============
+--  Filesystem
+-- ============
+
 -- Init the Filesystem table if not exists
 DEFINE TABLE IF NOT EXISTS Filesystem SCHEMAFULL;
 
@@ -7,30 +11,33 @@ DEFINE FIELD OVERWRITE name ON TABLE Filesystem TYPE string;
 
 -- Define unique index on name
 DEFINE INDEX OVERWRITE Name ON TABLE Filesystem FIELDS name UNIQUE;
-"#;
 
-pub const INIT_NODE_TABLE: &str = r#"
+DEFINE FUNCTION OVERWRITE fn::first_filesystem() {
+  RETURN (SELECT id FROM Filesystem LIMIT 1)[0].id
+};
+
+-- ======
+--  Node
+-- ======
+
 -- Init the Node table if not exists
 DEFINE TABLE IF NOT EXISTS Node SCHEMAFULL;
 
--- Create inode allocator function.
-DEFINE FUNCTION OVERWRITE fn::node_next_ino() {
-  LET $max = (SELECT math::max(ino) AS max_ino FROM Node GROUP ALL)[0].max_ino;
-  RETURN IF $max = NONE OR $max = NULL {
+-- Create node creation function.
+DEFINE FUNCTION OVERWRITE fn::create_node($data: object) {
+  LET $max = (SELECT math::max(record::id(id)) AS max_ino FROM Node GROUP ALL)[0].max_ino;
+  LET $ino = IF $max = NONE OR $max = NULL {
     2
   } ELSE {
     $max + 1
   };
+  RETURN CREATE type::record("Node", $ino) CONTENT $data;
 };
--- Define the ino field and unique index
-DEFINE FIELD OVERWRITE ino ON TABLE Node
-  TYPE int
-  DEFAULT fn::node_next_ino()
-  READONLY;
-DEFINE INDEX OVERWRITE InoUnique ON TABLE Node FIELDS ino UNIQUE;
 
 -- Define other fields
-DEFINE FIELD OVERWRITE filesystem ON TABLE Node TYPE string;
+DEFINE FIELD OVERWRITE filesystem ON TABLE Node
+  TYPE record<Filesystem>
+  DEFAULT fn::first_filesystem();
 DEFINE FIELD OVERWRITE parent ON TABLE Node
   TYPE int
   DEFAULT 1;
