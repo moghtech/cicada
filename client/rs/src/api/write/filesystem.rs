@@ -3,6 +3,7 @@ use resolver_api::Resolve;
 use serde::{Deserialize, Serialize};
 use surrealdb_types::SurrealValue;
 use typeshare::typeshare;
+use utoipa::ToSchema;
 
 use crate::{
   api::write::CicadaWriteRequest,
@@ -21,6 +22,7 @@ use crate::{
   SurrealValue,
   Resolve,
   EmptyTraits,
+  ToSchema,
 )]
 #[empty_traits(CicadaWriteRequest)]
 #[response(CreateFilesystemResponse)]
@@ -46,6 +48,7 @@ pub type CreateFilesystemResponse = FilesystemRecord;
   SurrealValue,
   Resolve,
   EmptyTraits,
+  ToSchema,
 )]
 #[empty_traits(CicadaWriteRequest)]
 #[response(UpdateFilesystemResponse)]

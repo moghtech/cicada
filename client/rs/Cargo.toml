@@ -22,4 +22,5 @@ typeshare.workspace = true
 reqwest.workspace = true
 tracing.workspace = true
 anyhow.workspace = true
+utoipa.workspace = true
 serde.workspace = true

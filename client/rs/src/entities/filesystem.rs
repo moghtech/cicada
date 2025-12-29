@@ -2,9 +2,12 @@ use anyhow::anyhow;
 use serde::{Deserialize, Serialize};
 use surrealdb_types::{RecordIdKey, SurrealValue};
 use typeshare::typeshare;
+use utoipa::ToSchema;
 
 #[typeshare]
-#[derive(Debug, Clone, Serialize, Deserialize, SurrealValue)]
+#[derive(
+  Debug, Clone, Serialize, Deserialize, SurrealValue, ToSchema,
+)]
 pub struct FilesystemRecord {
   /// The unique filesystem id
   pub id: FilesystemId,
@@ -13,7 +16,7 @@ pub struct FilesystemRecord {
 }
 
 #[typeshare(serialized_as = "string")]
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
 pub struct FilesystemId(pub String);
 
 impl SurrealValue for FilesystemId {

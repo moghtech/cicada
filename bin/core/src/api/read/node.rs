@@ -2,26 +2,64 @@ use anyhow::Context;
 use axum::http::StatusCode;
 use cicada_client::{
   api::read::node::{FindNode, GetNode, ListNodes},
-  entities::{filesystem::FilesystemId, node::NodeRecord},
+  entities::{
+    filesystem::FilesystemId,
+    node::{NodeListItem, NodeRecord},
+  },
 };
 use resolver_api::Resolve;
 use serror::AddStatusCode;
 
 use crate::{api::read::ReadArgs, db::DB};
 
+#[utoipa::path(
+  post,
+  path = "/read/ListNodes",
+  description = "List available folders and files",
+  request_body(content = ListNodes),
+  responses(
+    (status = 200, body = Vec<NodeListItem>),
+    (status = 500, description = "Failed to query database")
+  ),
+)]
+pub async fn list_nodes(
+  body: ListNodes,
+) -> serror::Result<Vec<NodeListItem>> {
+  DB.query("SELECT id, filesystem, parent, name, kind FROM Node WHERE filesystem = $filesystem AND parent = $parent")
+    .bind(("filesystem", FilesystemId(body.filesystem)))
+    .bind(("parent", body.parent))
+    .await
+    .context("Failed to query for nodes")?
+    .take(0)
+    .map_err(Into::into)
+}
+
 impl Resolve<ReadArgs> for ListNodes {
   async fn resolve(
     self,
     _: &ReadArgs,
   ) -> Result<Self::Response, Self::Error> {
-    DB.query("SELECT id, filesystem, parent, name, kind FROM Node WHERE filesystem = $filesystem AND parent = $parent")
-      .bind(("filesystem", FilesystemId(self.filesystem)))
-      .bind(("parent", self.parent))
-      .await
-      .context("Failed to query for nodes")?
-      .take(0)
-      .map_err(Into::into)
+    list_nodes(self).await
   }
+}
+
+#[utoipa::path(
+  post,
+  path = "/read/GetNode",
+  description = "Get a folder or file by id",
+  request_body(content = GetNode),
+  responses(
+    (status = 200, body = NodeRecord),
+    (status = 404, description = "Failed to find node with given id"),
+    (status = 500, description = "Failed to query database"),
+  ),
+)]
+pub async fn get_node(body: GetNode) -> serror::Result<NodeRecord> {
+  DB.select(("Node", body.id as i64))
+    .await
+    .context("Failed to find node with given id.")?
+    .context("Failed to find node with given id.")
+    .status_code(StatusCode::NOT_FOUND)
 }
 
 impl Resolve<ReadArgs> for GetNode {
@@ -29,12 +67,32 @@ impl Resolve<ReadArgs> for GetNode {
     self,
     _: &ReadArgs,
   ) -> Result<Self::Response, Self::Error> {
-    DB.select(("Node", self.id as i64))
-      .await
-      .context("Failed to find node with given id.")?
-      .context("Failed to find node with given id.")
-      .status_code(StatusCode::NOT_FOUND)
+    get_node(self).await
   }
+}
+
+#[utoipa::path(
+  post,
+  path = "/read/FindNode",
+  description = "Find a node by parent id and name",
+  request_body(content = FindNode),
+  responses(
+    (status = 200, body = NodeRecord),
+    (status = 404, description = "Failed to find node with given parent / name"),
+    (status = 500, description = "Failed to query database"),
+  ),
+)]
+pub async fn find_node(body: FindNode) -> serror::Result<NodeRecord> {
+  DB.query(
+      "SELECT * FROM Node WHERE filesystem = $filesystem AND parent = $parent AND name = $name",
+    )
+    .bind(("filesystem", FilesystemId(body.filesystem)))
+    .bind(("parent", body.parent))
+    .bind(("name", body.name))
+    .await?
+    .take::<Option<NodeRecord>>(0)?
+    .context("Failed to find Node with given parent and name.")
+    .status_code(StatusCode::NOT_FOUND)
 }
 
 impl Resolve<ReadArgs> for FindNode {
@@ -42,15 +100,6 @@ impl Resolve<ReadArgs> for FindNode {
     self,
     _: &ReadArgs,
   ) -> Result<Self::Response, Self::Error> {
-    DB.query(
-      "SELECT * FROM Node WHERE filesystem = $filesystem AND parent = $parent AND name = $name",
-    )
-    .bind(("filesystem", FilesystemId(self.filesystem)))
-    .bind(("parent", self.parent))
-    .bind(("name", self.name))
-    .await?
-    .take::<Option<NodeRecord>>(0)?
-    .context("Failed to find Node with given parent and name.")
-    .status_code(StatusCode::NOT_FOUND)
+    find_node(self).await
   }
 }

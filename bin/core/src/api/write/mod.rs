@@ -15,8 +15,8 @@ use typeshare::typeshare;
 
 use crate::api::{Variant, response::Response};
 
-mod filesystem;
-mod node;
+pub mod filesystem;
+pub mod node;
 
 pub struct WriteArgs {}
 

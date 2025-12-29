@@ -2,6 +2,7 @@ use derive_empty_traits::EmptyTraits;
 use resolver_api::Resolve;
 use serde::{Deserialize, Serialize};
 use typeshare::typeshare;
+use utoipa::ToSchema;
 
 use crate::{
   api::read::CicadaReadRequest,
@@ -20,7 +21,7 @@ fn default_parent() -> u64 {
 /// List filesystem nodes. Response: [ListNodesResponse].
 #[typeshare]
 #[derive(
-  Debug, Clone, Serialize, Deserialize, Resolve, EmptyTraits,
+  Debug, Clone, Serialize, Deserialize, Resolve, EmptyTraits, ToSchema,
 )]
 #[empty_traits(CicadaReadRequest)]
 #[response(ListNodesResponse)]
@@ -43,7 +44,7 @@ pub type ListNodesResponse = Vec<NodeListItem>;
 /// Get a node. Response: [NodeRecord].
 #[typeshare]
 #[derive(
-  Debug, Clone, Serialize, Deserialize, Resolve, EmptyTraits,
+  Debug, Clone, Serialize, Deserialize, Resolve, EmptyTraits, ToSchema,
 )]
 #[empty_traits(CicadaReadRequest)]
 #[response(GetNodeResponse)]
@@ -62,7 +63,7 @@ pub type GetNodeResponse = NodeRecord;
 /// Find a node using parent inode number and name. Response: [NodeRecord].
 #[typeshare]
 #[derive(
-  Debug, Clone, Serialize, Deserialize, Resolve, EmptyTraits,
+  Debug, Clone, Serialize, Deserialize, Resolve, EmptyTraits, ToSchema,
 )]
 #[empty_traits(CicadaReadRequest)]
 #[response(FindNodeResponse)]

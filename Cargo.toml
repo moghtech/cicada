@@ -45,6 +45,10 @@ axum-extra = { version = "0.12.4", features = ["typed-header"] }
 axum-server = { version = "0.8.0", features = ["tls-rustls"] }
 tower-sessions = "0.14.0"
 
+# UTOIPA
+utoipa-scalar = { version = "0.3.0", features = ["axum"] }
+utoipa = "5.4.0"
+
 # SER/DE
 serde = { version = "1.0.227", features = ["derive"] }
 strum = { version = "0.27.2", features = ["derive"] }

@@ -3,6 +3,7 @@ use resolver_api::Resolve;
 use serde::{Deserialize, Serialize};
 use surrealdb_types::SurrealValue;
 use typeshare::typeshare;
+use utoipa::ToSchema;
 
 use crate::{
   api::write::CicadaWriteRequest,
@@ -29,6 +30,7 @@ fn default_parent() -> u64 {
   SurrealValue,
   Resolve,
   EmptyTraits,
+  ToSchema,
 )]
 #[empty_traits(CicadaWriteRequest)]
 #[response(CreateNodeResponse)]
@@ -70,6 +72,7 @@ pub type CreateNodeResponse = NodeRecord;
   SurrealValue,
   Resolve,
   EmptyTraits,
+  ToSchema,
 )]
 #[empty_traits(CicadaWriteRequest)]
 #[response(UpdateNodeResponse)]

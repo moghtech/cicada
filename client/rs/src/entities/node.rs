@@ -2,11 +2,14 @@ use anyhow::anyhow;
 use serde::{Deserialize, Serialize};
 use surrealdb_types::{RecordIdKey, SurrealValue};
 use typeshare::typeshare;
+use utoipa::ToSchema;
 
 use crate::entities::{U64, filesystem::FilesystemId};
 
 #[typeshare]
-#[derive(Debug, Clone, Serialize, Deserialize, SurrealValue)]
+#[derive(
+  Debug, Clone, Serialize, Deserialize, SurrealValue, ToSchema,
+)]
 pub struct NodeListItem {
   /// The unique node id
   pub id: NodeId,
@@ -23,7 +26,9 @@ pub struct NodeListItem {
 }
 
 #[typeshare]
-#[derive(Debug, Clone, Serialize, Deserialize, SurrealValue)]
+#[derive(
+  Debug, Clone, Serialize, Deserialize, SurrealValue, ToSchema,
+)]
 pub struct NodeRecord {
   /// The unique node id
   pub id: NodeId,
@@ -47,7 +52,14 @@ pub struct NodeRecord {
 /// Nodes can be either folders or files.
 #[typeshare]
 #[derive(
-  Debug, Clone, Copy, Default, Serialize, Deserialize, SurrealValue,
+  Debug,
+  Clone,
+  Copy,
+  Default,
+  Serialize,
+  Deserialize,
+  SurrealValue,
+  ToSchema,
 )]
 #[surreal(untagged)]
 pub enum NodeKind {
@@ -57,7 +69,7 @@ pub enum NodeKind {
 }
 
 #[typeshare(serialized_as = "number")]
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
 pub struct NodeId(pub U64);
 
 impl SurrealValue for NodeId {
