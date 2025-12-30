@@ -5,8 +5,6 @@ use surrealdb::{Surreal, engine::any::Any, opt::auth};
 
 use crate::config::core_config;
 
-mod tables;
-
 pub static DB: LazyLock<Surreal<Any>> = LazyLock::new(Surreal::init);
 
 pub async fn init() -> anyhow::Result<()> {
@@ -28,7 +26,7 @@ pub async fn init() -> anyhow::Result<()> {
     .use_db(&config.database.db_name)
     .await?;
 
-  DB.query(tables::INIT_TABLES)
+  DB.query(include_str!("init.surrealql"))
     .await
     .context("Failed to initialize tables")?;
 
