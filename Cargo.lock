@@ -3694,14 +3694,15 @@ dependencies = [
 
 [[package]]
 name = "serror"
-version = "0.5.3"
+version = "0.5.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "83d5f0c9ed890d2599995e99e2a8c1b5f54b1d428a1046753e3efda5170ff33d"
+checksum = "a59635d388fd254fe808fe61abbee8dbe733e8a5cbf01f88f7862ed94a133865"
 dependencies = [
  "anyhow",
  "axum 0.8.8",
  "serde",
  "serde_json",
+ "utoipa",
 ]
 
 [[package]]

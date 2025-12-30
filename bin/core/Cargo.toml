@@ -17,7 +17,7 @@ environment_file.workspace = true
 config.workspace = true
 logger.workspace = true
 # mogh
-serror = { workspace = true, features = ["axum"] }
+serror = { workspace = true, features = ["axum", "utoipa"] }
 # partial_derive2.workspace = true
 derive_variants.workspace = true
 resolver_api.workspace = true

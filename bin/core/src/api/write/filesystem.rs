@@ -14,7 +14,7 @@ use crate::{api::write::WriteArgs, db::DB};
   request_body(content = CreateFilesystem),
   responses(
     (status = 200, body = FilesystemRecord),
-    (status = 500, description = "Failed to query database")
+    (status = 500, description = "Request failed", body = serror::Serror)
   ),
 )]
 pub async fn create_filesystem(
@@ -47,7 +47,7 @@ impl Resolve<WriteArgs> for CreateFilesystem {
   request_body(content = UpdateFilesystem),
   responses(
     (status = 200, body = FilesystemRecord),
-    (status = 500, description = "Failed to query database")
+    (status = 500, description = "Request failed", body = serror::Serror)
   ),
 )]
 pub async fn update_filesystem(

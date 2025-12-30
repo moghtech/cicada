@@ -75,13 +75,26 @@ async fn handler(
 
 //
 
+#[utoipa::path(
+  post,
+  path = "/read/GetVersion",
+  description = "Get the Cicada Core api version",
+  request_body(content = GetVersion),
+  responses(
+    (status = 200, description = "Cicada api version", body = GetVersionResponse),
+  ),
+)]
+async fn get_version() -> serror::Result<GetVersionResponse> {
+  Ok(GetVersionResponse {
+    version: env!("CARGO_PKG_VERSION").to_string(),
+  })
+}
+
 impl Resolve<ReadArgs> for GetVersion {
   async fn resolve(
     self,
     _: &ReadArgs,
   ) -> Result<Self::Response, Self::Error> {
-    Ok(GetVersionResponse {
-      version: env!("CARGO_PKG_VERSION").to_string(),
-    })
+    get_version().await
   }
 }

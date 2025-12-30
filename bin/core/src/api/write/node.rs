@@ -16,7 +16,7 @@ use crate::{api::write::WriteArgs, db::DB};
   request_body(content = CreateNode),
   responses(
     (status = 200, body = NodeRecord),
-    (status = 500, description = "Failed to query database")
+    (status = 500, description = "Request failed", body = serror::Serror)
   ),
 )]
 pub async fn create_node(
@@ -49,7 +49,7 @@ impl Resolve<WriteArgs> for CreateNode {
   request_body(content = UpdateNode),
   responses(
     (status = 200, body = NodeRecord),
-    (status = 500, description = "Failed to query database")
+    (status = 500, description = "Request failed", body = serror::Serror)
   ),
 )]
 pub async fn update_node(

@@ -18,8 +18,8 @@ use crate::{api::read::ReadArgs, db::DB};
   description = "List available folders and files",
   request_body(content = ListNodes),
   responses(
-    (status = 200, body = Vec<NodeListItem>),
-    (status = 500, description = "Failed to query database")
+    (status = 200, description = "List of filesystem nodes", body = Vec<NodeListItem>),
+    (status = 500, description = "Request failed", body = serror::Serror)
   ),
 )]
 pub async fn list_nodes(
@@ -54,9 +54,9 @@ impl Resolve<ReadArgs> for ListNodes {
   description = "Get a folder or file by id",
   request_body(content = GetNode),
   responses(
-    (status = 200, body = NodeRecord),
-    (status = 404, description = "Failed to find node with given id"),
-    (status = 500, description = "Failed to query database"),
+    (status = 200, description = "The filesystem node", body = NodeRecord),
+    (status = 404, description = "Failed to find node with given id", body = serror::Serror),
+    (status = 500, description = "Request failed", body = serror::Serror),
   ),
 )]
 pub async fn get_node(body: GetNode) -> serror::Result<NodeRecord> {
@@ -82,9 +82,9 @@ impl Resolve<ReadArgs> for GetNode {
   description = "Find a node by parent id and name",
   request_body(content = FindNode),
   responses(
-    (status = 200, body = NodeRecord),
-    (status = 404, description = "Failed to find node with given parent / name"),
-    (status = 500, description = "Failed to query database"),
+    (status = 200, description = "The filesystem node", body = NodeRecord),
+    (status = 404, description = "Failed to find node with given parent / name", body = serror::Serror),
+    (status = 500, description = "Request failed", body = serror::Serror),
   ),
 )]
 pub async fn find_node(body: FindNode) -> serror::Result<NodeRecord> {

@@ -8,11 +8,10 @@ use tower_sessions::{
   Expiry, MemoryStore, SessionManagerLayer,
   cookie::{SameSite, time::Duration},
 };
-use utoipa::OpenApi;
-use utoipa_scalar::{Scalar, Servable};
 
 use crate::config::cors_layer;
 
+mod openapi;
 mod read;
 mod response;
 mod write;
@@ -33,8 +32,8 @@ pub fn app() -> Router {
   //   .not_found_service(frontend_index.clone());
 
   Router::new()
+    .merge(openapi::serve_docs())
     .route("/version", get(|| async { env!("CARGO_PKG_VERSION") }))
-    .merge(Scalar::with_url("/openapi", CicadaApi::openapi()))
     // .nest("/auth", auth::router())
     // .nest("/user", user::router())
     .nest("/read", read::router())
@@ -79,26 +78,3 @@ fn memory_session_layer() -> SessionManagerLayer<MemoryStore> {
   // }
   layer
 }
-
-#[derive(OpenApi)]
-#[openapi(paths(
-  // ======
-  //  READ
-  // ======
-  // FILESYSTEM
-  read::filesystem::list_filesystems,
-  // NODE
-  read::node::list_nodes,
-  read::node::get_node,
-  read::node::find_node,
-  // =======
-  //  WRITE
-  // =======
-  // FILESYSTEM
-  write::filesystem::create_filesystem,
-  write::filesystem::update_filesystem,
-  // NODE
-  write::node::create_node,
-  write::node::update_node,
-))]
-struct CicadaApi;

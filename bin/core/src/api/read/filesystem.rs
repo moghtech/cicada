@@ -13,8 +13,8 @@ use crate::{api::read::ReadArgs, db::DB};
   description = "List available filesystems",
   request_body(content = ListFilesystems),
   responses(
-    (status = 200, body = Vec<FilesystemRecord>),
-    (status = 500, description = "Failed to query database")
+    (status = 200, description = "List of filesystems", body = Vec<FilesystemRecord>),
+    (status = 500, description = "Request failed", body = serror::Serror)
   ),
 )]
 pub async fn list_filesystems()
