@@ -29,4 +29,5 @@ struct CicadaApi;
 
 pub fn serve_docs() -> Scalar<utoipa::openapi::OpenApi> {
   Scalar::with_url("/openapi", CicadaApi::openapi())
+    .custom_html(include_str!("scalar.html"))
 }
