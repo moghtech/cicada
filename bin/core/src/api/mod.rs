@@ -34,7 +34,7 @@ pub fn app() -> Router {
 
   Router::new()
     .route("/version", get(|| async { env!("CARGO_PKG_VERSION") }))
-    .merge(Scalar::with_url("/scalar", ApiDoc::openapi()))
+    .merge(Scalar::with_url("/openapi", CicadaApi::openapi()))
     // .nest("/auth", auth::router())
     // .nest("/user", user::router())
     .nest("/read", read::router())
@@ -101,4 +101,4 @@ fn memory_session_layer() -> SessionManagerLayer<MemoryStore> {
   write::node::create_node,
   write::node::update_node,
 ))]
-struct ApiDoc;
+struct CicadaApi;

@@ -12,3 +12,11 @@ fn default_merge_nested_config() -> bool {
 fn default_extend_config_arrays() -> bool {
   true
 }
+
+pub fn empty_or_redacted(src: &str) -> String {
+  if src.is_empty() {
+    String::new()
+  } else {
+    String::from("##############")
+  }
+}

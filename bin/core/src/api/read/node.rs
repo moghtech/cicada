@@ -25,13 +25,18 @@ use crate::{api::read::ReadArgs, db::DB};
 pub async fn list_nodes(
   body: ListNodes,
 ) -> serror::Result<Vec<NodeListItem>> {
-  DB.query("SELECT id, filesystem, parent, name, kind FROM Node WHERE filesystem = $filesystem AND parent = $parent")
-    .bind(("filesystem", FilesystemId(body.filesystem)))
-    .bind(("parent", body.parent))
-    .await
-    .context("Failed to query for nodes")?
-    .take(0)
-    .map_err(Into::into)
+  DB.query(
+    "
+SELECT id, filesystem, parent, name, kind FROM Node 
+WHERE ($filesystem IS NONE OR filesystem = $filesystem)
+AND ($parent IS NONE OR parent = $parent)",
+  )
+  .bind(("filesystem", body.filesystem.map(FilesystemId)))
+  .bind(("parent", body.parent))
+  .await
+  .context("Failed to query for nodes")?
+  .take(0)
+  .map_err(Into::into)
 }
 
 impl Resolve<ReadArgs> for ListNodes {

@@ -28,11 +28,9 @@ fn default_parent() -> u64 {
 #[error(serror::Error)]
 pub struct ListNodes {
   /// Filesystem id
-  pub filesystem: String,
+  pub filesystem: Option<String>,
   /// parent inode number.
-  /// Default: 1 (the root node).
-  #[serde(default = "default_parent")]
-  pub parent: U64,
+  pub parent: Option<U64>,
 }
 
 /// Response for [ListNodes].

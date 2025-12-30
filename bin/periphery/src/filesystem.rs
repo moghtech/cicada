@@ -103,8 +103,8 @@ impl fuser::Filesystem for CicadaFs {
     mut reply: fuser::ReplyDirectory,
   ) {
     let nodes = match cicada().read(ListNodes {
-      filesystem: self.filesystem.clone(),
-      parent: ino,
+      filesystem: self.filesystem.clone().into(),
+      parent: ino.into(),
     }) {
       Ok(node) => node,
       Err(e) => {
