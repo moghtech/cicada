@@ -78,10 +78,10 @@ async fn handler(
 #[utoipa::path(
   post,
   path = "/read/GetVersion",
-  description = "Get the Cicada Core api version",
+  description = "Get the Cicada Core version",
   request_body(content = GetVersion),
   responses(
-    (status = 200, description = "Cicada api version", body = GetVersionResponse),
+    (status = 200, description = "Cicada Core version", body = GetVersionResponse),
   ),
 )]
 async fn get_version() -> serror::Result<GetVersionResponse> {
