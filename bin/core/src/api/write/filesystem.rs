@@ -13,20 +13,28 @@ use crate::{api::write::WriteArgs, db::DB};
   description = "Create a new filesystem",
   request_body(content = CreateFilesystem),
   responses(
-    (status = 200, body = FilesystemRecord),
+    (status = 200, description = "The created filesystem", body = FilesystemRecord),
     (status = 500, description = "Request failed", body = serror::Serror)
   ),
 )]
 pub async fn create_filesystem(
   body: CreateFilesystem,
 ) -> serror::Result<FilesystemRecord> {
-  DB.insert::<Vec<_>>("Filesystem")
+  // DB.insert::<Vec<_>>("Filesystem")
+  //   .content(body)
+  //   .await
+  //   .context("Failed to create filesystem on database")?
+  //   .pop()
+  //   .context(
+  //     "Failed to create filesystem on database: No creation result",
+  //   )
+  //   .map_err(Into::into)
+  DB.create("Filesystem")
     .content(body)
     .await
-    .context("Failed to create filesystem on database")?
-    .pop()
+    .context("Failed to create Filesystem on database")?
     .context(
-      "Failed to create filesystem on database: No creation result",
+      "Failed to create Filesystem on database: No creation result",
     )
     .map_err(Into::into)
 }
@@ -46,26 +54,34 @@ impl Resolve<WriteArgs> for CreateFilesystem {
   description = "Update a filesystem",
   request_body(content = UpdateFilesystem),
   responses(
-    (status = 200, body = FilesystemRecord),
+    (status = 200, description = "The updated filesystem", body = FilesystemRecord),
     (status = 500, description = "Request failed", body = serror::Serror)
   ),
 )]
 pub async fn update_filesystem(
   body: UpdateFilesystem,
 ) -> serror::Result<FilesystemRecord> {
-  let update = serde_json::to_string(&body)
-    .context("Failed to serialize MERGE update")?;
-  DB.query(format!(
-    r#"UPDATE type::record("Filesystem", $id) MERGE {update}"#
-  ))
-  .bind(("id", body.id))
-  .await
-  .context("Failed to update filesystem on database")?
-  .take::<Option<_>>(0)?
-  .context(
-    "Failed to update filesystem on database: No update result",
-  )
-  .map_err(Into::into)
+  // let update = serde_json::to_string(&body)
+  //   .context("Failed to serialize MERGE update")?;
+  // DB.query(format!(
+  //   r#"UPDATE type::record("Filesystem", $id) MERGE {update}"#
+  // ))
+  // .bind(("id", body.id))
+  // .await
+  // .context("Failed to update filesystem on database")?
+  // .take::<Option<_>>(0)?
+  // .context(
+  //   "Failed to update filesystem on database: No update result",
+  // )
+  // .map_err(Into::into)
+  DB.update(body.id.as_record_id())
+    .merge(body)
+    .await
+    .context("Failed to update Filesystem on database")?
+    .context(
+      "Failed to update Filesystem on database: No update result",
+    )
+    .map_err(Into::into)
 }
 
 impl Resolve<WriteArgs> for UpdateFilesystem {

@@ -9,7 +9,7 @@ use tower_sessions::{
   cookie::{SameSite, time::Duration},
 };
 
-use crate::config::cors_layer;
+use crate::config::{core_config, core_host, cors_layer};
 
 mod openapi;
 mod read;
@@ -64,17 +64,17 @@ pub fn app() -> Router {
 const MEMORY_SESSION_EXPIRY_SECONDS: i64 = 60;
 
 fn memory_session_layer() -> SessionManagerLayer<MemoryStore> {
-  // let config = core_config();
-  let layer = SessionManagerLayer::new(MemoryStore::default())
+  let config = core_config();
+  let mut layer = SessionManagerLayer::new(MemoryStore::default())
     .with_expiry(Expiry::OnInactivity(Duration::seconds(
       MEMORY_SESSION_EXPIRY_SECONDS,
     )))
-    // .with_secure(config.host.starts_with("https://"))
+    .with_secure(config.host.starts_with("https://"))
     // Needs Lax in order for sessions to work
     // accross oauth redirects.
     .with_same_site(SameSite::Lax);
-  // if let Some(domain) = core_host().and_then(|url| url.domain()) {
-  //   layer = layer.with_domain(domain);
-  // }
+  if let Some(domain) = core_host().and_then(|url| url.domain()) {
+    layer = layer.with_domain(domain);
+  }
   layer
 }

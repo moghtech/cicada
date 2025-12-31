@@ -3,7 +3,6 @@ use resolver_api::Resolve;
 use serde::{Deserialize, Serialize};
 use surrealdb_types::SurrealValue;
 use typeshare::typeshare;
-use utoipa::ToSchema;
 
 use crate::{
   api::write::CicadaWriteRequest,
@@ -13,10 +12,6 @@ use crate::{
     node::{NodeId, NodeKind, NodeRecord},
   },
 };
-
-fn default_parent() -> u64 {
-  1
-}
 
 //
 
@@ -30,29 +25,29 @@ fn default_parent() -> u64 {
   SurrealValue,
   Resolve,
   EmptyTraits,
-  ToSchema,
 )]
+#[cfg_attr(feature = "openapi", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaWriteRequest)]
 #[response(CreateNodeResponse)]
 #[error(serror::Error)]
 pub struct CreateNode {
   /// The filesystem ID
-  #[serde(skip_serializing_if = "Option::is_none")]
   pub filesystem: Option<FilesystemId>,
   /// parent inode number.
   /// Default: 1 (the root node).
-  #[serde(default = "default_parent")]
-  pub parent: U64,
+  #[cfg_attr(feature = "openapi", schema(minimum = 1, default = 1))]
+  pub parent: Option<U64>,
   /// The name of the node
   pub name: String,
   /// The kind of node.
-  /// - Folder,
-  /// - File,
-  #[serde(default)]
-  pub kind: NodeKind,
+  /// - Folder
+  /// - File
+  ///
+  /// Default: **Folder**
+  #[cfg_attr(feature = "openapi", schema(default = "Folder"))]
+  pub kind: Option<NodeKind>,
   /// Data associated with the node.
   /// For files, this contains the file contents.
-  #[serde(skip_serializing_if = "Option::is_none")]
   pub data: Option<String>,
 }
 
@@ -72,8 +67,8 @@ pub type CreateNodeResponse = NodeRecord;
   SurrealValue,
   Resolve,
   EmptyTraits,
-  ToSchema,
 )]
+#[cfg_attr(feature = "openapi", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaWriteRequest)]
 #[response(UpdateNodeResponse)]
 #[error(serror::Error)]

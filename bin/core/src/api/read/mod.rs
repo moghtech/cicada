@@ -84,7 +84,7 @@ async fn handler(
     (status = 200, description = "Cicada Core version", body = GetVersionResponse),
   ),
 )]
-async fn get_version() -> serror::Result<GetVersionResponse> {
+fn get_version() -> serror::Result<GetVersionResponse> {
   Ok(GetVersionResponse {
     version: env!("CARGO_PKG_VERSION").to_string(),
   })
@@ -95,6 +95,6 @@ impl Resolve<ReadArgs> for GetVersion {
     self,
     _: &ReadArgs,
   ) -> Result<Self::Response, Self::Error> {
-    get_version().await
+    get_version()
   }
 }

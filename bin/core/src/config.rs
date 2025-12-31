@@ -46,6 +46,21 @@ pub fn cors_layer() -> CorsLayer {
   cors
 }
 
+pub fn core_host() -> Option<&'static url::Url> {
+  static CORE_URL: OnceLock<Option<url::Url>> = OnceLock::new();
+  CORE_URL
+    .get_or_init(|| {
+      url::Url::parse(&core_config().host)
+      .inspect_err(|e| {
+        warn!(
+          "Invalid KOMODO_HOST: not URL. Passkeys won't work. | {e:?}"
+        )
+      })
+      .ok()
+    })
+    .as_ref()
+}
+
 pub fn core_config() -> &'static CoreConfig {
   static CORE_CONFIG: OnceLock<CoreConfig> = OnceLock::new();
   CORE_CONFIG.get_or_init(|| {

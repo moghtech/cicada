@@ -12,7 +12,7 @@ path = "src/main.rs"
 
 [dependencies]
 # local
-cicada_client.workspace = true
+cicada_client = { workspace = true, features = ["openapi"] }
 environment_file.workspace = true
 config.workspace = true
 logger.workspace = true
@@ -40,3 +40,4 @@ strum.workspace = true
 tokio.workspace = true
 axum.workspace = true
 envy.workspace = true
+url.workspace = true

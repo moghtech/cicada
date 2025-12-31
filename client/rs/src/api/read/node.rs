@@ -2,34 +2,32 @@ use derive_empty_traits::EmptyTraits;
 use resolver_api::Resolve;
 use serde::{Deserialize, Serialize};
 use typeshare::typeshare;
-use utoipa::ToSchema;
 
 use crate::{
   api::read::CicadaReadRequest,
   entities::{
     U64,
-    node::{NodeListItem, NodeRecord},
+    filesystem::FilesystemId,
+    node::{NodeId, NodeListItem, NodeRecord},
   },
 };
-
-fn default_parent() -> u64 {
-  1
-}
 
 //
 
 /// List filesystem nodes. Response: [ListNodesResponse].
 #[typeshare]
 #[derive(
-  Debug, Clone, Serialize, Deserialize, Resolve, EmptyTraits, ToSchema,
+  Debug, Clone, Serialize, Deserialize, Resolve, EmptyTraits,
 )]
+#[cfg_attr(feature = "openapi", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaReadRequest)]
 #[response(ListNodesResponse)]
 #[error(serror::Error)]
 pub struct ListNodes {
   /// Filesystem id
-  pub filesystem: Option<String>,
+  pub filesystem: Option<FilesystemId>,
   /// parent inode number.
+  #[cfg_attr(feature = "openapi", schema(minimum = 1))]
   pub parent: Option<U64>,
 }
 
@@ -42,14 +40,15 @@ pub type ListNodesResponse = Vec<NodeListItem>;
 /// Get a node. Response: [NodeRecord].
 #[typeshare]
 #[derive(
-  Debug, Clone, Serialize, Deserialize, Resolve, EmptyTraits, ToSchema,
+  Debug, Clone, Serialize, Deserialize, Resolve, EmptyTraits,
 )]
+#[cfg_attr(feature = "openapi", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaReadRequest)]
 #[response(GetNodeResponse)]
 #[error(serror::Error)]
 pub struct GetNode {
-  /// inode number
-  pub id: U64,
+  /// The node id
+  pub id: NodeId,
 }
 
 /// Response for [GetNode].
@@ -58,23 +57,55 @@ pub type GetNodeResponse = NodeRecord;
 
 //
 
-/// Find a node using parent inode number and name. Response: [NodeRecord].
+/// Find a node. Response: [NodeRecord].
+///
+/// Query using either:
+/// - inode number (ino)
+/// - name (parent inode number defaults to 1)
 #[typeshare]
 #[derive(
-  Debug, Clone, Serialize, Deserialize, Resolve, EmptyTraits, ToSchema,
+  Debug, Clone, Serialize, Deserialize, Resolve, EmptyTraits,
 )]
+#[cfg_attr(feature = "openapi", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaReadRequest)]
 #[response(FindNodeResponse)]
 #[error(serror::Error)]
 pub struct FindNode {
   /// Filesystem id
-  pub filesystem: String,
-  /// parent inode number.
+  pub filesystem: FilesystemId,
+  /// The node inode number
+  #[cfg_attr(feature = "openapi", schema(minimum = "1"))]
+  pub ino: Option<U64>,
+  /// The node parent inode number.
   /// Default: 1 (the root node).
-  #[serde(default = "default_parent")]
-  pub parent: U64,
+  #[cfg_attr(feature = "openapi", schema(minimum = "1"))]
+  pub parent: Option<U64>,
   /// file name
-  pub name: String,
+  pub name: Option<String>,
+}
+
+impl FindNode {
+  pub fn with_ino(filesystem: FilesystemId, ino: u64) -> FindNode {
+    FindNode {
+      filesystem,
+      ino: ino.into(),
+      parent: None,
+      name: None,
+    }
+  }
+
+  pub fn with_parent_name(
+    filesystem: FilesystemId,
+    parent: u64,
+    name: impl Into<String>,
+  ) -> FindNode {
+    FindNode {
+      filesystem,
+      parent: parent.into(),
+      name: name.into().into(),
+      ino: None,
+    }
+  }
 }
 
 /// Response for [FindNode].

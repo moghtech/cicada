@@ -2,7 +2,6 @@ use derive_empty_traits::EmptyTraits;
 use resolver_api::Resolve;
 use serde::{Deserialize, Serialize};
 use typeshare::typeshare;
-use utoipa::ToSchema;
 
 use crate::{
   api::read::CicadaReadRequest,
@@ -14,8 +13,9 @@ use crate::{
 /// List filesystems. Response: [ListFilesystemsResponse].
 #[typeshare]
 #[derive(
-  Debug, Clone, Serialize, Deserialize, Resolve, EmptyTraits, ToSchema,
+  Debug, Clone, Serialize, Deserialize, Resolve, EmptyTraits,
 )]
+#[cfg_attr(feature = "openapi", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaReadRequest)]
 #[response(ListFilesystemsResponse)]
 #[error(serror::Error)]

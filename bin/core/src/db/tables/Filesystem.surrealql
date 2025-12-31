@@ -1,0 +1,43 @@
+-- ============
+--  Filesystem
+-- ============
+
+DEFINE TABLE IF NOT EXISTS Filesystem SCHEMAFULL;
+
+-- name
+DEFINE FIELD OVERWRITE name
+  ON TABLE Filesystem
+  TYPE string;
+
+-- created_at
+DEFINE FIELD OVERWRITE created_at
+  ON TABLE Filesystem
+  TYPE datetime
+  VALUE $before OR time::now()
+  DEFAULT time::now();
+
+-- updated_at
+DEFINE FIELD OVERWRITE updated_at
+  ON TABLE Filesystem
+  TYPE datetime
+  VALUE time::now()
+  DEFAULT time::now();
+
+-------------
+-- Indexes --
+-------------
+
+-- name | unique
+DEFINE INDEX OVERWRITE Name
+  ON TABLE Filesystem
+  FIELDS name
+  UNIQUE;
+
+---------------
+-- Functions --
+---------------
+
+-- Returns the ID of the first created filesystem to use as node default
+DEFINE FUNCTION OVERWRITE fn::first_filesystem() {
+  RETURN (SELECT id, created_at FROM Filesystem ORDER BY created_at LIMIT 1)[0].id
+};

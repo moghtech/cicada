@@ -79,7 +79,7 @@ envy = "0.4.2"
 rustls = { version = "0.23.35", features = ["aws-lc-rs"] }
 
 # DATABASE
-surrealdb = { version = "3.0.0-beta.1", features = ["native-tls"] }
+surrealdb = { version = "3.0.0-beta.1", features = ["native-tls", "kv-tikv"] }
 surrealdb-types = { version = "3.0.0-beta.1" }
 
 # MISC

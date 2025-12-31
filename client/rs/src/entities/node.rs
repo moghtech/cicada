@@ -1,20 +1,22 @@
 use anyhow::anyhow;
 use serde::{Deserialize, Serialize};
-use surrealdb_types::{RecordIdKey, SurrealValue};
+use surrealdb_types::{
+  Datetime, RecordId, RecordIdKey, SurrealValue,
+};
 use typeshare::typeshare;
-use utoipa::ToSchema;
 
 use crate::entities::{U64, filesystem::FilesystemId};
 
 #[typeshare]
-#[derive(
-  Debug, Clone, Serialize, Deserialize, SurrealValue, ToSchema,
-)]
+#[derive(Debug, Clone, Serialize, Deserialize, SurrealValue)]
+#[cfg_attr(feature = "openapi", derive(utoipa::ToSchema))]
 pub struct NodeListItem {
   /// The unique node id
   pub id: NodeId,
   /// Filesystem ID
   pub filesystem: FilesystemId,
+  /// The inode number
+  pub ino: U64,
   /// The parent node ID
   pub parent: U64,
   /// The name of the node
@@ -23,18 +25,25 @@ pub struct NodeListItem {
   /// - Folder,
   /// - File,
   pub kind: NodeKind,
+  /// Created at as ISO8601 timestamp.
+  #[cfg_attr(feature = "openapi", schema(value_type = String))]
+  pub created_at: Datetime,
+  /// Updated at as ISO8601 timestamp.
+  #[cfg_attr(feature = "openapi", schema(value_type = String))]
+  pub updated_at: Datetime,
 }
 
 #[typeshare]
-#[derive(
-  Debug, Clone, Serialize, Deserialize, SurrealValue, ToSchema,
-)]
+#[derive(Debug, Clone, Serialize, Deserialize, SurrealValue)]
+#[cfg_attr(feature = "openapi", derive(utoipa::ToSchema))]
 pub struct NodeRecord {
   /// The unique node id
   pub id: NodeId,
   /// Filesystem ID
   pub filesystem: FilesystemId,
-  /// The parent node ID
+  /// The inode number
+  pub ino: U64,
+  /// The parent inode number
   pub parent: U64,
   /// The name of the node
   pub name: String,
@@ -47,20 +56,20 @@ pub struct NodeRecord {
   /// For files, this contains the file contents.
   #[serde(skip_serializing_if = "Option::is_none")]
   pub data: Option<String>,
+  /// Created at as ISO8601 timestamp.
+  #[cfg_attr(feature = "openapi", schema(value_type = String))]
+  pub created_at: Datetime,
+  /// Updated at as ISO8601 timestamp.
+  #[cfg_attr(feature = "openapi", schema(value_type = String))]
+  pub updated_at: Datetime,
 }
 
 /// Nodes can be either folders or files.
 #[typeshare]
 #[derive(
-  Debug,
-  Clone,
-  Copy,
-  Default,
-  Serialize,
-  Deserialize,
-  SurrealValue,
-  ToSchema,
+  Debug, Clone, Copy, Default, Serialize, Deserialize, SurrealValue,
 )]
+#[cfg_attr(feature = "openapi", derive(utoipa::ToSchema))]
 #[surreal(untagged)]
 pub enum NodeKind {
   #[default]
@@ -68,9 +77,16 @@ pub enum NodeKind {
   File,
 }
 
-#[typeshare(serialized_as = "number")]
-#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
-pub struct NodeId(pub U64);
+#[typeshare(serialized_as = "string")]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "openapi", derive(utoipa::ToSchema))]
+pub struct NodeId(pub String);
+
+impl NodeId {
+  pub fn as_record_id(&self) -> RecordId {
+    RecordId::new("Node", self.0.as_str())
+  }
+}
 
 impl SurrealValue for NodeId {
   fn kind_of() -> surrealdb_types::Kind {
@@ -79,8 +95,7 @@ impl SurrealValue for NodeId {
 
   fn into_value(self) -> surrealdb_types::Value {
     surrealdb_types::Value::RecordId(surrealdb_types::RecordId::new(
-      "Node",
-      self.0 as i64,
+      "Node", self.0,
     ))
   }
 
@@ -91,9 +106,9 @@ impl SurrealValue for NodeId {
     let surrealdb_types::Value::RecordId(id) = value else {
       return Err(anyhow!("Value is not RecordId"));
     };
-    let RecordIdKey::Number(id) = id.key else {
-      return Err(anyhow!("RecordIdKey is not Number"));
+    let RecordIdKey::String(id) = id.key else {
+      return Err(anyhow!("RecordIdKey is not String"));
     };
-    Ok(Self(id as u64))
+    Ok(Self(id))
   }
 }

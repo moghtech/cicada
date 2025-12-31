@@ -9,6 +9,7 @@ repository.workspace = true
 [features]
 # default = ["blocking"] # use to dev client blocking mode
 blocking = ["reqwest/blocking"]
+openapi = ["dep:utoipa"]
 
 [dependencies]
 # MOGH
@@ -16,11 +17,11 @@ serror = { workspace = true, features = ["axum"] }
 derive_empty_traits.workspace = true
 resolver_api.workspace = true
 # EXTERNAL
+utoipa = { workspace = true, optional = true }
 surrealdb-types.workspace = true
 serde_json.workspace = true
 typeshare.workspace = true
 reqwest.workspace = true
 tracing.workspace = true
 anyhow.workspace = true
-utoipa.workspace = true
 serde.workspace = true

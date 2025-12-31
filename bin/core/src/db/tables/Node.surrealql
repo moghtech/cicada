@@ -1,0 +1,88 @@
+-- ======
+--  Node
+-- ======
+
+DEFINE TABLE IF NOT EXISTS Node SCHEMAFULL;
+
+-- filesystem
+DEFINE FIELD OVERWRITE filesystem
+  ON TABLE Node
+  TYPE record<Filesystem>
+  DEFAULT fn::first_filesystem();
+
+-- ino
+DEFINE FIELD OVERWRITE ino
+  ON TABLE Node
+  TYPE int
+  DEFAULT fn::node_next_ino(filesystem);
+
+-- parent
+DEFINE FIELD OVERWRITE parent
+  ON TABLE Node
+  TYPE int
+  DEFAULT 1;
+
+-- name
+DEFINE FIELD OVERWRITE name 
+  ON TABLE Node 
+  TYPE string;
+
+-- kind
+DEFINE FIELD OVERWRITE kind
+  ON TABLE Node
+  TYPE "Folder" | "File"
+  DEFAULT "Folder"
+  READONLY;
+
+-- data
+DEFINE FIELD OVERWRITE data
+  ON TABLE Node
+  TYPE option<string>;
+
+-- created_at
+DEFINE FIELD OVERWRITE created_at
+  ON TABLE Filesystem
+  TYPE datetime
+  VALUE $before OR time::now()
+  DEFAULT time::now();
+
+-- updated_at
+DEFINE FIELD OVERWRITE updated_at
+  ON TABLE Filesystem
+  TYPE datetime
+  VALUE time::now()
+  DEFAULT time::now();
+
+-------------
+-- Indexes --
+-------------
+
+-- filesystem + ino | unique
+DEFINE INDEX OVERWRITE FilesystemInoUnique 
+  ON TABLE Node 
+  FIELDS filesystem, ino
+  UNIQUE;
+
+-- filesystem + parent + name | unique
+DEFINE INDEX OVERWRITE FilesystemParentNameUnique 
+  ON TABLE Node 
+  FIELDS filesystem, parent, name 
+  UNIQUE;
+
+---------------
+-- Functions --
+---------------
+
+-- Get the next node inode number
+DEFINE FUNCTION OVERWRITE fn::node_next_ino($filesystem: record<Filesystem>) {
+  LET $res = SELECT math::max(ino) AS max_ino
+    FROM Node 
+    WHERE filesystem = $filesystem
+    GROUP ALL;
+  LET $max = $res[0].max_ino;
+  RETURN IF $max = NONE OR $max = NULL {
+    2
+  } ELSE {
+    $max + 1
+  };
+};

@@ -2,10 +2,7 @@ use anyhow::Context;
 use axum::http::StatusCode;
 use cicada_client::{
   api::read::node::{FindNode, GetNode, ListNodes},
-  entities::{
-    filesystem::FilesystemId,
-    node::{NodeListItem, NodeRecord},
-  },
+  entities::node::{NodeListItem, NodeRecord},
 };
 use resolver_api::Resolve;
 use serror::AddStatusCode;
@@ -27,11 +24,11 @@ pub async fn list_nodes(
 ) -> serror::Result<Vec<NodeListItem>> {
   DB.query(
     "
-SELECT id, filesystem, parent, name, kind FROM Node 
+SELECT * OMIT data FROM Node 
 WHERE ($filesystem IS NONE OR filesystem = $filesystem)
 AND ($parent IS NONE OR parent = $parent)",
   )
-  .bind(("filesystem", body.filesystem.map(FilesystemId)))
+  .bind(("filesystem", body.filesystem))
   .bind(("parent", body.parent))
   .await
   .context("Failed to query for nodes")?
@@ -60,7 +57,7 @@ impl Resolve<ReadArgs> for ListNodes {
   ),
 )]
 pub async fn get_node(body: GetNode) -> serror::Result<NodeRecord> {
-  DB.select(("Node", body.id as i64))
+  DB.select(body.id.as_record_id())
     .await
     .context("Failed to find node with given id.")?
     .context("Failed to find node with given id.")
@@ -89,15 +86,23 @@ impl Resolve<ReadArgs> for GetNode {
 )]
 pub async fn find_node(body: FindNode) -> serror::Result<NodeRecord> {
   DB.query(
-      "SELECT * FROM Node WHERE filesystem = $filesystem AND parent = $parent AND name = $name",
-    )
-    .bind(("filesystem", FilesystemId(body.filesystem)))
-    .bind(("parent", body.parent))
-    .bind(("name", body.name))
-    .await?
-    .take::<Option<NodeRecord>>(0)?
-    .context("Failed to find Node with given parent and name.")
-    .status_code(StatusCode::NOT_FOUND)
+    "
+SELECT * FROM Node
+WHERE filesystem = $filesystem
+AND ($ino IS NONE OR ino = $ino)
+AND ($parent IS NONE OR parent = $parent)
+AND ($name IS NONE OR name = $name)",
+  )
+  .bind(("filesystem", body.filesystem))
+  .bind(("ino", body.ino))
+  .bind(("parent", body.parent))
+  .bind(("name", body.name))
+  .await
+  .context("Failed to query database")?
+  .take::<Option<NodeRecord>>(0)
+  .context("Failed to get query result")?
+  .context("Failed to find Node with given parent and name.")
+  .status_code(StatusCode::NOT_FOUND)
 }
 
 impl Resolve<ReadArgs> for FindNode {

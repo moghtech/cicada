@@ -3,11 +3,10 @@ use resolver_api::Resolve;
 use serde::{Deserialize, Serialize};
 use surrealdb_types::SurrealValue;
 use typeshare::typeshare;
-use utoipa::ToSchema;
 
 use crate::{
   api::write::CicadaWriteRequest,
-  entities::filesystem::FilesystemRecord,
+  entities::filesystem::{FilesystemId, FilesystemRecord},
 };
 
 //
@@ -22,8 +21,8 @@ use crate::{
   SurrealValue,
   Resolve,
   EmptyTraits,
-  ToSchema,
 )]
+#[cfg_attr(feature = "openapi", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaWriteRequest)]
 #[response(CreateFilesystemResponse)]
 #[error(serror::Error)]
@@ -48,16 +47,15 @@ pub type CreateFilesystemResponse = FilesystemRecord;
   SurrealValue,
   Resolve,
   EmptyTraits,
-  ToSchema,
 )]
+#[cfg_attr(feature = "openapi", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaWriteRequest)]
 #[response(UpdateFilesystemResponse)]
 #[error(serror::Error)]
 pub struct UpdateFilesystem {
   /// The filesystem ID
-  pub id: String,
+  pub id: FilesystemId,
   /// The name of the filesystem
-  #[serde(skip_serializing_if = "Option::is_none")]
   pub name: Option<String>,
 }
 

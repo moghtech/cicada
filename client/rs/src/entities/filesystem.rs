@@ -1,23 +1,36 @@
 use anyhow::anyhow;
 use serde::{Deserialize, Serialize};
-use surrealdb_types::{RecordIdKey, SurrealValue};
+use surrealdb_types::{
+  Datetime, RecordId, RecordIdKey, SurrealValue,
+};
 use typeshare::typeshare;
-use utoipa::ToSchema;
 
 #[typeshare]
-#[derive(
-  Debug, Clone, Serialize, Deserialize, SurrealValue, ToSchema,
-)]
+#[derive(Debug, Clone, Serialize, Deserialize, SurrealValue)]
+#[cfg_attr(feature = "openapi", derive(utoipa::ToSchema))]
 pub struct FilesystemRecord {
   /// The unique filesystem id
   pub id: FilesystemId,
   /// The name of the filesystem
   pub name: String,
+  /// Created at as ISO8601 timestamp.
+  #[cfg_attr(feature = "openapi", schema(value_type = String))]
+  pub created_at: Datetime,
+  /// Updated at as ISO8601 timestamp.
+  #[cfg_attr(feature = "openapi", schema(value_type = String))]
+  pub updated_at: Datetime,
 }
 
 #[typeshare(serialized_as = "string")]
-#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "openapi", derive(utoipa::ToSchema))]
 pub struct FilesystemId(pub String);
+
+impl FilesystemId {
+  pub fn as_record_id(&self) -> RecordId {
+    RecordId::new("Filesystem", self.0.as_str())
+  }
+}
 
 impl SurrealValue for FilesystemId {
   fn kind_of() -> surrealdb_types::Kind {
