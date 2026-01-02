@@ -1,11 +1,11 @@
 use anyhow::anyhow;
 use serde::{Deserialize, Serialize};
-use surrealdb_types::{
-  Datetime, RecordId, RecordIdKey, SurrealValue,
-};
+use surrealdb_types::{RecordId, RecordIdKey, SurrealValue};
 use typeshare::typeshare;
 
-use crate::entities::{U64, filesystem::FilesystemId};
+use crate::entities::{
+  Iso8601Timestamp, U64, filesystem::FilesystemId,
+};
 
 #[typeshare]
 #[derive(Debug, Clone, Serialize, Deserialize, SurrealValue)]
@@ -27,10 +27,10 @@ pub struct NodeListItem {
   pub kind: NodeKind,
   /// Created at as ISO8601 timestamp.
   #[cfg_attr(feature = "openapi", schema(value_type = String))]
-  pub created_at: Datetime,
+  pub created_at: Iso8601Timestamp,
   /// Updated at as ISO8601 timestamp.
   #[cfg_attr(feature = "openapi", schema(value_type = String))]
-  pub updated_at: Datetime,
+  pub updated_at: Iso8601Timestamp,
 }
 
 #[typeshare]
@@ -58,10 +58,10 @@ pub struct NodeRecord {
   pub data: Option<String>,
   /// Created at as ISO8601 timestamp.
   #[cfg_attr(feature = "openapi", schema(value_type = String))]
-  pub created_at: Datetime,
+  pub created_at: Iso8601Timestamp,
   /// Updated at as ISO8601 timestamp.
   #[cfg_attr(feature = "openapi", schema(value_type = String))]
-  pub updated_at: Datetime,
+  pub updated_at: Iso8601Timestamp,
 }
 
 /// Nodes can be either folders or files.

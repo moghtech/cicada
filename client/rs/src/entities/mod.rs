@@ -12,3 +12,5 @@ pub mod node;
 
 #[typeshare(serialized_as = "number")]
 pub type U64 = u64;
+#[typeshare(serialized_as = "string")]
+pub type Iso8601Timestamp = surrealdb_types::Datetime;

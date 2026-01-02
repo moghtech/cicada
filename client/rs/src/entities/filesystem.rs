@@ -1,9 +1,9 @@
 use anyhow::anyhow;
 use serde::{Deserialize, Serialize};
-use surrealdb_types::{
-  Datetime, RecordId, RecordIdKey, SurrealValue,
-};
+use surrealdb_types::{RecordId, RecordIdKey, SurrealValue};
 use typeshare::typeshare;
+
+use crate::entities::Iso8601Timestamp;
 
 #[typeshare]
 #[derive(Debug, Clone, Serialize, Deserialize, SurrealValue)]
@@ -15,10 +15,10 @@ pub struct FilesystemRecord {
   pub name: String,
   /// Created at as ISO8601 timestamp.
   #[cfg_attr(feature = "openapi", schema(value_type = String))]
-  pub created_at: Datetime,
+  pub created_at: Iso8601Timestamp,
   /// Updated at as ISO8601 timestamp.
   #[cfg_attr(feature = "openapi", schema(value_type = String))]
-  pub updated_at: Datetime,
+  pub updated_at: Iso8601Timestamp,
 }
 
 #[typeshare(serialized_as = "string")]

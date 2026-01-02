@@ -22,7 +22,7 @@ pub fn cors_layer() -> CorsLayer {
   let mut cors = CorsLayer::new()
     .allow_methods(tower_http::cors::AllowMethods::mirror_request())
     .allow_headers(tower_http::cors::AllowHeaders::mirror_request())
-    .allow_credentials(config.cors_allow_credentials);
+    .allow_credentials(true);
   if config.cors_allowed_origins.is_empty() {
     warn!(
       "CORS using allowed origin 'Any' (*). Use CICADA_CORS_ALLOWED_ORIGINS to configure specific origins."
