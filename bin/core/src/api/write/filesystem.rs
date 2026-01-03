@@ -75,7 +75,7 @@ pub async fn update_filesystem(
   // )
   // .map_err(Into::into)
   DB.update(body.id.as_record_id())
-    .merge(body)
+    .merge(serde_json::to_value(body)?)
     .await
     .context("Failed to update Filesystem on database")?
     .context(

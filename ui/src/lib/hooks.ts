@@ -27,7 +27,7 @@ export const useRead = <
       (T | P)[]
     >,
     "queryFn" | "queryKey"
-  >
+  >,
 >(
   type: T,
   params: P,
@@ -47,7 +47,7 @@ export const useInvalidate = () => {
   const qc = useQueryClient();
   return <
     Type extends Types.ReadRequest["type"],
-    Params extends Extract<Types.ReadRequest, { type: Type }>["params"]
+    Params extends Extract<Types.ReadRequest, { type: Type }>["params"],
   >(
     ...keys: Array<[Type] | [Type, Params]>
   ) => keys.forEach((key) => qc.invalidateQueries({ queryKey: key }));
@@ -60,7 +60,7 @@ export const useWrite = <
   C extends Omit<
     UseMutationOptions<WriteResponses[R["type"]], unknown, P, unknown>,
     "mutationKey" | "mutationFn"
-  >
+  >,
 >(
   type: T,
   config?: C

@@ -4,12 +4,18 @@ import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
 import { Types } from "cicada_client";
 
-const CreateNode = ({ kind }: { kind: Types.NodeKind }) => {
+const CreateNode = ({
+  kind,
+  parent,
+}: {
+  kind: Types.NodeKind;
+  parent: number;
+}) => {
   const [opened, { open, close }] = useDisclosure(false);
   return (
     <>
       <Modal opened={opened} onClose={close} title={`Create ${kind}`}>
-        <CreateNodeForm close={close} kind={kind} />
+        <CreateNodeForm close={close} kind={kind} parent={parent} />
       </Modal>
       <Button onClick={open}>Create {kind}</Button>
     </>
@@ -19,9 +25,11 @@ const CreateNode = ({ kind }: { kind: Types.NodeKind }) => {
 const CreateNodeForm = ({
   close,
   kind,
+  parent,
 }: {
   close: () => void;
   kind: Types.NodeKind;
+  parent: number;
 }) => {
   const inv = useInvalidate();
   const { mutate, isPending } = useWrite("CreateNode", {
@@ -40,7 +48,7 @@ const CreateNodeForm = ({
     },
   });
   return (
-    <form onSubmit={form.onSubmit((form) => mutate({ ...form, kind }))}>
+    <form onSubmit={form.onSubmit((form) => mutate({ ...form, kind, parent }))}>
       <TextInput
         {...form.getInputProps("name")}
         withAsterisk

@@ -5,6 +5,7 @@ import { Layout } from "./layout";
 // Lazy import pages
 const Filesystems = lazy(() => import("@/pages/filesystems"));
 const Filesystem = lazy(() => import("@/pages/filesystem"));
+const File = lazy(() => import("@/pages/file"));
 
 export const Router = () => {
   return (
@@ -17,6 +18,7 @@ export const Router = () => {
             path="filesystems/:filesystem/:parent"
             element={<Filesystem />}
           />
+          <Route path="files/:file" element={<File />} />
         </Route>
       </Routes>
     </BrowserRouter>

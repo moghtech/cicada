@@ -39,7 +39,7 @@ const FilesystemPage = () => {
         </Flex>
         <Group>
           {Object.values(Types.NodeKind).map((kind) => (
-            <CreateNode key={kind} kind={kind} />
+            <CreateNode key={kind} kind={kind} parent={parent} />
           ))}
         </Group>
       </Flex>
@@ -49,6 +49,8 @@ const FilesystemPage = () => {
         onRowClick={(node) => {
           if (node.kind === "Folder") {
             nav(`/filesystems/${filesystem}/${node.ino}`);
+          } else if (node.kind === "File") {
+            nav(`/files/${node.id}`);
           }
         }}
         columns={[
@@ -57,6 +59,12 @@ const FilesystemPage = () => {
               <SortableHeader column={column} title="Name" />
             ),
             accessorKey: "name",
+          },
+          {
+            header: ({ column }) => (
+              <SortableHeader column={column} title="Id" />
+            ),
+            accessorKey: "id",
           },
           {
             header: ({ column }) => (

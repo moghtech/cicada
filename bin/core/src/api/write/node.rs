@@ -69,7 +69,7 @@ pub async fn update_node(
   //   .context("Failed to update Node on database: No update result")
   //   .map_err(Into::into)
   DB.update(body.id.as_record_id())
-    .merge(body)
+    .merge(serde_json::to_value(body)?)
     .await
     .context("Failed to update Node on database")?
     .context("Failed to update Node on database: No update result")

@@ -51,7 +51,7 @@ const ThemeToggle = () => {
       <Menu.Target>
         <ActionIcon
           aria-label="ThemeToggle"
-          variant="outline"
+          variant="subtle"
           size="lg"
           style={{ cursor: "pointer" }}
         >
@@ -77,8 +77,8 @@ const ThemeToggle = () => {
 };
 
 const ThemeIcon = () => {
-  const computedColorScheme = useComputedColorScheme();
-  const dark = computedColorScheme === "dark";
+  const currentTheme = useComputedColorScheme();
+  const dark = currentTheme === "dark";
   return (
     <>
       <Sun
