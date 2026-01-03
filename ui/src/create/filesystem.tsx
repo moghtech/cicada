@@ -10,7 +10,7 @@ const CreateFilesystem = () => {
       <Modal opened={opened} onClose={close} title="Create Filesystem">
         <CreateFilesystemForm close={close} />
       </Modal>
-      <Button onClick={open}>Create</Button>
+      <Button onClick={open}>Create Filesystem</Button>
     </>
   );
 };

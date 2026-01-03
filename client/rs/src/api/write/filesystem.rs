@@ -37,7 +37,7 @@ pub type CreateFilesystemResponse = FilesystemRecord;
 
 //
 
-/// Update a filesystem node. Response: [UpdateFilesystemResponse].
+/// Update a filesystem. Response: [UpdateFilesystemResponse].
 #[typeshare]
 #[derive(
   Debug,
@@ -62,3 +62,31 @@ pub struct UpdateFilesystem {
 /// Response for [UpdateFilesystem].
 #[typeshare]
 pub type UpdateFilesystemResponse = FilesystemRecord;
+
+//
+
+/// Delete a filesystem. Response: [DeleteFilesystemResponse].
+/// 
+/// WARNING. This will also delete all nodes on the filesystem.
+#[typeshare]
+#[derive(
+  Debug,
+  Clone,
+  Serialize,
+  Deserialize,
+  SurrealValue,
+  Resolve,
+  EmptyTraits,
+)]
+#[cfg_attr(feature = "openapi", derive(utoipa::ToSchema))]
+#[empty_traits(CicadaWriteRequest)]
+#[response(DeleteFilesystemResponse)]
+#[error(serror::Error)]
+pub struct DeleteFilesystem {
+  /// The filesystem ID
+  pub id: FilesystemId,
+}
+
+/// Response for [DeleteFilesystem].
+#[typeshare]
+pub type DeleteFilesystemResponse = FilesystemRecord;

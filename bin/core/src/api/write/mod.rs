@@ -1,8 +1,10 @@
 use anyhow::Context as _;
 use axum::{Router, extract::Path, routing::post};
 use cicada_client::api::write::{
-  filesystem::{CreateFilesystem, UpdateFilesystem},
-  node::{CreateNode, UpdateNode},
+  filesystem::{
+    CreateFilesystem, DeleteFilesystem, UpdateFilesystem,
+  },
+  node::{CreateNode, DeleteNode, UpdateNode},
 };
 use derive_variants::{EnumVariants, ExtractVariant as _};
 use resolver_api::Resolve;
@@ -33,10 +35,12 @@ pub enum WriteRequest {
   // ==== NODE ====
   CreateFilesystem(CreateFilesystem),
   UpdateFilesystem(UpdateFilesystem),
+  DeleteFilesystem(DeleteFilesystem),
 
   // ==== NODE ====
   CreateNode(CreateNode),
   UpdateNode(UpdateNode),
+  DeleteNode(DeleteNode),
 }
 
 pub fn router() -> Router {

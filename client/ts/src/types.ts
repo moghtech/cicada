@@ -61,6 +61,12 @@ export interface NodeRecord {
 /** Response for [CreateNode]. */
 export type CreateNodeResponse = NodeRecord;
 
+/** Response for [DeleteFilesystem]. */
+export type DeleteFilesystemResponse = FilesystemRecord;
+
+/** Response for [DeleteNode]. */
+export type DeleteNodeResponse = NodeRecord;
+
 /** Response for [FindNode]. */
 export type FindNodeResponse = NodeRecord;
 
@@ -135,6 +141,32 @@ export interface CreateNode {
 }
 
 /**
+ * Delete a filesystem. Response: [DeleteFilesystemResponse].
+ * 
+ * WARNING. This will also delete all nodes on the filesystem.
+ */
+export interface DeleteFilesystem {
+	/** The filesystem ID */
+	id: FilesystemId;
+}
+
+/**
+ * Delete a filesystem node. Response: [DeleteNodeResponse].
+ * 
+ * WARNING: If the node is a folder and `move_children`
+ * is not passed, all children nodes will be recursively deleted.
+ */
+export interface DeleteNode {
+	/** The node id */
+	id: NodeId;
+	/**
+	 * Move the children of this node to another parent.
+	 * Otherwise, all children will be recursively deleted.
+	 */
+	move_children?: U64;
+}
+
+/**
  * Find a node. Response: [NodeRecord].
  * 
  * Query using either:
@@ -186,7 +218,7 @@ export interface ListNodes {
 	parent?: U64;
 }
 
-/** Update a filesystem node. Response: [UpdateFilesystemResponse]. */
+/** Update a filesystem. Response: [UpdateFilesystemResponse]. */
 export interface UpdateFilesystem {
 	/** The filesystem ID */
 	id: FilesystemId;
@@ -219,6 +251,8 @@ export type ReadRequest =
 export type WriteRequest = 
 	| { type: "CreateFilesystem", params: CreateFilesystem }
 	| { type: "UpdateFilesystem", params: UpdateFilesystem }
+	| { type: "DeleteFilesystem", params: DeleteFilesystem }
 	| { type: "CreateNode", params: CreateNode }
-	| { type: "UpdateNode", params: UpdateNode };
+	| { type: "UpdateNode", params: UpdateNode }
+	| { type: "DeleteNode", params: DeleteNode };
 

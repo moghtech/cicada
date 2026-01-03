@@ -1,11 +1,26 @@
 use anyhow::Context as _;
+use axum::http::StatusCode;
 use cicada_client::{
-  api::write::node::{CreateNode, UpdateNode},
-  entities::node::NodeRecord,
+  api::{
+    read::node::{GetNode, ListNodes},
+    write::node::{CreateNode, DeleteNode, UpdateNode},
+  },
+  entities::{
+    filesystem::FilesystemId,
+    node::{NodeKind, NodeRecord},
+  },
 };
+use futures_util::{TryStreamExt, stream::FuturesUnordered};
 use resolver_api::Resolve;
+use serror::AddStatusCode as _;
 
-use crate::{api::write::WriteArgs, db::DB};
+use crate::{
+  api::{
+    read::node::{get_node, list_nodes},
+    write::WriteArgs,
+  },
+  db::DB,
+};
 
 #[utoipa::path(
   post,
@@ -46,6 +61,8 @@ impl Resolve<WriteArgs> for CreateNode {
   }
 }
 
+//
+
 #[utoipa::path(
   post,
   path = "/write/UpdateNode",
@@ -83,4 +100,79 @@ impl Resolve<WriteArgs> for UpdateNode {
   ) -> Result<Self::Response, Self::Error> {
     update_node(self).await
   }
+}
+
+//
+
+#[utoipa::path(
+  post,
+  path = "/write/DeleteNode",
+  description = "Delete a node",
+  request_body(content = DeleteNode),
+  responses(
+    (status = 200, description = "The deleted node", body = NodeRecord),
+    (status = 404, description = "Node not found", body = serror::Serror),
+    (status = 500, description = "Request failed", body = serror::Serror)
+  ),
+)]
+pub async fn delete_node(
+  body: DeleteNode,
+) -> serror::Result<NodeRecord> {
+  let node = get_node(GetNode { id: body.id }).await?;
+  if matches!(node.kind, NodeKind::Folder) {
+    if let Some(parent) = body.move_children {
+      DB.query("UPDATE Node SET parent = $new_parent WHERE parent = $old_parent RETURN NONE;")
+        .bind(("old_parent", node.ino))
+        .bind(("new_parent", parent))
+        .await
+        .context("Failed to move children nodes to new parent")?;
+    } else {
+      delete_children(node.filesystem, node.ino).await?;
+    }
+  }
+  DB.delete(node.id.as_record_id())
+    .await?
+    .context("No filesystem matching given ID")
+    .status_code(StatusCode::NOT_FOUND)
+}
+
+impl Resolve<WriteArgs> for DeleteNode {
+  async fn resolve(
+    self,
+    _: &WriteArgs,
+  ) -> Result<Self::Response, Self::Error> {
+    delete_node(self).await
+  }
+}
+
+fn delete_children(
+  filesystem: FilesystemId,
+  parent: u64,
+) -> std::pin::Pin<Box<impl Future<Output = serror::Result<()>>>> {
+  Box::pin(async move {
+    let children = list_nodes(ListNodes {
+      filesystem: Some(filesystem),
+      parent: Some(parent),
+    })
+    .await?;
+    // Recursively deletes any sub folders as well.
+    children
+      .iter()
+      .map(|node| async {
+        if matches!(node.kind, NodeKind::Folder) {
+          delete_children(node.filesystem.clone(), node.ino).await?;
+        }
+        serror::Result::Ok(())
+      })
+      .collect::<FuturesUnordered<_>>()
+      .try_collect::<Vec<_>>()
+      .await?;
+    let ids =
+      children.into_iter().map(|node| node.id).collect::<Vec<_>>();
+    DB.query("DELETE Node WHERE $ids.any(id) RETURN NONE;")
+      .bind(("ids", ids))
+      .await
+      .context("Failed to delete children nodes")?;
+    Ok(())
+  })
 }

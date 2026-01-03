@@ -21,9 +21,11 @@ use super::{read, write};
   // FILESYSTEM
   write::filesystem::create_filesystem,
   write::filesystem::update_filesystem,
+  write::filesystem::delete_filesystem,
   // NODE
   write::node::create_node,
   write::node::update_node,
+  write::node::delete_node,
 ))]
 struct CicadaApi;
 

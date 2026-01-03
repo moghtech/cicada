@@ -90,3 +90,35 @@ pub struct UpdateNode {
 /// Response for [UpdateNode].
 #[typeshare]
 pub type UpdateNodeResponse = NodeRecord;
+
+//
+
+/// Delete a filesystem node. Response: [DeleteNodeResponse].
+/// 
+/// WARNING: If the node is a folder and `move_children`
+/// is not passed, all children nodes will be recursively deleted.
+#[typeshare]
+#[derive(
+  Debug,
+  Clone,
+  Serialize,
+  Deserialize,
+  SurrealValue,
+  Resolve,
+  EmptyTraits,
+)]
+#[cfg_attr(feature = "openapi", derive(utoipa::ToSchema))]
+#[empty_traits(CicadaWriteRequest)]
+#[response(DeleteNodeResponse)]
+#[error(serror::Error)]
+pub struct DeleteNode {
+  /// The node id
+  pub id: NodeId,
+  /// Move the children of this node to another parent.
+  /// Otherwise, all children will be recursively deleted.
+  pub move_children: Option<U64>,
+}
+
+/// Response for [DeleteNode].
+#[typeshare]
+pub type DeleteNodeResponse = NodeRecord;

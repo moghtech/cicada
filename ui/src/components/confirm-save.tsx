@@ -40,7 +40,7 @@ const ConfirmSave = ({
                 .catch((err) => console.error(err))
             }
             loading={loading}
-            w="100%"
+            fullWidth
           >
             Save
           </Button>

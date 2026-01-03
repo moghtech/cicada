@@ -24,6 +24,7 @@ resolver_api.workspace = true
 # external
 tower-sessions.workspace = true
 utoipa-scalar.workspace = true
+futures-util.workspace = true
 axum-server.workspace = true
 tower-http.workspace = true
 serde_json.workspace = true

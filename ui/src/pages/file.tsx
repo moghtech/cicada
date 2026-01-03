@@ -6,24 +6,30 @@ import { language_from_path, MonacoEditor } from "@/components/monaco";
 import { useLocalStorage } from "@mantine/hooks";
 import ConfirmSave from "@/components/confirm-save";
 import { useEffect } from "react";
+import ConfirmDelete from "@/components/confirm-delete";
 
 const FilePage = () => {
   const { file } = useParams() as {
     file: string;
   };
   const inv = useInvalidate();
+  const nav = useNavigate();
   const [{ data }, setEdit] = useLocalStorage<{ data: string | undefined }>({
     key: `node-${file}-edit-v1`,
     defaultValue: { data: undefined },
   });
   const { data: node, isPending } = useRead("GetNode", { id: file });
-  const { mutateAsync } = useWrite("UpdateNode", {
+  const { mutateAsync: updateNode } = useWrite("UpdateNode", {
     onSuccess: () => {
       inv(["GetNode", { id: file }]);
       setEdit({ data: undefined });
     },
   });
-  const nav = useNavigate();
+  const { mutateAsync: deleteNode } = useWrite("DeleteNode", {
+    onSuccess: () => {
+      nav(`/filesystems/${node?.filesystem}/${node?.parent}`);
+    },
+  });
 
   // Auto redirect folder nodes to appropriate page.
   useEffect(() => {
@@ -69,7 +75,12 @@ const FilePage = () => {
             disabled={!data}
             original={node.data ?? ""}
             modified={data ?? ""}
-            onConfirm={() => mutateAsync({ id: node.id, data })}
+            onConfirm={() => updateNode({ id: node.id, data })}
+          />
+          <ConfirmDelete
+            name={node.name}
+            disabled={false}
+            onConfirm={() => deleteNode({ id: node.id, move_children: 1 })}
           />
         </Flex>
       </Flex>

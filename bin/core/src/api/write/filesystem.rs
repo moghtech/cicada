@@ -1,9 +1,13 @@
 use anyhow::Context as _;
+use axum::http::StatusCode;
 use cicada_client::{
-  api::write::filesystem::{CreateFilesystem, UpdateFilesystem},
+  api::write::filesystem::{
+    CreateFilesystem, DeleteFilesystem, UpdateFilesystem,
+  },
   entities::filesystem::FilesystemRecord,
 };
 use resolver_api::Resolve;
+use serror::AddStatusCode;
 
 use crate::{api::write::WriteArgs, db::DB};
 
@@ -48,6 +52,8 @@ impl Resolve<WriteArgs> for CreateFilesystem {
   }
 }
 
+//
+
 #[utoipa::path(
   post,
   path = "/write/UpdateFilesystem",
@@ -90,5 +96,41 @@ impl Resolve<WriteArgs> for UpdateFilesystem {
     _: &WriteArgs,
   ) -> Result<Self::Response, Self::Error> {
     update_filesystem(self).await
+  }
+}
+
+//
+
+#[utoipa::path(
+  post,
+  path = "/write/DeleteFilesystem",
+  description = "Delete a filesystem",
+  request_body(content = DeleteFilesystem),
+  responses(
+    (status = 200, description = "The deleted filesystem", body = FilesystemRecord),
+    (status = 404, description = "Filesystem not found", body = serror::Serror),
+    (status = 500, description = "Request failed", body = serror::Serror)
+  ),
+)]
+pub async fn delete_filesystem(
+  body: DeleteFilesystem,
+) -> serror::Result<FilesystemRecord> {
+  DB.query("DELETE Node WHERE filesystem = $filesystem RETURN NONE;")
+    .bind(("filesystem", body.id.clone()))
+    .await
+    .context("Failed to delete filesystem nodes")?;
+  DB
+    .delete(body.id.as_record_id())
+    .await?
+    .context("No filesystem matching given ID")
+    .status_code(StatusCode::NOT_FOUND)
+}
+
+impl Resolve<WriteArgs> for DeleteFilesystem {
+  async fn resolve(
+    self,
+    _: &WriteArgs,
+  ) -> Result<Self::Response, Self::Error> {
+    delete_filesystem(self).await
   }
 }

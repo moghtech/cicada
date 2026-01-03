@@ -16,8 +16,10 @@ export type WriteResponses = {
   // ==== NODE ====
   CreateFilesystem: Types.CreateFilesystemResponse;
   UpdateFilesystem: Types.UpdateFilesystemResponse;
+  DeleteFilesystem: Types.DeleteFilesystemResponse;
 
   // ==== NODE ====
   CreateNode: Types.CreateNodeResponse;
   UpdateNode: Types.UpdateNodeResponse;
+  DeleteNode: Types.DeleteNodeResponse;
 };
