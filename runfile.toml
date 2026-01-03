@@ -10,22 +10,28 @@ alias = "dp"
 description = "runs periphery --release"
 cmd = "cargo run -p cicada_periphery --release"
 
-[dev-frontend]
-alias = "df"
-path = "frontend"
-cmd = "npm run dev"
+[dev-ui]
+alias = "du"
+path = "ui"
+cmd = "yarn dev"
 
-[npm-install]
+[build-ui]
+alias = "bu"
+path = "ui"
+cmd = "yarn build"
+
+[yarn-install]
 description = "downloads latest javacript dependencies for client and frontend"
 cmd = """
-cd client/ts && npm
+cd client/ts && yarn &&
+cd ../../ui && yarn
 """
 
 [gen-client]
 alias = "gc"
 description = "generates typescript types and build the ts client"
-after = "npm-install"
+after = "yarn-install"
 cmd = """
 node ./client/ts/generate_types.mjs && \
-cd ./client/ts && npm run build"""
+cd ./client/ts && yarn build"""
 

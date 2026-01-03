@@ -1,15 +1,17 @@
 import path from "path";
-import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
-// https://vite.dev/config/
+// https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [react()],
+  server: {
+    port: 3220,
+    allowedHosts: ["fe.test.cicada.bird"],
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  server: { allowedHosts: ["fe.test.komodo.bird"] },
 });

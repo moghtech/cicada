@@ -9,3 +9,5 @@ deno.lock
 
 .dev
 .cicada
+
+install-state.gz
