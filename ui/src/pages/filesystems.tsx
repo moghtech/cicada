@@ -1,4 +1,5 @@
 import { DataTable, SortableHeader } from "@/components/data-table";
+import CreateFilesystem from "@/create/filesystem";
 import { useRead } from "@/lib/hooks";
 import { Flex } from "@mantine/core";
 import { useNavigate } from "react-router-dom";
@@ -8,7 +9,10 @@ const FilesystemsPage = () => {
   const nav = useNavigate();
   return (
     <Flex direction="column">
-      <h2>Filesystems</h2>
+      <Flex align="center" gap="md">
+        <h2 style={{ opacity: 0.6 }}>Filesystems</h2>
+        <CreateFilesystem />
+      </Flex>
       <DataTable
         tableKey="filesystems-table-v1"
         data={data ?? []}
@@ -31,12 +35,16 @@ const FilesystemsPage = () => {
               <SortableHeader column={column} title="Created At" />
             ),
             accessorKey: "created_at",
+            cell: ({ row }) =>
+              new Date(row.original.created_at).toLocaleString(),
           },
           {
             header: ({ column }) => (
               <SortableHeader column={column} title="Updated At" />
             ),
             accessorKey: "updated_at",
+            cell: ({ row }) =>
+              new Date(row.original.updated_at).toLocaleString(),
           },
         ]}
       />

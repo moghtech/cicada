@@ -7,8 +7,10 @@ import {
   Menu,
   useComputedColorScheme,
   useMantineColorScheme,
+  Text,
 } from "@mantine/core";
 import { CheckCircle, Moon, Sun } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export const Topbar = ({
   opened,
@@ -23,12 +25,17 @@ export const Topbar = ({
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        padding: "1rem",
+        padding: "0rem 2rem",
       }}
     >
       <Flex align="center" gap="md">
         <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
-        <div>Logo</div>
+        <Link to="/" style={{ textDecoration: "none", color: "inherit" }}>
+          <Flex align="center" gap="sm">
+            <img src="/mogh-512x512.png" width={32} alt="moghtech" />
+            <Text size="xl">CICADA</Text>
+          </Flex>
+        </Link>
       </Flex>
       <Flex align="center" gap="md">
         <ThemeToggle />
@@ -40,7 +47,7 @@ export const Topbar = ({
 const ThemeToggle = () => {
   const { colorScheme, setColorScheme } = useMantineColorScheme();
   return (
-    <Menu>
+    <Menu position="bottom-end">
       <Menu.Target>
         <ActionIcon
           aria-label="ThemeToggle"
@@ -58,9 +65,7 @@ const ThemeToggle = () => {
             onClick={() => setColorScheme(theme as MantineColorScheme)}
             style={{ cursor: "pointer", textTransform: "capitalize" }}
             rightSection={
-              colorScheme === theme ? (
-                <CheckCircle size="0.8rem" />
-              ) : undefined
+              colorScheme === theme ? <CheckCircle size="0.8rem" /> : undefined
             }
           >
             {theme}

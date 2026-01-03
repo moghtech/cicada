@@ -1,6 +1,9 @@
 import { DataTable, SortableHeader } from "@/components/data-table";
+import CreateNode from "@/create/node";
 import { useRead } from "@/lib/hooks";
-import { Flex } from "@mantine/core";
+import { Flex, Group } from "@mantine/core";
+import { Types } from "cicada_client";
+import { FolderOpen, HardDrive } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 
 const FilesystemPage = () => {
@@ -24,12 +27,21 @@ const FilesystemPage = () => {
   const nav = useNavigate();
   return (
     <Flex direction="column">
-      <Flex gap="sm">
-        <h2 style={{ color: "gray" }}>Filesystem:</h2>
-        <h2>{fs?.name ?? "Unknown"}</h2>
-        <h2 style={{ color: "gray" }}>|</h2>
-        <h2 style={{ color: "gray" }}>Node:</h2>
-        <h2>{parent === 1 ? "Root" : node?.name ?? "Unknown"}</h2>
+      <Flex align="center" gap="md">
+        <Flex gap="sm" align="center">
+          <HardDrive size={20} />
+          <h2 style={{ opacity: 0.6 }}>Filesystem:</h2>
+          <h2>{fs?.name}</h2>
+          <h2 style={{ opacity: 0.6 }}>|</h2>
+          <FolderOpen size={20} />
+          <h2 style={{ opacity: 0.6 }}>Folder:</h2>
+          <h2>{parent === 1 ? "Root" : node?.name}</h2>
+        </Flex>
+        <Group>
+          {Object.values(Types.NodeKind).map((kind) => (
+            <CreateNode key={kind} kind={kind} />
+          ))}
+        </Group>
       </Flex>
       <DataTable
         tableKey="filesystem-table-v1"
@@ -57,12 +69,16 @@ const FilesystemPage = () => {
               <SortableHeader column={column} title="Created At" />
             ),
             accessorKey: "created_at",
+            cell: ({ row }) =>
+              new Date(row.original.created_at).toLocaleString(),
           },
           {
             header: ({ column }) => (
               <SortableHeader column={column} title="Updated At" />
             ),
             accessorKey: "updated_at",
+            cell: ({ row }) =>
+              new Date(row.original.updated_at).toLocaleString(),
           },
         ]}
       />

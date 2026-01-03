@@ -15,6 +15,7 @@ import {
   Flex,
   Group,
   Loader,
+  ScrollArea,
   Table,
   Text,
   Tooltip,
@@ -106,90 +107,94 @@ export function DataTable<TData, TValue>({
   const rows = table.getPrePaginationRowModel().rows;
 
   return (
-    <Table
-      striped={striped}
-      highlightOnHover={highlightOnHover}
-      withTableBorder={withTableBorder}
-      withColumnBorders={withColumnBorders}
-      captionSide="top"
-    >
-      {caption ? <Table.Caption>{caption}</Table.Caption> : null}
+    <ScrollArea>
+      <Table
+        striped={striped}
+        highlightOnHover={highlightOnHover}
+        withTableBorder={withTableBorder}
+        withColumnBorders={withColumnBorders}
+        captionSide="top"
+      >
+        {caption ? <Table.Caption>{caption}</Table.Caption> : null}
 
-      <Table.Thead>
-        {table.getHeaderGroups().map((hg) => (
-          <Table.Tr key={hg.id}>
-            {hg.headers.map((header) => {
-              // const canSort = header.column.getCanSort();
-              // const sortState = header.column.getIsSorted();
-              return (
-                <Table.Th key={header.id}>
-                  {header.isPlaceholder ? null : (
-                    //  : canSort ? (
-                    //   <UnstyledButton
-                    //     onClick={header.column.getToggleSortingHandler()}
-                    //     style={{ width: "100%" }}
-                    //   >
-                    //     <Group justify="space-between" gap="sm" wrap="nowrap">
-                    //       <Text fw={600} size="sm" lineClamp={1}>
-                    //         {flexRender(
-                    //           header.column.columnDef.header,
-                    //           header.getContext()
-                    //         )}
-                    //       </Text>
-                    //       <Center>
-                    //         <SortIcon state={sortState} />
-                    //       </Center>
-                    //     </Group>
-                    //   </UnstyledButton>
-                    // )
-                    <Text fw={600} size="sm" lineClamp={1}>
-                      {flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
-                    </Text>
-                  )}
-                </Table.Th>
-              );
-            })}
-          </Table.Tr>
-        ))}
-      </Table.Thead>
-
-      <Table.Tbody>
-        {loading ? (
-          <Table.Tr>
-            <Table.Td colSpan={table.getAllLeafColumns().length}>
-              <Group justify="center" py="lg">
-                <Loader size="sm" />
-              </Group>
-            </Table.Td>
-          </Table.Tr>
-        ) : rows.length === 0 ? (
-          <Table.Tr>
-            <Table.Td colSpan={table.getAllLeafColumns().length}>
-              <Group justify="center" py="lg">
-                {noResults}
-              </Group>
-            </Table.Td>
-          </Table.Tr>
-        ) : (
-          rows.map((row) => (
-            <Table.Tr
-              key={row.id}
-              onClick={onRowClick ? () => onRowClick(row.original) : undefined}
-              style={onRowClick ? { cursor: "pointer" } : undefined}
-            >
-              {row.getVisibleCells().map((cell) => (
-                <Table.Td key={cell.id}>
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </Table.Td>
-              ))}
+        <Table.Thead>
+          {table.getHeaderGroups().map((hg) => (
+            <Table.Tr key={hg.id}>
+              {hg.headers.map((header) => {
+                // const canSort = header.column.getCanSort();
+                // const sortState = header.column.getIsSorted();
+                return (
+                  <Table.Th key={header.id}>
+                    {header.isPlaceholder ? null : (
+                      //  : canSort ? (
+                      //   <UnstyledButton
+                      //     onClick={header.column.getToggleSortingHandler()}
+                      //     style={{ width: "100%" }}
+                      //   >
+                      //     <Group justify="space-between" gap="sm" wrap="nowrap">
+                      //       <Text fw={600} size="sm" lineClamp={1}>
+                      //         {flexRender(
+                      //           header.column.columnDef.header,
+                      //           header.getContext()
+                      //         )}
+                      //       </Text>
+                      //       <Center>
+                      //         <SortIcon state={sortState} />
+                      //       </Center>
+                      //     </Group>
+                      //   </UnstyledButton>
+                      // )
+                      <Text fw={600} size="sm" lineClamp={1}>
+                        {flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                      </Text>
+                    )}
+                  </Table.Th>
+                );
+              })}
             </Table.Tr>
-          ))
-        )}
-      </Table.Tbody>
-    </Table>
+          ))}
+        </Table.Thead>
+
+        <Table.Tbody>
+          {loading ? (
+            <Table.Tr>
+              <Table.Td colSpan={table.getAllLeafColumns().length}>
+                <Group justify="center" py="lg">
+                  <Loader size="sm" />
+                </Group>
+              </Table.Td>
+            </Table.Tr>
+          ) : rows.length === 0 ? (
+            <Table.Tr>
+              <Table.Td colSpan={table.getAllLeafColumns().length}>
+                <Group justify="center" py="lg">
+                  {noResults}
+                </Group>
+              </Table.Td>
+            </Table.Tr>
+          ) : (
+            rows.map((row) => (
+              <Table.Tr
+                key={row.id}
+                onClick={
+                  onRowClick ? () => onRowClick(row.original) : undefined
+                }
+                style={onRowClick ? { cursor: "pointer" } : undefined}
+              >
+                {row.getVisibleCells().map((cell) => (
+                  <Table.Td key={cell.id}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </Table.Td>
+                ))}
+              </Table.Tr>
+            ))
+          )}
+        </Table.Tbody>
+      </Table>
+    </ScrollArea>
   );
 }
 

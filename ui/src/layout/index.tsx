@@ -1,14 +1,15 @@
-import { AppShell } from "@mantine/core";
+import { AppShell, Center, Loader } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { Outlet } from "react-router-dom";
 import { Topbar } from "./topbar";
 import { Sidebar } from "./sidebar";
+import { Suspense } from "react";
 
 export const Layout = () => {
   const [opened, { toggle }] = useDisclosure();
   return (
     <AppShell
-      padding="md"
+      padding="lg"
       header={{ height: 80 }}
       navbar={{
         width: 300,
@@ -23,7 +24,15 @@ export const Layout = () => {
       </AppShell.Navbar>
 
       <AppShell.Main>
-        <Outlet />
+        <Suspense
+          fallback={
+            <Center h="70vh">
+              <Loader size={60} />
+            </Center>
+          }
+        >
+          <Outlet />
+        </Suspense>
       </AppShell.Main>
     </AppShell>
   );
