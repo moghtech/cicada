@@ -12,7 +12,7 @@ path = "src/main.rs"
 
 [dependencies]
 # LOCAL
-cicada_client = { workspace = true, features = ["blocking"] }
+cicada_client = { workspace = true, features = ["blocking", "logger"] }
 config.workspace = true
 logger.workspace = true
 # EXTERNAL

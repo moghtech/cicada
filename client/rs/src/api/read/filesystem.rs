@@ -18,7 +18,7 @@ use crate::{
 #[cfg_attr(feature = "openapi", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaReadRequest)]
 #[response(ListFilesystemsResponse)]
-#[error(serror::Error)]
+#[error(mogh_error::Error)]
 pub struct ListFilesystems {}
 
 /// Response for [ListFilesystems].

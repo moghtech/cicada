@@ -2,7 +2,6 @@
 resolver = "2"
 members = [
 	"bin/*",
-	"lib/*",
 	"client/rs",
 ]
 
@@ -19,12 +18,12 @@ strip = "debuginfo"
 
 [workspace.dependencies]
 cicada_client = { path = "client/rs" }
-environment_file = { path = "lib/environment_file" }
-config = { path = "lib/config" }
-logger = { path = "lib/logger" }
 
 # MOGH
-serror = { version = "0.5.4", default-features = false }
+config = { package = "mogh_config", version = "0.1.0", registry = "mogh" }
+logger = { package = "mogh_logger", version = "0.1.0", registry = "mogh" }
+secret_file = { package = "mogh_secret_file", version = "0.1.0", registry = "mogh" }
+mogh_error = { version = "0.5.5", default-features = false, registry = "mogh" }
 derive_default_builder = "0.1.8"
 derive_empty_traits = "0.1.0"
 partial_derive2 = "0.4.5"
@@ -32,8 +31,8 @@ derive_variants = "1.0.0"
 resolver_api = "3.0.0"
 
 # ASYNC
-reqwest = { version = "0.12.28", default-features = false, features = ["json", "rustls-tls-native-roots"] }
-tokio = { version = "1.48.0", features = ["full"] }
+reqwest = { version = "0.13.1", default-features = false, features = ["json", "rustls"] }
+tokio = { version = "1.49.0", features = ["full"] }
 futures-util = "0.3.31"
 arc-swap = "1.8.0"
 

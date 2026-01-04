@@ -25,7 +25,7 @@ use crate::{
 #[cfg_attr(feature = "openapi", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaWriteRequest)]
 #[response(CreateFilesystemResponse)]
-#[error(serror::Error)]
+#[error(mogh_error::Error)]
 pub struct CreateFilesystem {
   /// The name of the filesystem
   pub name: String,
@@ -51,7 +51,7 @@ pub type CreateFilesystemResponse = FilesystemRecord;
 #[cfg_attr(feature = "openapi", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaWriteRequest)]
 #[response(UpdateFilesystemResponse)]
-#[error(serror::Error)]
+#[error(mogh_error::Error)]
 pub struct UpdateFilesystem {
   /// The filesystem ID
   pub id: FilesystemId,
@@ -66,7 +66,7 @@ pub type UpdateFilesystemResponse = FilesystemRecord;
 //
 
 /// Delete a filesystem. Response: [DeleteFilesystemResponse].
-/// 
+///
 /// WARNING. This will also delete all nodes on the filesystem.
 #[typeshare]
 #[derive(
@@ -81,7 +81,7 @@ pub type UpdateFilesystemResponse = FilesystemRecord;
 #[cfg_attr(feature = "openapi", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaWriteRequest)]
 #[response(DeleteFilesystemResponse)]
-#[error(serror::Error)]
+#[error(mogh_error::Error)]
 pub struct DeleteFilesystem {
   /// The filesystem ID
   pub id: FilesystemId,

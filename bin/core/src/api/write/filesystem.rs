@@ -6,8 +6,8 @@ use cicada_client::{
   },
   entities::filesystem::FilesystemRecord,
 };
+use mogh_error::AddStatusCode;
 use resolver_api::Resolve;
-use serror::AddStatusCode;
 
 use crate::{api::write::WriteArgs, db::DB};
 
@@ -18,12 +18,12 @@ use crate::{api::write::WriteArgs, db::DB};
   request_body(content = CreateFilesystem),
   responses(
     (status = 200, description = "The created filesystem", body = FilesystemRecord),
-    (status = 500, description = "Request failed", body = serror::Serror)
+    (status = 500, description = "Request failed", body = mogh_error::Serror)
   ),
 )]
 pub async fn create_filesystem(
   body: CreateFilesystem,
-) -> serror::Result<FilesystemRecord> {
+) -> mogh_error::Result<FilesystemRecord> {
   // DB.insert::<Vec<_>>("Filesystem")
   //   .content(body)
   //   .await
@@ -61,12 +61,12 @@ impl Resolve<WriteArgs> for CreateFilesystem {
   request_body(content = UpdateFilesystem),
   responses(
     (status = 200, description = "The updated filesystem", body = FilesystemRecord),
-    (status = 500, description = "Request failed", body = serror::Serror)
+    (status = 500, description = "Request failed", body = mogh_error::Serror)
   ),
 )]
 pub async fn update_filesystem(
   body: UpdateFilesystem,
-) -> serror::Result<FilesystemRecord> {
+) -> mogh_error::Result<FilesystemRecord> {
   // let update = serde_json::to_string(&body)
   //   .context("Failed to serialize MERGE update")?;
   // DB.query(format!(
@@ -108,19 +108,18 @@ impl Resolve<WriteArgs> for UpdateFilesystem {
   request_body(content = DeleteFilesystem),
   responses(
     (status = 200, description = "The deleted filesystem", body = FilesystemRecord),
-    (status = 404, description = "Filesystem not found", body = serror::Serror),
-    (status = 500, description = "Request failed", body = serror::Serror)
+    (status = 404, description = "Filesystem not found", body = mogh_error::Serror),
+    (status = 500, description = "Request failed", body = mogh_error::Serror)
   ),
 )]
 pub async fn delete_filesystem(
   body: DeleteFilesystem,
-) -> serror::Result<FilesystemRecord> {
+) -> mogh_error::Result<FilesystemRecord> {
   DB.query("DELETE Node WHERE filesystem = $filesystem RETURN NONE;")
     .bind(("filesystem", body.id.clone()))
     .await
     .context("Failed to delete filesystem nodes")?;
-  DB
-    .delete(body.id.as_record_id())
+  DB.delete(body.id.as_record_id())
     .await?
     .context("No filesystem matching given ID")
     .status_code(StatusCode::NOT_FOUND)

@@ -8,7 +8,7 @@ use cicada_client::entities::{
 };
 use colored::Colorize as _;
 use config::ConfigLoader;
-use environment_file::maybe_read_item_from_file;
+use secret_file::maybe_read_item_from_file;
 use tower_http::cors::CorsLayer;
 
 /// Creates a CORS layer based on the Core configuration.
@@ -178,9 +178,7 @@ pub fn core_config() -> &'static CoreConfig {
       ssl_cert_file: env
         .cicada_ssl_cert_file
         .unwrap_or(config.ssl_cert_file),
-      ui_path: env
-        .cicada_ui_path
-        .unwrap_or(config.ui_path),
+      ui_path: env.cicada_ui_path.unwrap_or(config.ui_path),
     }
   })
 }

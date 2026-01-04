@@ -29,7 +29,7 @@ use crate::{
 #[cfg_attr(feature = "openapi", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaWriteRequest)]
 #[response(CreateNodeResponse)]
-#[error(serror::Error)]
+#[error(mogh_error::Error)]
 pub struct CreateNode {
   /// The filesystem ID
   pub filesystem: Option<FilesystemId>,
@@ -71,7 +71,7 @@ pub type CreateNodeResponse = NodeRecord;
 #[cfg_attr(feature = "openapi", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaWriteRequest)]
 #[response(UpdateNodeResponse)]
-#[error(serror::Error)]
+#[error(mogh_error::Error)]
 pub struct UpdateNode {
   /// The node id
   pub id: NodeId,
@@ -110,7 +110,7 @@ pub type UpdateNodeResponse = NodeRecord;
 #[cfg_attr(feature = "openapi", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaWriteRequest)]
 #[response(DeleteNodeResponse)]
-#[error(serror::Error)]
+#[error(mogh_error::Error)]
 pub struct DeleteNode {
   /// The node id
   pub id: NodeId,

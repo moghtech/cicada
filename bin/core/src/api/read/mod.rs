@@ -6,10 +6,10 @@ use cicada_client::api::read::{
   filesystem::ListFilesystems,
   node::{FindNode, GetNode, ListNodes},
 };
+use mogh_error::Json;
 use resolver_api::Resolve;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-use serror::Json;
 use surrealdb::types::Uuid;
 use typeshare::typeshare;
 
@@ -24,7 +24,7 @@ pub struct ReadArgs {}
 #[derive(Debug, Clone, Serialize, Deserialize, Resolve)]
 #[args(ReadArgs)]
 #[response(Response)]
-#[error(serror::Error)]
+#[error(mogh_error::Error)]
 #[serde(tag = "type", content = "params")]
 enum ReadRequest {
   GetVersion(GetVersion),
@@ -49,7 +49,7 @@ async fn variant_handler(
   // user: Extension<User>,
   Path(Variant { variant }): Path<Variant>,
   Json(params): Json<serde_json::Value>,
-) -> serror::Result<axum::response::Response> {
+) -> mogh_error::Result<axum::response::Response> {
   let req: ReadRequest = serde_json::from_value(json!({
     "type": variant,
     "params": params,
@@ -60,7 +60,7 @@ async fn variant_handler(
 async fn handler(
   // Extension(user): Extension<User>,
   Json(request): Json<ReadRequest>,
-) -> serror::Result<axum::response::Response> {
+) -> mogh_error::Result<axum::response::Response> {
   let timer = Instant::now();
   let req_id = Uuid::new_v4();
   // debug!("/read request | user: {}", user.username);
@@ -84,7 +84,7 @@ async fn handler(
     (status = 200, description = "Cicada Core version", body = GetVersionResponse),
   ),
 )]
-fn get_version() -> serror::Result<GetVersionResponse> {
+fn get_version() -> mogh_error::Result<GetVersionResponse> {
   Ok(GetVersionResponse {
     version: env!("CARGO_PKG_VERSION").to_string(),
   })

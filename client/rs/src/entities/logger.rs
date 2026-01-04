@@ -37,11 +37,11 @@ pub struct LogConfig {
 }
 
 fn default_opentelemetry_service_name() -> String {
-  String::from("Komodo")
+  String::from("Cicada")
 }
 
 fn default_opentelemetry_scope_name() -> String {
-  String::from("Komodo")
+  String::from("Cicada")
 }
 
 fn default_location() -> bool {
@@ -142,4 +142,36 @@ pub enum StdioLogMode {
   Standard,
   Json,
   None,
+}
+
+#[cfg(feature = "logger")]
+impl logger::LogConfig for &LogConfig {
+  fn ansi(&self) -> bool {
+    self.ansi
+  }
+  fn level(&self) -> tracing::Level {
+    self.level.into()
+  }
+  fn location(&self) -> bool {
+    self.location
+  }
+  fn opentelemetry_scope_name(&self) -> String {
+    self.opentelemetry_scope_name.clone()
+  }
+  fn opentelemetry_service_name(&self) -> String {
+    self.opentelemetry_service_name.clone()
+  }
+  fn otlp_endpoint(&self) -> &str {
+    &self.otlp_endpoint
+  }
+  fn pretty(&self) -> bool {
+    self.pretty
+  }
+  fn stdio(&self) -> logger::StdioLogMode {
+    match self.stdio {
+      StdioLogMode::Standard => logger::StdioLogMode::Standard,
+      StdioLogMode::Json => logger::StdioLogMode::Json,
+      StdioLogMode::None => logger::StdioLogMode::None,
+    }
+  }
 }

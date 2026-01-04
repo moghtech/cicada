@@ -22,7 +22,7 @@ use crate::{
 #[cfg_attr(feature = "openapi", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaReadRequest)]
 #[response(ListNodesResponse)]
-#[error(serror::Error)]
+#[error(mogh_error::Error)]
 pub struct ListNodes {
   /// Filesystem id
   pub filesystem: Option<FilesystemId>,
@@ -45,7 +45,7 @@ pub type ListNodesResponse = Vec<NodeListItem>;
 #[cfg_attr(feature = "openapi", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaReadRequest)]
 #[response(GetNodeResponse)]
-#[error(serror::Error)]
+#[error(mogh_error::Error)]
 pub struct GetNode {
   /// The node id
   pub id: NodeId,
@@ -69,7 +69,7 @@ pub type GetNodeResponse = NodeRecord;
 #[cfg_attr(feature = "openapi", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaReadRequest)]
 #[response(FindNodeResponse)]
-#[error(serror::Error)]
+#[error(mogh_error::Error)]
 pub struct FindNode {
   /// Filesystem id
   pub filesystem: FilesystemId,
@@ -85,7 +85,10 @@ pub struct FindNode {
 }
 
 impl FindNode {
-  pub fn with_inode(filesystem: FilesystemId, inode: u64) -> FindNode {
+  pub fn with_inode(
+    filesystem: FilesystemId,
+    inode: u64,
+  ) -> FindNode {
     FindNode {
       filesystem,
       inode: inode.into(),

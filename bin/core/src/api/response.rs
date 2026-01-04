@@ -1,7 +1,7 @@
 use anyhow::Context;
 use axum::http::{HeaderValue, StatusCode, header::CONTENT_TYPE};
+use mogh_error::serialize_error;
 use serde::Serialize;
-use serror::serialize_error;
 
 pub struct Response(pub axum::response::Response);
 

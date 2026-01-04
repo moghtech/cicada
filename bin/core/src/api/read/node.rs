@@ -4,8 +4,8 @@ use cicada_client::{
   api::read::node::{FindNode, GetNode, ListNodes},
   entities::node::{NodeListItem, NodeRecord},
 };
+use mogh_error::AddStatusCode;
 use resolver_api::Resolve;
-use serror::AddStatusCode;
 
 use crate::{api::read::ReadArgs, db::DB};
 
@@ -16,12 +16,12 @@ use crate::{api::read::ReadArgs, db::DB};
   request_body(content = ListNodes),
   responses(
     (status = 200, description = "List of filesystem nodes", body = Vec<NodeListItem>),
-    (status = 500, description = "Request failed", body = serror::Serror)
+    (status = 500, description = "Request failed", body = mogh_error::Serror)
   ),
 )]
 pub async fn list_nodes(
   body: ListNodes,
-) -> serror::Result<Vec<NodeListItem>> {
+) -> mogh_error::Result<Vec<NodeListItem>> {
   DB.query(
     "
 SELECT * OMIT data FROM Node 
@@ -52,11 +52,13 @@ impl Resolve<ReadArgs> for ListNodes {
   request_body(content = GetNode),
   responses(
     (status = 200, description = "The filesystem node", body = NodeRecord),
-    (status = 404, description = "Failed to find node with given id", body = serror::Serror),
-    (status = 500, description = "Request failed", body = serror::Serror),
+    (status = 404, description = "Failed to find node with given id", body = mogh_error::Serror),
+    (status = 500, description = "Request failed", body = mogh_error::Serror),
   ),
 )]
-pub async fn get_node(body: GetNode) -> serror::Result<NodeRecord> {
+pub async fn get_node(
+  body: GetNode,
+) -> mogh_error::Result<NodeRecord> {
   DB.select(body.id.as_record_id())
     .await
     .context("Failed to find node with given id.")?
@@ -80,11 +82,13 @@ impl Resolve<ReadArgs> for GetNode {
   request_body(content = FindNode),
   responses(
     (status = 200, description = "The filesystem node", body = NodeRecord),
-    (status = 404, description = "Failed to find node with given parameters", body = serror::Serror),
-    (status = 500, description = "Request failed", body = serror::Serror),
+    (status = 404, description = "Failed to find node with given parameters", body = mogh_error::Serror),
+    (status = 500, description = "Request failed", body = mogh_error::Serror),
   ),
 )]
-pub async fn find_node(body: FindNode) -> serror::Result<NodeRecord> {
+pub async fn find_node(
+  body: FindNode,
+) -> mogh_error::Result<NodeRecord> {
   DB.query(
     "
 SELECT * FROM Node

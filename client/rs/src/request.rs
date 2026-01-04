@@ -1,7 +1,7 @@
 use anyhow::{Context, anyhow};
+use mogh_error::deserialize_error;
 use serde::{Serialize, de::DeserializeOwned};
 use serde_json::json;
-use serror::deserialize_error;
 
 use crate::{
   CicadaClient,

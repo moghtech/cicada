@@ -11,8 +11,8 @@ use cicada_client::{
   },
 };
 use futures_util::{TryStreamExt, stream::FuturesUnordered};
+use mogh_error::AddStatusCode as _;
 use resolver_api::Resolve;
-use serror::AddStatusCode as _;
 
 use crate::{
   api::{
@@ -29,12 +29,12 @@ use crate::{
   request_body(content = CreateNode),
   responses(
     (status = 200, description = "The created node", body = NodeRecord),
-    (status = 500, description = "Request failed", body = serror::Serror)
+    (status = 500, description = "Request failed", body = mogh_error::Serror)
   ),
 )]
 pub async fn create_node(
   body: CreateNode,
-) -> serror::Result<NodeRecord> {
+) -> mogh_error::Result<NodeRecord> {
   // let data = serde_json::to_string(&body)
   //   .context("Failed to serialize Node content")?;
   // DB.query(format!("fn::create_node({data})"))
@@ -70,12 +70,12 @@ impl Resolve<WriteArgs> for CreateNode {
   request_body(content = UpdateNode),
   responses(
     (status = 200, description = "The updated node", body = NodeRecord),
-    (status = 500, description = "Request failed", body = serror::Serror)
+    (status = 500, description = "Request failed", body = mogh_error::Serror)
   ),
 )]
 pub async fn update_node(
   body: UpdateNode,
-) -> serror::Result<NodeRecord> {
+) -> mogh_error::Result<NodeRecord> {
   // let update = serde_json::to_string(&body)
   //   .context("Failed to serialize MERGE update")?;
   // DB.query(format!(r#"UPDATE $id MERGE {update}"#))
@@ -111,13 +111,13 @@ impl Resolve<WriteArgs> for UpdateNode {
   request_body(content = DeleteNode),
   responses(
     (status = 200, description = "The deleted node", body = NodeRecord),
-    (status = 404, description = "Node not found", body = serror::Serror),
-    (status = 500, description = "Request failed", body = serror::Serror)
+    (status = 404, description = "Node not found", body = mogh_error::Serror),
+    (status = 500, description = "Request failed", body = mogh_error::Serror)
   ),
 )]
 pub async fn delete_node(
   body: DeleteNode,
-) -> serror::Result<NodeRecord> {
+) -> mogh_error::Result<NodeRecord> {
   let node = get_node(GetNode { id: body.id }).await?;
   if matches!(node.kind, NodeKind::Folder) {
     if let Some(parent) = body.move_children {
@@ -149,7 +149,8 @@ impl Resolve<WriteArgs> for DeleteNode {
 fn delete_children(
   filesystem: FilesystemId,
   parent: u64,
-) -> std::pin::Pin<Box<impl Future<Output = serror::Result<()>>>> {
+) -> std::pin::Pin<Box<impl Future<Output = mogh_error::Result<()>>>>
+{
   Box::pin(async move {
     let children = list_nodes(ListNodes {
       filesystem: Some(filesystem),
@@ -161,9 +162,10 @@ fn delete_children(
       .iter()
       .map(|node| async {
         if matches!(node.kind, NodeKind::Folder) {
-          delete_children(node.filesystem.clone(), node.inode).await?;
+          delete_children(node.filesystem.clone(), node.inode)
+            .await?;
         }
-        serror::Result::Ok(())
+        mogh_error::Result::Ok(())
       })
       .collect::<FuturesUnordered<_>>()
       .try_collect::<Vec<_>>()

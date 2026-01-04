@@ -14,11 +14,11 @@ use crate::{api::read::ReadArgs, db::DB};
   request_body(content = ListFilesystems),
   responses(
     (status = 200, description = "List of filesystems", body = Vec<FilesystemRecord>),
-    (status = 500, description = "Request failed", body = serror::Serror)
+    (status = 500, description = "Request failed", body = mogh_error::Serror)
   ),
 )]
 pub async fn list_filesystems()
--> serror::Result<Vec<FilesystemRecord>> {
+-> mogh_error::Result<Vec<FilesystemRecord>> {
   DB.select("Filesystem")
     .await
     .context("Failed to query for filesystems")

@@ -7,10 +7,10 @@ use cicada_client::api::write::{
   node::{CreateNode, DeleteNode, UpdateNode},
 };
 use derive_variants::{EnumVariants, ExtractVariant as _};
+use mogh_error::Json;
 use resolver_api::Resolve;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-use serror::Json;
 use strum::Display;
 use surrealdb::types::Uuid;
 use typeshare::typeshare;
@@ -29,7 +29,7 @@ pub struct WriteArgs {}
 #[variant_derive(Debug, Display)]
 #[args(WriteArgs)]
 #[response(Response)]
-#[error(serror::Error)]
+#[error(mogh_error::Error)]
 #[serde(tag = "type", content = "params")]
 pub enum WriteRequest {
   // ==== NODE ====
@@ -54,7 +54,7 @@ async fn variant_handler(
   // user: Extension<User>,
   Path(Variant { variant }): Path<Variant>,
   Json(params): Json<serde_json::Value>,
-) -> serror::Result<axum::response::Response> {
+) -> mogh_error::Result<axum::response::Response> {
   let req: WriteRequest = serde_json::from_value(json!({
     "type": variant,
     "params": params,
@@ -65,7 +65,7 @@ async fn variant_handler(
 async fn handler(
   // Extension(user): Extension<User>,
   Json(request): Json<WriteRequest>,
-) -> serror::Result<axum::response::Response> {
+) -> mogh_error::Result<axum::response::Response> {
   let req_id = Uuid::new_v4();
 
   let res = tokio::spawn(task(req_id, request))
@@ -79,7 +79,7 @@ async fn task(
   req_id: Uuid,
   request: WriteRequest,
   // user: User,
-) -> serror::Result<axum::response::Response> {
+) -> mogh_error::Result<axum::response::Response> {
   let variant = request.extract_variant();
   info!("/write request | {variant}");
 

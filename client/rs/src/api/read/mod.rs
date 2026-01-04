@@ -21,7 +21,7 @@ pub trait CicadaReadRequest: HasResponse {}
 #[cfg_attr(feature = "openapi", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaReadRequest)]
 #[response(GetVersionResponse)]
-#[error(serror::Error)]
+#[error(mogh_error::Error)]
 pub struct GetVersion {}
 
 /// Response for [GetVersion].
