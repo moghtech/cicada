@@ -1,6 +1,7 @@
+import ConfirmDelete from "@/components/confirm-delete";
 import { DataTable, SortableHeader } from "@/components/data-table";
 import CreateNode from "@/create/node";
-import { useRead } from "@/lib/hooks";
+import { useInvalidate, useRead, useWrite } from "@/lib/hooks";
 import { Flex, Group } from "@mantine/core";
 import { Types } from "cicada_client";
 import { FolderOpen, HardDrive } from "lucide-react";
@@ -13,15 +14,32 @@ const FolderPage = ({
   filesystem: string;
   node: Types.NodeRecord | undefined;
 }) => {
+  const nav = useNavigate();
+  const inv = useInvalidate();
   const filesystem = useRead("ListFilesystems", {}).data?.find(
     (fs) => fs.id === _filesystem
+  );
+  const { mutateAsync: deleteFs, isPending: deleteFsPending } = useWrite(
+    "DeleteFilesystem",
+    {
+      onSuccess: () => {
+        inv(["ListFilesystems"], ["ListNodes"]);
+        nav("/");
+      },
+    }
   );
   const children =
     useRead("ListNodes", {
       filesystem: filesystem?.id,
       parent: node?.inode ?? 1,
     }).data ?? [];
-  const nav = useNavigate();
+  const { mutateAsync: deleteFolder, isPending: deleteFolderPending } =
+    useWrite("DeleteNode", {
+      onSuccess: () => {
+        inv(["ListNodes"]);
+        nav(`/filesystems/${node?.filesystem}/${node?.parent ?? 1}`);
+      },
+    });
   return (
     <Flex direction="column" gap="lg">
       <Flex gap="sm" align="center">
@@ -37,6 +55,24 @@ const FolderPage = ({
         {Object.values(Types.NodeKind).map((kind) => (
           <CreateNode key={kind} kind={kind} parent={node?.inode ?? 1} />
         ))}
+        {node === undefined && filesystem && (
+          <ConfirmDelete
+            entityType="Filesystem"
+            name={filesystem.name}
+            onConfirm={() => deleteFs({ id: filesystem.id })}
+            loading={deleteFsPending}
+            disabled={false}
+          />
+        )}
+        {node && (
+          <ConfirmDelete
+            entityType="Folder"
+            name={node.name}
+            onConfirm={() => deleteFolder({ id: node.id })}
+            loading={deleteFolderPending}
+            disabled={false}
+          />
+        )}
       </Group>
       <DataTable
         tableKey="filesystem-table-v1"

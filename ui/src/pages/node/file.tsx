@@ -21,11 +21,14 @@ const FilePage = ({ node }: { node: Types.NodeRecord | undefined }) => {
       setEdit({ data: undefined });
     },
   });
-  const { mutateAsync: deleteNode } = useWrite("DeleteNode", {
-    onSuccess: () => {
-      nav(`/filesystems/${node?.filesystem}/${node?.parent}`);
-    },
-  });
+  const { mutateAsync: deleteNode, isPending: deleteNodePending } = useWrite(
+    "DeleteNode",
+    {
+      onSuccess: () => {
+        nav(`/filesystems/${node?.filesystem}/${node?.parent}`);
+      },
+    }
+  );
 
   if (!node) {
     return (
@@ -58,9 +61,11 @@ const FilePage = ({ node }: { node: Types.NodeRecord | undefined }) => {
             onConfirm={() => updateNode({ id: node.id, data })}
           />
           <ConfirmDelete
+            entityType="File"
             name={node.name}
-            disabled={false}
             onConfirm={() => deleteNode({ id: node.id, move_children: 1 })}
+            loading={deleteNodePending}
+            disabled={false}
           />
         </Flex>
       </Flex>
