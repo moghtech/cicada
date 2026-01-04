@@ -1,27 +1,23 @@
-import { useInvalidate, useRead, useWrite } from "@/lib/hooks";
-import { Button, Center, Flex, Loader, Text } from "@mantine/core";
-import { useNavigate, useParams } from "react-router-dom";
+import { useInvalidate, useWrite } from "@/lib/hooks";
+import { Button, Center, Flex, Text } from "@mantine/core";
+import { useNavigate } from "react-router-dom";
 import { File, History } from "lucide-react";
 import { language_from_path, MonacoEditor } from "@/components/monaco";
 import { useLocalStorage } from "@mantine/hooks";
 import ConfirmSave from "@/components/confirm-save";
-import { useEffect } from "react";
 import ConfirmDelete from "@/components/confirm-delete";
+import { Types } from "cicada_client";
 
-const FilePage = () => {
-  const { file } = useParams() as {
-    file: string;
-  };
+const FilePage = ({ node }: { node: Types.NodeRecord | undefined }) => {
   const inv = useInvalidate();
   const nav = useNavigate();
   const [{ data }, setEdit] = useLocalStorage<{ data: string | undefined }>({
-    key: `node-${file}-edit-v1`,
+    key: `node-${node?.id}-edit-v1`,
     defaultValue: { data: undefined },
   });
-  const { data: node, isPending } = useRead("GetNode", { id: file });
   const { mutateAsync: updateNode } = useWrite("UpdateNode", {
     onSuccess: () => {
-      inv(["GetNode", { id: file }]);
+      inv(["FindNode"]);
       setEdit({ data: undefined });
     },
   });
@@ -31,26 +27,10 @@ const FilePage = () => {
     },
   });
 
-  // Auto redirect folder nodes to appropriate page.
-  useEffect(() => {
-    if (!node) return;
-    if (node.kind === "Folder") {
-      nav(`/filesystems/${node.filesystem}/${node.ino}`, { replace: true });
-    }
-  }, [node?.kind]);
-
-  if (!isPending && !node) {
-    return (
-      <Center>
-        <Text size="lg">404: No file found matching '{file}'</Text>
-      </Center>
-    );
-  }
-
   if (!node) {
     return (
-      <Center h="70vh">
-        <Loader size="lg" />
+      <Center>
+        <Text size="lg">404: No file found</Text>
       </Center>
     );
   }

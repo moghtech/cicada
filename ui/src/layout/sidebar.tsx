@@ -1,5 +1,13 @@
 import { useRead } from "@/lib/hooks";
-import { Center, Flex, Group, Loader, Tree, TreeNodeData } from "@mantine/core";
+import {
+  Button,
+  Center,
+  Flex,
+  Group,
+  Loader,
+  Tree,
+  TreeNodeData,
+} from "@mantine/core";
 import { ChevronRight, File } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -23,7 +31,8 @@ export const Sidebar = () => {
   }));
 
   return (
-    <Flex m={16}>
+    <Flex direction="column" m={16}>
+      <Filesystems />
       <Tree
         data={data}
         renderNode={({ node, expanded, hasChildren, elementProps }) => (
@@ -46,6 +55,28 @@ export const Sidebar = () => {
   );
 };
 
+const Filesystems = () => {
+  const { data: filesystems } = useRead("ListFilesystems", {});
+
+  if (!filesystems) {
+    return (
+      <Center h="100%">
+        <Loader size="lg" />
+      </Center>
+    );
+  }
+
+  return (
+    <>
+      {filesystems.map((fs) => (
+        <Button key={fs.id} variant="subtle" color="inherit">
+          {fs.name}
+        </Button>
+      ))}
+    </>
+  );
+};
+
 /* This value must not  */
 const CHILD_VALUE_IDENTIFIER = "__CHILD__";
 
@@ -60,7 +91,7 @@ const NodeTree = ({
   const nodes = useRead("ListNodes", { filesystem, parent }).data ?? [];
 
   const data: TreeNodeData[] = nodes.map((node) => ({
-    value: node.id,
+    value: `${node.filesystem}/${node.inode}`,
     label: node.name,
     children:
       node.kind === "Folder"
@@ -68,7 +99,7 @@ const NodeTree = ({
             {
               value: CHILD_VALUE_IDENTIFIER,
               label: (
-                <NodeTree filesystem={node.filesystem} parent={node.ino} />
+                <NodeTree filesystem={node.filesystem} parent={node.inode} />
               ),
             },
           ]
@@ -87,7 +118,7 @@ const NodeTree = ({
               ? undefined
               : hasChildren
                 ? elementProps.onClick(e)
-                : nav("/files/" + node.value)
+                : nav("/filesystems/" + node.value)
           }
         >
           {node.value !== CHILD_VALUE_IDENTIFIER &&

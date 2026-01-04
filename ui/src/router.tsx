@@ -4,8 +4,7 @@ import { Layout } from "./layout";
 
 // Lazy import pages
 const Filesystems = lazy(() => import("@/pages/filesystems"));
-const Filesystem = lazy(() => import("@/pages/filesystem"));
-const File = lazy(() => import("@/pages/file"));
+const Node = lazy(() => import("@/pages/node"));
 
 export const Router = () => {
   return (
@@ -13,12 +12,8 @@ export const Router = () => {
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route path="" element={<Filesystems />} />
-          <Route path="filesystems/:filesystem" element={<Filesystem />} />
-          <Route
-            path="filesystems/:filesystem/:parent"
-            element={<Filesystem />}
-          />
-          <Route path="files/:file" element={<File />} />
+          <Route path="filesystems/:filesystem" element={<Node />} />
+          <Route path="filesystems/:filesystem/:inode" element={<Node />} />
         </Route>
       </Routes>
     </BrowserRouter>

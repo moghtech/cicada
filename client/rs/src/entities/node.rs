@@ -16,7 +16,7 @@ pub struct NodeListItem {
   /// Filesystem ID
   pub filesystem: FilesystemId,
   /// The inode number
-  pub ino: U64,
+  pub inode: U64,
   /// The parent node ID
   pub parent: U64,
   /// The name of the node
@@ -42,7 +42,7 @@ pub struct NodeRecord {
   /// Filesystem ID
   pub filesystem: FilesystemId,
   /// The inode number
-  pub ino: U64,
+  pub inode: U64,
   /// The parent inode number
   pub parent: U64,
   /// The name of the node

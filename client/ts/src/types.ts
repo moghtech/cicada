@@ -36,7 +36,7 @@ export interface NodeRecord {
 	/** Filesystem ID */
 	filesystem: FilesystemId;
 	/** The inode number */
-	ino: U64;
+	inode: U64;
 	/** The parent inode number */
 	parent: U64;
 	/** The name of the node */
@@ -82,7 +82,7 @@ export interface NodeListItem {
 	/** Filesystem ID */
 	filesystem: FilesystemId;
 	/** The inode number */
-	ino: U64;
+	inode: U64;
 	/** The parent node ID */
 	parent: U64;
 	/** The name of the node */
@@ -177,7 +177,7 @@ export interface FindNode {
 	/** Filesystem id */
 	filesystem: FilesystemId;
 	/** The node inode number */
-	ino?: U64;
+	inode?: U64;
 	/**
 	 * The node parent inode number.
 	 * Default: 1 (the root node).

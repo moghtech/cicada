@@ -75,7 +75,7 @@ pub struct FindNode {
   pub filesystem: FilesystemId,
   /// The node inode number
   #[cfg_attr(feature = "openapi", schema(minimum = "1"))]
-  pub ino: Option<U64>,
+  pub inode: Option<U64>,
   /// The node parent inode number.
   /// Default: 1 (the root node).
   #[cfg_attr(feature = "openapi", schema(minimum = "1"))]
@@ -85,10 +85,10 @@ pub struct FindNode {
 }
 
 impl FindNode {
-  pub fn with_ino(filesystem: FilesystemId, ino: u64) -> FindNode {
+  pub fn with_inode(filesystem: FilesystemId, inode: u64) -> FindNode {
     FindNode {
       filesystem,
-      ino: ino.into(),
+      inode: inode.into(),
       parent: None,
       name: None,
     }
@@ -103,7 +103,7 @@ impl FindNode {
       filesystem,
       parent: parent.into(),
       name: name.into().into(),
-      ino: None,
+      inode: None,
     }
   }
 }

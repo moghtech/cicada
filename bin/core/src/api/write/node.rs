@@ -121,13 +121,14 @@ pub async fn delete_node(
   let node = get_node(GetNode { id: body.id }).await?;
   if matches!(node.kind, NodeKind::Folder) {
     if let Some(parent) = body.move_children {
+      // Moves children of this node to the new parent
       DB.query("UPDATE Node SET parent = $new_parent WHERE parent = $old_parent RETURN NONE;")
-        .bind(("old_parent", node.ino))
+        .bind(("old_parent", node.inode))
         .bind(("new_parent", parent))
         .await
         .context("Failed to move children nodes to new parent")?;
     } else {
-      delete_children(node.filesystem, node.ino).await?;
+      delete_children(node.filesystem, node.inode).await?;
     }
   }
   DB.delete(node.id.as_record_id())
@@ -160,7 +161,7 @@ fn delete_children(
       .iter()
       .map(|node| async {
         if matches!(node.kind, NodeKind::Folder) {
-          delete_children(node.filesystem.clone(), node.ino).await?;
+          delete_children(node.filesystem.clone(), node.inode).await?;
         }
         serror::Result::Ok(())
       })

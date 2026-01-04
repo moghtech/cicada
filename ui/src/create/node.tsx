@@ -1,8 +1,9 @@
 import { useInvalidate, useWrite } from "@/lib/hooks";
-import { Button, Group, Modal, TextInput } from "@mantine/core";
+import { Button, Flex, Menu, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
 import { Types } from "cicada_client";
+import { FilePlus, FolderPlus } from "lucide-react";
 
 const CreateNode = ({
   kind,
@@ -13,12 +14,43 @@ const CreateNode = ({
 }) => {
   const [opened, { open, close }] = useDisclosure(false);
   return (
-    <>
-      <Modal opened={opened} onClose={close} title={`Create ${kind}`}>
+    <Menu opened={opened} onClose={close} position="bottom-start" width={400}>
+      <Menu.Target>
+        <Button onClick={open}>
+          <CreateNodeTitle kind={kind} />
+        </Button>
+      </Menu.Target>
+      <Menu.Dropdown p="1rem">
         <CreateNodeForm close={close} kind={kind} parent={parent} />
-      </Modal>
-      <Button onClick={open}>Create {kind}</Button>
-    </>
+      </Menu.Dropdown>
+    </Menu>
+  );
+  // return (
+  //   <>
+  //     <Modal
+  //       opened={opened}
+  //       onClose={close}
+  //       title={<CreateNodeTitle kind={kind} />}
+  //     >
+  //       <CreateNodeForm close={close} kind={kind} parent={parent} />
+  //     </Modal>
+  //     <Button onClick={open}>
+  //       <CreateNodeTitle kind={kind} />
+  //     </Button>
+  //   </>
+  // );
+};
+
+const CreateNodeTitle = ({ kind }: { kind: Types.NodeKind }) => {
+  return (
+    <Flex align="center" gap="xs">
+      {kind === "Folder" ? (
+        <FolderPlus size="1rem" />
+      ) : (
+        <FilePlus size="1rem" />
+      )}
+      Create {kind}
+    </Flex>
   );
 };
 
@@ -48,7 +80,11 @@ const CreateNodeForm = ({
     },
   });
   return (
-    <form onSubmit={form.onSubmit((form) => mutate({ ...form, kind, parent }))}>
+    <form
+      onSubmit={form.onSubmit((form) => mutate({ ...form, kind, parent }))}
+      style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
+      autoFocus
+    >
       <TextInput
         {...form.getInputProps("name")}
         withAsterisk
@@ -57,11 +93,9 @@ const CreateNodeForm = ({
         placeholder="Enter name"
         key={form.key("name")}
       />
-      <Group justify="flex-end" mt="md">
-        <Button type="submit" loading={isPending}>
-          Create
-        </Button>
-      </Group>
+      <Button type="submit" loading={isPending}>
+        <CreateNodeTitle kind={kind} />
+      </Button>
     </form>
   );
 };

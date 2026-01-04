@@ -76,11 +76,11 @@ impl Resolve<ReadArgs> for GetNode {
 #[utoipa::path(
   post,
   path = "/read/FindNode",
-  description = "Find a node by parent id and name",
+  description = "Find a node by filesystem + inode OR filesystem + parent inode + name",
   request_body(content = FindNode),
   responses(
     (status = 200, description = "The filesystem node", body = NodeRecord),
-    (status = 404, description = "Failed to find node with given parent / name", body = serror::Serror),
+    (status = 404, description = "Failed to find node with given parameters", body = serror::Serror),
     (status = 500, description = "Request failed", body = serror::Serror),
   ),
 )]
@@ -89,19 +89,19 @@ pub async fn find_node(body: FindNode) -> serror::Result<NodeRecord> {
     "
 SELECT * FROM Node
 WHERE filesystem = $filesystem
-AND ($ino IS NONE OR ino = $ino)
+AND ($inode IS NONE OR inode = $inode)
 AND ($parent IS NONE OR parent = $parent)
 AND ($name IS NONE OR name = $name)",
   )
   .bind(("filesystem", body.filesystem))
-  .bind(("ino", body.ino))
+  .bind(("inode", body.inode))
   .bind(("parent", body.parent))
   .bind(("name", body.name))
   .await
   .context("Failed to query database")?
   .take::<Option<NodeRecord>>(0)
   .context("Failed to get query result")?
-  .context("Failed to find Node with given parent and name.")
+  .context("Failed to find Node with given parameters.")
   .status_code(StatusCode::NOT_FOUND)
 }
 

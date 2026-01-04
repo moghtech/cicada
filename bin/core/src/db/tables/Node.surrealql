@@ -10,13 +10,13 @@ DEFINE FIELD OVERWRITE filesystem
   TYPE record<Filesystem>
   DEFAULT fn::first_filesystem();
 
--- ino
-DEFINE FIELD OVERWRITE ino
+-- inode
+DEFINE FIELD OVERWRITE inode
   ON TABLE Node
   TYPE int
-  DEFAULT fn::node_next_ino(filesystem);
+  DEFAULT fn::node_next_inode(filesystem);
 
--- parent
+-- parent inode
 DEFINE FIELD OVERWRITE parent
   ON TABLE Node
   TYPE int
@@ -41,14 +41,14 @@ DEFINE FIELD OVERWRITE data
 
 -- created_at
 DEFINE FIELD OVERWRITE created_at
-  ON TABLE Filesystem
+  ON TABLE Node
   TYPE datetime
   VALUE $before OR time::now()
   DEFAULT time::now();
 
 -- updated_at
 DEFINE FIELD OVERWRITE updated_at
-  ON TABLE Filesystem
+  ON TABLE Node
   TYPE datetime
   VALUE time::now()
   DEFAULT time::now();
@@ -57,10 +57,10 @@ DEFINE FIELD OVERWRITE updated_at
 -- Indexes --
 -------------
 
--- filesystem + ino | unique
+-- filesystem + inode | unique
 DEFINE INDEX OVERWRITE FilesystemInoUnique 
   ON TABLE Node 
-  FIELDS filesystem, ino
+  FIELDS filesystem, inode
   UNIQUE;
 
 -- filesystem + parent + name | unique
@@ -74,12 +74,12 @@ DEFINE INDEX OVERWRITE FilesystemParentNameUnique
 ---------------
 
 -- Get the next node inode number
-DEFINE FUNCTION OVERWRITE fn::node_next_ino($filesystem: record<Filesystem>) {
-  LET $res = SELECT math::max(ino) AS max_ino
+DEFINE FUNCTION OVERWRITE fn::node_next_inode($filesystem: record<Filesystem>) {
+  LET $res = SELECT math::max(inode) AS max_inode
     FROM Node 
     WHERE filesystem = $filesystem
     GROUP ALL;
-  LET $max = $res[0].max_ino;
+  LET $max = $res[0].max_inode;
   RETURN IF $max = NONE OR $max = NULL {
     2
   } ELSE {

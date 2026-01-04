@@ -4,55 +4,46 @@ import { useRead } from "@/lib/hooks";
 import { Flex, Group } from "@mantine/core";
 import { Types } from "cicada_client";
 import { FolderOpen, HardDrive } from "lucide-react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
-const FilesystemPage = () => {
-  const { filesystem, parent: _parent } = useParams() as {
-    filesystem: string;
-    parent?: string;
-  };
-  const parent = _parent && Number(_parent) ? Number(_parent) : 1;
-  const fs = useRead("ListFilesystems", {}).data?.find(
-    (fs) => fs.id === filesystem
+const FolderPage = ({
+  filesystem: _filesystem,
+  node,
+}: {
+  filesystem: string;
+  node: Types.NodeRecord | undefined;
+}) => {
+  const filesystem = useRead("ListFilesystems", {}).data?.find(
+    (fs) => fs.id === _filesystem
   );
-  const { data: node } = useRead(
-    "FindNode",
-    { filesystem, ino: parent },
-    { enabled: parent > 1 }
-  );
-  const { data } = useRead("ListNodes", {
-    filesystem,
-    parent: parent && Number(parent) ? Number(parent) : 1,
-  });
+  const children =
+    useRead("ListNodes", {
+      filesystem: filesystem?.id,
+      parent: node?.inode ?? 1,
+    }).data ?? [];
   const nav = useNavigate();
   return (
-    <Flex direction="column">
-      <Flex align="center" gap="md">
-        <Flex gap="sm" align="center">
-          <HardDrive size={20} />
-          <h2 style={{ opacity: 0.6 }}>Filesystem:</h2>
-          <h2>{fs?.name}</h2>
-          <h2 style={{ opacity: 0.6 }}>|</h2>
-          <FolderOpen size={20} />
-          <h2 style={{ opacity: 0.6 }}>Folder:</h2>
-          <h2>{parent === 1 ? "Root" : node?.name}</h2>
-        </Flex>
-        <Group>
-          {Object.values(Types.NodeKind).map((kind) => (
-            <CreateNode key={kind} kind={kind} parent={parent} />
-          ))}
-        </Group>
+    <Flex direction="column" gap="lg">
+      <Flex gap="sm" align="center">
+        <HardDrive size={20} />
+        <h2 style={{ opacity: 0.6 }}>Filesystem:</h2>
+        <h2>{filesystem?.name}</h2>
+        <h2 style={{ opacity: 0.6 }}>|</h2>
+        <FolderOpen size={20} />
+        <h2 style={{ opacity: 0.6 }}>Folder:</h2>
+        <h2>{node?.name ?? "Root"}</h2>
       </Flex>
+      <Group>
+        {Object.values(Types.NodeKind).map((kind) => (
+          <CreateNode key={kind} kind={kind} parent={node?.inode ?? 1} />
+        ))}
+      </Group>
       <DataTable
         tableKey="filesystem-table-v1"
-        data={data ?? []}
-        onRowClick={(node) => {
-          if (node.kind === "Folder") {
-            nav(`/filesystems/${filesystem}/${node.ino}`);
-          } else if (node.kind === "File") {
-            nav(`/files/${node.id}`);
-          }
-        }}
+        data={children}
+        onRowClick={(node) =>
+          nav(`/filesystems/${filesystem?.id}/${node.inode}`)
+        }
         columns={[
           {
             header: ({ column }) => (
@@ -94,4 +85,4 @@ const FilesystemPage = () => {
   );
 };
 
-export default FilesystemPage;
+export default FolderPage;
