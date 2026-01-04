@@ -9,7 +9,7 @@ use crate::entities::{
 
 #[typeshare]
 #[derive(Debug, Clone, Serialize, Deserialize, SurrealValue)]
-#[cfg_attr(feature = "openapi", derive(utoipa::ToSchema))]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 pub struct NodeListItem {
   /// The unique node id
   pub id: NodeId,
@@ -26,16 +26,16 @@ pub struct NodeListItem {
   /// - File,
   pub kind: NodeKind,
   /// Created at as ISO8601 timestamp.
-  #[cfg_attr(feature = "openapi", schema(value_type = String))]
+  #[cfg_attr(feature = "utoipa", schema(value_type = String))]
   pub created_at: Iso8601Timestamp,
   /// Updated at as ISO8601 timestamp.
-  #[cfg_attr(feature = "openapi", schema(value_type = String))]
+  #[cfg_attr(feature = "utoipa", schema(value_type = String))]
   pub updated_at: Iso8601Timestamp,
 }
 
 #[typeshare]
 #[derive(Debug, Clone, Serialize, Deserialize, SurrealValue)]
-#[cfg_attr(feature = "openapi", derive(utoipa::ToSchema))]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 pub struct NodeRecord {
   /// The unique node id
   pub id: NodeId,
@@ -57,10 +57,10 @@ pub struct NodeRecord {
   #[serde(skip_serializing_if = "Option::is_none")]
   pub data: Option<String>,
   /// Created at as ISO8601 timestamp.
-  #[cfg_attr(feature = "openapi", schema(value_type = String))]
+  #[cfg_attr(feature = "utoipa", schema(value_type = String))]
   pub created_at: Iso8601Timestamp,
   /// Updated at as ISO8601 timestamp.
-  #[cfg_attr(feature = "openapi", schema(value_type = String))]
+  #[cfg_attr(feature = "utoipa", schema(value_type = String))]
   pub updated_at: Iso8601Timestamp,
 }
 
@@ -69,7 +69,7 @@ pub struct NodeRecord {
 #[derive(
   Debug, Clone, Copy, Default, Serialize, Deserialize, SurrealValue,
 )]
-#[cfg_attr(feature = "openapi", derive(utoipa::ToSchema))]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[surreal(untagged)]
 pub enum NodeKind {
   #[default]
@@ -79,7 +79,7 @@ pub enum NodeKind {
 
 #[typeshare(serialized_as = "string")]
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[cfg_attr(feature = "openapi", derive(utoipa::ToSchema))]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 pub struct NodeId(pub String);
 
 impl NodeId {

@@ -691,6 +691,7 @@ dependencies = [
  "derive_empty_traits",
  "mogh_error",
  "mogh_logger",
+ "mogh_server",
  "reqwest 0.13.1",
  "resolver_api",
  "serde",
@@ -707,7 +708,6 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "axum 0.8.8",
- "axum-server",
  "cicada_client",
  "colored",
  "derive_variants",
@@ -718,6 +718,7 @@ dependencies = [
  "mogh_error",
  "mogh_logger",
  "mogh_secret_file",
+ "mogh_server",
  "resolver_api",
  "rustls 0.23.35",
  "serde",
@@ -726,10 +727,8 @@ dependencies = [
  "surrealdb",
  "tokio",
  "tower-http",
- "tower-sessions",
  "tracing",
  "typeshare",
- "url",
  "utoipa",
  "utoipa-scalar",
 ]
@@ -1920,7 +1919,7 @@ dependencies = [
  "libc",
  "percent-encoding",
  "pin-project-lite",
- "socket2 0.5.10",
+ "socket2 0.6.1",
  "tokio",
  "tower-service",
  "tracing",
@@ -2457,6 +2456,21 @@ source = "sparse+https://forge.mogh.tech/api/packages/lib/cargo/"
 checksum = "2187cad3617aea76c25c66eb96f8425e3f61aeeb1c6919a1aeeacc54b77c2f89"
 dependencies = [
  "thiserror 2.0.17",
+]
+
+[[package]]
+name = "mogh_server"
+version = "0.1.3"
+source = "sparse+https://forge.mogh.tech/api/packages/lib/cargo/"
+checksum = "3043657a1c4b3db5c915affa43e5f1ae0d461d3b0803e35936b51e90cac0f10e"
+dependencies = [
+ "anyhow",
+ "axum 0.8.8",
+ "axum-server",
+ "tower-http",
+ "tower-sessions",
+ "tracing",
+ "url",
 ]
 
 [[package]]
@@ -3114,7 +3128,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8a56d757972c98b346a9b766e3f02746cde6dd1cd1d1d563472929fdd74bec4d"
 dependencies = [
  "anyhow",
- "itertools 0.11.0",
+ "itertools 0.13.0",
  "proc-macro2",
  "quote",
  "syn 2.0.111",
@@ -3127,7 +3141,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9120690fafc389a67ba3803df527d0ec9cbbc9cc45e4cc20b332996dfb672425"
 dependencies = [
  "anyhow",
- "itertools 0.11.0",
+ "itertools 0.13.0",
  "proc-macro2",
  "quote",
  "syn 2.0.111",
@@ -3193,7 +3207,7 @@ dependencies = [
  "quinn-udp",
  "rustc-hash",
  "rustls 0.23.35",
- "socket2 0.5.10",
+ "socket2 0.6.1",
  "thiserror 2.0.17",
  "tokio",
  "tracing",
@@ -3231,7 +3245,7 @@ dependencies = [
  "cfg_aliases",
  "libc",
  "once_cell",
- "socket2 0.5.10",
+ "socket2 0.6.1",
  "tracing",
  "windows-sys 0.60.2",
 ]

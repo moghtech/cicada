@@ -26,7 +26,7 @@ use crate::{
   Resolve,
   EmptyTraits,
 )]
-#[cfg_attr(feature = "openapi", derive(utoipa::ToSchema))]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaWriteRequest)]
 #[response(CreateNodeResponse)]
 #[error(mogh_error::Error)]
@@ -35,7 +35,7 @@ pub struct CreateNode {
   pub filesystem: Option<FilesystemId>,
   /// parent inode number.
   /// Default: 1 (the root node).
-  #[cfg_attr(feature = "openapi", schema(minimum = 1, default = 1))]
+  #[cfg_attr(feature = "utoipa", schema(minimum = 1, default = 1))]
   pub parent: Option<U64>,
   /// The name of the node
   pub name: String,
@@ -44,7 +44,7 @@ pub struct CreateNode {
   /// - File
   ///
   /// Default: **Folder**
-  #[cfg_attr(feature = "openapi", schema(default = "Folder"))]
+  #[cfg_attr(feature = "utoipa", schema(default = "Folder"))]
   pub kind: Option<NodeKind>,
   /// Data associated with the node.
   /// For files, this contains the file contents.
@@ -68,7 +68,7 @@ pub type CreateNodeResponse = NodeRecord;
   Resolve,
   EmptyTraits,
 )]
-#[cfg_attr(feature = "openapi", derive(utoipa::ToSchema))]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaWriteRequest)]
 #[response(UpdateNodeResponse)]
 #[error(mogh_error::Error)]
@@ -94,7 +94,7 @@ pub type UpdateNodeResponse = NodeRecord;
 //
 
 /// Delete a filesystem node. Response: [DeleteNodeResponse].
-/// 
+///
 /// WARNING: If the node is a folder and `move_children`
 /// is not passed, all children nodes will be recursively deleted.
 #[typeshare]
@@ -107,7 +107,7 @@ pub type UpdateNodeResponse = NodeRecord;
   Resolve,
   EmptyTraits,
 )]
-#[cfg_attr(feature = "openapi", derive(utoipa::ToSchema))]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaWriteRequest)]
 #[response(DeleteNodeResponse)]
 #[error(mogh_error::Error)]

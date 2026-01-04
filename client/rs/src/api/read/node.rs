@@ -19,7 +19,7 @@ use crate::{
 #[derive(
   Debug, Clone, Serialize, Deserialize, Resolve, EmptyTraits,
 )]
-#[cfg_attr(feature = "openapi", derive(utoipa::ToSchema))]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaReadRequest)]
 #[response(ListNodesResponse)]
 #[error(mogh_error::Error)]
@@ -27,7 +27,7 @@ pub struct ListNodes {
   /// Filesystem id
   pub filesystem: Option<FilesystemId>,
   /// parent inode number.
-  #[cfg_attr(feature = "openapi", schema(minimum = 1))]
+  #[cfg_attr(feature = "utoipa", schema(minimum = 1))]
   pub parent: Option<U64>,
 }
 
@@ -42,7 +42,7 @@ pub type ListNodesResponse = Vec<NodeListItem>;
 #[derive(
   Debug, Clone, Serialize, Deserialize, Resolve, EmptyTraits,
 )]
-#[cfg_attr(feature = "openapi", derive(utoipa::ToSchema))]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaReadRequest)]
 #[response(GetNodeResponse)]
 #[error(mogh_error::Error)]
@@ -66,7 +66,7 @@ pub type GetNodeResponse = NodeRecord;
 #[derive(
   Debug, Clone, Serialize, Deserialize, Resolve, EmptyTraits,
 )]
-#[cfg_attr(feature = "openapi", derive(utoipa::ToSchema))]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaReadRequest)]
 #[response(FindNodeResponse)]
 #[error(mogh_error::Error)]
@@ -74,11 +74,11 @@ pub struct FindNode {
   /// Filesystem id
   pub filesystem: FilesystemId,
   /// The node inode number
-  #[cfg_attr(feature = "openapi", schema(minimum = "1"))]
+  #[cfg_attr(feature = "utoipa", schema(minimum = "1"))]
   pub inode: Option<U64>,
   /// The node parent inode number.
   /// Default: 1 (the root node).
-  #[cfg_attr(feature = "openapi", schema(minimum = "1"))]
+  #[cfg_attr(feature = "utoipa", schema(minimum = "1"))]
   pub parent: Option<U64>,
   /// file name
   pub name: Option<String>,

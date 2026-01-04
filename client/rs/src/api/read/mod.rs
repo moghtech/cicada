@@ -18,7 +18,7 @@ pub trait CicadaReadRequest: HasResponse {}
 #[derive(
   Debug, Clone, Serialize, Deserialize, Resolve, EmptyTraits,
 )]
-#[cfg_attr(feature = "openapi", derive(utoipa::ToSchema))]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaReadRequest)]
 #[response(GetVersionResponse)]
 #[error(mogh_error::Error)]
@@ -27,7 +27,7 @@ pub struct GetVersion {}
 /// Response for [GetVersion].
 #[typeshare]
 #[derive(Serialize, Deserialize, Debug, Clone)]
-#[cfg_attr(feature = "openapi", derive(utoipa::ToSchema))]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 pub struct GetVersionResponse {
   /// The version of the core api.
   pub version: String,

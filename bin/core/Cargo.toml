@@ -12,19 +12,18 @@ path = "src/main.rs"
 
 [dependencies]
 # local
-cicada_client = { workspace = true, features = ["openapi", "logger"] }
+cicada_client = { workspace = true, features = ["core"] }
 # mogh
 mogh_error = { workspace = true, features = ["axum", "utoipa"] }
+mogh_server.workspace = true
 derive_variants.workspace = true
 resolver_api.workspace = true
 secret_file.workspace = true
 config.workspace = true
 logger.workspace = true
 # external
-tower-sessions.workspace = true
 utoipa-scalar.workspace = true
 futures-util.workspace = true
-axum-server.workspace = true
 tower-http.workspace = true
 serde_json.workspace = true
 surrealdb.workspace = true
@@ -40,4 +39,3 @@ strum.workspace = true
 tokio.workspace = true
 axum.workspace = true
 envy.workspace = true
-url.workspace = true

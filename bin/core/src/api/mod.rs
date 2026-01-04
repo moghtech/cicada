@@ -1,18 +1,7 @@
-use axum::{
-  Router,
-  http::{HeaderName, HeaderValue},
-  routing::get,
-};
-use tower_http::{
-  services::{ServeDir, ServeFile},
-  set_header::SetResponseHeaderLayer,
-};
-use tower_sessions::{
-  Expiry, MemoryStore, SessionManagerLayer,
-  cookie::{SameSite, time::Duration},
-};
+use axum::{Router, routing::get};
+use tower_http::services::{ServeDir, ServeFile};
 
-use crate::config::{core_config, core_host, cors_layer};
+use crate::config::core_config;
 
 mod openapi;
 mod read;
@@ -42,41 +31,7 @@ pub fn app() -> Router {
     .nest("/write", write::router())
     // .nest("/listener", listener::router())
     // .nest("/client", ts_client::router())
-    .layer(memory_session_layer())
     .fallback_service(serve_ui)
-    .layer(cors_layer())
-    .layer(SetResponseHeaderLayer::overriding(
-      HeaderName::from_static("x-content-type-options"),
-      HeaderValue::from_static("nosniff"),
-    ))
-    .layer(SetResponseHeaderLayer::overriding(
-      HeaderName::from_static("x-frame-options"),
-      HeaderValue::from_static("DENY"),
-    ))
-    .layer(SetResponseHeaderLayer::overriding(
-      HeaderName::from_static("x-xss-protection"),
-      HeaderValue::from_static("1; mode=block"),
-    ))
-    .layer(SetResponseHeaderLayer::overriding(
-      HeaderName::from_static("referrer-policy"),
-      HeaderValue::from_static("strict-origin-when-cross-origin"),
-    ))
-}
-
-const MEMORY_SESSION_EXPIRY_SECONDS: i64 = 60;
-
-fn memory_session_layer() -> SessionManagerLayer<MemoryStore> {
-  let config = core_config();
-  let mut layer = SessionManagerLayer::new(MemoryStore::default())
-    .with_expiry(Expiry::OnInactivity(Duration::seconds(
-      MEMORY_SESSION_EXPIRY_SECONDS,
-    )))
-    .with_secure(config.host.starts_with("https://"))
-    // Needs Lax in order for sessions to work
-    // accross oauth redirects.
-    .with_same_site(SameSite::Lax);
-  if let Some(domain) = core_host().and_then(|url| url.domain()) {
-    layer = layer.with_domain(domain);
-  }
-  layer
+    .layer(mogh_server::session::layer(config))
+    .layer(mogh_server::cors::layer(config))
 }

@@ -102,9 +102,9 @@ pub struct Env {
   /// Override `ssl_enabled`.
   pub cicada_ssl_enabled: Option<bool>,
   /// Override `ssl_key_file`
-  pub cicada_ssl_key_file: Option<PathBuf>,
+  pub cicada_ssl_key_file: Option<String>,
   /// Override `ssl_cert_file`
-  pub cicada_ssl_cert_file: Option<PathBuf>,
+  pub cicada_ssl_cert_file: Option<String>,
 
   /// Override `ui_path`
   pub cicada_ui_path: Option<String>,
@@ -200,12 +200,12 @@ pub struct CoreConfig {
   /// Path to the ssl key.
   /// Default: `/config/ssl/key.pem`.
   #[serde(default = "default_ssl_key_file")]
-  pub ssl_key_file: PathBuf,
+  pub ssl_key_file: String,
 
   /// Path to the ssl cert.
   /// Default: `/config/ssl/cert.pem`.
   #[serde(default = "default_ssl_cert_file")]
-  pub ssl_cert_file: PathBuf,
+  pub ssl_cert_file: String,
 
   // =======
   // = DEV =
@@ -231,12 +231,12 @@ fn default_core_bind_ip() -> String {
   "[::]".to_string()
 }
 
-fn default_ssl_key_file() -> PathBuf {
-  "/config/ssl/key.pem".parse().unwrap()
+fn default_ssl_key_file() -> String {
+  "/config/ssl/key.pem".to_string()
 }
 
-fn default_ssl_cert_file() -> PathBuf {
-  "/config/ssl/cert.pem".parse().unwrap()
+fn default_ssl_cert_file() -> String {
+  "/config/ssl/cert.pem".to_string()
 }
 
 fn default_ui_path() -> String {
@@ -363,5 +363,50 @@ impl DatabaseConfig {
 
   pub fn is_default(&self) -> bool {
     self == default_database_config()
+  }
+}
+
+#[cfg(feature = "core")]
+impl mogh_server::ServerConfig for &CoreConfig {
+  fn bind_ip(&self) -> &str {
+    &self.bind_ip
+  }
+  fn port(&self) -> u16 {
+    self.port
+  }
+  fn ssl_enabled(&self) -> bool {
+    self.ssl_enabled
+  }
+  fn ssl_key_file(&self) -> &str {
+    &self.ssl_key_file
+  }
+  fn ssl_cert_file(&self) -> &str {
+    &self.ssl_cert_file
+  }
+}
+
+#[cfg(feature = "core")]
+impl mogh_server::cors::CorsConfig for &CoreConfig {
+  fn allow_credentials(&self) -> bool {
+    self.cors_allow_credentials
+  }
+  fn allowed_origins(&self) -> &[String] {
+    &self.cors_allowed_origins
+  }
+  fn allowed_origins_env_field(&self) -> &'static str {
+    "CICADA_CORS_ALLOWED_ORIGINS"
+  }
+}
+
+#[cfg(feature = "core")]
+impl mogh_server::session::SessionConfig for &CoreConfig {
+  fn expiry_seconds(&self) -> i64 {
+    60
+  }
+  fn host_env_field(&self) -> &str {
+    "CICADA_HOST"
+  }
+  fn host(&self) -> &str {
+    &self.host
   }
 }

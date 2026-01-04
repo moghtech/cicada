@@ -22,7 +22,7 @@ use crate::{
   Resolve,
   EmptyTraits,
 )]
-#[cfg_attr(feature = "openapi", derive(utoipa::ToSchema))]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaWriteRequest)]
 #[response(CreateFilesystemResponse)]
 #[error(mogh_error::Error)]
@@ -48,7 +48,7 @@ pub type CreateFilesystemResponse = FilesystemRecord;
   Resolve,
   EmptyTraits,
 )]
-#[cfg_attr(feature = "openapi", derive(utoipa::ToSchema))]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaWriteRequest)]
 #[response(UpdateFilesystemResponse)]
 #[error(mogh_error::Error)]
@@ -78,7 +78,7 @@ pub type UpdateFilesystemResponse = FilesystemRecord;
   Resolve,
   EmptyTraits,
 )]
-#[cfg_attr(feature = "openapi", derive(utoipa::ToSchema))]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaWriteRequest)]
 #[response(DeleteFilesystemResponse)]
 #[error(mogh_error::Error)]
