@@ -5,7 +5,6 @@ import {
   Center,
   Divider,
   Flex,
-  Group,
   Loader,
   ScrollArea,
   Text,
