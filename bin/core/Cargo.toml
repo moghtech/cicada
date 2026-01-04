@@ -24,7 +24,6 @@ logger.workspace = true
 # external
 utoipa-scalar.workspace = true
 futures-util.workspace = true
-tower-http.workspace = true
 serde_json.workspace = true
 surrealdb.workspace = true
 typeshare.workspace = true

@@ -726,7 +726,6 @@ dependencies = [
  "strum",
  "surrealdb",
  "tokio",
- "tower-http",
  "tracing",
  "typeshare",
  "utoipa",
@@ -2248,9 +2247,9 @@ dependencies = [
 
 [[package]]
 name = "libc"
-version = "0.2.178"
+version = "0.2.179"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "37c93d8daa9d8a012fd8ab92f088405fb202ea0b6ab73ee2482ae66af4f42091"
+checksum = "c5a2d376baa530d1238d133232d15e239abad80d05838b4b59354e5268af431f"
 
 [[package]]
 name = "libm"
@@ -2460,9 +2459,9 @@ dependencies = [
 
 [[package]]
 name = "mogh_server"
-version = "0.1.3"
+version = "0.1.4"
 source = "sparse+https://forge.mogh.tech/api/packages/lib/cargo/"
-checksum = "3043657a1c4b3db5c915affa43e5f1ae0d461d3b0803e35936b51e90cac0f10e"
+checksum = "c91ed2489c6b41da95a5df8394405949ecc1ed7f4b0db97e4f58b269bbcdd762"
 dependencies = [
  "anyhow",
  "axum 0.8.8",
@@ -3128,7 +3127,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8a56d757972c98b346a9b766e3f02746cde6dd1cd1d1d563472929fdd74bec4d"
 dependencies = [
  "anyhow",
- "itertools 0.13.0",
+ "itertools 0.14.0",
  "proc-macro2",
  "quote",
  "syn 2.0.111",
@@ -3141,7 +3140,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9120690fafc389a67ba3803df527d0ec9cbbc9cc45e4cc20b332996dfb672425"
 dependencies = [
  "anyhow",
- "itertools 0.13.0",
+ "itertools 0.14.0",
  "proc-macro2",
  "quote",
  "syn 2.0.111",
@@ -5339,9 +5338,9 @@ checksum = "562d481066bde0658276a35467c4af00bdc6ee726305698a55b86e61d7ad82bb"
 
 [[package]]
 name = "typeshare"
-version = "1.0.4"
+version = "1.0.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "19be0f411120091e76e13e5a0186d8e2bcc3e7e244afdb70152197f1a8486ceb"
+checksum = "da1bf9fe204f358ffea7f8f779b53923a20278b3ab8e8d97962c5e1b3a54edb7"
 dependencies = [
  "chrono",
  "serde",

@@ -1,5 +1,8 @@
 use axum::{Router, routing::get};
-use tower_http::services::{ServeDir, ServeFile};
+use mogh_server::{
+  cors::cors_layer, session::memory_session_layer,
+  ui::serve_static_ui,
+};
 
 use crate::config::core_config;
 
@@ -15,13 +18,6 @@ struct Variant {
 
 pub fn app() -> Router {
   let config = core_config();
-
-  // Setup static ui services
-  let ui_path = &config.ui_path;
-  let ui_index = ServeFile::new(format!("{ui_path}/index.html"));
-  let serve_ui =
-    ServeDir::new(ui_path).not_found_service(ui_index.clone());
-
   Router::new()
     .merge(openapi::serve_docs())
     .route("/version", get(|| async { env!("CARGO_PKG_VERSION") }))
@@ -31,7 +27,7 @@ pub fn app() -> Router {
     .nest("/write", write::router())
     // .nest("/listener", listener::router())
     // .nest("/client", ts_client::router())
-    .fallback_service(serve_ui)
-    .layer(mogh_server::session::layer(config))
-    .layer(mogh_server::cors::layer(config))
+    .fallback_service(serve_static_ui(&config.ui_path))
+    .layer(cors_layer(config))
+    .layer(memory_session_layer(config))
 }

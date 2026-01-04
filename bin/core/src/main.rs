@@ -42,7 +42,7 @@ async fn app() -> anyhow::Result<()> {
   .instrument(startup_span)
   .await?;
 
-  mogh_server::serve(api::app(), config).await
+  mogh_server::serve_app(api::app(), config).await
 }
 
 #[tokio::main]
