@@ -3,7 +3,10 @@ use axum::{
   http::{HeaderName, HeaderValue},
   routing::get,
 };
-use tower_http::set_header::SetResponseHeaderLayer;
+use tower_http::{
+  services::{ServeDir, ServeFile},
+  set_header::SetResponseHeaderLayer,
+};
 use tower_sessions::{
   Expiry, MemoryStore, SessionManagerLayer,
   cookie::{SameSite, time::Duration},
@@ -22,14 +25,13 @@ struct Variant {
 }
 
 pub fn app() -> Router {
-  // let config = core_config();
+  let config = core_config();
 
-  // Setup static frontend services
-  // let frontend_path = &config.frontend_path;
-  // let frontend_index =
-  //   ServeFile::new(format!("{frontend_path}/index.html"));
-  // let serve_frontend = ServeDir::new(frontend_path)
-  //   .not_found_service(frontend_index.clone());
+  // Setup static ui services
+  let ui_path = &config.ui_path;
+  let ui_index = ServeFile::new(format!("{ui_path}/index.html"));
+  let serve_ui =
+    ServeDir::new(ui_path).not_found_service(ui_index.clone());
 
   Router::new()
     .merge(openapi::serve_docs())
@@ -41,7 +43,7 @@ pub fn app() -> Router {
     // .nest("/listener", listener::router())
     // .nest("/client", ts_client::router())
     .layer(memory_session_layer())
-    // .fallback_service(serve_frontend)
+    .fallback_service(serve_ui)
     .layer(cors_layer())
     .layer(SetResponseHeaderLayer::overriding(
       HeaderName::from_static("x-content-type-options"),

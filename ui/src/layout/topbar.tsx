@@ -1,15 +1,5 @@
-import {
-  ActionIcon,
-  AppShell,
-  Burger,
-  Flex,
-  MantineColorScheme,
-  Menu,
-  useComputedColorScheme,
-  useMantineColorScheme,
-  Text,
-} from "@mantine/core";
-import { CheckCircle, Moon, Sun } from "lucide-react";
+import { ThemeToggle } from "@/theme";
+import { AppShell, Burger, Flex, Text } from "@mantine/core";
 import { Link } from "react-router-dom";
 
 export const Topbar = ({
@@ -41,62 +31,5 @@ export const Topbar = ({
         <ThemeToggle />
       </Flex>
     </AppShell.Header>
-  );
-};
-
-const ThemeToggle = () => {
-  const { colorScheme, setColorScheme } = useMantineColorScheme();
-  return (
-    <Menu position="bottom-end">
-      <Menu.Target>
-        <ActionIcon
-          aria-label="ThemeToggle"
-          variant="subtle"
-          size="lg"
-          style={{ cursor: "pointer" }}
-        >
-          <ThemeIcon />
-        </ActionIcon>
-      </Menu.Target>
-      <Menu.Dropdown>
-        {["light", "dark", "auto"].map((theme) => (
-          <Menu.Item
-            key={theme}
-            onClick={() => setColorScheme(theme as MantineColorScheme)}
-            style={{ cursor: "pointer", textTransform: "capitalize" }}
-            rightSection={
-              colorScheme === theme ? <CheckCircle size="0.8rem" /> : undefined
-            }
-          >
-            {theme}
-          </Menu.Item>
-        ))}
-      </Menu.Dropdown>
-    </Menu>
-  );
-};
-
-const ThemeIcon = () => {
-  const currentTheme = useComputedColorScheme();
-  const dark = currentTheme === "dark";
-  return (
-    <>
-      <Sun
-        color="black"
-        size="1.3rem"
-        style={{
-          display: dark ? "none" : undefined,
-          cursor: "pointer",
-        }}
-      />
-      <Moon
-        color="white"
-        size="1.3rem"
-        style={{
-          display: dark ? undefined : "none",
-          cursor: "pointer",
-        }}
-      />
-    </>
   );
 };

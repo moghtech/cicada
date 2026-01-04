@@ -178,6 +178,9 @@ pub fn core_config() -> &'static CoreConfig {
       ssl_cert_file: env
         .cicada_ssl_cert_file
         .unwrap_or(config.ssl_cert_file),
+      ui_path: env
+        .cicada_ui_path
+        .unwrap_or(config.ui_path),
     }
   })
 }

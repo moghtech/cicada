@@ -3,7 +3,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { MantineProvider } from "@mantine/core";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { theme } from "@/theme";
+import { DEFAULT_COLOR_SCHEME, theme } from "@/theme";
 import { Router } from "./router";
 // Run monaco setup
 import "./monaco";
@@ -22,7 +22,7 @@ init_monaco();
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
-    <MantineProvider theme={theme}>
+    <MantineProvider theme={theme} defaultColorScheme={DEFAULT_COLOR_SCHEME}>
       <QueryClientProvider client={client}>
         <Router />
       </QueryClientProvider>

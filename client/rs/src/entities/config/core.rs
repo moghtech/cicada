@@ -105,6 +105,9 @@ pub struct Env {
   pub cicada_ssl_key_file: Option<PathBuf>,
   /// Override `ssl_cert_file`
   pub cicada_ssl_cert_file: Option<PathBuf>,
+
+  /// Override `ui_path`
+  pub cicada_ui_path: Option<String>,
 }
 
 fn default_core_config_paths() -> Vec<PathBuf> {
@@ -203,6 +206,13 @@ pub struct CoreConfig {
   /// Default: `/config/ssl/cert.pem`.
   #[serde(default = "default_ssl_cert_file")]
   pub ssl_cert_file: PathBuf,
+
+  // =======
+  // = DEV =
+  // =======
+  /// The path to the built ui static folder.
+  #[serde(default = "default_ui_path")]
+  pub ui_path: String,
 }
 
 fn default_title() -> String {
@@ -229,6 +239,10 @@ fn default_ssl_cert_file() -> PathBuf {
   "/config/ssl/cert.pem".parse().unwrap()
 }
 
+fn default_ui_path() -> String {
+  "/app/ui".to_string()
+}
+
 impl Default for CoreConfig {
   fn default() -> Self {
     Self {
@@ -245,6 +259,7 @@ impl Default for CoreConfig {
       ssl_enabled: Default::default(),
       ssl_key_file: default_ssl_key_file(),
       ssl_cert_file: default_ssl_cert_file(),
+      ui_path: default_ui_path(),
     }
   }
 }
@@ -267,6 +282,7 @@ impl CoreConfig {
       ssl_enabled: config.ssl_enabled,
       ssl_key_file: config.ssl_key_file,
       ssl_cert_file: config.ssl_cert_file,
+      ui_path: config.ui_path,
     }
   }
 
