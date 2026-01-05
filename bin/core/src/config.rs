@@ -1,8 +1,8 @@
 use std::{path::PathBuf, sync::OnceLock};
 
 use anyhow::Context as _;
-use cicada_client::entities::{
-  config::core::{CoreConfig, DatabaseConfig, Env},
+use cicada_client::entities::config::{
+  core::{CoreConfig, DatabaseConfig, Env},
   logger::LogConfig,
 };
 use colored::Colorize as _;

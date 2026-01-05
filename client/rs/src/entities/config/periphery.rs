@@ -14,7 +14,9 @@ use std::path::PathBuf;
 
 use serde::Deserialize;
 
-use crate::entities::logger::{LogConfig, LogLevel, StdioLogMode};
+use crate::entities::config::logger::{
+  LogConfig, LogLevel, StdioLogMode,
+};
 
 /// # Periphery Environment Variables
 ///

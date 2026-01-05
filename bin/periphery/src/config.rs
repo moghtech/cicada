@@ -1,8 +1,8 @@
 use std::{path::PathBuf, sync::OnceLock};
 
-use cicada_client::entities::{
-  config::periphery::{Env, PeripheryConfig},
+use cicada_client::entities::config::{
   logger::{LogConfig, LogLevel},
+  periphery::{Env, PeripheryConfig},
 };
 use colored::Colorize;
 use config::ConfigLoader;

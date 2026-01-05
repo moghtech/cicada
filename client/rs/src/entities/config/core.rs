@@ -2,8 +2,8 @@ use std::{path::PathBuf, sync::OnceLock};
 
 use serde::Deserialize;
 
-use crate::entities::{
-  config::empty_or_redacted,
+use crate::entities::config::{
+  empty_or_redacted,
   logger::{LogConfig, LogLevel, StdioLogMode},
 };
 

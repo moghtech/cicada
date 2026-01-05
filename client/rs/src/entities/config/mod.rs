@@ -1,4 +1,5 @@
 pub mod core;
+pub mod logger;
 pub mod periphery;
 
 fn default_config_keywords() -> Vec<String> {
