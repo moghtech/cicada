@@ -23,7 +23,7 @@ fn cicada() -> &'static CicadaClient {
 async fn app() -> anyhow::Result<()> {
   dotenvy::dotenv().ok();
   let config = periphery_config();
-  logger::init(&config.logging)?;
+  mogh_logger::init(&config.logging)?;
 
   info!("Cicada Periphery version: v{}", env!("CARGO_PKG_VERSION"));
   info!("{config:?}");

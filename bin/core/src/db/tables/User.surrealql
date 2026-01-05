@@ -1,0 +1,40 @@
+-- ======
+--  User
+-- ======
+
+DEFINE TABLE IF NOT EXISTS User SCHEMAFULL;
+
+-- name
+DEFINE FIELD OVERWRITE name
+  ON TABLE User
+  TYPE string;
+
+-- password
+DEFINE FIELD OVERWRITE password
+  ON TABLE User
+  TYPE string
+  DEFAULT "";
+
+-- created_at
+DEFINE FIELD OVERWRITE created_at
+  ON TABLE User
+  TYPE datetime
+  VALUE $before OR time::now()
+  DEFAULT time::now();
+
+-- updated_at
+DEFINE FIELD OVERWRITE updated_at
+  ON TABLE User
+  TYPE datetime
+  VALUE time::now()
+  DEFAULT time::now();
+
+-------------
+-- Indexes --
+-------------
+
+-- name | unique
+DEFINE INDEX OVERWRITE Name
+  ON TABLE User
+  FIELDS name
+  UNIQUE;

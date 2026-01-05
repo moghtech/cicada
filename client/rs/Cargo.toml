@@ -9,7 +9,7 @@ repository.workspace = true
 [features]
 # default = ["blocking"] # use to dev client blocking mode
 blocking = ["reqwest/blocking"]
-logger = ["dep:logger"]
+logger = ["dep:mogh_logger"]
 utoipa = ["dep:utoipa"]
 core = ["logger", "utoipa", "dep:mogh_server"]
 
@@ -17,12 +17,12 @@ core = ["logger", "utoipa", "dep:mogh_server"]
 # MOGH
 mogh_error = { workspace = true, features = ["axum"] }
 mogh_server = { workspace = true, optional = true }
-logger = { workspace = true, optional = true }
+mogh_logger = { workspace = true, optional = true }
 derive_empty_traits.workspace = true
 resolver_api.workspace = true
 # EXTERNAL
+surrealdb-types = { workspace = true, optional = false }
 utoipa = { workspace = true, optional = true }
-surrealdb-types.workspace = true
 serde_json.workspace = true
 typeshare.workspace = true
 reqwest.workspace = true

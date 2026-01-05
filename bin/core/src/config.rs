@@ -6,8 +6,8 @@ use cicada_client::entities::config::{
   logger::LogConfig,
 };
 use colored::Colorize as _;
-use config::ConfigLoader;
-use secret_file::maybe_read_item_from_file;
+use mogh_config::ConfigLoader;
+use mogh_secret_file::maybe_read_item_from_file;
 
 pub fn core_config() -> &'static CoreConfig {
   static CORE_CONFIG: OnceLock<CoreConfig> = OnceLock::new();

@@ -15,12 +15,12 @@ path = "src/main.rs"
 cicada_client = { workspace = true, features = ["core"] }
 # mogh
 mogh_error = { workspace = true, features = ["axum", "utoipa"] }
-mogh_server.workspace = true
+mogh_secret_file.workspace = true
 derive_variants.workspace = true
 resolver_api.workspace = true
-secret_file.workspace = true
-config.workspace = true
-logger.workspace = true
+mogh_config.workspace = true
+mogh_logger.workspace = true
+mogh_server.workspace = true
 # external
 utoipa-scalar.workspace = true
 futures-util.workspace = true

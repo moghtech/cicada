@@ -26,34 +26,4 @@ pub struct FilesystemRecord {
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 pub struct FilesystemId(pub String);
 
-impl FilesystemId {
-  pub fn as_record_id(&self) -> RecordId {
-    RecordId::new("Filesystem", self.0.as_str())
-  }
-}
-
-impl SurrealValue for FilesystemId {
-  fn kind_of() -> surrealdb_types::Kind {
-    surrealdb_types::Kind::Record(vec![])
-  }
-
-  fn into_value(self) -> surrealdb_types::Value {
-    surrealdb_types::Value::RecordId(surrealdb_types::RecordId::new(
-      "Filesystem",
-      self.0,
-    ))
-  }
-
-  fn from_value(value: surrealdb_types::Value) -> anyhow::Result<Self>
-  where
-    Self: Sized,
-  {
-    let surrealdb_types::Value::RecordId(id) = value else {
-      return Err(anyhow!("Value is not RecordId"));
-    };
-    let RecordIdKey::String(id) = id.key else {
-      return Err(anyhow!("RecordIdKey is not String"));
-    };
-    Ok(Self(id))
-  }
-}
+crate::surreal_id!(FilesystemId, "Filesystem");

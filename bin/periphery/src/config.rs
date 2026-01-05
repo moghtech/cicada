@@ -5,7 +5,7 @@ use cicada_client::entities::config::{
   periphery::{Env, PeripheryConfig},
 };
 use colored::Colorize;
-use config::ConfigLoader;
+use mogh_config::ConfigLoader;
 
 pub fn periphery_config() -> &'static PeripheryConfig {
   static PERIPHERY_CONFIG: OnceLock<PeripheryConfig> =
