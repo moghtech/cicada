@@ -1,10 +1,14 @@
+import { MoghAuthClient } from "mogh_auth_client";
 import { ReadResponses, WriteResponses } from "./responses";
 import { ReadRequest, WriteRequest } from "./types";
 
+export * as MoghAuth from "mogh_auth_client";
 export * as Types from "./types.js";
 export type { ReadResponses, WriteResponses } from "./responses";
 
 export function CicadaClient(url: string) {
+  const auth = MoghAuthClient(url).auth;
+
   const request = <Params, Res>(
     path: "/read" | "/write",
     type: string,
@@ -87,6 +91,19 @@ export function CicadaClient(url: string) {
     );
 
   return {
+    /**
+     * Call the `/auth` api.
+     *
+     * ```
+     * const stack = await cicada.auth("LoginLocalUser", {
+     *   username: "test-user",
+     *   password: "test-pass"
+     * });
+     * ```
+     *
+     * https://docs.rs/mogh_auth_client/latest/mogh_auth_client/api/index.html
+     */
+    auth,
     /**
      * Call the `/read` api.
      *

@@ -1,4 +1,5 @@
 use anyhow::{Context, anyhow};
+use mogh_auth_client::api::MoghAuthRequest;
 use mogh_error::deserialize_error;
 use serde::{Serialize, de::DeserializeOwned};
 use serde_json::json;
@@ -9,6 +10,36 @@ use crate::{
 };
 
 impl CicadaClient {
+  #[cfg(not(feature = "blocking"))]
+  pub async fn auth<T>(
+    &self,
+    request: T,
+  ) -> anyhow::Result<T::Response>
+  where
+    T: Serialize + MoghAuthRequest,
+    T::Response: DeserializeOwned,
+  {
+    mogh_auth_client::request::auth(
+      &self.reqwest,
+      &self.address,
+      request,
+    )
+    .await
+  }
+
+  #[cfg(feature = "blocking")]
+  pub fn auth<T>(&self, request: T) -> anyhow::Result<T::Response>
+  where
+    T: Serialize + MoghAuthRequest,
+    T::Response: DeserializeOwned,
+  {
+    mogh_auth_client::request::auth(
+      &self.reqwest,
+      &self.address,
+      request,
+    )
+  }
+
   #[cfg(not(feature = "blocking"))]
   pub async fn read<T>(
     &self,

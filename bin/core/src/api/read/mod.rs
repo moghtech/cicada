@@ -13,7 +13,10 @@ use serde_json::json;
 use surrealdb::types::Uuid;
 use typeshare::typeshare;
 
-use crate::api::{Variant, response::Response};
+use crate::{
+  api::{Variant, response::Response},
+  auth::middleware::auth_request,
+};
 
 pub mod filesystem;
 pub mod node;
@@ -42,7 +45,7 @@ pub fn router() -> Router {
   Router::new()
     .route("/", post(handler))
     .route("/{variant}", post(variant_handler))
-  // .layer(middleware::from_fn(auth_request))
+    .layer(axum::middleware::from_fn(auth_request))
 }
 
 async fn variant_handler(

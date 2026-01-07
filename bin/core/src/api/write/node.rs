@@ -1,10 +1,7 @@
 use anyhow::Context as _;
 use axum::http::StatusCode;
 use cicada_client::{
-  api::{
-    read::node::{GetNode, ListNodes},
-    write::node::{CreateNode, DeleteNode, UpdateNode},
-  },
+  api::write::node::{CreateNode, DeleteNode, UpdateNode},
   entities::{
     filesystem::FilesystemId,
     node::{NodeKind, NodeRecord},
@@ -15,11 +12,11 @@ use mogh_error::AddStatusCode as _;
 use resolver_api::Resolve;
 
 use crate::{
-  api::{
-    read::node::{get_node, list_nodes},
-    write::WriteArgs,
+  api::write::WriteArgs,
+  db::{
+    DB,
+    query::node::{get_node, list_nodes},
   },
-  db::DB,
 };
 
 #[utoipa::path(
@@ -118,7 +115,7 @@ impl Resolve<WriteArgs> for UpdateNode {
 pub async fn delete_node(
   body: DeleteNode,
 ) -> mogh_error::Result<NodeRecord> {
-  let node = get_node(GetNode { id: body.id }).await?;
+  let node = get_node(&body.id.0).await?;
   if matches!(node.kind, NodeKind::Folder) {
     if let Some(parent) = body.move_children {
       // Moves children of this node to the new parent
@@ -152,11 +149,7 @@ fn delete_children(
 ) -> std::pin::Pin<Box<impl Future<Output = mogh_error::Result<()>>>>
 {
   Box::pin(async move {
-    let children = list_nodes(ListNodes {
-      filesystem: Some(filesystem),
-      parent: Some(parent),
-    })
-    .await?;
+    let children = list_nodes(Some(filesystem), Some(parent)).await?;
     // Recursively deletes any sub folders as well.
     children
       .iter()

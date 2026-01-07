@@ -16,15 +16,28 @@ homepage = "https://mogh.tech/cicada"
 [profile.release]
 strip = "debuginfo"
 
+[patch.mogh]
+mogh_auth_client = { path = "../lib/auth/client/rs" }
+mogh_auth_server = { path = "../lib/auth/server" }
+mogh_error = { path = "../lib/crates/error" }
+mogh_secret_file = { path = "../lib/crates/secret_file" }
+mogh_config = { path = "../lib/crates/config" }
+mogh_logger = { path = "../lib/crates/logger" }
+mogh_server = { path = "../lib/crates/server" }
+mogh_rate_limit = { path = "../lib/crates/rate_limit" }
+
 [workspace.dependencies]
 cicada_client = { path = "client/rs" }
 
 # MOGH
+mogh_auth_client = { version = "0.1.0", registry = "mogh" }
+mogh_auth_server = { version = "0.1.0", registry = "mogh" }
 mogh_error = { version = "0.5.5", default-features = false, registry = "mogh" }
 mogh_secret_file = { version = "0.1.0", registry = "mogh" }
 mogh_config = { version = "0.1.0", registry = "mogh" }
 mogh_logger = { version = "0.1.0", registry = "mogh" }
 mogh_server = { version = "0.1.4", registry = "mogh" }
+mogh_rate_limit = { version = "0.1.0", registry = "mogh" }
 derive_default_builder = "0.1.8"
 derive_empty_traits = "0.1.0"
 partial_derive2 = "0.4.5"
@@ -48,7 +61,7 @@ utoipa = "5.4.0"
 serde = { version = "1.0.227", features = ["derive"] }
 strum = { version = "0.27.2", features = ["derive"] }
 serde_yaml_ng = "0.10.0"
-serde_json = "1.0.148"
+serde_json = "1.0.149"
 serde_qs = "0.15.0"
 toml = "0.9.8"
 url = "2.5.7"
@@ -65,7 +78,7 @@ dotenvy = "0.15.7"
 envy = "0.4.2"
 
 # CRYPTO / AUTH
-rustls = { version = "0.23.35", features = ["aws-lc-rs"] }
+rustls = { version = "0.23.36", features = ["aws-lc-rs"] }
 
 # DATABASE
 surrealdb = { version = "3.0.0-beta.1", features = ["native-tls", "kv-tikv"] }

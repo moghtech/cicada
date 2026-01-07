@@ -1,12 +1,14 @@
-use anyhow::Context;
 use cicada_client::{
   api::read::filesystem::ListFilesystems,
   entities::filesystem::FilesystemRecord,
 };
 use resolver_api::Resolve;
 
-use crate::{api::read::ReadArgs, db::DB};
+use crate::{
+  api::read::ReadArgs, db::query::filesystem::list_all_filesystems,
+};
 
+#[allow(unused)]
 #[utoipa::path(
   post,
   path = "/read/ListFilesystems",
@@ -17,19 +19,13 @@ use crate::{api::read::ReadArgs, db::DB};
     (status = 500, description = "Request failed", body = mogh_error::Serror)
   ),
 )]
-pub async fn list_filesystems()
--> mogh_error::Result<Vec<FilesystemRecord>> {
-  DB.select("Filesystem")
-    .await
-    .context("Failed to query for filesystems")
-    .map_err(Into::into)
-}
+pub fn list_filesystems() {}
 
 impl Resolve<ReadArgs> for ListFilesystems {
   async fn resolve(
     self,
     _: &ReadArgs,
   ) -> Result<Self::Response, Self::Error> {
-    list_filesystems().await
+    list_all_filesystems().await.map_err(Into::into)
   }
 }

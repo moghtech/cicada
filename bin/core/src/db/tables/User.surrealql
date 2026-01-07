@@ -14,6 +14,12 @@ DEFINE FIELD OVERWRITE password
   ON TABLE User
   TYPE string
   DEFAULT "";
+  
+-- enabled
+DEFINE FIELD OVERWRITE enabled
+  ON TABLE User
+  TYPE bool
+  DEFAULT false;
 
 -- created_at
 DEFINE FIELD OVERWRITE created_at

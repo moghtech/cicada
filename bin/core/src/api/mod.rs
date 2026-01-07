@@ -4,7 +4,7 @@ use mogh_server::{
   ui::serve_static_ui,
 };
 
-use crate::config::core_config;
+use crate::{auth::CicadaAuthImpl, config::core_config};
 
 mod openapi;
 mod read;
@@ -21,13 +21,13 @@ pub fn app() -> Router {
   Router::new()
     .merge(openapi::serve_docs())
     .route("/version", get(|| async { env!("CARGO_PKG_VERSION") }))
-    // .nest("/auth", auth::router())
+    .nest("/auth", mogh_auth_server::api::router::<CicadaAuthImpl>())
     // .nest("/user", user::router())
     .nest("/read", read::router())
     .nest("/write", write::router())
     // .nest("/listener", listener::router())
     // .nest("/client", ts_client::router())
+    .layer(memory_session_layer(config))
     .fallback_service(serve_static_ui(&config.ui_path))
     .layer(cors_layer(config))
-    .layer(memory_session_layer(config))
 }

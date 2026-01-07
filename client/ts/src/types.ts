@@ -108,6 +108,8 @@ export type UpdateFilesystemResponse = FilesystemRecord;
 /** Response for [UpdateNode]. */
 export type UpdateNodeResponse = NodeRecord;
 
+export type UserId = string;
+
 /** Create filesystem node. Response: [CreateFilesystemResponse]. */
 export interface CreateFilesystem {
 	/** The name of the filesystem */
@@ -239,6 +241,22 @@ export interface UpdateNode {
 	 * For files, this contains the file contents.
 	 */
 	data?: string;
+}
+
+export interface UserRecord {
+	/** The unique user id */
+	id: UserId;
+	/** The name of the user, ie username */
+	name: string;
+	/**
+	 * Hashed user password.
+	 * Empty if local login is not set.
+	 */
+	password: string;
+	/** Created at as ISO8601 timestamp. */
+	created_at: Iso8601Timestamp;
+	/** Updated at as ISO8601 timestamp. */
+	updated_at: Iso8601Timestamp;
 }
 
 export type ReadRequest = 

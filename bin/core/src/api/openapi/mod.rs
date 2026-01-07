@@ -1,32 +1,51 @@
+use mogh_auth_server::openapi::{AddSecurityHeaders, MoghAuthApi};
 use utoipa::OpenApi;
 use utoipa_scalar::{Scalar, Servable as _};
 
-use super::{read, write};
+use super::{read as _read, write as _write};
+
+mod read {
+  pub use super::_read::{filesystem::*, node::*, *};
+}
+
+mod write {
+  pub use super::_write::{filesystem::*, node::*};
+}
 
 #[derive(OpenApi)]
-#[openapi(paths(
-  // ======
-  //  READ
-  // ======
-  read::get_version,
-  // FILESYSTEM
-  read::filesystem::list_filesystems,
-  // NODE
-  read::node::list_nodes,
-  read::node::get_node,
-  read::node::find_node,
-  // =======
-  //  WRITE
-  // =======
-  // FILESYSTEM
-  write::filesystem::create_filesystem,
-  write::filesystem::update_filesystem,
-  write::filesystem::delete_filesystem,
-  // NODE
-  write::node::create_node,
-  write::node::update_node,
-  write::node::delete_node,
-))]
+#[openapi(
+  nest(
+    (path = "/auth", api = MoghAuthApi)
+  ),
+  paths(
+    // ======
+    //  READ
+    // ======
+    read::get_version,
+    // FILESYSTEM
+    read::list_filesystems,
+    // NODE
+    read::list_nodes,
+    read::get_node,
+    read::find_node,
+    // =======
+    //  WRITE
+    // =======
+    // FILESYSTEM
+    write::create_filesystem,
+    write::update_filesystem,
+    write::delete_filesystem,
+    // NODE
+    write::create_node,
+    write::update_node,
+    write::delete_node,
+  ),
+  modifiers(&AddSecurityHeaders),
+  security(
+    ("api-key" = [], "api-secret" = []),
+    ("jwt" = [])
+  )
+)]
 struct CicadaApi;
 
 pub fn serve_docs() -> Scalar<utoipa::openapi::OpenApi> {

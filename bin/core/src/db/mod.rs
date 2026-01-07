@@ -5,6 +5,8 @@ use surrealdb::{Surreal, engine::any::Any, opt::auth};
 
 use crate::config::core_config;
 
+pub mod query;
+
 pub static DB: LazyLock<Surreal<Any>> = LazyLock::new(Surreal::init);
 
 pub async fn init() -> anyhow::Result<()> {

@@ -6,6 +6,7 @@ use tracing::Instrument as _;
 use crate::config::core_config;
 
 mod api;
+mod auth;
 mod config;
 mod db;
 

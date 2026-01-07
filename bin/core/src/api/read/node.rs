@@ -7,8 +7,12 @@ use cicada_client::{
 use mogh_error::AddStatusCode;
 use resolver_api::Resolve;
 
-use crate::{api::read::ReadArgs, db::DB};
+use crate::{
+  api::read::ReadArgs,
+  db::{DB, query::node},
+};
 
+#[allow(unused)]
 #[utoipa::path(
   post,
   path = "/read/ListNodes",
@@ -19,29 +23,16 @@ use crate::{api::read::ReadArgs, db::DB};
     (status = 500, description = "Request failed", body = mogh_error::Serror)
   ),
 )]
-pub async fn list_nodes(
-  body: ListNodes,
-) -> mogh_error::Result<Vec<NodeListItem>> {
-  DB.query(
-    "
-SELECT * OMIT data FROM Node 
-WHERE ($filesystem IS NONE OR filesystem = $filesystem)
-AND ($parent IS NONE OR parent = $parent)",
-  )
-  .bind(("filesystem", body.filesystem))
-  .bind(("parent", body.parent))
-  .await
-  .context("Failed to query for nodes")?
-  .take(0)
-  .map_err(Into::into)
-}
+pub fn list_nodes() {}
 
 impl Resolve<ReadArgs> for ListNodes {
   async fn resolve(
     self,
     _: &ReadArgs,
   ) -> Result<Self::Response, Self::Error> {
-    list_nodes(self).await
+    node::list_nodes(self.filesystem, self.parent)
+      .await
+      .map_err(Into::into)
   }
 }
 

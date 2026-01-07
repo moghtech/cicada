@@ -15,6 +15,13 @@ import {
 
 export const cicada_client = () => CicadaClient(CICADA_BASE_URL);
 
+export const useLoginOptions = () => {
+  return useQuery({
+    queryKey: ["GetLoginOptions"],
+    queryFn: () => cicada_client().auth("GetLoginOptions", {}),
+  });
+};
+
 export const useRead = <
   T extends Types.ReadRequest["type"],
   R extends Extract<Types.ReadRequest, { type: T }>,
