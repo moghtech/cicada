@@ -4,7 +4,12 @@ import {
   Button,
   Center,
   Fieldset,
+  Flex,
+  Grid,
+  Group,
   PasswordInput,
+  SimpleGrid,
+  Text,
   TextInput,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
@@ -65,29 +70,32 @@ export default function Login({
     onSuccess: secondFactorOnSuccess,
   });
 
-  const { mutate: login, isPending: loginPending } = useLogin("LoginLocalUser", {
-    onSuccess: ({ type, data }) => {
-      switch (type) {
-        case "Jwt":
-          return onSuccess(data);
-        case "Passkey":
-          setPasskeyPending(true);
-          return navigator.credentials
-            .get(MoghAuth.Passkey.preparePasskeyCredential(data))
-            .then((credential) => completePasskeyLogin({ credential }))
-            .catch((e) => {
-              console.error(e);
-              // toast({
-              //   title: "Failed to select passkey",
-              //   description: "See console for details",
-              //   variant: "destructive",
-              // });
-            });
-        case "Totp":
-          return setTotpPending(true);
-      }
-    },
-  });
+  const { mutate: login, isPending: loginPending } = useLogin(
+    "LoginLocalUser",
+    {
+      onSuccess: ({ type, data }) => {
+        switch (type) {
+          case "Jwt":
+            return onSuccess(data);
+          case "Passkey":
+            setPasskeyPending(true);
+            return navigator.credentials
+              .get(MoghAuth.Passkey.preparePasskeyCredential(data))
+              .then((credential) => completePasskeyLogin({ credential }))
+              .catch((e) => {
+                console.error(e);
+                // toast({
+                //   title: "Failed to select passkey",
+                //   description: "See console for details",
+                //   variant: "destructive",
+                // });
+              });
+          case "Totp":
+            return setTotpPending(true);
+        }
+      },
+    }
+  );
 
   const getFormCredentials = () => {
     if (!formRef.current) return undefined;
@@ -148,13 +156,31 @@ export default function Login({
     },
   });
 
+  const registration_disabled = options?.registration_disabled ?? true;
+
   return (
     <Center h="80vh">
       <Fieldset
-        legend="Login"
+        legend={
+          <Flex gap="sm" align="center">
+            <img
+              src="/mogh-512x512.png"
+              width={32}
+              height={32}
+              alt="moghtech"
+            />
+            <Flex direction="column">
+              <Text size="xl" fw="bold">
+                Cicada
+              </Text>
+              <Text size="sm">Log In</Text>
+            </Flex>
+          </Flex>
+        }
         component="form"
         onSubmit={form.onSubmit((form) => login(form)) as any}
         style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
+        w={400}
       >
         <TextInput
           {...form.getInputProps("username")}
@@ -169,9 +195,20 @@ export default function Login({
           placeholder="Enter password"
           key={form.key("password")}
         />
-        <Button type="submit" loading={loginPending}>
-          Login
-        </Button>
+        <SimpleGrid cols={registration_disabled ? 1 : 2} mt="sm">
+          {!registration_disabled && (
+            <Button
+              variant="default"
+              onClick={form.onSubmit((form) => signup(form)) as any}
+              loading={signupPending}
+            >
+              Sign Up
+            </Button>
+          )}
+          <Button variant="filled" type="submit" loading={loginPending}>
+            Login
+          </Button>
+        </SimpleGrid>
       </Fieldset>
     </Center>
   );

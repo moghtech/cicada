@@ -1,3 +1,8 @@
+use std::str::FromStr as _;
+
+use anyhow::Context as _;
+use serde::{Deserialize, Serialize};
+use strum::{Display, EnumString};
 use typeshare::typeshare;
 
 /// Configuration for Cicada
@@ -14,6 +19,141 @@ pub mod user;
 pub type U64 = u64;
 #[typeshare(serialized_as = "string")]
 pub type Iso8601Timestamp = surrealdb_types::Datetime;
+
+#[typeshare]
+#[derive(
+  Debug,
+  Clone,
+  Copy,
+  PartialEq,
+  Eq,
+  Hash,
+  Default,
+  Serialize,
+  Deserialize,
+  Display,
+  EnumString,
+)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
+#[serde(rename_all = "snake_case")]
+#[strum(serialize_all = "snake_case")]
+pub enum Timelength {
+  /// `1-sec`
+  #[serde(rename = "1-sec")]
+  #[strum(serialize = "1-sec")]
+  OneSecond,
+  /// `1-sec`
+  #[serde(rename = "2-sec")]
+  #[strum(serialize = "2-sec")]
+  TwoSeconds,
+  /// `1-sec`
+  #[serde(rename = "3-sec")]
+  #[strum(serialize = "3-sec")]
+  ThreeSeconds,
+  /// `5-sec`
+  #[serde(rename = "5-sec")]
+  #[strum(serialize = "5-sec")]
+  FiveSeconds,
+  /// `10-sec`
+  #[serde(rename = "10-sec")]
+  #[strum(serialize = "10-sec")]
+  TenSeconds,
+  /// `15-sec`
+  #[serde(rename = "15-sec")]
+  #[strum(serialize = "15-sec")]
+  FifteenSeconds,
+  /// `30-sec`
+  #[serde(rename = "30-sec")]
+  #[strum(serialize = "30-sec")]
+  ThirtySeconds,
+  #[default]
+  /// `1-min`
+  #[serde(rename = "1-min")]
+  #[strum(serialize = "1-min")]
+  OneMinute,
+  /// `2-min`
+  #[serde(rename = "2-min")]
+  #[strum(serialize = "2-min")]
+  TwoMinutes,
+  /// `3-min`
+  #[serde(rename = "3-min")]
+  #[strum(serialize = "3-min")]
+  ThreeMinutes,
+  /// `5-min`
+  #[serde(rename = "5-min")]
+  #[strum(serialize = "5-min")]
+  FiveMinutes,
+  /// `10-min`
+  #[serde(rename = "10-min")]
+  #[strum(serialize = "10-min")]
+  TenMinutes,
+  /// `15-min`
+  #[serde(rename = "15-min")]
+  #[strum(serialize = "15-min")]
+  FifteenMinutes,
+  /// `30-min`
+  #[serde(rename = "30-min")]
+  #[strum(serialize = "30-min")]
+  ThirtyMinutes,
+  /// `1-hr`
+  #[serde(rename = "1-hr")]
+  #[strum(serialize = "1-hr")]
+  OneHour,
+  /// `2-hr`
+  #[serde(rename = "2-hr")]
+  #[strum(serialize = "2-hr")]
+  TwoHours,
+  /// `3-hr`
+  #[serde(rename = "3-hr")]
+  #[strum(serialize = "3-hr")]
+  ThreeHours,
+  /// `6-hr`
+  #[serde(rename = "6-hr")]
+  #[strum(serialize = "6-hr")]
+  SixHours,
+  /// `8-hr`
+  #[serde(rename = "8-hr")]
+  #[strum(serialize = "8-hr")]
+  EightHours,
+  /// `12-hr`
+  #[serde(rename = "12-hr")]
+  #[strum(serialize = "12-hr")]
+  TwelveHours,
+  /// `1-day`
+  #[serde(rename = "1-day")]
+  #[strum(serialize = "1-day")]
+  OneDay,
+  /// `2-day`
+  #[serde(rename = "2-day")]
+  #[strum(serialize = "2-day")]
+  TwoDays,
+  /// `3-day`
+  #[serde(rename = "3-day")]
+  #[strum(serialize = "3-day")]
+  ThreeDays,
+  /// `1-wk`
+  #[serde(rename = "1-wk")]
+  #[strum(serialize = "1-wk")]
+  OneWeek,
+  /// `2-wk`
+  #[serde(rename = "2-wk")]
+  #[strum(serialize = "2-wk")]
+  TwoWeeks,
+  /// `30-day`
+  #[serde(rename = "30-day")]
+  #[strum(serialize = "30-day")]
+  ThirtyDays,
+}
+
+impl TryInto<async_timing_util::Timelength> for Timelength {
+  type Error = anyhow::Error;
+  fn try_into(
+    self,
+  ) -> Result<async_timing_util::Timelength, Self::Error> {
+    async_timing_util::Timelength::from_str(&self.to_string())
+      .context("Failed to parse timelength?")
+  }
+}
 
 #[macro_export]
 macro_rules! surreal_id {

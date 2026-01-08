@@ -226,6 +226,23 @@ export interface GetUser {
 }
 
 /**
+ * Gets the username of a specific user.
+ * Response: [GetUsernameResponse].
+ */
+export interface GetUsername {
+	/** The id of the user */
+	user_id: string;
+}
+
+/** Response for [GetUsername]. */
+export interface GetUsernameResponse {
+	/** The username of the user. */
+	username: string;
+	/** An optional icon for the user. */
+	avatar?: string;
+}
+
+/**
  * Get the version of the Cicada Core api.
  * Response: [GetVersionResponse].
  */
@@ -276,10 +293,66 @@ export interface UpdateNode {
 export type ReadRequest = 
 	| { type: "GetVersion", params: GetVersion }
 	| { type: "GetUser", params: GetUser }
+	| { type: "GetUsername", params: GetUsername }
 	| { type: "ListFilesystems", params: ListFilesystems }
 	| { type: "ListNodes", params: ListNodes }
 	| { type: "GetNode", params: GetNode }
 	| { type: "FindNode", params: FindNode };
+
+export enum Timelength {
+	/** `1-sec` */
+	OneSecond = "1-sec",
+	/** `1-sec` */
+	TwoSeconds = "2-sec",
+	/** `1-sec` */
+	ThreeSeconds = "3-sec",
+	/** `5-sec` */
+	FiveSeconds = "5-sec",
+	/** `10-sec` */
+	TenSeconds = "10-sec",
+	/** `15-sec` */
+	FifteenSeconds = "15-sec",
+	/** `30-sec` */
+	ThirtySeconds = "30-sec",
+	/** `1-min` */
+	OneMinute = "1-min",
+	/** `2-min` */
+	TwoMinutes = "2-min",
+	/** `3-min` */
+	ThreeMinutes = "3-min",
+	/** `5-min` */
+	FiveMinutes = "5-min",
+	/** `10-min` */
+	TenMinutes = "10-min",
+	/** `15-min` */
+	FifteenMinutes = "15-min",
+	/** `30-min` */
+	ThirtyMinutes = "30-min",
+	/** `1-hr` */
+	OneHour = "1-hr",
+	/** `2-hr` */
+	TwoHours = "2-hr",
+	/** `3-hr` */
+	ThreeHours = "3-hr",
+	/** `6-hr` */
+	SixHours = "6-hr",
+	/** `8-hr` */
+	EightHours = "8-hr",
+	/** `12-hr` */
+	TwelveHours = "12-hr",
+	/** `1-day` */
+	OneDay = "1-day",
+	/** `2-day` */
+	TwoDays = "2-day",
+	/** `3-day` */
+	ThreeDays = "3-day",
+	/** `1-wk` */
+	OneWeek = "1-wk",
+	/** `2-wk` */
+	TwoWeeks = "2-wk",
+	/** `30-day` */
+	ThirtyDays = "30-day",
+}
 
 export type WriteRequest = 
 	| { type: "CreateFilesystem", params: CreateFilesystem }

@@ -136,7 +136,7 @@ const NodeTree = ({
         return (
           <Button
             variant={selected && selected === inode ? "default" : "subtle"}
-            color="inherit"
+            c="inherit"
             p="0rem 0.5rem"
             mb="0.25rem"
             justify="space-between"

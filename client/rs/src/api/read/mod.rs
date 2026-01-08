@@ -51,3 +51,31 @@ pub struct GetUser {}
 
 #[typeshare]
 pub type GetUserResponse = UserRecord;
+
+//
+
+/// Gets the username of a specific user.
+/// Response: [GetUsernameResponse].
+#[typeshare]
+#[derive(
+  Debug, Clone, Serialize, Deserialize, Resolve, EmptyTraits,
+)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
+#[empty_traits(CicadaReadRequest)]
+#[response(GetUsernameResponse)]
+#[error(mogh_error::Error)]
+pub struct GetUsername {
+  /// The id of the user
+  pub user_id: String,
+}
+
+/// Response for [GetUsername].
+#[typeshare]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
+pub struct GetUsernameResponse {
+  /// The username of the user.
+  pub username: String,
+  /// An optional icon for the user.
+  pub avatar: Option<String>,
+}

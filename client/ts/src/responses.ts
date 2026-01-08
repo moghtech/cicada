@@ -3,6 +3,7 @@ import * as Types from "./types.js";
 export type ReadResponses = {
   GetVersion: Types.GetVersionResponse;
   GetUser: Types.GetUserResponse;
+  GetUsername: Types.GetUsernameResponse;
 
   // ==== FILESYSTEM ====
   ListFilesystems: Types.ListFilesystemsResponse;

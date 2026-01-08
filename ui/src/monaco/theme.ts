@@ -1,12 +1,12 @@
 import * as monaco from "monaco-editor";
 
-// background: #f1f0f0ff
+// background: #f6f6f6ff
 monaco.editor.defineTheme("light", {
   base: "vs",
   inherit: true,
   rules: [
     {
-      background: "f1f0f0ff",
+      background: "f6f6f6ff",
       token: "",
     },
     {
@@ -337,7 +337,7 @@ monaco.editor.defineTheme("light", {
     },
   ],
   colors: {
-    "editor.background": "#f1f0f0ff",
+    "editor.background": "#f6f6f6ff",
     "editor.foreground": "#24292e",
     // "editor.selectionBackground": "#c8c8fa",
     // "editor.inactiveSelectionBackground": "#fafbfc",

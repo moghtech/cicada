@@ -2,9 +2,12 @@ use std::{path::PathBuf, sync::OnceLock};
 
 use serde::Deserialize;
 
-use crate::entities::config::{
-  empty_or_redacted,
-  logger::{LogConfig, LogLevel, StdioLogMode},
+use crate::entities::{
+  Timelength,
+  config::{
+    empty_or_redacted,
+    logger::{LogConfig, LogLevel, StdioLogMode},
+  },
 };
 
 /// # Cicada Core Environment Variables
@@ -58,6 +61,13 @@ pub struct Env {
   /// Override `bind_ip`
   pub cicada_bind_ip: Option<String>,
 
+  /// Override `jwt_secret`
+  pub cicada_jwt_secret: Option<String>,
+  /// Override `jwt_secret` from file
+  pub cicada_jwt_secret_file: Option<PathBuf>,
+  /// Override `jwt_ttl`
+  pub cicada_jwt_ttl: Option<Timelength>,
+
   /// Override `database.uri`
   pub cicada_database_uri: Option<String>,
   /// Override `database.username`
@@ -72,6 +82,13 @@ pub struct Env {
   pub cicada_database_namespace: Option<String>,
   /// Override `database.db_name`
   pub cicada_database_db_name: Option<String>,
+
+  /// Override `auth_rate_limit_disabled`
+  pub cicada_auth_rate_limit_disabled: Option<bool>,
+  /// Override `auth_rate_limit_max_attempts`
+  pub cicada_auth_rate_limit_max_attempts: Option<u16>,
+  /// Override `auth_rate_limit_window_seconds`
+  pub cicada_auth_rate_limit_window_seconds: Option<u64>,
 
   /// Override `cors_allowed_origins`
   pub cicada_cors_allowed_origins: Option<Vec<String>>,
@@ -151,9 +168,34 @@ pub struct CoreConfig {
   #[serde(default = "default_core_bind_ip")]
   pub bind_ip: String,
 
+  /// Optionally provide a specific jwt secret.
+  /// Passing nothing or an empty string will cause one to be generated.
+  /// Default: "" (empty string)
+  #[serde(default)]
+  pub jwt_secret: String,
+
+  /// Control how long distributed JWT remain valid for.
+  /// Default: `1-day`.
+  #[serde(default = "default_jwt_ttl")]
+  pub jwt_ttl: Timelength,
+
   /// Configure database connection
   #[serde(default)]
   pub database: DatabaseConfig,
+
+  // =================
+  // = Rate Limiting =
+  // =================
+  /// Disable the auth rate limiter.
+  #[serde(default)]
+  pub auth_rate_limit_disabled: bool,
+
+  /// Set the max allowed attempts per IP
+  #[serde(default = "default_auth_rate_limit_max_attempts")]
+  pub auth_rate_limit_max_attempts: u16,
+
+  #[serde(default = "default_auth_rate_limit_window_seconds")]
+  pub auth_rate_limit_window_seconds: u64,
 
   // =======
   // = CORS =
@@ -224,6 +266,18 @@ fn default_core_bind_ip() -> String {
   "[::]".to_string()
 }
 
+fn default_jwt_ttl() -> Timelength {
+  Timelength::OneDay
+}
+
+fn default_auth_rate_limit_max_attempts() -> u16 {
+  5
+}
+
+fn default_auth_rate_limit_window_seconds() -> u64 {
+  15
+}
+
 fn default_ssl_key_file() -> String {
   "/config/ssl/key.pem".to_string()
 }
@@ -243,7 +297,14 @@ impl Default for CoreConfig {
       host: default_host(),
       port: default_core_port(),
       bind_ip: default_core_bind_ip(),
+      jwt_secret: Default::default(),
+      jwt_ttl: default_jwt_ttl(),
       database: Default::default(),
+      auth_rate_limit_disabled: Default::default(),
+      auth_rate_limit_max_attempts:
+        default_auth_rate_limit_max_attempts(),
+      auth_rate_limit_window_seconds:
+        default_auth_rate_limit_window_seconds(),
       cors_allowed_origins: Default::default(),
       logging: Default::default(),
       pretty_startup_config: Default::default(),
@@ -264,11 +325,18 @@ impl CoreConfig {
       host: config.host,
       port: config.port,
       bind_ip: config.bind_ip,
+      jwt_secret: empty_or_redacted(&config.jwt_secret),
+      jwt_ttl: config.jwt_ttl,
       database: config.database.sanitized(),
       logging: config.logging,
       pretty_startup_config: config.pretty_startup_config,
       unsafe_unsanitized_startup_config: config
         .unsafe_unsanitized_startup_config,
+      auth_rate_limit_disabled: config.auth_rate_limit_disabled,
+      auth_rate_limit_max_attempts: config
+        .auth_rate_limit_max_attempts,
+      auth_rate_limit_window_seconds: config
+        .auth_rate_limit_window_seconds,
       cors_allowed_origins: config.cors_allowed_origins,
       ssl_enabled: config.ssl_enabled,
       ssl_key_file: config.ssl_key_file,

@@ -25,6 +25,7 @@ mogh_config.workspace = true
 mogh_logger.workspace = true
 mogh_server.workspace = true
 # external
+async_timing_util.workspace = true
 utoipa-scalar.workspace = true
 futures-util.workspace = true
 serde_json.workspace = true

@@ -3,7 +3,8 @@ use std::time::Instant;
 use axum::{Extension, Router, extract::Path, routing::post};
 use cicada_client::{
   api::read::{
-    GetUser, GetVersion, GetVersionResponse,
+    GetUser, GetUsername, GetUsernameResponse, GetVersion,
+    GetVersionResponse,
     filesystem::ListFilesystems,
     node::{FindNode, GetNode, ListNodes},
   },
@@ -16,7 +17,10 @@ use serde_json::json;
 use surrealdb::types::Uuid;
 use typeshare::typeshare;
 
-use crate::{api::Variant, auth::middleware::auth_request};
+use crate::{
+  api::Variant, auth::middleware::auth_request,
+  db::query::user::get_user,
+};
 
 pub mod filesystem;
 pub mod node;
@@ -34,6 +38,7 @@ pub struct ReadArgs {
 enum ReadRequest {
   GetVersion(GetVersion),
   GetUser(GetUser),
+  GetUsername(GetUsername),
 
   // ==== FILESYSTEM ====
   ListFilesystems(ListFilesystems),
@@ -113,5 +118,20 @@ impl Resolve<ReadArgs> for GetUser {
     ReadArgs { user }: &ReadArgs,
   ) -> Result<Self::Response, Self::Error> {
     Ok(user.clone())
+  }
+}
+
+//
+
+impl Resolve<ReadArgs> for GetUsername {
+  async fn resolve(
+    self,
+    ReadArgs { .. }: &ReadArgs,
+  ) -> Result<Self::Response, Self::Error> {
+    let username = get_user(&self.user_id).await?.name;
+    Ok(GetUsernameResponse {
+      username,
+      avatar: None,
+    })
   }
 }

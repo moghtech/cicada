@@ -1,6 +1,7 @@
 use std::sync::{Arc, LazyLock};
 
 use anyhow::anyhow;
+use async_timing_util::{Timelength, get_timelength_in_ms};
 use axum::http::StatusCode;
 use cicada_client::entities::user::UserRecord;
 use mogh_auth_client::passkey::Passkey;
@@ -9,6 +10,7 @@ use mogh_auth_server::{
   AuthImpl,
   args::RequestClientArgs,
   provider::{jwt::JwtProvider, passkey::PasskeyProvider},
+  rand::random_string,
   user::{AuthUserImpl, BoxAuthUser},
 };
 use mogh_error::AddStatusCode;
@@ -23,16 +25,55 @@ use crate::{
 
 pub mod middleware;
 
-static JWT_PROVIDER: LazyLock<JwtProvider> =
-  LazyLock::new(|| JwtProvider::new(&[], 600_000));
+static JWT_PROVIDER: LazyLock<JwtProvider> = LazyLock::new(|| {
+  let config = core_config();
+  let secret = if config.jwt_secret.is_empty() {
+    random_string(40)
+  } else {
+    config.jwt_secret.clone()
+  };
+  JwtProvider::new(
+    secret.as_bytes(),
+    get_timelength_in_ms(
+      config.jwt_ttl.to_string().parse().unwrap_or_else(|e| {
+        warn!(
+          "Failed to parse 'jwt_ttl' | Using default of 1-day | {e:?}"
+        );
+        Timelength::OneDay
+      }),
+    ),
+  )
+});
+
 static GENERAL_RATE_LIMITER: LazyLock<Arc<RateLimiter>> =
-  LazyLock::new(|| RateLimiter::new(true, 0, 0));
+  LazyLock::new(|| {
+    let config = core_config();
+    RateLimiter::new(
+      config.auth_rate_limit_disabled,
+      config.auth_rate_limit_max_attempts as usize,
+      config.auth_rate_limit_window_seconds,
+    )
+  });
+
+static LOCAL_LOGIN_RATE_LIMITER: LazyLock<Arc<RateLimiter>> =
+  LazyLock::new(|| {
+    let config = core_config();
+    RateLimiter::new(
+      config.auth_rate_limit_disabled,
+      config.auth_rate_limit_max_attempts as usize,
+      config.auth_rate_limit_window_seconds,
+    )
+  });
 
 pub struct AuthUser(UserRecord);
 
 impl AuthUserImpl for AuthUser {
   fn id(&self) -> &str {
     &self.0.id.0
+  }
+
+  fn username(&self) -> &str {
+    &self.0.name
   }
 
   fn hashed_password(&self) -> Option<&str> {
@@ -66,10 +107,9 @@ impl AuthImpl for CicadaAuthImpl {
 
   fn get_user(
     &self,
-    user_id: &str,
+    user_id: String,
   ) -> mogh_auth_server::DynFuture<mogh_error::Result<BoxAuthUser>>
   {
-    let user_id = user_id.to_string();
     Box::pin(async move {
       Ok(Box::new(AuthUser(get_user(&user_id).await?)) as BoxAuthUser)
     })
@@ -103,6 +143,10 @@ impl AuthImpl for CicadaAuthImpl {
   // = LOCAL AUTH =
   // ==============
 
+  fn local_login_rate_limiter(&self) -> &RateLimiter {
+    &LOCAL_LOGIN_RATE_LIMITER
+  }
+
   fn sign_up_local_user(
     &self,
     username: String,
@@ -118,10 +162,9 @@ impl AuthImpl for CicadaAuthImpl {
 
   fn find_user_with_username(
     &self,
-    username: &str,
+    username: String,
   ) -> mogh_auth_server::DynFuture<mogh_error::Result<BoxAuthUser>>
   {
-    let username = username.to_string();
     Box::pin(async move {
       let user = find_user_with_username(username)
         .await
@@ -131,10 +174,50 @@ impl AuthImpl for CicadaAuthImpl {
     })
   }
 
+  fn update_user_username(
+    &self,
+    user_id: String,
+    username: String,
+  ) -> mogh_auth_server::DynFuture<mogh_error::Result<()>> {
+    Box::pin(async { todo!() })
+  }
+
+  fn update_user_password(
+    &self,
+    user_id: String,
+    password: String,
+  ) -> mogh_auth_server::DynFuture<mogh_error::Result<()>> {
+    Box::pin(async { todo!() })
+  }
+
+  // ===============
+  // = PASSKEY 2FA =
+  // ===============
+
   fn update_user_stored_passkey(
     &self,
-    user_id: &str,
-    passkey: Passkey,
+    user_id: String,
+    passkey: Option<Passkey>,
+  ) -> mogh_auth_server::DynFuture<mogh_error::Result<()>> {
+    Box::pin(async { todo!() })
+  }
+
+  // ===============
+  // = TOTP 2FA =
+  // ===============
+
+  fn update_user_stored_totp(
+    &self,
+    user_id: String,
+    encoded_secret: String,
+    hashed_recovery_codes: Vec<String>,
+  ) -> mogh_auth_server::DynFuture<mogh_error::Result<()>> {
+    Box::pin(async { todo!() })
+  }
+
+  fn remove_user_stored_totp(
+    &self,
+    user_id: String,
   ) -> mogh_auth_server::DynFuture<mogh_error::Result<()>> {
     Box::pin(async { todo!() })
   }

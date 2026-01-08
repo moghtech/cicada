@@ -62,6 +62,12 @@ pub fn core_config() -> &'static CoreConfig {
       host: env.cicada_host.unwrap_or(config.host),
       port: env.cicada_port.unwrap_or(config.port),
       bind_ip: env.cicada_bind_ip.unwrap_or(config.bind_ip),
+      jwt_secret: maybe_read_item_from_file(
+        env.cicada_jwt_secret_file,
+        env.cicada_jwt_secret,
+      )
+      .unwrap_or(config.jwt_secret),
+      jwt_ttl: env.cicada_jwt_ttl.unwrap_or(config.jwt_ttl),
       database: DatabaseConfig {
         uri: env.cicada_database_uri.unwrap_or(config.database.uri),
         username: maybe_read_item_from_file(
@@ -81,6 +87,15 @@ pub fn core_config() -> &'static CoreConfig {
           .cicada_database_db_name
           .unwrap_or(config.database.db_name),
       },
+      auth_rate_limit_disabled: env
+        .cicada_auth_rate_limit_disabled
+        .unwrap_or(config.auth_rate_limit_disabled),
+      auth_rate_limit_max_attempts: env
+        .cicada_auth_rate_limit_max_attempts
+        .unwrap_or(config.auth_rate_limit_max_attempts),
+      auth_rate_limit_window_seconds: env
+        .cicada_auth_rate_limit_window_seconds
+        .unwrap_or(config.auth_rate_limit_window_seconds),
       cors_allowed_origins: env
         .cicada_cors_allowed_origins
         .unwrap_or(config.cors_allowed_origins),
