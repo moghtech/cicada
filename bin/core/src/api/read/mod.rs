@@ -1,27 +1,29 @@
 use std::time::Instant;
 
-use axum::{Router, extract::Path, routing::post};
-use cicada_client::api::read::{
-  GetVersion, GetVersionResponse,
-  filesystem::ListFilesystems,
-  node::{FindNode, GetNode, ListNodes},
+use axum::{Extension, Router, extract::Path, routing::post};
+use cicada_client::{
+  api::read::{
+    GetUser, GetVersion, GetVersionResponse,
+    filesystem::ListFilesystems,
+    node::{FindNode, GetNode, ListNodes},
+  },
+  entities::user::UserRecord,
 };
-use mogh_error::Json;
+use mogh_error::{Json, Response};
 use resolver_api::Resolve;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use surrealdb::types::Uuid;
 use typeshare::typeshare;
 
-use crate::{
-  api::{Variant, response::Response},
-  auth::middleware::auth_request,
-};
+use crate::{api::Variant, auth::middleware::auth_request};
 
 pub mod filesystem;
 pub mod node;
 
-pub struct ReadArgs {}
+pub struct ReadArgs {
+  user: UserRecord,
+}
 
 #[typeshare]
 #[derive(Debug, Clone, Serialize, Deserialize, Resolve)]
@@ -31,6 +33,7 @@ pub struct ReadArgs {}
 #[serde(tag = "type", content = "params")]
 enum ReadRequest {
   GetVersion(GetVersion),
+  GetUser(GetUser),
 
   // ==== FILESYSTEM ====
   ListFilesystems(ListFilesystems),
@@ -49,7 +52,7 @@ pub fn router() -> Router {
 }
 
 async fn variant_handler(
-  // user: Extension<User>,
+  user: Extension<UserRecord>,
   Path(Variant { variant }): Path<Variant>,
   Json(params): Json<serde_json::Value>,
 ) -> mogh_error::Result<axum::response::Response> {
@@ -57,17 +60,17 @@ async fn variant_handler(
     "type": variant,
     "params": params,
   }))?;
-  handler(Json(req)).await
+  handler(user, Json(req)).await
 }
 
 async fn handler(
-  // Extension(user): Extension<User>,
+  Extension(user): Extension<UserRecord>,
   Json(request): Json<ReadRequest>,
 ) -> mogh_error::Result<axum::response::Response> {
   let timer = Instant::now();
   let req_id = Uuid::new_v4();
   // debug!("/read request | user: {}", user.username);
-  let res = request.resolve(&ReadArgs {}).await;
+  let res = request.resolve(&ReadArgs { user }).await;
   // if let Err(e) = &res {
   //   debug!("/read request {req_id} error: {:#}", e.error);
   // }
@@ -99,5 +102,16 @@ impl Resolve<ReadArgs> for GetVersion {
     _: &ReadArgs,
   ) -> Result<Self::Response, Self::Error> {
     get_version()
+  }
+}
+
+//
+
+impl Resolve<ReadArgs> for GetUser {
+  async fn resolve(
+    self,
+    ReadArgs { user }: &ReadArgs,
+  ) -> Result<Self::Response, Self::Error> {
+    Ok(user.clone())
   }
 }

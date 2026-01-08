@@ -3,6 +3,8 @@ use resolver_api::{HasResponse, Resolve};
 use serde::{Deserialize, Serialize};
 use typeshare::typeshare;
 
+use crate::entities::user::UserRecord;
+
 pub mod filesystem;
 pub mod node;
 
@@ -32,3 +34,20 @@ pub struct GetVersionResponse {
   /// The version of the core api.
   pub version: String,
 }
+
+//
+
+/// Get calling user extracted from the request authorization.
+/// Response: [User].
+#[typeshare]
+#[derive(
+  Debug, Clone, Serialize, Deserialize, Resolve, EmptyTraits,
+)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
+#[empty_traits(CicadaReadRequest)]
+#[response(GetUserResponse)]
+#[error(mogh_error::Error)]
+pub struct GetUser {}
+
+#[typeshare]
+pub type GetUserResponse = UserRecord;

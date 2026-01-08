@@ -60,7 +60,7 @@ pub async fn get_user_id_from_headers(
     (Some(jwt), _, _) => {
       // USE JWT
       let jwt = jwt.to_str().context("JWT is not valid UTF-8")?;
-      JWT_PROVIDER.decode(jwt)
+      JWT_PROVIDER.decode_sub(jwt)
     }
     (None, Some(key), Some(secret)) => {
       // USE API KEY / SECRET

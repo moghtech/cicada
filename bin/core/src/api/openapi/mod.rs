@@ -1,4 +1,4 @@
-use mogh_auth_server::openapi::{AddSecurityHeaders, MoghAuthApi};
+use mogh_auth_server::api::openapi::MoghAuthApi;
 use utoipa::OpenApi;
 use utoipa_scalar::{Scalar, Servable as _};
 
@@ -40,11 +40,6 @@ mod write {
     write::update_node,
     write::delete_node,
   ),
-  modifiers(&AddSecurityHeaders),
-  security(
-    ("api-key" = [], "api-secret" = []),
-    ("jwt" = [])
-  )
 )]
 struct CicadaApi;
 

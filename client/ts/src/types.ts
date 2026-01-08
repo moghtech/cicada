@@ -73,6 +73,31 @@ export type FindNodeResponse = NodeRecord;
 /** Response for [GetNode]. */
 export type GetNodeResponse = NodeRecord;
 
+export type UserId = string;
+
+export interface UserRecord {
+	/** The unique user id */
+	id: UserId;
+	/** The name of the user, ie username */
+	name: string;
+	/**
+	 * Hashed user password.
+	 * Empty if local login is not set.
+	 */
+	password: string;
+	/**
+	 * Whether user is enabled.
+	 * Disabled users cannot log in and have no API access.
+	 */
+	enabled?: boolean;
+	/** Created at as ISO8601 timestamp. */
+	created_at: Iso8601Timestamp;
+	/** Updated at as ISO8601 timestamp. */
+	updated_at: Iso8601Timestamp;
+}
+
+export type GetUserResponse = UserRecord;
+
 /** Response for [ListFilesystems]. */
 export type ListFilesystemsResponse = FilesystemRecord[];
 
@@ -107,8 +132,6 @@ export type UpdateFilesystemResponse = FilesystemRecord;
 
 /** Response for [UpdateNode]. */
 export type UpdateNodeResponse = NodeRecord;
-
-export type UserId = string;
 
 /** Create filesystem node. Response: [CreateFilesystemResponse]. */
 export interface CreateFilesystem {
@@ -196,6 +219,13 @@ export interface GetNode {
 }
 
 /**
+ * Get calling user extracted from the request authorization.
+ * Response: [User].
+ */
+export interface GetUser {
+}
+
+/**
  * Get the version of the Cicada Core api.
  * Response: [GetVersionResponse].
  */
@@ -243,24 +273,9 @@ export interface UpdateNode {
 	data?: string;
 }
 
-export interface UserRecord {
-	/** The unique user id */
-	id: UserId;
-	/** The name of the user, ie username */
-	name: string;
-	/**
-	 * Hashed user password.
-	 * Empty if local login is not set.
-	 */
-	password: string;
-	/** Created at as ISO8601 timestamp. */
-	created_at: Iso8601Timestamp;
-	/** Updated at as ISO8601 timestamp. */
-	updated_at: Iso8601Timestamp;
-}
-
 export type ReadRequest = 
 	| { type: "GetVersion", params: GetVersion }
+	| { type: "GetUser", params: GetUser }
 	| { type: "ListFilesystems", params: ListFilesystems }
 	| { type: "ListNodes", params: ListNodes }
 	| { type: "GetNode", params: GetNode }

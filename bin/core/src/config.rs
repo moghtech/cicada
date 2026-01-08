@@ -84,9 +84,6 @@ pub fn core_config() -> &'static CoreConfig {
       cors_allowed_origins: env
         .cicada_cors_allowed_origins
         .unwrap_or(config.cors_allowed_origins),
-      cors_allow_credentials: env
-        .cicada_cors_allow_credentials
-        .unwrap_or(config.cors_allow_credentials),
       logging: LogConfig {
         level: env
           .cicada_logging_level

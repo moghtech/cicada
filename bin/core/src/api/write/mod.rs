@@ -1,13 +1,16 @@
 use anyhow::Context as _;
-use axum::{Router, extract::Path, routing::post};
-use cicada_client::api::write::{
-  filesystem::{
-    CreateFilesystem, DeleteFilesystem, UpdateFilesystem,
+use axum::{Extension, Router, extract::Path, routing::post};
+use cicada_client::{
+  api::write::{
+    filesystem::{
+      CreateFilesystem, DeleteFilesystem, UpdateFilesystem,
+    },
+    node::{CreateNode, DeleteNode, UpdateNode},
   },
-  node::{CreateNode, DeleteNode, UpdateNode},
+  entities::user::UserRecord,
 };
 use derive_variants::{EnumVariants, ExtractVariant as _};
-use mogh_error::Json;
+use mogh_error::{Json, Response};
 use resolver_api::Resolve;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
@@ -15,15 +18,14 @@ use strum::Display;
 use surrealdb::types::Uuid;
 use typeshare::typeshare;
 
-use crate::{
-  api::{Variant, response::Response},
-  auth::middleware::auth_request,
-};
+use crate::{api::Variant, auth::middleware::auth_request};
 
 pub mod filesystem;
 pub mod node;
 
-pub struct WriteArgs {}
+pub struct WriteArgs {
+  user: UserRecord,
+}
 
 #[typeshare]
 #[derive(
@@ -54,7 +56,7 @@ pub fn router() -> Router {
 }
 
 async fn variant_handler(
-  // user: Extension<User>,
+  user: Extension<UserRecord>,
   Path(Variant { variant }): Path<Variant>,
   Json(params): Json<serde_json::Value>,
 ) -> mogh_error::Result<axum::response::Response> {
@@ -62,31 +64,33 @@ async fn variant_handler(
     "type": variant,
     "params": params,
   }))?;
-  handler(Json(req)).await
+  handler(user, Json(req)).await
 }
 
 async fn handler(
-  // Extension(user): Extension<User>,
+  Extension(user): Extension<UserRecord>,
   Json(request): Json<WriteRequest>,
 ) -> mogh_error::Result<axum::response::Response> {
   let req_id = Uuid::new_v4();
 
-  let res = tokio::spawn(task(req_id, request))
+  let res = tokio::spawn(task(req_id, request, user))
     .await
     .context("failure in spawned task");
 
   res?
 }
 
+/// Spawn a task to handle write requests
+/// to ensure they finish even if client disconnects.
 async fn task(
   req_id: Uuid,
   request: WriteRequest,
-  // user: User,
+  user: UserRecord,
 ) -> mogh_error::Result<axum::response::Response> {
   let variant = request.extract_variant();
   info!("/write request | {variant}");
 
-  let res = request.resolve(&WriteArgs {}).await;
+  let res = request.resolve(&WriteArgs { user }).await;
 
   if let Err(e) = &res {
     warn!(

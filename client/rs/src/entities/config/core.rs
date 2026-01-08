@@ -75,8 +75,6 @@ pub struct Env {
 
   /// Override `cors_allowed_origins`
   pub cicada_cors_allowed_origins: Option<Vec<String>>,
-  /// Override `cors_allow_credentials`
-  pub cicada_cors_allow_credentials: Option<bool>,
 
   /// Override `logging.level`
   pub cicada_logging_level: Option<LogLevel>,
@@ -167,11 +165,6 @@ pub struct CoreConfig {
   #[serde(default)]
   pub cors_allowed_origins: Vec<String>,
 
-  /// Tell CORS to allow credentials in requests.
-  /// Used if needed for authentication proxy.
-  #[serde(default)]
-  pub cors_allow_credentials: bool,
-
   // ===========
   // = Logging =
   // ===========
@@ -252,7 +245,6 @@ impl Default for CoreConfig {
       bind_ip: default_core_bind_ip(),
       database: Default::default(),
       cors_allowed_origins: Default::default(),
-      cors_allow_credentials: Default::default(),
       logging: Default::default(),
       pretty_startup_config: Default::default(),
       unsafe_unsanitized_startup_config: Default::default(),
@@ -278,7 +270,6 @@ impl CoreConfig {
       unsafe_unsanitized_startup_config: config
         .unsafe_unsanitized_startup_config,
       cors_allowed_origins: config.cors_allowed_origins,
-      cors_allow_credentials: config.cors_allow_credentials,
       ssl_enabled: config.ssl_enabled,
       ssl_key_file: config.ssl_key_file,
       ssl_cert_file: config.ssl_cert_file,
@@ -387,14 +378,11 @@ impl mogh_server::ServerConfig for &CoreConfig {
 
 #[cfg(feature = "core")]
 impl mogh_server::cors::CorsConfig for &CoreConfig {
-  fn allow_credentials(&self) -> bool {
-    self.cors_allow_credentials
+  fn allowed_origins_env_field(&self) -> &'static str {
+    "CICADA_CORS_ALLOWED_ORIGINS"
   }
   fn allowed_origins(&self) -> &[String] {
     &self.cors_allowed_origins
-  }
-  fn allowed_origins_env_field(&self) -> &'static str {
-    "CICADA_CORS_ALLOWED_ORIGINS"
   }
 }
 

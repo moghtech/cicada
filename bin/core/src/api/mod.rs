@@ -8,7 +8,6 @@ use crate::{auth::CicadaAuthImpl, config::core_config};
 
 mod openapi;
 mod read;
-mod response;
 mod write;
 
 #[derive(serde::Deserialize)]
@@ -22,7 +21,6 @@ pub fn app() -> Router {
     .merge(openapi::serve_docs())
     .route("/version", get(|| async { env!("CARGO_PKG_VERSION") }))
     .nest("/auth", mogh_auth_server::api::router::<CicadaAuthImpl>())
-    // .nest("/user", user::router())
     .nest("/read", read::router())
     .nest("/write", write::router())
     // .nest("/listener", listener::router())

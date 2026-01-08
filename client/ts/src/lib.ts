@@ -6,11 +6,27 @@ export * as MoghAuth from "mogh_auth_client";
 export * as Types from "./types.js";
 export type { ReadResponses, WriteResponses } from "./responses";
 
-export function CicadaClient(url: string) {
-  const auth = MoghAuthClient(url).auth;
+export type InitOptions =
+  | { type: "jwt"; params: { jwt: string } }
+  | { type: "api-key"; params: { key: string; secret: string } };
+
+export type ClientState = {
+  jwt: string | undefined;
+  key: string | undefined;
+  secret: string | undefined;
+};
+
+export function CicadaClient(url: string, options: InitOptions) {
+  const state: ClientState = {
+    jwt: options.type === "jwt" ? options.params.jwt : undefined,
+    key: options.type === "api-key" ? options.params.key : undefined,
+    secret: options.type === "api-key" ? options.params.secret : undefined,
+  };
+
+  const auth = MoghAuthClient(url + "/auth", state.jwt);
 
   const request = <Params, Res>(
-    path: "/read" | "/write",
+    path: "/user" | "/read" | "/write",
     type: string,
     params: Params
   ): Promise<Res> =>
@@ -20,16 +36,16 @@ export function CicadaClient(url: string) {
           method: "POST",
           body: JSON.stringify(params),
           headers: {
-            // ...(state.jwt
-            //   ? {
-            //       authorization: state.jwt,
-            //     }
-            //   : state.key && state.secret
-            //   ? {
-            //       "x-api-key": state.key,
-            //       "x-api-secret": state.secret,
-            //     }
-            //   : {}),
+            ...(state.jwt
+              ? {
+                  authorization: state.jwt,
+                }
+              : state.key && state.secret
+              ? {
+                  "x-api-key": state.key,
+                  "x-api-secret": state.secret,
+                }
+              : {}),
             "content-type": "application/json",
           },
           credentials: "include",
@@ -95,7 +111,7 @@ export function CicadaClient(url: string) {
      * Call the `/auth` api.
      *
      * ```
-     * const stack = await cicada.auth("LoginLocalUser", {
+     * const { jwt } = await cicada.auth.login("LoginLocalUser", {
      *   username: "test-user",
      *   password: "test-pass"
      * });

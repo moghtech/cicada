@@ -9,13 +9,16 @@ pub struct CicadaClient {
   #[cfg(feature = "blocking")]
   reqwest: reqwest::blocking::Client,
   address: String,
+  auth_address: String,
 }
 
 impl CicadaClient {
   pub fn new(address: impl Into<String>) -> CicadaClient {
+    let address = address.into();
     CicadaClient {
       reqwest: Default::default(),
-      address: address.into(),
+      auth_address: format!("{address}/auth"),
+      address,
     }
   }
 

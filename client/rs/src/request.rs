@@ -1,5 +1,7 @@
 use anyhow::{Context, anyhow};
-use mogh_auth_client::api::MoghAuthRequest;
+use mogh_auth_client::api::login::MoghAuthLoginRequest;
+#[cfg(not(feature = "blocking"))]
+use mogh_auth_client::api::manage::MoghAuthManageRequest;
 use mogh_error::deserialize_error;
 use serde::{Serialize, de::DeserializeOwned};
 use serde_json::json;
@@ -11,31 +13,67 @@ use crate::{
 
 impl CicadaClient {
   #[cfg(not(feature = "blocking"))]
-  pub async fn auth<T>(
+  pub async fn auth_login<T>(
     &self,
     request: T,
   ) -> anyhow::Result<T::Response>
   where
-    T: Serialize + MoghAuthRequest,
+    T: Serialize + MoghAuthLoginRequest,
     T::Response: DeserializeOwned,
   {
-    mogh_auth_client::request::auth(
+    mogh_auth_client::request::login(
       &self.reqwest,
-      &self.address,
+      &self.auth_address,
       request,
     )
     .await
   }
 
   #[cfg(feature = "blocking")]
-  pub fn auth<T>(&self, request: T) -> anyhow::Result<T::Response>
+  pub fn auth_login<T>(
+    &self,
+    request: T,
+  ) -> anyhow::Result<T::Response>
   where
-    T: Serialize + MoghAuthRequest,
+    T: Serialize + MoghAuthLoginRequest,
     T::Response: DeserializeOwned,
   {
-    mogh_auth_client::request::auth(
+    mogh_auth_client::request::login(
       &self.reqwest,
-      &self.address,
+      &self.auth_address,
+      request,
+    )
+  }
+
+  #[cfg(not(feature = "blocking"))]
+  pub async fn auth_manage<T>(
+    &self,
+    request: T,
+  ) -> anyhow::Result<T::Response>
+  where
+    T: Serialize + MoghAuthManageRequest,
+    T::Response: DeserializeOwned,
+  {
+    mogh_auth_client::request::manage(
+      &self.reqwest,
+      &self.auth_address,
+      request,
+    )
+    .await
+  }
+
+  #[cfg(feature = "blocking")]
+  pub fn auth_manage<T>(
+    &self,
+    request: T,
+  ) -> anyhow::Result<T::Response>
+  where
+    T: Serialize + MoghAuthManageRequest,
+    T::Response: DeserializeOwned,
+  {
+    mogh_auth_client::request::manage(
+      &self.reqwest,
+      &self.auth_address,
       request,
     )
   }
