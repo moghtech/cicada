@@ -5,14 +5,16 @@ import {
   Center,
   Fieldset,
   Flex,
+  Group,
+  Loader,
   PasswordInput,
-  SimpleGrid,
   Text,
   TextInput,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 import { MoghAuth } from "cicada_client";
+import { KeyRound } from "lucide-react";
 import { useState } from "react";
 
 export default function Login({
@@ -60,12 +62,12 @@ export default function Login({
     onSuccess: secondFactorOnSuccess,
   });
 
-  // const { mutate: completeTotpLogin, isPending: totpPending } = useLogin(
-  //   "CompleteTotpLogin",
-  //   {
-  //     onSuccess: secondFactorOnSuccess,
-  //   }
-  // );
+  const { mutate: completeTotpLogin, isPending: totpPending } = useLogin(
+    "CompleteTotpLogin",
+    {
+      onSuccess: secondFactorOnSuccess,
+    }
+  );
 
   const { mutate: login, isPending: loginPending } = useLogin(
     "LoginLocalUser",
@@ -94,13 +96,13 @@ export default function Login({
     }
   );
 
-  const noAuthConfigured =
-    options !== undefined &&
-    Object.values(options).every((value) => value === false);
+  // const noAuthConfigured =
+  //   options !== undefined &&
+  //   Object.values(options).every((value) => value === false);
 
-  const showSignUp = options !== undefined && !options.registration_disabled;
+  // const showSignUp = options !== undefined && !options.registration_disabled;
 
-  const form = useForm({
+  const localForm = useForm({
     mode: "uncontrolled",
     initialValues: {
       username: "",
@@ -111,6 +113,16 @@ export default function Login({
         username.length ? null : "Username cannot be empty",
       password: (password) =>
         password.length ? null : "Password cannot be empty",
+    },
+  });
+
+  const totpForm = useForm({
+    mode: "uncontrolled",
+    initialValues: {
+      code: "",
+    },
+    validate: {
+      code: (code) => (code.length === 6 ? null : "Code should be 6 digits"),
     },
   });
 
@@ -136,37 +148,89 @@ export default function Login({
           </Flex>
         }
         component="form"
-        onSubmit={form.onSubmit((form) => login(form)) as any}
+        onSubmit={
+          totpIsPending
+            ? totpForm.onSubmit((form) => completeTotpLogin(form))
+            : (localForm.onSubmit((form) => login(form)) as any)
+        }
         style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
         w={400}
       >
-        <TextInput
-          {...form.getInputProps("username")}
-          autoFocus
-          label="Username"
-          placeholder="Enter username"
-          key={form.key("username")}
-        />
-        <PasswordInput
-          {...form.getInputProps("password")}
-          label="Password"
-          placeholder="Enter password"
-          key={form.key("password")}
-        />
-        <SimpleGrid cols={registration_disabled ? 1 : 2} mt="sm">
-          {!registration_disabled && (
-            <Button
-              variant="default"
-              onClick={form.onSubmit((form) => signup(form)) as any}
-              loading={signupPending}
-            >
-              Sign Up
-            </Button>
-          )}
-          <Button variant="filled" type="submit" loading={loginPending}>
-            Login
-          </Button>
-        </SimpleGrid>
+        {options?.local && !secondFactorPending && (
+          <>
+            <TextInput
+              {...localForm.getInputProps("username")}
+              autoFocus
+              label="Username"
+              placeholder="Enter username"
+              key={localForm.key("username")}
+            />
+            <PasswordInput
+              {...localForm.getInputProps("password")}
+              label="Password"
+              placeholder="Enter password"
+              key={localForm.key("password")}
+            />
+            <Flex gap="md" mt="sm" justify="flex-end">
+              {!registration_disabled && (
+                <Button
+                  w={95}
+                  variant="default"
+                  onClick={localForm.onSubmit((form) => signup(form)) as any}
+                  loading={signupPending}
+                >
+                  Sign Up
+                </Button>
+              )}
+              <Button
+                w={95}
+                variant="filled"
+                type="submit"
+                loading={loginPending}
+              >
+                Log In
+              </Button>
+            </Flex>
+          </>
+        )}
+
+        {passkeyIsPending && (
+          <Flex direction="column" gap="md">
+            <KeyRound size="1.5rem" />
+            <Group>
+              <Loader />
+              <Text size="lg">Provide your passkey to finish login</Text>
+            </Group>
+          </Flex>
+        )}
+
+        {totpIsPending && (
+          <Flex direction="column" gap="md">
+            <TextInput
+              {...totpForm.getInputProps("code")}
+              label={
+                <Flex align="center" gap="sm">
+                  <KeyRound size="1rem" />
+                  2FA Code
+                </Flex>
+              }
+              autoComplete="code"
+              autoCapitalize="none"
+              autoCorrect="off"
+              autoFocus
+            />
+            <Flex justify="flex-end">
+              <Button
+                w={100}
+                variant="filled"
+                type="submit"
+                loading={totpPending}
+              >
+                Log In
+              </Button>
+            </Flex>
+          </Flex>
+        )}
       </Fieldset>
     </Center>
   );

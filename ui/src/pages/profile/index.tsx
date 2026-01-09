@@ -15,6 +15,7 @@ import { Types } from "cicada_client";
 import { Save } from "lucide-react";
 import { useState } from "react";
 import { EnrollPasskey } from "./passkey";
+import { EnrollTotp } from "./totp";
 
 const ProfilePage = () => {
   const user = useUser().data;
@@ -86,7 +87,10 @@ const ProfileInner = ({ user }: { user: Types.UserRecord }) => {
       </Fieldset>
 
       <Fieldset legend="2FA">
-        <EnrollPasskey user={user} />
+        <Group>
+          <EnrollPasskey user={user} />
+          <EnrollTotp user={user} />
+        </Group>
       </Fieldset>
     </Flex>
   );

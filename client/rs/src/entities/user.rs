@@ -4,7 +4,7 @@ use serde_json::json;
 use surrealdb_types::{RecordId, RecordIdKey, SurrealValue};
 use typeshare::typeshare;
 
-use crate::entities::Iso8601Timestamp;
+use crate::entities::{Iso8601Timestamp, JsonValue};
 
 #[typeshare]
 #[derive(Debug, Clone, Serialize, Deserialize, SurrealValue)]
@@ -22,7 +22,7 @@ pub struct UserRecord {
   /// Empty if local login is not set.
   pub password: String,
   /// User passkey config for 2fa
-  pub passkey: Option<serde_json::Value>,
+  pub passkey: Option<JsonValue>,
   /// User totp secret.
   pub totp_secret: String,
   // pub totp:
@@ -37,7 +37,9 @@ pub struct UserRecord {
 impl UserRecord {
   pub fn sanitize(&mut self) {
     self.password.clear();
-    self.totp_secret = String::from("redacted");
+    if !self.totp_secret.is_empty() {
+      self.totp_secret = String::from("redacted");
+    }
     if let Some(passkey) = self.passkey.as_mut() {
       *passkey = json!("redacted")
     }

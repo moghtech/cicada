@@ -45,7 +45,7 @@ export const EnrollPasskey = ({ user }: { user: Types.UserRecord }) => {
 
   return (
     <>
-      {user?.passkey === null && (
+      {user?.passkey === null && !user?.totp_secret && (
         <Button
           leftSection={<Fingerprint size="1rem" />}
           onClick={() => beginEnrollment({})}

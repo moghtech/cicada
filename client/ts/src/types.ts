@@ -75,6 +75,8 @@ export type GetNodeResponse = NodeRecord;
 
 export type UserId = string;
 
+export type JsonValue = any;
+
 export interface UserRecord {
 	/** The unique user id */
 	id: UserId;
@@ -91,7 +93,7 @@ export interface UserRecord {
 	 */
 	password: string;
 	/** User passkey config for 2fa */
-	passkey?: Object;
+	passkey?: JsonValue;
 	/** User totp secret. */
 	totp_secret: string;
 	/** Created at as ISO8601 timestamp. */

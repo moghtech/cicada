@@ -19,6 +19,8 @@ pub mod user;
 pub type U64 = u64;
 #[typeshare(serialized_as = "string")]
 pub type Iso8601Timestamp = surrealdb_types::Datetime;
+#[typeshare(serialized_as = "any")]
+pub type JsonValue = serde_json::Value;
 
 #[typeshare]
 #[derive(
