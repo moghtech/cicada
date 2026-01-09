@@ -6,6 +6,7 @@ use cicada_client::entities::config::{
   logger::LogConfig,
 };
 use colored::Colorize as _;
+use mogh_auth_client::config::OidcConfig;
 use mogh_config::ConfigLoader;
 use mogh_secret_file::maybe_read_item_from_file;
 
@@ -86,6 +87,36 @@ pub fn core_config() -> &'static CoreConfig {
         db_name: env
           .cicada_database_db_name
           .unwrap_or(config.database.db_name),
+      },
+      local_auth: env.cicada_local_auth.unwrap_or(config.local_auth),
+      disable_user_registration: env
+        .cicada_disable_user_registration
+        .unwrap_or(config.disable_user_registration),
+      lock_login_credentials_for: env
+        .cicada_lock_login_credentials_for
+        .unwrap_or(config.lock_login_credentials_for),
+      oidc: OidcConfig {
+        enabled: env
+          .cicada_oidc_enabled
+          .unwrap_or(config.oidc.enabled),
+        provider: env
+          .cicada_oidc_provider
+          .unwrap_or(config.oidc.provider),
+        redirect_host: env
+          .cicada_oidc_redirect_host
+          .unwrap_or(config.oidc.redirect_host),
+        client_id: env
+          .cicada_oidc_client_id
+          .unwrap_or(config.oidc.client_id),
+        client_secret: env
+          .cicada_oidc_client_secret
+          .unwrap_or(config.oidc.client_secret),
+        use_full_email: env
+          .cicada_oidc_use_full_email
+          .unwrap_or(config.oidc.use_full_email),
+        additional_audiences: env
+          .cicada_oidc_additional_audiences
+          .unwrap_or(config.oidc.additional_audiences),
       },
       auth_rate_limit_disabled: env
         .cicada_auth_rate_limit_disabled

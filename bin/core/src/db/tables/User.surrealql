@@ -15,11 +15,32 @@ DEFINE FIELD OVERWRITE enabled
   TYPE bool
   DEFAULT false;
 
+// =========
+// = LOGIN =
+// =========
+
 -- password
 DEFINE FIELD OVERWRITE password
   ON TABLE User
   TYPE string
   DEFAULT "";
+
+-- oidc_subject
+DEFINE FIELD OVERWRITE oidc_subject
+  ON TABLE User
+  TYPE string
+  DEFAULT "";
+
+-- Derived oidc_subject uniqueness key
+DEFINE FIELD OVERWRITE oidc_subject_unique 
+  ON TABLE User
+  TYPE string
+  VALUE IF oidc_subject == "" { record::id(id) } ELSE { oidc_subject }
+  READONLY;
+
+// =======
+// = 2FA =
+// =======
 
 -- passkey
 DEFINE FIELD OVERWRITE passkey
@@ -54,4 +75,10 @@ DEFINE FIELD OVERWRITE updated_at
 DEFINE INDEX OVERWRITE Name
   ON TABLE User
   FIELDS name
+  UNIQUE;
+
+-- oidc_subject_unique | unique
+DEFINE INDEX OVERWRITE OidcSubject
+  ON TABLE User
+  FIELDS oidc_subject_unique
   UNIQUE;

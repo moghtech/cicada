@@ -18,14 +18,28 @@ pub struct UserRecord {
   /// Disabled users cannot log in and have no API access.
   #[serde(default)]
   pub enabled: bool,
+  // =========
+  // = LOGIN =
+  // =========
   /// Hashed user password.
   /// Empty if local login is not set.
+  #[serde(default)]
   pub password: String,
+  /// OIDC subject identifier
+  /// Empty if OIDC login is not set.
+  #[serde(default)]
+  pub oidc_subject: String,
+  // =======
+  // = 2FA =
+  // =======
   /// User passkey config for 2fa
   pub passkey: Option<JsonValue>,
   /// User totp secret.
+  #[serde(default)]
   pub totp_secret: String,
-  // pub totp:
+  // ===============
+  // = TIMESTAMPS =
+  // ===============
   /// Created at as ISO8601 timestamp.
   #[cfg_attr(feature = "utoipa", schema(value_type = String))]
   pub created_at: Iso8601Timestamp,

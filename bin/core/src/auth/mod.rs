@@ -1,26 +1,29 @@
 use std::sync::{Arc, LazyLock};
 
-use anyhow::anyhow;
 use async_timing_util::{Timelength, get_timelength_in_ms};
-use axum::http::StatusCode;
 use cicada_client::entities::user::UserRecord;
-use mogh_auth_client::passkey::Passkey;
+use mogh_auth_client::{
+  api::login::LoginProvider, config::OidcConfig, passkey::Passkey,
+};
 // use cicada_client::entities::user::u
 use mogh_auth_server::{
   AuthImpl,
   args::RequestClientArgs,
-  provider::{jwt::JwtProvider, passkey::PasskeyProvider},
+  provider::{
+    jwt::JwtProvider, oidc::SubjectIdentifier,
+    passkey::PasskeyProvider,
+  },
   rand::random_string,
   user::{AuthUserImpl, BoxAuthUser},
 };
-use mogh_error::AddStatusCode;
 use mogh_rate_limit::RateLimiter;
 
 use crate::{
   config::core_config,
   db::query::user::{
-    UpdateUser, find_user_with_username, get_user,
-    sign_up_local_user, update_user_fields, update_user_passkey,
+    UpdateUser, find_user_with_oidc_subject, find_user_with_username,
+    get_user, sign_up_local_user, sign_up_oidc_user,
+    update_user_fields, update_user_passkey,
   },
 };
 
@@ -87,17 +90,15 @@ impl AuthUserImpl for AuthUser {
 
   fn passkey(&self) -> Option<Passkey> {
     let passkey = self.0.passkey.as_ref()?;
-    serde_json::from_str(
-      &serde_json::to_string(passkey).ok()?,
-    )
-    .inspect_err(|e| {
-      warn!(
-        "User {} ({}) | Invalid passkey on database | {e:?}",
-        self.username(),
-        self.id(),
-      )
-    })
-    .ok()
+    serde_json::from_str(&serde_json::to_string(passkey).ok()?)
+      .inspect_err(|e| {
+        warn!(
+          "User {} ({}) | Invalid passkey on database | {e:?}",
+          self.username(),
+          self.id(),
+        )
+      })
+      .ok()
   }
 
   fn totp_secret(&self) -> Option<&str> {
@@ -125,8 +126,12 @@ impl AuthImpl for CicadaAuthImpl {
     &self.client
   }
 
-  fn app_name(&self) -> &str {
+  fn app_name(&self) -> &'static str {
     "Cicada"
+  }
+
+  fn host(&self) -> &str {
+    &core_config().host
   }
 
   fn get_user(
@@ -187,14 +192,14 @@ impl AuthImpl for CicadaAuthImpl {
   fn find_user_with_username(
     &self,
     username: String,
-  ) -> mogh_auth_server::DynFuture<mogh_error::Result<BoxAuthUser>>
-  {
+  ) -> mogh_auth_server::DynFuture<
+    mogh_error::Result<Option<BoxAuthUser>>,
+  > {
     Box::pin(async move {
       let user = find_user_with_username(username)
-        .await
-        .map_err(|_| anyhow!("Invalid login credentials"))
-        .status_code(StatusCode::UNAUTHORIZED)?;
-      Ok(Box::new(AuthUser(user)) as BoxAuthUser)
+        .await?
+        .map(|user| Box::new(AuthUser(user)) as BoxAuthUser);
+      Ok(user)
     })
   }
 
@@ -233,6 +238,87 @@ impl AuthImpl for CicadaAuthImpl {
       .await
       .map(|_| ())
       .map_err(Into::into)
+    })
+  }
+
+  // =============
+  // = OIDC AUTH =
+  // =============
+
+  fn oidc_config(&self) -> &OidcConfig {
+    &core_config().oidc
+  }
+
+  fn find_user_with_oidc_subject(
+    &self,
+    subject: SubjectIdentifier,
+  ) -> mogh_auth_server::DynFuture<
+    mogh_error::Result<Option<BoxAuthUser>>,
+  > {
+    Box::pin(async move {
+      let user = find_user_with_oidc_subject(subject.into())
+        .await?
+        .map(|user| Box::new(AuthUser(user)) as BoxAuthUser);
+      Ok(user)
+    })
+  }
+
+  fn sign_up_oidc_user(
+    &self,
+    username: String,
+    subject: SubjectIdentifier,
+    _no_users_exist: bool,
+  ) -> mogh_auth_server::DynFuture<mogh_error::Result<String>> {
+    Box::pin(async move {
+      sign_up_oidc_user(username, subject.into(), true)
+        .await
+        .map_err(Into::into)
+    })
+  }
+
+  fn link_oidc_login(
+    &self,
+    user_id: String,
+    subject: SubjectIdentifier,
+  ) -> mogh_auth_server::DynFuture<mogh_error::Result<()>> {
+    Box::pin(async move {
+      update_user_fields(
+        user_id,
+        UpdateUser {
+          oidc_subject: Some(subject.into()),
+          ..Default::default()
+        },
+      )
+      .await
+      .map(|_| ())
+      .map_err(Into::into)
+    })
+  }
+
+  // ==========
+  // = UNLINK =
+  // ==========
+
+  fn unlink_login(
+    &self,
+    user_id: String,
+    provider: LoginProvider,
+  ) -> mogh_auth_server::DynFuture<mogh_error::Result<()>> {
+    Box::pin(async move {
+      let update = match provider {
+        LoginProvider::Local => UpdateUser {
+          password: Some(String::new()),
+          ..Default::default()
+        },
+        LoginProvider::Oidc => UpdateUser {
+          oidc_subject: Some(String::new()),
+          ..Default::default()
+        },
+      };
+      update_user_fields(user_id, update)
+        .await
+        .map(|_| ())
+        .map_err(Into::into)
     })
   }
 

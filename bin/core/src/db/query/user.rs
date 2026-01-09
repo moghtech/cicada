@@ -15,15 +15,16 @@ pub async fn get_user(user_id: &str) -> anyhow::Result<UserRecord> {
 
 pub async fn find_user_with_username(
   username: String,
-) -> anyhow::Result<UserRecord> {
-  DB.query("SELECT * FROM User WHERE name = $name")
+) -> anyhow::Result<Option<UserRecord>> {
+  let user = DB
+    .query("SELECT * FROM User WHERE name = $name")
     .bind(("name", username))
     .await
     .context("Failed to query database for user")?
     .take::<Vec<UserRecord>>(0)
     .context("Failed to deserialize UserRecord")?
-    .pop()
-    .context("Did not find user with given username")
+    .pop();
+  Ok(user)
 }
 
 pub async fn sign_up_local_user(
@@ -32,9 +33,41 @@ pub async fn sign_up_local_user(
   enabled: bool,
 ) -> anyhow::Result<String> {
   let user = DB
-    .query("CREATE User SET name = $name, password = $password, enabled = $enabled;")
+    .query("CREATE User SET name = $name, enabled = $enabled, password = $password;")
     .bind(("name", username))
     .bind(("password", hashed_password))
+    .bind(("enabled", enabled))
+    .await
+    .context("Failed to create user on database")?
+    .take::<Option<UserRecord>>(0)
+    .context("Failed to deserialize UserRecord")?
+    .context("Query response missing created UserRecord")?;
+  Ok(user.id.0)
+}
+
+pub async fn find_user_with_oidc_subject(
+  oidc_subject: String,
+) -> anyhow::Result<Option<UserRecord>> {
+  let user = DB
+    .query("SELECT * FROM User WHERE oidc_subject = $oidc_subject")
+    .bind(("oidc_subject", oidc_subject))
+    .await
+    .context("Failed to query database for user")?
+    .take::<Vec<UserRecord>>(0)
+    .context("Failed to deserialize UserRecord")?
+    .pop();
+  Ok(user)
+}
+
+pub async fn sign_up_oidc_user(
+  username: String,
+  oidc_subject: String,
+  enabled: bool,
+) -> anyhow::Result<String> {
+  let user = DB
+    .query("CREATE User SET name = $name, enabled = $enabled, oidc_subject = $oidc_subject;")
+    .bind(("name", username))
+    .bind(("oidc_subject", oidc_subject))
     .bind(("enabled", enabled))
     .await
     .context("Failed to create user on database")?
@@ -52,6 +85,8 @@ pub struct UpdateUser {
   pub enabled: Option<bool>,
   #[serde(skip_serializing_if = "Option::is_none")]
   pub password: Option<String>,
+  #[serde(skip_serializing_if = "Option::is_none")]
+  pub oidc_subject: Option<String>,
   #[serde(skip_serializing_if = "Option::is_none")]
   pub totp_secret: Option<String>,
 }

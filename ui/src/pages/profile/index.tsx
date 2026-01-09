@@ -1,6 +1,7 @@
 import { useLoginOptions, useManageAuth, useUser } from "@/lib/hooks";
 import {
   ActionIcon,
+  Button,
   Center,
   Fieldset,
   Flex,
@@ -11,11 +12,14 @@ import {
   TextInput,
 } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
-import { Types } from "cicada_client";
-import { Save } from "lucide-react";
-import { useState } from "react";
+import { MoghAuth, Types } from "cicada_client";
+import { CirclePlus, Save, User } from "lucide-react";
+import { useMemo, useState } from "react";
 import { EnrollPasskey } from "./passkey";
 import { EnrollTotp } from "./totp";
+import { CICADA_BASE_URL } from "@/main";
+import { DataTable } from "@/components/data-table";
+import ConfirmDelete from "@/components/confirm-delete";
 
 const ProfilePage = () => {
   const user = useUser().data;
@@ -29,6 +33,14 @@ const ProfilePage = () => {
   }
 
   return <ProfileInner user={user} />;
+};
+
+const useLinkWithOauth = () => {
+  const { mutateAsync } = useManageAuth("BeginExternalLoginLink");
+  return (provider: MoghAuth.Types.ExternalLoginProvider) =>
+    mutateAsync({}).then(() =>
+      location.replace(`${CICADA_BASE_URL}/auth/${provider.toLowerCase()}/link`)
+    );
 };
 
 const ProfileInner = ({ user }: { user: Types.UserRecord }) => {
@@ -49,17 +61,54 @@ const ProfileInner = ({ user }: { user: Types.UserRecord }) => {
       refetchUser();
     },
   });
+  const { mutateAsync: unlink } = useManageAuth("UnlinkLogin", {
+    onSuccess: () => {
+      notifications.show({ message: "Unlinked login." });
+      refetchUser();
+    },
+  });
+  const loginProviders: Array<{
+    provider: MoghAuth.Types.LoginProvider;
+    enabled: boolean;
+    linked: boolean;
+  }> = useMemo(
+    () =>
+      [
+        {
+          provider: "Local" as MoghAuth.Types.LoginProvider,
+          enabled: !!options?.local,
+          linked: !!user?.password,
+        },
+        {
+          provider: "Oidc" as MoghAuth.Types.LoginProvider,
+          enabled: !!options?.oidc,
+          linked: !!user?.oidc_subject,
+        },
+      ].filter(({ enabled }) => enabled),
+    [user, options]
+  );
+  const linkedCount = loginProviders.filter(({ linked }) => linked).length;
+  const linkWithOauth = useLinkWithOauth();
   return (
     <Flex direction="column" gap="lg">
-      <Fieldset legend="Login">
+      <Group>
+        <User size={20} />
+        <Text fz="h2" opacity={0.6}>
+          Profile
+        </Text>
+      </Group>
+
+      <Fieldset legend={<Text size="lg">Login</Text>}>
         <Group>
-          <Text ff="monospace">Update Username:</Text>
+          <Text ff="monospace">Username:</Text>
+
           <TextInput
-            placeholder="Input username"
+            placeholder="Update username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             w={250}
           />
+
           <ActionIcon
             onClick={() => updateUsername({ username })}
             disabled={!username || username === user.name}
@@ -67,15 +116,18 @@ const ProfileInner = ({ user }: { user: Types.UserRecord }) => {
             <Save size="1rem" />
           </ActionIcon>
         </Group>
+
         {options?.local && (
           <Group mt="sm">
-            <Text ff="monospace">Update Password:</Text>
+            <Text ff="monospace">Password:</Text>
+
             <PasswordInput
               placeholder="Update password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               w={250}
             />
+
             <ActionIcon
               onClick={() => updatePassword({ password })}
               disabled={!password}
@@ -86,7 +138,64 @@ const ProfileInner = ({ user }: { user: Types.UserRecord }) => {
         )}
       </Fieldset>
 
-      <Fieldset legend="2FA">
+      {!!loginProviders.length && (
+        <Fieldset legend={<Text size="lg">Providers</Text>}>
+          <DataTable
+            tableKey="login-providers-v1"
+            data={loginProviders}
+            columns={[
+              { header: "Provider", accessorKey: "provider" },
+              {
+                header: "Linked",
+                cell: ({
+                  row: {
+                    original: { linked },
+                  },
+                }) => (
+                  <Button color={linked ? "green" : "red"}>
+                    {linked ? "Linked" : "Unlinked"}
+                  </Button>
+                ),
+              },
+              {
+                header: "Link",
+                cell: ({
+                  row: {
+                    original: { provider, linked },
+                  },
+                }) =>
+                  linked ? (
+                    linkedCount < 2 ? (
+                      <>Must have at least 1 login linked.</>
+                    ) : (
+                      <ConfirmDelete
+                        action="Unlink"
+                        name={provider}
+                        entityType="Login"
+                        onConfirm={() => unlink({ provider })}
+                      />
+                    )
+                  ) : provider === "Local" ? (
+                    <>Set password above to enable.</>
+                  ) : (
+                    <Button
+                      variant="default"
+                      onClick={() => linkWithOauth(provider as any)}
+                      disabled={
+                        provider === "Oidc" ? !!user.oidc_subject : false
+                      }
+                      leftSection={<CirclePlus size="1rem" />}
+                    >
+                      Link {provider}
+                    </Button>
+                  ),
+              },
+            ]}
+          />
+        </Fieldset>
+      )}
+
+      <Fieldset legend={<Text size="lg">2FA</Text>}>
         <Group>
           <EnrollPasskey user={user} />
           <EnrollTotp user={user} />

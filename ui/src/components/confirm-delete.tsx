@@ -3,12 +3,14 @@ import { useDisclosure } from "@mantine/hooks";
 import { Trash2 } from "lucide-react";
 
 const ConfirmDelete = ({
+  action = "Delete",
   entityType,
   name,
   onConfirm,
   loading,
   disabled,
 }: {
+  action?: string;
   entityType?: string;
   name: string;
   onConfirm: () => Promise<unknown>;
@@ -24,7 +26,8 @@ const ConfirmDelete = ({
         onClose={close}
         title={
           <Flex gap="0.3rem" align="center">
-            Delete{formatted_et} <Text fw="bolder">{name}</Text>
+            {action}
+            {formatted_et} <Text fw="bolder">{name}</Text>
           </Flex>
         }
       >
@@ -42,7 +45,8 @@ const ConfirmDelete = ({
             leftSection={<Trash2 size="1rem" />}
             fullWidth
           >
-            Delete{formatted_et}
+            {action}
+            {formatted_et}
           </Button>
         </Flex>
       </Modal>
@@ -53,7 +57,8 @@ const ConfirmDelete = ({
         onClick={open}
         leftSection={<Trash2 size="1rem" />}
       >
-        Delete{formatted_et}
+        {action}
+        {formatted_et}
       </Button>
     </>
   );

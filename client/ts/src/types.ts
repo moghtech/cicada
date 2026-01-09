@@ -91,11 +91,16 @@ export interface UserRecord {
 	 * Hashed user password.
 	 * Empty if local login is not set.
 	 */
-	password: string;
+	password?: string;
+	/**
+	 * OIDC subject identifier
+	 * Empty if OIDC login is not set.
+	 */
+	oidc_subject?: string;
 	/** User passkey config for 2fa */
 	passkey?: JsonValue;
 	/** User totp secret. */
-	totp_secret: string;
+	totp_secret?: string;
 	/** Created at as ISO8601 timestamp. */
 	created_at: Iso8601Timestamp;
 	/** Updated at as ISO8601 timestamp. */

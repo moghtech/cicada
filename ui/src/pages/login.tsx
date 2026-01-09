@@ -1,4 +1,9 @@
-import { useLogin, useLoginOptions, useUserInvalidate } from "@/lib/hooks";
+import {
+  cicada_client,
+  useLogin,
+  useLoginOptions,
+  useUserInvalidate,
+} from "@/lib/hooks";
 import { sanitize_query } from "@/lib/utils";
 import {
   Button,
@@ -132,19 +137,44 @@ export default function Login({
     <Center h="80vh">
       <Fieldset
         legend={
-          <Flex gap="sm" align="center">
-            <img
-              src="/mogh-512x512.png"
-              width={32}
-              height={32}
-              alt="moghtech"
-            />
-            <Flex direction="column">
-              <Text size="xl" fw="bold">
-                Cicada
-              </Text>
-              <Text size="sm">Log In</Text>
-            </Flex>
+          <Flex gap="lg" align="center" justify="space-between">
+            <Group gap="sm">
+              <img
+                src="/mogh-512x512.png"
+                width={32}
+                height={32}
+                alt="moghtech"
+              />
+              <Flex direction="column">
+                <Text size="xl" fw="bold">
+                  Cicada
+                </Text>
+                <Text size="sm">Log In</Text>
+              </Flex>
+            </Group>
+            {!secondFactorPending && (
+              <Group gap="sm">
+                {(
+                  [[options?.oidc, "Oidc"]] as Array<
+                    [boolean | undefined, MoghAuth.Types.ExternalLoginProvider]
+                  >
+                ).map(
+                  ([enabled, provider]) =>
+                    enabled && (
+                      <Button
+                        key={provider}
+                        onClick={() =>
+                          cicada_client().auth.login_with_third_party(provider)
+                        }
+                        leftSection={<KeyRound size="1rem" />}
+                        w={95}
+                      >
+                        {provider}
+                      </Button>
+                    )
+                )}
+              </Group>
+            )}
           </Flex>
         }
         component="form"
@@ -195,17 +225,17 @@ export default function Login({
         )}
 
         {passkeyIsPending && (
-          <Flex direction="column" gap="md">
+          <>
             <KeyRound size="1.5rem" />
             <Group>
               <Loader />
               <Text size="lg">Provide your passkey to finish login</Text>
             </Group>
-          </Flex>
+          </>
         )}
 
         {totpIsPending && (
-          <Flex direction="column" gap="md">
+          <>
             <TextInput
               {...totpForm.getInputProps("code")}
               label={
@@ -229,7 +259,7 @@ export default function Login({
                 Log In
               </Button>
             </Flex>
-          </Flex>
+          </>
         )}
       </Fieldset>
     </Center>

@@ -1,13 +1,11 @@
 use std::{path::PathBuf, sync::OnceLock};
 
+use mogh_auth_client::config::{OidcConfig, empty_or_redacted};
 use serde::Deserialize;
 
 use crate::entities::{
   Timelength,
-  config::{
-    empty_or_redacted,
-    logger::{LogConfig, LogLevel, StdioLogMode},
-  },
+  config::logger::{LogConfig, LogLevel, StdioLogMode},
 };
 
 /// # Cicada Core Environment Variables
@@ -82,6 +80,34 @@ pub struct Env {
   pub cicada_database_namespace: Option<String>,
   /// Override `database.db_name`
   pub cicada_database_db_name: Option<String>,
+
+  /// Override `local_auth`
+  pub cicada_local_auth: Option<bool>,
+  /// Override `disable_user_registration`
+  pub cicada_disable_user_registration: Option<bool>,
+  /// Override `lock_login_credentials_for`
+  pub cicada_lock_login_credentials_for: Option<Vec<String>>,
+
+  /// Override `oidc_enabled`
+  pub cicada_oidc_enabled: Option<bool>,
+  /// Override `oidc_provider`
+  pub cicada_oidc_provider: Option<String>,
+  /// Override `oidc_redirect_host`
+  pub cicada_oidc_redirect_host: Option<String>,
+  /// Override `oidc_client_id`
+  pub cicada_oidc_client_id: Option<String>,
+  /// Override `oidc_client_id` from file
+  pub cicada_oidc_client_id_file: Option<PathBuf>,
+  /// Override `oidc_client_secret`
+  pub cicada_oidc_client_secret: Option<String>,
+  /// Override `oidc_client_secret` from file
+  pub cicada_oidc_client_secret_file: Option<PathBuf>,
+  /// Override `oidc_use_full_email`
+  pub cicada_oidc_use_full_email: Option<bool>,
+  /// Override `oidc_additional_audiences`
+  pub cicada_oidc_additional_audiences: Option<Vec<String>>,
+  /// Override `oidc_additional_audiences` from file
+  pub cicada_oidc_additional_audiences_file: Option<PathBuf>,
 
   /// Override `auth_rate_limit_disabled`
   pub cicada_auth_rate_limit_disabled: Option<bool>,
@@ -182,6 +208,29 @@ pub struct CoreConfig {
   /// Configure database connection
   #[serde(default)]
   pub database: DatabaseConfig,
+
+  // ================
+  // = Auth / Login =
+  // ================
+  /// Enable login with local auth
+  #[serde(default)]
+  pub local_auth: bool,
+
+  /// Normally new users will be registered, but not enabled until an Admin enables them.
+  /// With `disable_user_registration = true`, only the first user to sign up will be registered as a user.
+  #[serde(default)]
+  pub disable_user_registration: bool,
+
+  /// List of usernames for which the update username / password
+  /// APIs are disabled. Used by demo to lock the 'demo' : 'demo' login.
+  ///
+  /// To lock the api for all users, use `lock_login_credentials_for = ["__ALL__"]`
+  #[serde(default, skip_serializing_if = "Vec::is_empty")]
+  pub lock_login_credentials_for: Vec<String>,
+
+  /// OIDC login configuration
+  #[serde(default)]
+  pub oidc: OidcConfig,
 
   // =================
   // = Rate Limiting =
@@ -300,6 +349,10 @@ impl Default for CoreConfig {
       jwt_secret: Default::default(),
       jwt_ttl: default_jwt_ttl(),
       database: Default::default(),
+      local_auth: Default::default(),
+      disable_user_registration: Default::default(),
+      lock_login_credentials_for: Default::default(),
+      oidc: Default::default(),
       auth_rate_limit_disabled: Default::default(),
       auth_rate_limit_max_attempts:
         default_auth_rate_limit_max_attempts(),
@@ -319,7 +372,8 @@ impl Default for CoreConfig {
 
 impl CoreConfig {
   pub fn sanitized(&self) -> CoreConfig {
-    let config = self.clone();
+    let mut config = self.clone();
+    config.oidc.sanitize();
     CoreConfig {
       title: config.title,
       host: config.host,
@@ -328,6 +382,10 @@ impl CoreConfig {
       jwt_secret: empty_or_redacted(&config.jwt_secret),
       jwt_ttl: config.jwt_ttl,
       database: config.database.sanitized(),
+      local_auth: config.local_auth,
+      disable_user_registration: config.disable_user_registration,
+      lock_login_credentials_for: config.lock_login_credentials_for,
+      oidc: config.oidc,
       logging: config.logging,
       pretty_startup_config: config.pretty_startup_config,
       unsafe_unsanitized_startup_config: config
