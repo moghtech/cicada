@@ -5,16 +5,15 @@ import {
   Center,
   Fieldset,
   Flex,
-  Grid,
-  Group,
   PasswordInput,
   SimpleGrid,
   Text,
   TextInput,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
+import { notifications } from "@mantine/notifications";
 import { MoghAuth } from "cicada_client";
-import { useRef, useState } from "react";
+import { useState } from "react";
 
 export default function Login({
   passkeyIsPending: _passkeyIsPending,
@@ -25,8 +24,6 @@ export default function Login({
 }) {
   const options = useLoginOptions().data;
   const userInvalidate = useUserInvalidate();
-  const formRef = useRef<HTMLFormElement>(null);
-  const totpFormRef = useRef<HTMLFormElement>(null);
   const [passkeyIsPending, setPasskeyPending] = useState(
     _passkeyIsPending ?? false
   );
@@ -59,16 +56,16 @@ export default function Login({
     }
   );
 
-  const { mutate: completeTotpLogin, isPending: totpPending } = useLogin(
-    "CompleteTotpLogin",
-    {
-      onSuccess: secondFactorOnSuccess,
-    }
-  );
-
   const { mutate: completePasskeyLogin } = useLogin("CompletePasskeyLogin", {
     onSuccess: secondFactorOnSuccess,
   });
+
+  // const { mutate: completeTotpLogin, isPending: totpPending } = useLogin(
+  //   "CompleteTotpLogin",
+  //   {
+  //     onSuccess: secondFactorOnSuccess,
+  //   }
+  // );
 
   const { mutate: login, isPending: loginPending } = useLogin(
     "LoginLocalUser",
@@ -80,15 +77,15 @@ export default function Login({
           case "Passkey":
             setPasskeyPending(true);
             return navigator.credentials
-              .get(MoghAuth.Passkey.preparePasskeyCredential(data))
+              .get(MoghAuth.Passkey.prepareRequestChallengeResponse(data))
               .then((credential) => completePasskeyLogin({ credential }))
               .catch((e) => {
                 console.error(e);
-                // toast({
-                //   title: "Failed to select passkey",
-                //   description: "See console for details",
-                //   variant: "destructive",
-                // });
+                notifications.show({
+                  title: "Failed to select passkey",
+                  message: "See console for details",
+                  color: "red",
+                });
               });
           case "Totp":
             return setTotpPending(true);
@@ -96,45 +93,6 @@ export default function Login({
       },
     }
   );
-
-  const getFormCredentials = () => {
-    if (!formRef.current) return undefined;
-    const fd = new FormData(formRef.current);
-    const username = String(fd.get("username") ?? "");
-    const password = String(fd.get("password") ?? "");
-    return { username, password };
-  };
-
-  const handleLogin = () => {
-    const creds = getFormCredentials();
-    if (!creds) return;
-    login(creds);
-  };
-
-  const handleSubmit = (e: any) => {
-    e.preventDefault();
-    handleLogin();
-  };
-
-  const handleSignUp = () => {
-    const creds = getFormCredentials();
-    if (!creds) return;
-    signup(creds);
-  };
-
-  const getTotpFormCredentials = () => {
-    if (!totpFormRef.current) return undefined;
-    const fd = new FormData(totpFormRef.current);
-    const code = String(fd.get("code") ?? "");
-    return { code };
-  };
-
-  const handleTotpSubmit = (e: any) => {
-    e.preventDefault();
-    const creds = getTotpFormCredentials();
-    if (!creds || !totpIsPending) return;
-    completeTotpLogin({ code: creds.code });
-  };
 
   const noAuthConfigured =
     options !== undefined &&

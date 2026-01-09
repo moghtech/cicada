@@ -14,6 +14,7 @@ import { MoghAuth } from "cicada_client";
 
 // Lazy import pages
 const Login = lazy(() => import("@/pages/login"));
+const Profile = lazy(() => import("@/pages/profile"));
 const Filesystems = lazy(() => import("@/pages/filesystems"));
 const Node = lazy(() => import("@/pages/node"));
 const UserDisabled = lazy(() => import("@/pages/user-disabled"));
@@ -43,6 +44,7 @@ export const Router = () => {
             <Route path="" element={<Filesystems />} />
             <Route path="filesystems/:filesystem" element={<Node />} />
             <Route path="filesystems/:filesystem/:inode" element={<Node />} />
+            <Route path="profile" element={<Profile />} />
           </Route>
         </Route>
       </Routes>

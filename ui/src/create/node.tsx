@@ -1,7 +1,8 @@
 import { useInvalidate, useWrite } from "@/lib/hooks";
-import { Button, Flex, Menu, TextInput } from "@mantine/core";
+import { Button, Menu, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
+import { notifications } from "@mantine/notifications";
 import { Types } from "cicada_client";
 import { FilePlus, FolderPlus } from "lucide-react";
 
@@ -16,8 +17,8 @@ const CreateNode = ({
   return (
     <Menu opened={opened} onClose={close} position="bottom-start" width={400}>
       <Menu.Target>
-        <Button onClick={open}>
-          <CreateNodeTitle kind={kind} />
+        <Button onClick={open} leftSection={<CreateNodeIcon kind={kind} />}>
+          Create {kind}
         </Button>
       </Menu.Target>
       <Menu.Dropdown p="1rem">
@@ -41,16 +42,11 @@ const CreateNode = ({
   // );
 };
 
-const CreateNodeTitle = ({ kind }: { kind: Types.NodeKind }) => {
-  return (
-    <Flex align="center" gap="xs">
-      {kind === "Folder" ? (
-        <FolderPlus size="1rem" />
-      ) : (
-        <FilePlus size="1rem" />
-      )}
-      Create {kind}
-    </Flex>
+const CreateNodeIcon = ({ kind }: { kind: Types.NodeKind }) => {
+  return kind === "Folder" ? (
+    <FolderPlus size="1rem" />
+  ) : (
+    <FilePlus size="1rem" />
   );
 };
 
@@ -66,6 +62,7 @@ const CreateNodeForm = ({
   const inv = useInvalidate();
   const { mutate, isPending } = useWrite("CreateNode", {
     onSuccess: () => {
+      notifications.show({ message: `Created ${kind.toLowerCase()}.` });
       inv(["ListNodes"]);
       close();
     },
@@ -93,8 +90,12 @@ const CreateNodeForm = ({
         placeholder="Enter name"
         key={form.key("name")}
       />
-      <Button type="submit" loading={isPending}>
-        <CreateNodeTitle kind={kind} />
+      <Button
+        leftSection={<CreateNodeIcon kind={kind} />}
+        type="submit"
+        loading={isPending}
+      >
+        Create {kind}
       </Button>
     </form>
   );

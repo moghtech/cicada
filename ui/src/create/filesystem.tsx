@@ -2,6 +2,8 @@ import { useInvalidate, useWrite } from "@/lib/hooks";
 import { Button, Group, Modal, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
+import { notifications } from "@mantine/notifications";
+import { Plus } from "lucide-react";
 
 const CreateFilesystem = () => {
   const [opened, { open, close }] = useDisclosure(false);
@@ -10,15 +12,18 @@ const CreateFilesystem = () => {
       <Modal opened={opened} onClose={close} title="Create Filesystem">
         <CreateFilesystemForm close={close} />
       </Modal>
-      <Button onClick={open}>Create Filesystem</Button>
+      <Button onClick={open} rightSection={<Plus size="1rem" />}>
+        Create Filesystem
+      </Button>
     </>
   );
 };
 
-const CreateFilesystemForm = ({ close }: { close: () => void; }) => {
+const CreateFilesystemForm = ({ close }: { close: () => void }) => {
   const inv = useInvalidate();
   const { mutate, isPending } = useWrite("CreateFilesystem", {
     onSuccess: () => {
+      notifications.show({ message: "Created filesystem." });
       inv(["ListFilesystems"]);
       close();
     },

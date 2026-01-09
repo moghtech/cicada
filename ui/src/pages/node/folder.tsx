@@ -42,7 +42,7 @@ const FolderPage = ({
     });
   return (
     <Flex direction="column" gap="lg">
-      <Flex gap="sm" align="center">
+      <Group>
         <HardDrive size={20} />
         <h2 style={{ opacity: 0.6 }}>Filesystem:</h2>
         <h2>{filesystem?.name}</h2>
@@ -50,7 +50,7 @@ const FolderPage = ({
         <FolderOpen size={20} />
         <h2 style={{ opacity: 0.6 }}>Folder:</h2>
         <h2>{node?.name ?? "Root"}</h2>
-      </Flex>
+      </Group>
       <Group>
         {Object.values(Types.NodeKind).map((kind) => (
           <CreateNode key={kind} kind={kind} parent={node?.inode ?? 1} />

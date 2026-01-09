@@ -19,7 +19,8 @@ use mogh_rate_limit::RateLimiter;
 use crate::{
   config::core_config,
   db::query::user::{
-    find_user_with_username, get_user, sign_up_local_user,
+    UpdateUser, find_user_with_username, get_user,
+    sign_up_local_user, update_user_fields, update_user_passkey,
   },
 };
 
@@ -81,6 +82,29 @@ impl AuthUserImpl for AuthUser {
       None
     } else {
       Some(&self.0.password)
+    }
+  }
+
+  fn passkey(&self) -> Option<Passkey> {
+    let passkey = self.0.passkey.as_ref()?;
+    serde_json::from_str(
+      &serde_json::to_string(passkey).ok()?,
+    )
+    .inspect_err(|e| {
+      warn!(
+        "User {} ({}) | Invalid passkey on database | {e:?}",
+        self.username(),
+        self.id(),
+      )
+    })
+    .ok()
+  }
+
+  fn totp_secret(&self) -> Option<&str> {
+    if self.0.totp_secret.is_empty() {
+      None
+    } else {
+      Some(&self.0.totp_secret)
     }
   }
 }
@@ -179,7 +203,18 @@ impl AuthImpl for CicadaAuthImpl {
     user_id: String,
     username: String,
   ) -> mogh_auth_server::DynFuture<mogh_error::Result<()>> {
-    Box::pin(async { todo!() })
+    Box::pin(async {
+      update_user_fields(
+        user_id,
+        UpdateUser {
+          name: Some(username),
+          ..Default::default()
+        },
+      )
+      .await
+      .map(|_| ())
+      .map_err(Into::into)
+    })
   }
 
   fn update_user_password(
@@ -187,7 +222,18 @@ impl AuthImpl for CicadaAuthImpl {
     user_id: String,
     password: String,
   ) -> mogh_auth_server::DynFuture<mogh_error::Result<()>> {
-    Box::pin(async { todo!() })
+    Box::pin(async {
+      update_user_fields(
+        user_id,
+        UpdateUser {
+          password: Some(password),
+          ..Default::default()
+        },
+      )
+      .await
+      .map(|_| ())
+      .map_err(Into::into)
+    })
   }
 
   // ===============
@@ -199,7 +245,12 @@ impl AuthImpl for CicadaAuthImpl {
     user_id: String,
     passkey: Option<Passkey>,
   ) -> mogh_auth_server::DynFuture<mogh_error::Result<()>> {
-    Box::pin(async { todo!() })
+    Box::pin(async {
+      update_user_passkey(user_id, passkey)
+        .await
+        .map(|_| ())
+        .map_err(Into::into)
+    })
   }
 
   // ===============
@@ -209,16 +260,38 @@ impl AuthImpl for CicadaAuthImpl {
   fn update_user_stored_totp(
     &self,
     user_id: String,
-    encoded_secret: String,
-    hashed_recovery_codes: Vec<String>,
+    totp_secret: String,
+    _hashed_recovery_codes: Vec<String>,
   ) -> mogh_auth_server::DynFuture<mogh_error::Result<()>> {
-    Box::pin(async { todo!() })
+    Box::pin(async {
+      update_user_fields(
+        user_id,
+        UpdateUser {
+          totp_secret: Some(totp_secret),
+          ..Default::default()
+        },
+      )
+      .await
+      .map(|_| ())
+      .map_err(Into::into)
+    })
   }
 
   fn remove_user_stored_totp(
     &self,
     user_id: String,
   ) -> mogh_auth_server::DynFuture<mogh_error::Result<()>> {
-    Box::pin(async { todo!() })
+    Box::pin(async {
+      update_user_fields(
+        user_id,
+        UpdateUser {
+          totp_secret: Some(String::new()),
+          ..Default::default()
+        },
+      )
+      .await
+      .map(|_| ())
+      .map_err(Into::into)
+    })
   }
 }

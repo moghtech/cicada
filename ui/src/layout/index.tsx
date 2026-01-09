@@ -6,7 +6,7 @@ import { Sidebar } from "./sidebar";
 import { Suspense } from "react";
 
 export const Layout = () => {
-  const [opened, { toggle }] = useDisclosure();
+  const [opened, { toggle, close }] = useDisclosure();
   return (
     <AppShell
       padding="lg"
@@ -20,7 +20,7 @@ export const Layout = () => {
       <Topbar opened={opened} toggle={toggle} />
 
       <AppShell.Navbar>
-        <Sidebar />
+        <Sidebar close={close} />
       </AppShell.Navbar>
 
       <AppShell.Main>

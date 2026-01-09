@@ -26,6 +26,7 @@ mogh_logger.workspace = true
 mogh_server.workspace = true
 # external
 async_timing_util.workspace = true
+surrealdb-types.workspace = true
 utoipa-scalar.workspace = true
 futures-util.workspace = true
 serde_json.workspace = true

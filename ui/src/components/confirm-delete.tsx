@@ -1,4 +1,4 @@
-import { Button, Flex, Modal } from "@mantine/core";
+import { Button, Flex, Modal, Text } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { Trash2 } from "lucide-react";
 
@@ -22,7 +22,11 @@ const ConfirmDelete = ({
       <Modal
         opened={opened}
         onClose={close}
-        title={`Delete${formatted_et} ${name}`}
+        title={
+          <Flex gap="0.3rem" align="center">
+            Delete{formatted_et} <Text fw="bolder">{name}</Text>
+          </Flex>
+        }
       >
         <Flex direction="column" gap="lg">
           <span>Note: This action may not be undoable.</span>
@@ -35,17 +39,21 @@ const ConfirmDelete = ({
             variant="filled"
             color="red"
             loading={loading}
+            leftSection={<Trash2 size="1rem" />}
             fullWidth
           >
             Delete{formatted_et}
           </Button>
         </Flex>
       </Modal>
-      <Button variant="filled" color="red" disabled={disabled} onClick={open}>
-        <Flex align="center" gap="0.5rem">
-          <Trash2 size="1rem" />
-          Delete{formatted_et}
-        </Flex>
+      <Button
+        variant="filled"
+        color="red"
+        disabled={disabled}
+        onClick={open}
+        leftSection={<Trash2 size="1rem" />}
+      >
+        Delete{formatted_et}
       </Button>
     </>
   );

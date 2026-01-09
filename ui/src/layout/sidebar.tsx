@@ -11,10 +11,16 @@ import {
   Tree,
   TreeNodeData,
 } from "@mantine/core";
-import { ChevronRight, File, FolderOpen, HardDrive, Link2 } from "lucide-react";
+import {
+  ChevronRight,
+  File,
+  FolderOpen,
+  HardDrive,
+  Link2,
+} from "lucide-react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
-export const Sidebar = () => {
+export const Sidebar = ({ close }: { close: () => void }) => {
   const { filesystem: selected_filesystem, inode: _selected_inode } =
     useParams() as {
       filesystem?: string;
@@ -26,10 +32,16 @@ export const Sidebar = () => {
     : undefined;
   const selected_inode = n_selected_inode ? n_selected_inode : undefined;
 
+  const _nav = useNavigate();
+  const nav = (to: string) => {
+    close();
+    _nav(to);
+  };
+
   return (
     <ScrollArea>
       <Flex direction="column" gap="lg" m={16}>
-        <Filesystems filesystem={selected_filesystem} />
+        <Filesystems filesystem={selected_filesystem} close={close} />
         <Divider />
         {selected_filesystem ? (
           <Flex direction="column" gap="sm">
@@ -42,6 +54,7 @@ export const Sidebar = () => {
               filesystem={selected_filesystem}
               parent={1}
               selected={selected_inode}
+              nav={nav}
             />
           </Flex>
         ) : (
@@ -54,7 +67,13 @@ export const Sidebar = () => {
   );
 };
 
-const Filesystems = ({ filesystem }: { filesystem: string | undefined }) => {
+const Filesystems = ({
+  filesystem,
+  close,
+}: {
+  filesystem: string | undefined;
+  close: () => void;
+}) => {
   const { data: filesystems } = useRead("ListFilesystems", {});
 
   if (!filesystems) {
@@ -79,6 +98,7 @@ const Filesystems = ({ filesystem }: { filesystem: string | undefined }) => {
           justify="start"
           component={Link}
           to={`/filesystems/${fs.id}`}
+          onClick={close}
         >
           {fs.name}
         </Button>
@@ -94,12 +114,13 @@ const NodeTree = ({
   filesystem,
   parent,
   selected,
+  nav,
 }: {
   filesystem: string;
   parent: number;
   selected: number | undefined;
+  nav: (to: string) => void;
 }) => {
-  const nav = useNavigate();
   const nodes = useRead("ListNodes", { filesystem, parent }).data ?? [];
 
   const data: TreeNodeData[] = nodes.map((node) => ({
@@ -115,6 +136,7 @@ const NodeTree = ({
                   filesystem={node.filesystem}
                   parent={node.inode}
                   selected={selected}
+                  nav={nav}
                 />
               ),
             },

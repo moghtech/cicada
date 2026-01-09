@@ -41,7 +41,6 @@ mogh_rate_limit = { version = "0.1.0", registry = "mogh" }
 derive_default_builder = "0.1.8"
 derive_empty_traits = "0.1.0"
 async_timing_util = "1.1.0"
-partial_derive2 = "0.4.5"
 derive_variants = "1.0.0"
 resolver_api = "3.0.0"
 

@@ -7,6 +7,7 @@ import { useLocalStorage } from "@mantine/hooks";
 import ConfirmSave from "@/components/confirm-save";
 import ConfirmDelete from "@/components/confirm-delete";
 import { Types } from "cicada_client";
+import { notifications } from "@mantine/notifications";
 
 const FilePage = ({ node }: { node: Types.NodeRecord | undefined }) => {
   const inv = useInvalidate();
@@ -25,6 +26,7 @@ const FilePage = ({ node }: { node: Types.NodeRecord | undefined }) => {
     "DeleteNode",
     {
       onSuccess: () => {
+        notifications.show({ message: "File deleted." });
         nav(`/filesystems/${node?.filesystem}/${node?.parent}`);
       },
     }
@@ -39,14 +41,14 @@ const FilePage = ({ node }: { node: Types.NodeRecord | undefined }) => {
   }
 
   return (
-    <Flex direction="column" gap="md">
-      <Flex align="center" gap="md">
-        <Flex gap="sm" align="center">
+    <Flex direction="column" gap="lg">
+      <Flex align="center" gap="md" wrap="wrap">
+        <Flex gap="sm" align="center" wrap="wrap">
           <File size={20} />
           <h2 style={{ opacity: 0.6 }}>File:</h2>
           <h2>{node.name}</h2>
         </Flex>
-        <Flex gap="sm" align="center">
+        <Flex gap="sm" align="center" wrap="wrap">
           <Button disabled={!data} onClick={() => setEdit({ data: undefined })}>
             <Flex align="center" gap="0.5rem">
               <History size="1rem" />
@@ -58,7 +60,11 @@ const FilePage = ({ node }: { node: Types.NodeRecord | undefined }) => {
             disabled={!data}
             original={node.data ?? ""}
             modified={data ?? ""}
-            onConfirm={() => updateNode({ id: node.id, data })}
+            onConfirm={() =>
+              updateNode({ id: node.id, data }).then(() =>
+                notifications.show({ message: "Saved changes to file." })
+              )
+            }
           />
           <ConfirmDelete
             entityType="File"

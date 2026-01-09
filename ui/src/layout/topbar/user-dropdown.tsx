@@ -1,5 +1,13 @@
 import { useRead, useUser, useUserInvalidate } from "@/lib/hooks";
-import { ActionIcon, Button, Divider, Flex, Menu, Text } from "@mantine/core";
+import {
+  ActionIcon,
+  Button,
+  Divider,
+  Flex,
+  Menu,
+  SimpleGrid,
+  Text,
+} from "@mantine/core";
 import { MoghAuth } from "cicada_client";
 import {
   ArrowLeftRight,
@@ -61,6 +69,8 @@ export const UserDropdown = () => {
             </ActionIcon>
           </Flex>
 
+          <Divider />
+
           {accounts.map((login) => (
             <Account
               login={login}
@@ -73,20 +83,31 @@ export const UserDropdown = () => {
 
           <Divider />
 
-          <Button
-            variant="subtle"
-            c="inherit"
-            fullWidth
-            onClick={() => {
-              setOpen(false);
-              nav(
-                `/login?${new URLSearchParams({ backto: `${location.pathname}${location.search}` })}`
-              );
-            }}
-            rightSection={<Plus size="1rem" />}
-          >
-            Add account
-          </Button>
+          <SimpleGrid cols={2}>
+            <Button
+              variant="subtle"
+              c="inherit"
+              leftSection={<Plus size="1rem" />}
+              onClick={() => {
+                setOpen(false);
+                nav(
+                  `/login?${new URLSearchParams({ backto: `${location.pathname}${location.search}` })}`
+                );
+              }}
+            >
+              Add account
+            </Button>
+
+            <Button
+              leftSection={<Settings size="1rem" />}
+              onClick={() => {
+                setOpen(false);
+                nav("/profile");
+              }}
+            >
+              Profile
+            </Button>
+          </SimpleGrid>
 
           {viewLogout && (
             <Button
@@ -189,7 +210,7 @@ const Username = ({ username }: { username: string | undefined }) => {
         textOverflow: "ellipsis",
         maxWidth: 140,
       }}
-      visibleFrom="lg"
+      // visibleFrom="lg"
     >
       {username}
     </Text>

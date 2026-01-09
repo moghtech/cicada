@@ -1,4 +1,6 @@
 import "@mantine/core/styles.css";
+// ‼️ import notifications styles after core package styles
+import "@mantine/notifications/styles.css";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { MantineProvider } from "@mantine/core";
@@ -8,6 +10,7 @@ import { Router } from "@/router";
 // Run monaco setup
 import "@/monaco";
 import { init_monaco } from "@/monaco/init";
+import { Notifications } from "@mantine/notifications";
 
 export const CICADA_BASE_URL =
   import.meta.env.VITE_CICADA_HOST ?? location.origin;
@@ -26,6 +29,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
       <QueryClientProvider client={client}>
         <Router />
       </QueryClientProvider>
+      <Notifications />
     </MantineProvider>
   </React.StrictMode>
 );

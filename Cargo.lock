@@ -827,6 +827,7 @@ dependencies = [
  "serde_json",
  "strum",
  "surrealdb",
+ "surrealdb-types",
  "tokio",
  "tracing",
  "typeshare",

@@ -1,7 +1,8 @@
 use anyhow::{Context, anyhow};
-use mogh_auth_client::api::login::MoghAuthLoginRequest;
-#[cfg(not(feature = "blocking"))]
-use mogh_auth_client::api::manage::MoghAuthManageRequest;
+use mogh_auth_client::api::{
+  login::MoghAuthLoginRequest,
+  manage::MoghAuthManageRequest
+};
 use mogh_error::deserialize_error;
 use serde::{Serialize, de::DeserializeOwned};
 use serde_json::json;

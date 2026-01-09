@@ -1,5 +1,8 @@
 use anyhow::Context as _;
 use cicada_client::entities::user::UserRecord;
+use mogh_auth_client::passkey::Passkey;
+use serde::Serialize;
+use surrealdb_types::object;
 
 use crate::db::DB;
 
@@ -39,4 +42,49 @@ pub async fn sign_up_local_user(
     .context("Failed to deserialize UserRecord")?
     .context("Query response missing created UserRecord")?;
   Ok(user.id.0)
+}
+
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct UpdateUser {
+  #[serde(skip_serializing_if = "Option::is_none")]
+  pub name: Option<String>,
+  #[serde(skip_serializing_if = "Option::is_none")]
+  pub enabled: Option<bool>,
+  #[serde(skip_serializing_if = "Option::is_none")]
+  pub password: Option<String>,
+  #[serde(skip_serializing_if = "Option::is_none")]
+  pub totp_secret: Option<String>,
+}
+
+/// Uses merge strategy for non optional field types.
+/// If the field is None, it will not be updated.
+pub async fn update_user_fields(
+  id: String,
+  update: UpdateUser,
+) -> anyhow::Result<UserRecord> {
+  DB.update(("User", id))
+    .merge(serde_json::to_value(update)?)
+    .await
+    .context("Failed to query database")?
+    .context("No user update result")
+}
+
+/// Because passkey is Option type,
+/// need it's own 'content' type update
+/// which can set it to NONE.
+pub async fn update_user_passkey(
+  id: String,
+  passkey: Option<Passkey>,
+) -> anyhow::Result<UserRecord> {
+  let passkey: Option<serde_json::Value> =
+    if let Some(passkey) = passkey {
+      serde_json::from_str(&serde_json::to_string(&passkey)?)?
+    } else {
+      None
+    };
+  DB.update(("User", id))
+    .merge(object! { "passkey": passkey })
+    .await
+    .context("Failed to query database")?
+    .context("No user update result")
 }

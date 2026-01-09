@@ -15,6 +15,7 @@ import {
 } from "cicada_client";
 import { useEffect } from "react";
 import { sanitize_query_inner } from "./utils";
+import { notifications } from "@mantine/notifications";
 
 export const cicada_client = () =>
   CicadaClient(CICADA_BASE_URL, {
@@ -41,12 +42,11 @@ export const useLogin = <
   type: T,
   config?: C
 ) => {
-  // const { toast } = useToast();
   return useMutation({
     mutationKey: [type],
     mutationFn: (params: P) => cicada_client().auth.login<T, R>(type, params),
     onError: (e: { result: { error?: string; trace?: string[] } }, v, r, c) => {
-      console.log("Auth error:", e);
+      console.log("Login error:", e);
       const msg = e.result.error ?? "Unknown error. See console.";
       const detail = e.result?.trace
         ?.map((msg) => msg[0].toUpperCase() + msg.slice(1))
@@ -55,11 +55,47 @@ export const useLogin = <
       if (detail) {
         msg_log += detail + " | ";
       }
-      // toast({
-      //   title: `Auth request ${type} failed`,
-      //   description: `${msg_log}See console for details`,
-      //   variant: "destructive",
-      // });
+      notifications.show({
+        title: `Login request ${type} failed`,
+        message: `${msg_log}See console for details`,
+        color: "red",
+      });
+      config?.onError && config.onError(e, v, r, c);
+    },
+    ...config,
+  });
+};
+
+export const useManageAuth = <
+  T extends MoghAuth.Types.ManageRequest["type"],
+  R extends Extract<MoghAuth.Types.ManageRequest, { type: T }>,
+  P extends R["params"],
+  C extends Omit<
+    UseMutationOptions<MoghAuth.ManageResponses[T], unknown, P, unknown>,
+    "mutationKey" | "mutationFn"
+  >,
+>(
+  type: T,
+  config?: C
+) => {
+  return useMutation({
+    mutationKey: [type],
+    mutationFn: (params: P) => cicada_client().auth.manage<T, R>(type, params),
+    onError: (e: { result: { error?: string; trace?: string[] } }, v, r, c) => {
+      console.log("Auth Manage error:", e);
+      const msg = e.result.error ?? "Unknown error. See console.";
+      const detail = e.result?.trace
+        ?.map((msg) => msg[0].toUpperCase() + msg.slice(1))
+        .join(" | ");
+      let msg_log = msg ? msg[0].toUpperCase() + msg.slice(1) + " | " : "";
+      if (detail) {
+        msg_log += detail + " | ";
+      }
+      notifications.show({
+        title: `ManageAuth request ${type} failed`,
+        message: `${msg_log}See console for details`,
+        color: "red",
+      });
       config?.onError && config.onError(e, v, r, c);
     },
     ...config,
@@ -90,15 +126,15 @@ export const useAuthState = () => {
   // maybe isPending would do this but not sure about with render loop, this for sure will.
   if (passkey && !passkey_sent) {
     navigator.credentials
-      .get(MoghAuth.Passkey.preparePasskeyCredential(passkey))
+      .get(MoghAuth.Passkey.prepareRequestChallengeResponse(passkey))
       .then((credential) => completePasskeyLogin({ credential }))
       .catch((e) => {
         console.error(e);
-        // toast({
-        //   title: "Failed to select passkey",
-        //   description: "See console for details",
-        //   variant: "destructive",
-        // });
+        notifications.show({
+          title: "Failed to select passkey",
+          message: "See console for details",
+          color: "red",
+        });
       });
     passkey_sent = true;
   }
@@ -173,12 +209,11 @@ export const useRead = <
   params: P,
   config?: C
 ) => {
-  // const hasJwt = !!LOGIN_TOKENS.jwt();
+  const hasJwt = !!MoghAuth.LOGIN_TOKENS.jwt();
   return useQuery({
     queryKey: [type, params],
     queryFn: () => cicada_client().read<T, R>(type, params),
-    // enabled: hasJwt && config?.enabled !== false,
-    enabled: config?.enabled !== false,
+    enabled: hasJwt && config?.enabled !== false,
     ...config,
   });
 };
@@ -207,7 +242,6 @@ export const useWrite = <
   type: T,
   config?: C
 ) => {
-  // const { toast } = useToast();
   return useMutation({
     mutationKey: [type],
     mutationFn: (params: P) => cicada_client().write<T, R>(type, params),
@@ -221,11 +255,11 @@ export const useWrite = <
       if (detail) {
         msg_log += detail + " | ";
       }
-      // toast({
-      //   title: `Write request ${type} failed`,
-      //   description: `${msg_log}See console for details`,
-      //   variant: "destructive",
-      // });
+      notifications.show({
+        title: `Write request ${type} failed`,
+        message: `${msg_log}See console for details`,
+        color: "red",
+      });
       config?.onError && config.onError(e, v, r, c);
     },
     ...config,

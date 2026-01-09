@@ -81,15 +81,19 @@ export interface UserRecord {
 	/** The name of the user, ie username */
 	name: string;
 	/**
-	 * Hashed user password.
-	 * Empty if local login is not set.
-	 */
-	password: string;
-	/**
 	 * Whether user is enabled.
 	 * Disabled users cannot log in and have no API access.
 	 */
 	enabled?: boolean;
+	/**
+	 * Hashed user password.
+	 * Empty if local login is not set.
+	 */
+	password: string;
+	/** User passkey config for 2fa */
+	passkey?: Object;
+	/** User totp secret. */
+	totp_secret: string;
 	/** Created at as ISO8601 timestamp. */
 	created_at: Iso8601Timestamp;
 	/** Updated at as ISO8601 timestamp. */

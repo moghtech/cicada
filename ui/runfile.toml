@@ -1,0 +1,7 @@
+[dev-ui]
+alias = "du"
+cmd = "yarn dev"
+
+[build-ui]
+alias = "bu"
+cmd = "yarn build"

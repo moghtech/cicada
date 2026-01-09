@@ -10,16 +10,6 @@ alias = "dp"
 description = "runs periphery --release"
 cmd = "cargo run -p cicada_periphery --release"
 
-[dev-ui]
-alias = "du"
-path = "ui"
-cmd = "yarn dev"
-
-[build-ui]
-alias = "bu"
-path = "ui"
-cmd = "yarn build"
-
 [yarn-install]
 description = "downloads latest javacript dependencies for client and frontend"
 cmd = """
