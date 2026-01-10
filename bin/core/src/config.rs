@@ -6,7 +6,7 @@ use cicada_client::entities::config::{
   logger::LogConfig,
 };
 use colored::Colorize as _;
-use mogh_auth_client::config::OidcConfig;
+use mogh_auth_client::config::{NamedOauthConfig, OidcConfig};
 use mogh_config::ConfigLoader;
 use mogh_secret_file::maybe_read_item_from_file;
 
@@ -92,6 +92,9 @@ pub fn core_config() -> &'static CoreConfig {
       disable_user_registration: env
         .cicada_disable_user_registration
         .unwrap_or(config.disable_user_registration),
+      enable_new_users: env
+        .cicada_enable_new_users
+        .unwrap_or(config.enable_new_users),
       lock_login_credentials_for: env
         .cicada_lock_login_credentials_for
         .unwrap_or(config.lock_login_credentials_for),
@@ -117,6 +120,28 @@ pub fn core_config() -> &'static CoreConfig {
         additional_audiences: env
           .cicada_oidc_additional_audiences
           .unwrap_or(config.oidc.additional_audiences),
+      },
+      github_oauth: NamedOauthConfig {
+        enabled: env
+          .cicada_github_oauth_enabled
+          .unwrap_or(config.github_oauth.enabled),
+        client_id: env
+          .cicada_github_oauth_client_id
+          .unwrap_or(config.github_oauth.client_id),
+        client_secret: env
+          .cicada_github_oauth_client_secret
+          .unwrap_or(config.github_oauth.client_secret),
+      },
+      google_oauth: NamedOauthConfig {
+        enabled: env
+          .cicada_google_oauth_enabled
+          .unwrap_or(config.google_oauth.enabled),
+        client_id: env
+          .cicada_google_oauth_client_id
+          .unwrap_or(config.google_oauth.client_id),
+        client_secret: env
+          .cicada_google_oauth_client_secret
+          .unwrap_or(config.google_oauth.client_secret),
       },
       auth_rate_limit_disabled: env
         .cicada_auth_rate_limit_disabled

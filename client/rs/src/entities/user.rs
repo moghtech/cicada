@@ -26,9 +26,17 @@ pub struct UserRecord {
   #[serde(default)]
   pub password: String,
   /// OIDC subject identifier
-  /// Empty if OIDC login is not set.
+  /// Empty if OIDC login is not linked.
   #[serde(default)]
   pub oidc_subject: String,
+  /// Github identifier.
+  /// Empty if Github login is not linked.
+  #[serde(default)]
+  pub github_id: String,
+  /// Google identifier.
+  /// Empty if Google login is not linked.
+  #[serde(default)]
+  pub google_id: String,
   // =======
   // = 2FA =
   // =======

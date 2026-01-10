@@ -84,6 +84,16 @@ const ProfileInner = ({ user }: { user: Types.UserRecord }) => {
           enabled: !!options?.oidc,
           linked: !!user?.oidc_subject,
         },
+        {
+          provider: "Github" as MoghAuth.Types.LoginProvider,
+          enabled: !!options?.github,
+          linked: !!user?.github_id,
+        },
+        {
+          provider: "Google" as MoghAuth.Types.LoginProvider,
+          enabled: !!options?.google,
+          linked: !!user?.google_id,
+        },
       ].filter(({ enabled }) => enabled),
     [user, options]
   );

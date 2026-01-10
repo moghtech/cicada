@@ -3,7 +3,9 @@ use std::sync::{Arc, LazyLock};
 use async_timing_util::{Timelength, get_timelength_in_ms};
 use cicada_client::entities::user::UserRecord;
 use mogh_auth_client::{
-  api::login::LoginProvider, config::OidcConfig, passkey::Passkey,
+  api::login::LoginProvider,
+  config::{NamedOauthConfig, OidcConfig},
+  passkey::Passkey,
 };
 // use cicada_client::entities::user::u
 use mogh_auth_server::{
@@ -21,9 +23,11 @@ use mogh_rate_limit::RateLimiter;
 use crate::{
   config::core_config,
   db::query::user::{
-    UpdateUser, find_user_with_oidc_subject, find_user_with_username,
-    get_user, sign_up_local_user, sign_up_oidc_user,
-    update_user_fields, update_user_passkey,
+    UpdateUser, find_user_with_github_id, find_user_with_google_id,
+    find_user_with_oidc_subject, find_user_with_username, get_user,
+    no_users_exist, sign_up_github_user, sign_up_google_user,
+    sign_up_local_user, sign_up_oidc_user, update_user_fields,
+    update_user_passkey,
   },
 };
 
@@ -144,6 +148,12 @@ impl AuthImpl for CicadaAuthImpl {
     })
   }
 
+  fn no_users_exist(
+    &self,
+  ) -> mogh_auth_server::DynFuture<mogh_error::Result<bool>> {
+    Box::pin(async { no_users_exist().await.map_err(Into::into) })
+  }
+
   // =========
   // = STATE =
   // =========
@@ -180,12 +190,16 @@ impl AuthImpl for CicadaAuthImpl {
     &self,
     username: String,
     hashed_password: String,
-    _no_users_exist: bool,
+    no_users_exist: bool,
   ) -> mogh_auth_server::DynFuture<mogh_error::Result<String>> {
     Box::pin(async move {
-      sign_up_local_user(username, hashed_password, true)
-        .await
-        .map_err(Into::into)
+      sign_up_local_user(
+        username,
+        hashed_password,
+        no_users_exist || core_config().enable_new_users,
+      )
+      .await
+      .map_err(Into::into)
     })
   }
 
@@ -267,12 +281,16 @@ impl AuthImpl for CicadaAuthImpl {
     &self,
     username: String,
     subject: SubjectIdentifier,
-    _no_users_exist: bool,
+    no_users_exist: bool,
   ) -> mogh_auth_server::DynFuture<mogh_error::Result<String>> {
     Box::pin(async move {
-      sign_up_oidc_user(username, subject.into(), true)
-        .await
-        .map_err(Into::into)
+      sign_up_oidc_user(
+        username,
+        subject.into(),
+        no_users_exist || core_config().enable_new_users,
+      )
+      .await
+      .map_err(Into::into)
     })
   }
 
@@ -295,6 +313,122 @@ impl AuthImpl for CicadaAuthImpl {
     })
   }
 
+  // ===============
+  // = GITHUB AUTH =
+  // ===============
+
+  fn github_config(&self) -> &NamedOauthConfig {
+    &core_config().github_oauth
+  }
+
+  fn find_user_with_github_id(
+    &self,
+    github_id: String,
+  ) -> mogh_auth_server::DynFuture<
+    mogh_error::Result<Option<BoxAuthUser>>,
+  > {
+    Box::pin(async move {
+      let user = find_user_with_github_id(github_id)
+        .await?
+        .map(|user| Box::new(AuthUser(user)) as BoxAuthUser);
+      Ok(user)
+    })
+  }
+
+  fn link_github_login(
+    &self,
+    user_id: String,
+    github_id: String,
+  ) -> mogh_auth_server::DynFuture<mogh_error::Result<()>> {
+    Box::pin(async move {
+      update_user_fields(
+        user_id,
+        UpdateUser {
+          github_id: Some(github_id),
+          ..Default::default()
+        },
+      )
+      .await
+      .map(|_| ())
+      .map_err(Into::into)
+    })
+  }
+
+  fn sign_up_github_user(
+    &self,
+    username: String,
+    github_id: String,
+    no_users_exist: bool,
+  ) -> mogh_auth_server::DynFuture<mogh_error::Result<String>> {
+    Box::pin(async move {
+      sign_up_github_user(
+        username,
+        github_id,
+        no_users_exist || core_config().enable_new_users,
+      )
+      .await
+      .map_err(Into::into)
+    })
+  }
+
+  // ===============
+  // = GOOGLE AUTH =
+  // ===============
+
+  fn google_config(&self) -> &NamedOauthConfig {
+    &core_config().google_oauth
+  }
+
+  fn find_user_with_google_id(
+    &self,
+    google_id: String,
+  ) -> mogh_auth_server::DynFuture<
+    mogh_error::Result<Option<BoxAuthUser>>,
+  > {
+    Box::pin(async move {
+      let user = find_user_with_google_id(google_id)
+        .await?
+        .map(|user| Box::new(AuthUser(user)) as BoxAuthUser);
+      Ok(user)
+    })
+  }
+
+  fn link_google_login(
+    &self,
+    user_id: String,
+    google_id: String,
+  ) -> mogh_auth_server::DynFuture<mogh_error::Result<()>> {
+    Box::pin(async move {
+      update_user_fields(
+        user_id,
+        UpdateUser {
+          google_id: Some(google_id),
+          ..Default::default()
+        },
+      )
+      .await
+      .map(|_| ())
+      .map_err(Into::into)
+    })
+  }
+
+  fn sign_up_google_user(
+    &self,
+    username: String,
+    google_id: String,
+    no_users_exist: bool,
+  ) -> mogh_auth_server::DynFuture<mogh_error::Result<String>> {
+    Box::pin(async move {
+      sign_up_google_user(
+        username,
+        google_id,
+        no_users_exist || core_config().enable_new_users,
+      )
+      .await
+      .map_err(Into::into)
+    })
+  }
+
   // ==========
   // = UNLINK =
   // ==========
@@ -311,6 +445,14 @@ impl AuthImpl for CicadaAuthImpl {
           ..Default::default()
         },
         LoginProvider::Oidc => UpdateUser {
+          oidc_subject: Some(String::new()),
+          ..Default::default()
+        },
+        LoginProvider::Github => UpdateUser {
+          oidc_subject: Some(String::new()),
+          ..Default::default()
+        },
+        LoginProvider::Google => UpdateUser {
           oidc_subject: Some(String::new()),
           ..Default::default()
         },

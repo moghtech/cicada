@@ -94,9 +94,19 @@ export interface UserRecord {
 	password?: string;
 	/**
 	 * OIDC subject identifier
-	 * Empty if OIDC login is not set.
+	 * Empty if OIDC login is not linked.
 	 */
 	oidc_subject?: string;
+	/**
+	 * Github identifier.
+	 * Empty if Github login is not linked.
+	 */
+	github_id?: string;
+	/**
+	 * Google identifier.
+	 * Empty if Google login is not linked.
+	 */
+	google_id?: string;
 	/** User passkey config for 2fa */
 	passkey?: JsonValue;
 	/** User totp secret. */

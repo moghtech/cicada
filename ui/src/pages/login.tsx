@@ -153,9 +153,13 @@ export default function Login({
               </Flex>
             </Group>
             {!secondFactorPending && (
-              <Group gap="sm">
+              <Flex gap="sm" align="center" wrap="wrap">
                 {(
-                  [[options?.oidc, "Oidc"]] as Array<
+                  [
+                    [options?.oidc, "Oidc"],
+                    [options?.github, "Github"],
+                    [options?.google, "Google"],
+                  ] as Array<
                     [boolean | undefined, MoghAuth.Types.ExternalLoginProvider]
                   >
                 ).map(
@@ -164,16 +168,28 @@ export default function Login({
                       <Button
                         key={provider}
                         onClick={() =>
-                          cicada_client().auth.login_with_third_party(provider)
+                          cicada_client().auth.externalLogin(provider)
                         }
-                        leftSection={<KeyRound size="1rem" />}
-                        w={95}
+                        leftSection={
+                          provider === "Oidc" ? (
+                            <KeyRound size="1rem" />
+                          ) : (
+                            // <img
+                            //   src={`/icons/${provider.toLowerCase()}.svg`}
+                            //   alt={provider}
+                            //   width="1rem"
+                            //   height="1rem"
+                            // />
+                            <KeyRound size="1rem" />
+                          )
+                        }
+                        w={110}
                       >
                         {provider}
                       </Button>
                     )
                 )}
-              </Group>
+              </Flex>
             )}
           </Flex>
         }
@@ -184,7 +200,7 @@ export default function Login({
             : (localForm.onSubmit((form) => login(form)) as any)
         }
         style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
-        w={400}
+        maw="95vw"
       >
         {options?.local && !secondFactorPending && (
           <>
@@ -204,7 +220,7 @@ export default function Login({
             <Flex gap="md" mt="sm" justify="flex-end">
               {!registration_disabled && (
                 <Button
-                  w={95}
+                  w={110}
                   variant="default"
                   onClick={localForm.onSubmit((form) => signup(form)) as any}
                   loading={signupPending}
@@ -213,7 +229,7 @@ export default function Login({
                 </Button>
               )}
               <Button
-                w={95}
+                w={110}
                 variant="filled"
                 type="submit"
                 loading={loginPending}
@@ -251,7 +267,7 @@ export default function Login({
             />
             <Flex justify="flex-end">
               <Button
-                w={100}
+                w={110}
                 variant="filled"
                 type="submit"
                 loading={totpPending}

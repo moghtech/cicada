@@ -1,6 +1,8 @@
 use std::{path::PathBuf, sync::OnceLock};
 
-use mogh_auth_client::config::{OidcConfig, empty_or_redacted};
+use mogh_auth_client::config::{
+  NamedOauthConfig, OidcConfig, empty_or_redacted,
+};
 use serde::Deserialize;
 
 use crate::entities::{
@@ -85,6 +87,8 @@ pub struct Env {
   pub cicada_local_auth: Option<bool>,
   /// Override `disable_user_registration`
   pub cicada_disable_user_registration: Option<bool>,
+  /// Override `enable_new_users`
+  pub cicada_enable_new_users: Option<bool>,
   /// Override `lock_login_credentials_for`
   pub cicada_lock_login_credentials_for: Option<Vec<String>>,
 
@@ -108,6 +112,36 @@ pub struct Env {
   pub cicada_oidc_additional_audiences: Option<Vec<String>>,
   /// Override `oidc_additional_audiences` from file
   pub cicada_oidc_additional_audiences_file: Option<PathBuf>,
+
+  /// Override `github_oauth.enabled`
+  pub cicada_github_oauth_enabled: Option<bool>,
+  /// Override `github_oauth.client_id`
+  #[serde(alias = "cicada_github_oauth_id")]
+  pub cicada_github_oauth_client_id: Option<String>,
+  /// Override `github_oauth.client_id` from file
+  #[serde(alias = "cicada_github_oauth_id_file")]
+  pub cicada_github_oauth_client_id_file: Option<PathBuf>,
+  /// Override `github_oauth.secret`
+  #[serde(alias = "cicada_github_oauth_secret")]
+  pub cicada_github_oauth_client_secret: Option<String>,
+  /// Override `github_oauth.secret` from file
+  #[serde(alias = "cicada_github_oauth_secret_file")]
+  pub cicada_github_oauth_client_secret_file: Option<PathBuf>,
+
+  /// Override `google_oauth.enabled`
+  pub cicada_google_oauth_enabled: Option<bool>,
+  /// Override `google_oauth.client_id`
+  #[serde(alias = "cicada_google_oauth_id")]
+  pub cicada_google_oauth_client_id: Option<String>,
+  /// Override `google_oauth.client_id` from file
+  #[serde(alias = "cicada_google_oauth_id_file")]
+  pub cicada_google_oauth_client_id_file: Option<PathBuf>,
+  /// Override `google_oauth.secret`
+  #[serde(alias = "cicada_google_oauth_secret")]
+  pub cicada_google_oauth_client_secret: Option<String>,
+  /// Override `google_oauth.secret` from file
+  #[serde(alias = "cicada_google_oauth_secret_file")]
+  pub cicada_google_oauth_client_secret_file: Option<PathBuf>,
 
   /// Override `auth_rate_limit_disabled`
   pub cicada_auth_rate_limit_disabled: Option<bool>,
@@ -221,6 +255,10 @@ pub struct CoreConfig {
   #[serde(default)]
   pub disable_user_registration: bool,
 
+  /// New users will be automatically enabled.
+  #[serde(default)]
+  pub enable_new_users: bool,
+
   /// List of usernames for which the update username / password
   /// APIs are disabled. Used by demo to lock the 'demo' : 'demo' login.
   ///
@@ -231,6 +269,14 @@ pub struct CoreConfig {
   /// OIDC login configuration
   #[serde(default)]
   pub oidc: OidcConfig,
+
+  /// Github oauth login configuration
+  #[serde(default)]
+  pub github_oauth: NamedOauthConfig,
+
+  /// Google oauth login configuration
+  #[serde(default)]
+  pub google_oauth: NamedOauthConfig,
 
   // =================
   // = Rate Limiting =
@@ -351,8 +397,11 @@ impl Default for CoreConfig {
       database: Default::default(),
       local_auth: Default::default(),
       disable_user_registration: Default::default(),
+      enable_new_users: Default::default(),
       lock_login_credentials_for: Default::default(),
       oidc: Default::default(),
+      github_oauth: Default::default(),
+      google_oauth: Default::default(),
       auth_rate_limit_disabled: Default::default(),
       auth_rate_limit_max_attempts:
         default_auth_rate_limit_max_attempts(),
@@ -374,6 +423,8 @@ impl CoreConfig {
   pub fn sanitized(&self) -> CoreConfig {
     let mut config = self.clone();
     config.oidc.sanitize();
+    config.github_oauth.sanitize();
+    config.google_oauth.sanitize();
     CoreConfig {
       title: config.title,
       host: config.host,
@@ -384,8 +435,11 @@ impl CoreConfig {
       database: config.database.sanitized(),
       local_auth: config.local_auth,
       disable_user_registration: config.disable_user_registration,
+      enable_new_users: config.enable_new_users,
       lock_login_credentials_for: config.lock_login_credentials_for,
       oidc: config.oidc,
+      github_oauth: config.github_oauth,
+      google_oauth: config.google_oauth,
       logging: config.logging,
       pretty_startup_config: config.pretty_startup_config,
       unsafe_unsanitized_startup_config: config
