@@ -1,3 +1,8 @@
+use http::{Method, Uri};
+use mogh_pki::key::{Pkcs8PrivateKey, SpkiPublicKey};
+
+use crate::entities::ClientType;
+
 pub mod api;
 pub mod entities;
 
@@ -10,16 +15,34 @@ pub struct CicadaClient {
   reqwest: reqwest::blocking::Client,
   address: String,
   auth_address: String,
+  client_type: ClientType,
+  /// Raw private key
+  private_key: [u8; 32],
+  /// Raw public key
+  core_public_key: [u8; 32],
 }
 
 impl CicadaClient {
-  pub fn new(address: impl Into<String>) -> CicadaClient {
+  pub fn new(
+    address: impl Into<String>,
+    client_type: ClientType,
+    private_key: &Pkcs8PrivateKey,
+    core_public_key: &SpkiPublicKey,
+  ) -> anyhow::Result<CicadaClient> {
     let address = address.into();
-    CicadaClient {
+    let private_key =
+      Pkcs8PrivateKey::maybe_raw_bytes(private_key.as_str())?;
+    let core_public_key = SpkiPublicKey::maybe_pem_to_raw_bytes(
+      core_public_key.as_str(),
+    )?;
+    Ok(CicadaClient {
       reqwest: Default::default(),
       auth_address: format!("{address}/auth"),
       address,
-    }
+      client_type,
+      private_key,
+      core_public_key,
+    })
   }
 
   /// Use a custom reqwest client.
@@ -38,4 +61,12 @@ impl CicadaClient {
     self.reqwest = reqwest;
     self
   }
+}
+
+pub fn pki_auth_prologue(
+  method: &Method,
+  uri: &Uri,
+  timestamp: i64,
+) -> String {
+  format!("{method}|{uri}|{timestamp}")
 }

@@ -28,15 +28,18 @@ pub async fn init() -> anyhow::Result<()> {
     .use_db(&config.database.db_name)
     .await?;
 
+  DB.query(include_str!("tables/User.surrealql"))
+    .await
+    .context("Failed to initialize User table")?;
+  DB.query(include_str!("tables/Device.surrealql"))
+    .await
+    .context("Failed to initialize Device table")?;
   DB.query(include_str!("tables/Filesystem.surrealql"))
     .await
     .context("Failed to initialize Filesystem table")?;
   DB.query(include_str!("tables/Node.surrealql"))
     .await
     .context("Failed to initialize Node table")?;
-  DB.query(include_str!("tables/User.surrealql"))
-    .await
-    .context("Failed to initialize User table")?;
 
   Ok(())
 }

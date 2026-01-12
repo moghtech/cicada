@@ -68,6 +68,11 @@ pub struct Env {
   /// Override `jwt_ttl`
   pub cicada_jwt_ttl: Option<Timelength>,
 
+  /// Override `private_key`
+  pub cicada_private_key: Option<String>,
+  /// Override `private_key` with file
+  pub cicada_private_key_file: Option<PathBuf>,
+
   /// Override `database.uri`
   pub cicada_database_uri: Option<String>,
   /// Override `database.username`
@@ -239,6 +244,18 @@ pub struct CoreConfig {
   #[serde(default = "default_jwt_ttl")]
   pub jwt_ttl: Timelength,
 
+  /// Private key to use with Noise handshake to authenticate with Periphery agents.
+  ///
+  /// Supports openssl generated pem file, `openssl genpkey -algorithm X25519 -out private.key`.
+  /// To load from file, use `private_key = "file:/path/to/private.key"`.
+  ///
+  /// If a file is specified and does not exist, will try to generate one at the path
+  /// and use it going forward.
+  ///
+  /// Default: file:/config/keys/core.key
+  #[serde(default = "default_private_key")]
+  pub private_key: String,
+
   /// Configure database connection
   #[serde(default)]
   pub database: DatabaseConfig,
@@ -361,6 +378,10 @@ fn default_core_bind_ip() -> String {
   "[::]".to_string()
 }
 
+fn default_private_key() -> String {
+  String::from("file:/config/keys/core.key")
+}
+
 fn default_jwt_ttl() -> Timelength {
   Timelength::OneDay
 }
@@ -394,6 +415,7 @@ impl Default for CoreConfig {
       bind_ip: default_core_bind_ip(),
       jwt_secret: Default::default(),
       jwt_ttl: default_jwt_ttl(),
+      private_key: default_private_key(),
       database: Default::default(),
       local_auth: Default::default(),
       disable_user_registration: Default::default(),
@@ -432,6 +454,11 @@ impl CoreConfig {
       bind_ip: config.bind_ip,
       jwt_secret: empty_or_redacted(&config.jwt_secret),
       jwt_ttl: config.jwt_ttl,
+      private_key: if self.private_key.starts_with("file:") {
+        self.private_key.clone()
+      } else {
+        empty_or_redacted(&self.private_key)
+      },
       database: config.database.sanitized(),
       local_auth: config.local_auth,
       disable_user_registration: config.disable_user_registration,

@@ -1,79 +1,149 @@
+use std::time::{SystemTime, UNIX_EPOCH};
+
 use anyhow::{Context as _, anyhow};
 use axum::{
-  extract::Request,
-  http::{HeaderMap, StatusCode},
+  extract::{OriginalUri, Request},
+  http::{HeaderMap, Method, StatusCode, Uri},
   middleware::Next,
   response::Response,
 };
-use cicada_client::entities::user::UserRecord;
+use cicada_client::{
+  entities::{ClientType, device::DeviceRecord, user::UserRecord},
+  pki_auth_prologue,
+};
 use futures_util::TryFutureExt as _;
 use mogh_auth_server::request_ip::RequestIp;
 use mogh_error::AddStatusCodeError as _;
+use mogh_pki::{key::Pkcs8PrivateKey, one_way::OneWayNoiseHandshake};
 use mogh_rate_limit::WithFailureRateLimit as _;
 
 use crate::{
   auth::{GENERAL_RATE_LIMITER, JWT_PROVIDER},
-  db::query::user::get_user,
+  config::core_keys,
+  db::query::{device::find_device_with_public_key, user::get_user},
 };
+
+#[derive(Clone)]
+pub enum Client {
+  /// The user
+  User(UserRecord),
+  /// The device
+  Device(DeviceRecord),
+}
+
+impl Client {
+  pub fn sanitize(&mut self) {
+    match self {
+      Client::User(user_record) => user_record.sanitize(),
+      Client::Device(device_record) => device_record.sanitize(),
+    }
+  }
+}
 
 /// Middleware to authenticate incoming requests
 /// using JWT or Api Key. It will attach the calling
 /// client UserRecord to the request extensions.
 pub async fn auth_request(
   RequestIp(ip): RequestIp,
+  OriginalUri(uri): OriginalUri,
   mut req: Request,
   next: Next,
 ) -> mogh_error::Result<Response> {
-  let mut user = authenticate_check_enabled(req.headers())
-    .map_err(|e| e.status_code(StatusCode::UNAUTHORIZED))
-    .with_failure_rate_limit_using_ip(&GENERAL_RATE_LIMITER, &ip)
-    .await?;
+  let mut client =
+    get_client_from_request(req.method(), &uri, req.headers())
+      .map_err(|e| e.status_code(StatusCode::UNAUTHORIZED))
+      .with_failure_rate_limit_using_ip(&GENERAL_RATE_LIMITER, &ip)
+      .await?;
   // Sanitize the user for safety before
   // attaching to the request handlers.
-  user.sanitize();
-  req.extensions_mut().insert(user);
+  client.sanitize();
+  req.extensions_mut().insert(client);
   Ok(next.run(req).await)
 }
 
-pub async fn authenticate_check_enabled(
+pub async fn get_client_from_request(
+  method: &Method,
+  uri: &Uri,
   headers: &HeaderMap,
-) -> anyhow::Result<UserRecord> {
-  let user_id = get_user_id_from_headers(headers).await?;
-  let user = get_user(&user_id)
-    .await
-    .map_err(|_| anyhow!("Invalid user credentials"))?;
-  if user.enabled {
-    Ok(user)
-  } else {
-    Err(anyhow!("Invalid user credentials"))
-  }
-}
-
-pub async fn get_user_id_from_headers(
-  headers: &HeaderMap,
-) -> anyhow::Result<String> {
+) -> anyhow::Result<Client> {
   match (
     headers.get("authorization"),
-    headers.get("x-api-key"),
-    headers.get("x-api-secret"),
+    headers.get("x-api-type"),
+    headers.get("x-api-signature"),
+    headers.get("x-api-timestamp"),
   ) {
-    (Some(jwt), _, _) => {
+    (Some(jwt), _, _, _) => {
       // USE JWT
       let jwt = jwt.to_str().context("JWT is not valid UTF-8")?;
-      JWT_PROVIDER.decode_sub(jwt)
+      let user_id = JWT_PROVIDER.decode_sub(jwt)?;
+      let user = get_user(&user_id).await?;
+      if user.enabled {
+        Ok(Client::User(user))
+      } else {
+        Err(anyhow!("Invalid client credentials"))
+      }
     }
-    (None, Some(key), Some(secret)) => {
-      // USE API KEY / SECRET
-      let key =
-        key.to_str().context("X-API-KEY is not valid UTF-8")?;
-      let secret =
-        secret.to_str().context("X-API-SECRET is not valid UTF-8")?;
-      todo!()
+    (None, Some(client_type), Some(signature), Some(timestamp)) => {
+      // USE API TYPE / SIGNATURE
+      let client_type = client_type
+        .to_str()
+        .context("X-API-TYPE is not valid UTF-8")?
+        .parse::<ClientType>()
+        .context("X-API-TYPE is invalid")?;
+      let signature = signature
+        .to_str()
+        .context("X-API-SIGNATURE is not valid UTF-8")?;
+      // let signature = BASE
+      let timestamp = timestamp
+        .to_str()
+        .context("X-API-TIMESTAMP is not valid UTF-8")?
+        .parse::<i64>()?;
+
+      let now = SystemTime::now()
+        .duration_since(UNIX_EPOCH)?
+        .as_millis() as i64;
+
+      // Ensure timestamp is ~now
+      if (now - timestamp).abs() > 1_000 {
+        return Err(anyhow!("Invalid client credentials"));
+      }
+
+      let prologue = pki_auth_prologue(method, uri, timestamp);
+
+      let mut handshake = OneWayNoiseHandshake::new_responder(
+        &Pkcs8PrivateKey::maybe_raw_bytes(
+          core_keys().load().private.as_str(),
+        )?,
+        prologue.as_bytes(),
+      )?;
+
+      // Server now has client public key
+      let public_key =
+        handshake.validate_signature(signature)?.into_inner();
+
+      match client_type {
+        // Check against user api keys
+        ClientType::User => {
+          //
+          todo!()
+        }
+        // Check against device public keys
+        ClientType::Device => {
+          let device = find_device_with_public_key(public_key)
+            .await?
+            .context("Invalid client credentials")?;
+          if device.enabled {
+            Ok(Client::Device(device))
+          } else {
+            Err(anyhow!("Invalid client credentials"))
+          }
+        }
+      }
     }
     _ => {
       // AUTH FAIL
       Err(anyhow!(
-        "Must attach either AUTHORIZATION header with jwt OR pass X-API-KEY and X-API-SECRET"
+        "Must attach either AUTHORIZATION header with jwt OR headers X-API-TYPE and X-API-SIGNATURE"
       ))
     }
   }

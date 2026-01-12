@@ -6,6 +6,28 @@ use cicada_client::entities::config::{
 };
 use colored::Colorize;
 use mogh_config::ConfigLoader;
+use mogh_pki::key::{RotatableKeyPair, SpkiPublicKey};
+use mogh_secret_file::maybe_read_item_from_file;
+
+/// Should call in startup to ensure Periphery errors without valid private key.
+pub fn periphery_keys() -> &'static RotatableKeyPair {
+  static PERIPHERY_KEYS: OnceLock<RotatableKeyPair> = OnceLock::new();
+  PERIPHERY_KEYS.get_or_init(|| {
+    RotatableKeyPair::from_private_key_spec(
+      mogh_pki::PkiType::OneWay,
+      &periphery_config().private_key,
+    )
+    .unwrap()
+  })
+}
+
+pub fn core_public_key() -> &'static SpkiPublicKey {
+  static CORE_PUBLIC_KEY: OnceLock<SpkiPublicKey> = OnceLock::new();
+  CORE_PUBLIC_KEY.get_or_init(|| {
+    SpkiPublicKey::from_spec(&periphery_config().core_public_key)
+      .unwrap()
+  })
+}
 
 pub fn periphery_config() -> &'static PeripheryConfig {
   static PERIPHERY_CONFIG: OnceLock<PeripheryConfig> =
@@ -58,6 +80,14 @@ pub fn periphery_config() -> &'static PeripheryConfig {
       core_tls_insecure_skip_verify: env
         .periphery_core_tls_insecure_skip_verify
         .unwrap_or(config.core_tls_insecure_skip_verify),
+      private_key: maybe_read_item_from_file(
+        env.periphery_private_key_file,
+        env.periphery_private_key,
+      )
+      .unwrap_or(config.private_key),
+      core_public_key: env
+        .periphery_core_public_key
+        .unwrap_or(config.core_public_key),
       filesystem_root: env
         .periphery_filesystem_root
         .unwrap_or(config.filesystem_root),
@@ -90,6 +120,12 @@ pub fn periphery_config() -> &'static PeripheryConfig {
           .periphery_logging_opentelemetry_scope_name
           .unwrap_or(config.logging.opentelemetry_scope_name),
       },
+      pretty_startup_config: env
+        .periphery_pretty_startup_config
+        .unwrap_or(config.pretty_startup_config),
+      unsafe_unsanitized_startup_config: env
+        .periphery_unsafe_unsanitized_startup_config
+        .unwrap_or(config.unsafe_unsanitized_startup_config),
     }
   })
 }

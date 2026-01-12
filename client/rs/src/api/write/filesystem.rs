@@ -11,7 +11,7 @@ use crate::{
 
 //
 
-/// Create filesystem node. Response: [CreateFilesystemResponse].
+/// Create a filesystem. Response: [CreateFilesystemResponse].
 #[typeshare]
 #[derive(
   Debug,
@@ -56,6 +56,7 @@ pub struct UpdateFilesystem {
   /// The filesystem ID
   pub id: FilesystemId,
   /// The name of the filesystem
+  #[serde(skip_serializing_if = "Option::is_none")]
   pub name: Option<String>,
 }
 

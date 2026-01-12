@@ -22,6 +22,7 @@ derive_empty_traits.workspace = true
 async_timing_util.workspace = true
 mogh_auth_client.workspace = true
 resolver_api.workspace = true
+mogh_pki.workspace = true
 # EXTERNAL
 surrealdb-types = { workspace = true, optional = false }
 utoipa = { workspace = true, optional = true }
@@ -32,3 +33,4 @@ tracing.workspace = true
 anyhow.workspace = true
 serde.workspace = true
 strum.workspace = true
+http.workspace = true

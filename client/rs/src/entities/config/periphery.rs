@@ -12,6 +12,7 @@
 
 use std::path::PathBuf;
 
+use mogh_auth_client::config::empty_or_redacted;
 use serde::Deserialize;
 
 use crate::entities::config::logger::{
@@ -62,6 +63,14 @@ pub struct Env {
   pub periphery_core_address: Option<String>,
   /// Override `core_tls_insecure_skip_verify`
   pub periphery_core_tls_insecure_skip_verify: Option<bool>,
+
+  /// Override `private_key`
+  pub periphery_private_key: Option<String>,
+  /// Override `private_key` with file
+  pub periphery_private_key_file: Option<PathBuf>,
+  /// Override `core_public_key`
+  pub periphery_core_public_key: Option<String>,
+
   /// Override `filesystem_root`
   pub periphery_filesystem_root: Option<PathBuf>,
   /// Override `filesystems`
@@ -87,12 +96,14 @@ pub struct Env {
   pub periphery_logging_opentelemetry_scope_name: Option<String>,
   /// Override `pretty_startup_config`
   pub periphery_pretty_startup_config: Option<bool>,
+  /// Override `unsafe_unsanitized_startup_config`
+  pub periphery_unsafe_unsanitized_startup_config: Option<bool>,
 }
 
 /// # Periphery Configuration File
 ///
 /// Refer to the [example file](https://github.com/moghtech/komodo/blob/main/config/periphery.config.toml) for a full example.
-#[derive(Debug, Clone, Default, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct PeripheryConfig {
   /// Address of Cicada Core
   #[serde(default)]
@@ -102,6 +113,23 @@ pub struct PeripheryConfig {
   /// without validating the Core certs
   #[serde(default)]
   pub core_tls_insecure_skip_verify: bool,
+
+  /// Private key to use with Noise handshake to authenticate with Cicada Core.
+  ///
+  /// Supports openssl generated pem file, `openssl genpkey -algorithm X25519 -out private.key`.
+  /// To load from file, use `private_key = "file:/path/to/private.key"`.
+  ///
+  /// If a file is specified and does not exist, will try to generate one at the path
+  /// and use it going forward.
+  ///
+  /// Default: file:/config/keys/periphery.key
+  #[serde(default = "default_private_key")]
+  pub private_key: String,
+
+  /// Specify the core public key to use with authentication signature.
+  /// If not specified, will be retreived from the Core '/public_key' route.
+  #[serde(default)]
+  pub core_public_key: String,
 
   /// Specify the default filesystem root when
   /// mount points are ommitted or relative.
@@ -131,8 +159,61 @@ pub struct PeripheryConfig {
   /// Logging configuration
   #[serde(default)]
   pub logging: LogConfig,
+
+  /// Pretty-log (multi-line) the startup config
+  /// for easier human readability.
+  #[serde(default)]
+  pub pretty_startup_config: bool,
+
+  /// Unsafe: logs unsanitized config on startup,
+  /// in order to verify everything is being
+  /// passed correctly.
+  #[serde(default)]
+  pub unsafe_unsanitized_startup_config: bool,
+}
+
+fn default_private_key() -> String {
+  String::from("file:/config/keys/periphery.key")
 }
 
 fn default_filesystem_root() -> PathBuf {
   PathBuf::from("/cicada")
+}
+
+impl Default for PeripheryConfig {
+  fn default() -> Self {
+    Self {
+      core_address: Default::default(),
+      core_tls_insecure_skip_verify: Default::default(),
+      private_key: default_private_key(),
+      core_public_key: Default::default(),
+      filesystem_root: default_filesystem_root(),
+      filesystems: Default::default(),
+      logging: Default::default(),
+      pretty_startup_config: Default::default(),
+      unsafe_unsanitized_startup_config: Default::default(),
+    }
+  }
+}
+
+impl PeripheryConfig {
+  pub fn sanitized(&self) -> PeripheryConfig {
+    PeripheryConfig {
+      core_address: self.core_address.clone(),
+      core_tls_insecure_skip_verify: self
+        .core_tls_insecure_skip_verify,
+      private_key: if self.private_key.starts_with("file:") {
+        self.private_key.clone()
+      } else {
+        empty_or_redacted(&self.private_key)
+      },
+      core_public_key: self.core_public_key.clone(),
+      filesystem_root: self.filesystem_root.clone(),
+      filesystems: self.filesystems.clone(),
+      logging: self.logging.clone(),
+      pretty_startup_config: self.pretty_startup_config,
+      unsafe_unsanitized_startup_config: self
+        .unsafe_unsanitized_startup_config,
+    }
+  }
 }

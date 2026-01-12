@@ -5,6 +5,9 @@ export type ReadResponses = {
   GetUser: Types.GetUserResponse;
   GetUsername: Types.GetUsernameResponse;
 
+  // ==== DEVICE ====
+  ListDevices: Types.ListDevicesResponse;
+
   // ==== FILESYSTEM ====
   ListFilesystems: Types.ListFilesystemsResponse;
 
@@ -15,7 +18,12 @@ export type ReadResponses = {
 };
 
 export type WriteResponses = {
-  // ==== NODE ====
+  // ==== DEVICE ====
+  CreateDevice: Types.CreateDeviceResponse;
+  UpdateDevice: Types.UpdateDeviceResponse;
+  DeleteDevice: Types.DeleteDeviceResponse;
+
+  // ==== FILESYSTEM ====
   CreateFilesystem: Types.CreateFilesystemResponse;
   UpdateFilesystem: Types.UpdateFilesystemResponse;
   DeleteFilesystem: Types.DeleteFilesystemResponse;

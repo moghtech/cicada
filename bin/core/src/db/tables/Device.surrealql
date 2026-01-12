@@ -1,0 +1,51 @@
+-- ========
+--  Device
+-- ========
+
+DEFINE TABLE IF NOT EXISTS Device SCHEMAFULL;
+
+-- name
+DEFINE FIELD OVERWRITE name
+  ON TABLE Device
+  TYPE string;
+
+-- public_key
+DEFINE FIELD OVERWRITE public_key
+  ON TABLE Device
+  TYPE string;
+  
+-- enabled
+DEFINE FIELD OVERWRITE enabled
+  ON TABLE Device
+  TYPE bool
+  DEFAULT false;
+
+-- created_at
+DEFINE FIELD OVERWRITE created_at
+  ON TABLE Device
+  TYPE datetime
+  VALUE $before OR time::now()
+  DEFAULT time::now();
+
+-- updated_at
+DEFINE FIELD OVERWRITE updated_at
+  ON TABLE Device
+  TYPE datetime
+  VALUE time::now()
+  DEFAULT time::now();
+
+-------------
+-- Indexes --
+-------------
+
+-- name | unique
+DEFINE INDEX OVERWRITE Name
+  ON TABLE Device
+  FIELDS name
+  UNIQUE;
+
+-- public_key | unique
+DEFINE INDEX OVERWRITE PublicKey
+  ON TABLE Device
+  FIELDS public_key
+  UNIQUE;

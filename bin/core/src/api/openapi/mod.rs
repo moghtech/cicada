@@ -2,14 +2,12 @@ use mogh_auth_server::api::openapi::MoghAuthApi;
 use utoipa::OpenApi;
 use utoipa_scalar::{Scalar, Servable as _};
 
-use super::{read as _read, write as _write};
-
 mod read {
-  pub use super::_read::{filesystem::*, node::*, *};
+  pub use crate::api::read::{device::*, filesystem::*, node::*, *};
 }
 
 mod write {
-  pub use super::_write::{filesystem::*, node::*};
+  pub use crate::api::write::{device::*, filesystem::*, node::*};
 }
 
 #[derive(OpenApi)]
@@ -22,6 +20,8 @@ mod write {
     //  READ
     // ======
     read::get_version,
+    // DEVICE
+    read::list_devices,
     // FILESYSTEM
     read::list_filesystems,
     // NODE
@@ -31,6 +31,10 @@ mod write {
     // =======
     //  WRITE
     // =======
+    // DEVICE
+    write::create_device,
+    write::update_device,
+    write::delete_device,
     // FILESYSTEM
     write::create_filesystem,
     write::update_filesystem,

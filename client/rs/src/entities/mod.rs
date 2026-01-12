@@ -2,11 +2,13 @@ use std::str::FromStr as _;
 
 use anyhow::Context as _;
 use serde::{Deserialize, Serialize};
-use strum::{Display, EnumString};
+use strum::{AsRefStr, Display, EnumString};
 use typeshare::typeshare;
 
 /// Configuration for Cicada
 pub mod config;
+/// A device mounting Cicada files
+pub mod device;
 /// Represents virtual filesystems which can be mounted to clients.
 pub mod filesystem;
 /// Nodes represent entries in a filesystem.
@@ -21,6 +23,28 @@ pub type U64 = u64;
 pub type Iso8601Timestamp = surrealdb_types::Datetime;
 #[typeshare(serialized_as = "any")]
 pub type JsonValue = serde_json::Value;
+
+#[typeshare]
+#[derive(
+  Debug,
+  Clone,
+  Copy,
+  PartialEq,
+  Eq,
+  Hash,
+  Default,
+  Serialize,
+  Deserialize,
+  Display,
+  EnumString,
+  AsRefStr,
+)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
+pub enum ClientType {
+  #[default]
+  User,
+  Device,
+}
 
 #[typeshare]
 #[derive(

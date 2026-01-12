@@ -1,14 +1,22 @@
+use std::{
+  str::FromStr,
+  time::{SystemTime, UNIX_EPOCH},
+};
+
 use anyhow::{Context, anyhow};
+use http::{Method, Uri};
 use mogh_auth_client::api::{
   login::MoghAuthLoginRequest, manage::MoghAuthManageRequest,
 };
 use mogh_error::deserialize_error;
+use mogh_pki::one_way::OneWayNoiseHandshake;
 use serde::{Serialize, de::DeserializeOwned};
 use serde_json::json;
 
 use crate::{
   CicadaClient,
   api::{read::CicadaReadRequest, write::CicadaWriteRequest},
+  pki_auth_prologue,
 };
 
 impl CicadaClient {
@@ -157,16 +165,38 @@ impl CicadaClient {
     endpoint: &str,
     body: B,
   ) -> anyhow::Result<R> {
+    let timestamp = SystemTime::now()
+      .duration_since(UNIX_EPOCH)?
+      .as_millis() as i64;
+
+    let prologue = pki_auth_prologue(
+      &Method::POST,
+      &Uri::from_str(endpoint)?,
+      timestamp,
+    );
+
+    let mut handshake = OneWayNoiseHandshake::new_initiator(
+      &self.private_key,
+      &self.core_public_key,
+      prologue.as_bytes(),
+    )?;
+
+    let signature = handshake.generate_signature()?;
+
     let req = self
       .reqwest
       .post(format!("{}{endpoint}", self.address))
-      // .header("x-api-key", &self.key)
-      // .header("x-api-secret", &self.secret)
+      .header("x-api-type", self.client_type.as_ref())
+      .header("x-api-signature", signature)
+      .header("x-api-timestamp", timestamp)
       .header("content-type", "application/json")
       .json(&body);
+
     let res =
-      req.send().await.context("failed to reach Cicada API")?;
+      req.send().await.context("Failed to reach Cicada API")?;
+
     let status = res.status();
+
     if status.is_success() {
       match res.json().await {
         Ok(res) => Ok(res),
@@ -186,15 +216,37 @@ impl CicadaClient {
     endpoint: &str,
     body: B,
   ) -> anyhow::Result<R> {
+    let timestamp = SystemTime::now()
+      .duration_since(UNIX_EPOCH)?
+      .as_millis() as i64;
+
+    let prologue = pki_auth_prologue(
+      &Method::POST,
+      &Uri::from_str(endpoint)?,
+      timestamp,
+    );
+
+    let mut handshake = OneWayNoiseHandshake::new_initiator(
+      &self.private_key,
+      &self.core_public_key,
+      prologue.as_bytes(),
+    )?;
+
+    let signature = handshake.generate_signature()?;
+
     let req = self
       .reqwest
       .post(format!("{}{endpoint}", self.address))
-      // .header("x-api-key", &self.key)
-      // .header("x-api-secret", &self.secret)
+      .header("x-api-type", self.client_type.as_ref())
+      .header("x-api-signature", signature)
+      .header("x-api-timestamp", timestamp)
       .header("content-type", "application/json")
       .json(&body);
-    let res = req.send().context("failed to reach Cicada API")?;
+
+    let res = req.send().context("Failed to reach Cicada API")?;
+
     let status = res.status();
+
     if status.is_success() {
       match res.json() {
         Ok(res) => Ok(res),

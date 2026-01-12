@@ -3,7 +3,7 @@ extern crate tracing;
 
 use tracing::Instrument as _;
 
-use crate::config::core_config;
+use crate::config::{core_config, core_keys};
 
 mod api;
 mod auth;
@@ -20,14 +20,6 @@ async fn app() -> anyhow::Result<()> {
   async {
     info!("Cicada Core version: v{}", env!("CARGO_PKG_VERSION"));
 
-    rustls::crypto::aws_lc_rs::default_provider()
-      .install_default()
-      .map_err(|_| {
-        anyhow::Error::msg("Failed to install tls crypto provider")
-      })?;
-
-    db::init().await?;
-
     match (
       config.pretty_startup_config,
       config.unsafe_unsanitized_startup_config,
@@ -37,6 +29,17 @@ async fn app() -> anyhow::Result<()> {
       (false, true) => info!("{:?}", config),
       (false, false) => info!("{:?}", config.sanitized()),
     }
+
+    // Init + log public key. Will crash if invalid private key here.
+    info!("Public Key: {}", core_keys().load().public);
+
+    rustls::crypto::aws_lc_rs::default_provider()
+      .install_default()
+      .map_err(|_| {
+        anyhow::Error::msg("Failed to install tls crypto provider")
+      })?;
+
+    db::init().await?;
 
     anyhow::Ok(())
   }

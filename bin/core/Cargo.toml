@@ -24,6 +24,7 @@ resolver_api.workspace = true
 mogh_config.workspace = true
 mogh_logger.workspace = true
 mogh_server.workspace = true
+mogh_pki.workspace = true
 # external
 async_timing_util.workspace = true
 surrealdb-types.workspace = true

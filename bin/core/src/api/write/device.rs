@@ -1,0 +1,84 @@
+use cicada_client::{
+  api::write::device::{
+    CreateDevice, DeleteDevice, UpdateDevice,
+  },
+  entities::device::DeviceRecord,
+};
+use resolver_api::Resolve;
+
+use crate::{api::write::WriteArgs, db::query};
+
+#[allow(unused)]
+#[utoipa::path(
+  post,
+  path = "/write/CreateDevice",
+  description = "Create a new device",
+  request_body(content = CreateDevice),
+  responses(
+    (status = 200, description = "The created device", body = DeviceRecord),
+    (status = 500, description = "Request failed", body = mogh_error::Serror)
+  ),
+)]
+pub fn create_device() {}
+
+impl Resolve<WriteArgs> for CreateDevice {
+  async fn resolve(
+    self,
+    _: &WriteArgs,
+  ) -> Result<Self::Response, Self::Error> {
+    query::device::create_device(self)
+      .await
+      .map_err(Into::into)
+  }
+}
+
+//
+
+#[allow(unused)]
+#[utoipa::path(
+  post,
+  path = "/write/UpdateDevice",
+  description = "Update a device",
+  request_body(content = UpdateDevice),
+  responses(
+    (status = 200, description = "The updated device", body = DeviceRecord),
+    (status = 500, description = "Request failed", body = mogh_error::Serror)
+  ),
+)]
+pub fn update_device() {}
+
+impl Resolve<WriteArgs> for UpdateDevice {
+  async fn resolve(
+    self,
+    _: &WriteArgs,
+  ) -> Result<Self::Response, Self::Error> {
+    query::device::update_device(self)
+      .await
+      .map_err(Into::into)
+  }
+}
+
+//
+
+#[allow(unused)]
+#[utoipa::path(
+  post,
+  path = "/write/DeleteDevice",
+  description = "Delete a device",
+  request_body(content = DeleteDevice),
+  responses(
+    (status = 200, description = "The deleted device", body = DeviceRecord),
+    (status = 404, description = "Device not found", body = mogh_error::Serror),
+    (status = 500, description = "Request failed", body = mogh_error::Serror)
+  ),
+)]
+pub fn delete_device() {}
+
+impl Resolve<WriteArgs> for DeleteDevice {
+  async fn resolve(
+    self,
+    _: &WriteArgs,
+  ) -> Result<Self::Response, Self::Error> {
+    query::device::delete_device(self.id.0).await
+  }
+}

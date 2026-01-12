@@ -13,8 +13,10 @@ path = "src/main.rs"
 [dependencies]
 # LOCAL
 cicada_client = { workspace = true, features = ["blocking", "logger"] }
+mogh_secret_file.workspace = true
 mogh_config.workspace = true
 mogh_logger.workspace = true
+mogh_pki.workspace = true
 # EXTERNAL
 futures-util.workspace = true
 colored.workspace = true

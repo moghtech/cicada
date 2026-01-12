@@ -58,7 +58,9 @@ pub struct UserRecord {
 
 impl UserRecord {
   pub fn sanitize(&mut self) {
-    self.password.clear();
+    if !self.password.is_empty() {
+      self.password = String::from("redacted");
+    }
     if !self.totp_secret.is_empty() {
       self.totp_secret = String::from("redacted");
     }

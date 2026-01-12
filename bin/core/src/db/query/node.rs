@@ -1,8 +1,14 @@
 use anyhow::Context as _;
-use cicada_client::entities::{
-  filesystem::FilesystemId,
-  node::{NodeListItem, NodeRecord},
+use axum::http::StatusCode;
+use cicada_client::{
+  api::write::node::{CreateNode, UpdateNode},
+  entities::{
+    filesystem::FilesystemId,
+    node::{NodeKind, NodeListItem, NodeRecord},
+  },
 };
+use futures_util::{TryStreamExt as _, stream::FuturesUnordered};
+use mogh_error::AddStatusCode as _;
 
 use crate::db::DB;
 
@@ -29,4 +35,77 @@ AND ($parent IS NONE OR parent = $parent)",
   .context("Failed to query database for nodes")?
   .take(0)
   .context("Failed to get node query result")
+}
+
+pub async fn create_node(
+  body: CreateNode,
+) -> anyhow::Result<NodeRecord> {
+  DB.create("Node")
+    .content(body)
+    .await
+    .context("Failed to create Node on database")?
+    .context("Failed to create Node on database: No creation result")
+}
+
+pub async fn update_node(
+  body: UpdateNode,
+) -> anyhow::Result<NodeRecord> {
+  DB.update(body.id.as_record_id())
+    .merge(serde_json::to_value(body)?)
+    .await
+    .context("Failed to update Node on database")?
+    .context("Failed to update Node on database: No update result")
+}
+
+pub async fn delete_node(
+  id: &str,
+  move_children: Option<u64>,
+) -> mogh_error::Result<NodeRecord> {
+  let node = get_node(id).await?;
+  if matches!(node.kind, NodeKind::Folder) {
+    if let Some(parent) = move_children {
+      // Moves children of this node to the new parent
+      DB.query("UPDATE Node SET parent = $new_parent WHERE parent = $old_parent RETURN NONE;")
+        .bind(("old_parent", node.inode))
+        .bind(("new_parent", parent))
+        .await
+        .context("Failed to move children nodes to new parent")?;
+    } else {
+      delete_children(node.filesystem, node.inode).await?;
+    }
+  }
+  DB.delete(node.id.as_record_id())
+    .await?
+    .context("No filesystem matching given ID")
+    .status_code(StatusCode::NOT_FOUND)
+}
+
+fn delete_children(
+  filesystem: FilesystemId,
+  parent: u64,
+) -> std::pin::Pin<Box<impl Future<Output = mogh_error::Result<()>>>>
+{
+  Box::pin(async move {
+    let children = list_nodes(Some(filesystem), Some(parent)).await?;
+    // Recursively deletes any sub folders as well.
+    children
+      .iter()
+      .map(|node| async {
+        if matches!(node.kind, NodeKind::Folder) {
+          delete_children(node.filesystem.clone(), node.inode)
+            .await?;
+        }
+        mogh_error::Result::Ok(())
+      })
+      .collect::<FuturesUnordered<_>>()
+      .try_collect::<Vec<_>>()
+      .await?;
+    let ids =
+      children.into_iter().map(|node| node.id).collect::<Vec<_>>();
+    DB.query("DELETE Node WHERE $ids.any(id) RETURN NONE;")
+      .bind(("ids", ids))
+      .await
+      .context("Failed to delete children nodes")?;
+    Ok(())
+  })
 }

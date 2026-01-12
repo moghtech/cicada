@@ -8,7 +8,20 @@ use cicada_client::entities::config::{
 use colored::Colorize as _;
 use mogh_auth_client::config::{NamedOauthConfig, OidcConfig};
 use mogh_config::ConfigLoader;
+use mogh_pki::key::RotatableKeyPair;
 use mogh_secret_file::maybe_read_item_from_file;
+
+/// Should call in startup to ensure Core errors without valid private key.
+pub fn core_keys() -> &'static RotatableKeyPair {
+  static CORE_KEYS: OnceLock<RotatableKeyPair> = OnceLock::new();
+  CORE_KEYS.get_or_init(|| {
+    RotatableKeyPair::from_private_key_spec(
+      mogh_pki::PkiType::OneWay,
+      &core_config().private_key,
+    )
+    .unwrap()
+  })
+}
 
 pub fn core_config() -> &'static CoreConfig {
   static CORE_CONFIG: OnceLock<CoreConfig> = OnceLock::new();
@@ -69,6 +82,11 @@ pub fn core_config() -> &'static CoreConfig {
       )
       .unwrap_or(config.jwt_secret),
       jwt_ttl: env.cicada_jwt_ttl.unwrap_or(config.jwt_ttl),
+      private_key: maybe_read_item_from_file(
+        env.cicada_private_key_file,
+        env.cicada_private_key,
+      )
+      .unwrap_or(config.private_key),
       database: DatabaseConfig {
         uri: env.cicada_database_uri.unwrap_or(config.database.uri),
         username: maybe_read_item_from_file(

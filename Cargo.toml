@@ -23,6 +23,7 @@ mogh_error = { path = "../lib/crates/error" }
 mogh_secret_file = { path = "../lib/crates/secret_file" }
 mogh_config = { path = "../lib/crates/config" }
 mogh_logger = { path = "../lib/crates/logger" }
+mogh_pki = { path = "../lib/crates/pki" }
 mogh_server = { path = "../lib/crates/server" }
 mogh_rate_limit = { path = "../lib/crates/rate_limit" }
 
@@ -33,9 +34,10 @@ cicada_client = { path = "client/rs" }
 mogh_auth_client = { version = "0.1.0", registry = "mogh" }
 mogh_auth_server = { version = "0.1.0", registry = "mogh" }
 mogh_error = { version = "0.5.5", default-features = false, registry = "mogh" }
-mogh_secret_file = { version = "0.1.0", registry = "mogh" }
+mogh_secret_file = { version = "0.2.0", registry = "mogh" }
 mogh_config = { version = "0.1.0", registry = "mogh" }
 mogh_logger = { version = "0.1.0", registry = "mogh" }
+mogh_pki = { version = "0.1.0", registry = "mogh" }
 mogh_server = { version = "0.1.4", registry = "mogh" }
 mogh_rate_limit = { version = "0.1.0", registry = "mogh" }
 derive_default_builder = "0.1.8"
@@ -52,6 +54,7 @@ arc-swap = "1.8.0"
 
 # SERVER
 axum = { version = "0.8.8", features = ["ws", "json", "macros"] }
+http = "1.4.0"
 
 # OPENAPI
 utoipa-scalar = { version = "0.3.0", features = ["axum"] }

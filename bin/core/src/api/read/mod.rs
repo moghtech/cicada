@@ -1,16 +1,13 @@
 use std::time::Instant;
 
-use axum::{Extension, Router, extract::Path, routing::post};
-use cicada_client::{
-  api::read::{
-    GetUser, GetUsername, GetUsernameResponse, GetVersion,
-    GetVersionResponse,
-    filesystem::ListFilesystems,
-    node::{FindNode, GetNode, ListNodes},
-  },
-  entities::user::UserRecord,
+use anyhow::anyhow;
+use axum::{
+  Extension, Router, extract::Path, http::StatusCode, routing::post,
 };
-use mogh_error::{Json, Response};
+use cicada_client::api::read::{
+  device::*, filesystem::*, node::*, *,
+};
+use mogh_error::{AddStatusCodeError, Json, Response};
 use resolver_api::Resolve;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
@@ -18,15 +15,17 @@ use surrealdb::types::Uuid;
 use typeshare::typeshare;
 
 use crate::{
-  api::Variant, auth::middleware::auth_request,
+  api::Variant,
+  auth::middleware::{Client, auth_request},
   db::query::user::get_user,
 };
 
+pub mod device;
 pub mod filesystem;
 pub mod node;
 
 pub struct ReadArgs {
-  user: UserRecord,
+  client: Client,
 }
 
 #[typeshare]
@@ -39,6 +38,9 @@ enum ReadRequest {
   GetVersion(GetVersion),
   GetUser(GetUser),
   GetUsername(GetUsername),
+
+  // ==== DEVICE ====
+  ListDevices(ListDevices),
 
   // ==== FILESYSTEM ====
   ListFilesystems(ListFilesystems),
@@ -57,7 +59,7 @@ pub fn router() -> Router {
 }
 
 async fn variant_handler(
-  user: Extension<UserRecord>,
+  client: Extension<Client>,
   Path(Variant { variant }): Path<Variant>,
   Json(params): Json<serde_json::Value>,
 ) -> mogh_error::Result<axum::response::Response> {
@@ -65,17 +67,17 @@ async fn variant_handler(
     "type": variant,
     "params": params,
   }))?;
-  handler(user, Json(req)).await
+  handler(client, Json(req)).await
 }
 
 async fn handler(
-  Extension(user): Extension<UserRecord>,
+  Extension(client): Extension<Client>,
   Json(request): Json<ReadRequest>,
 ) -> mogh_error::Result<axum::response::Response> {
   let timer = Instant::now();
   let req_id = Uuid::new_v4();
   // debug!("/read request | user: {}", user.username);
-  let res = request.resolve(&ReadArgs { user }).await;
+  let res = request.resolve(&ReadArgs { client }).await;
   // if let Err(e) = &res {
   //   debug!("/read request {req_id} error: {:#}", e.error);
   // }
@@ -115,8 +117,14 @@ impl Resolve<ReadArgs> for GetVersion {
 impl Resolve<ReadArgs> for GetUser {
   async fn resolve(
     self,
-    ReadArgs { user }: &ReadArgs,
+    ReadArgs { client }: &ReadArgs,
   ) -> Result<Self::Response, Self::Error> {
+    let Client::User(user) = client else {
+      return Err(
+        anyhow!("Client is not user")
+          .status_code(StatusCode::BAD_REQUEST),
+      );
+    };
     Ok(user.clone())
   }
 }

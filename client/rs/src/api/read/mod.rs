@@ -5,6 +5,7 @@ use typeshare::typeshare;
 
 use crate::entities::user::UserRecord;
 
+pub mod device;
 pub mod filesystem;
 pub mod node;
 
