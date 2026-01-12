@@ -1,5 +1,5 @@
 import { useInvalidate, useWrite } from "@/lib/hooks";
-import { Button, Group, Modal, TextInput } from "@mantine/core";
+import { Button, Menu, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
@@ -8,14 +8,16 @@ import { Plus } from "lucide-react";
 const CreateFilesystem = () => {
   const [opened, { open, close }] = useDisclosure(false);
   return (
-    <>
-      <Modal opened={opened} onClose={close} title="Create Filesystem">
+    <Menu opened={opened} onClose={close} position="bottom-start" width={400}>
+      <Menu.Target>
+        <Button onClick={open} leftSection={<Plus size="1rem" />}>
+          Create Filesystem
+        </Button>
+      </Menu.Target>
+      <Menu.Dropdown p="1rem">
         <CreateFilesystemForm close={close} />
-      </Modal>
-      <Button onClick={open} rightSection={<Plus size="1rem" />}>
-        Create Filesystem
-      </Button>
-    </>
+      </Menu.Dropdown>
+    </Menu>
   );
 };
 
@@ -50,11 +52,13 @@ const CreateFilesystemForm = ({ close }: { close: () => void }) => {
         placeholder="Enter name"
         key={form.key("name")}
       />
-      <Group justify="flex-end" mt="md">
-        <Button type="submit" loading={isPending}>
-          Create
-        </Button>
-      </Group>
+      <Button
+        leftSection={<Plus size="1rem" />}
+        type="submit"
+        loading={isPending}
+      >
+        Create Filesystem
+      </Button>
     </form>
   );
 };

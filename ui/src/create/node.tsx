@@ -26,20 +26,6 @@ const CreateNode = ({
       </Menu.Dropdown>
     </Menu>
   );
-  // return (
-  //   <>
-  //     <Modal
-  //       opened={opened}
-  //       onClose={close}
-  //       title={<CreateNodeTitle kind={kind} />}
-  //     >
-  //       <CreateNodeForm close={close} kind={kind} parent={parent} />
-  //     </Modal>
-  //     <Button onClick={open}>
-  //       <CreateNodeTitle kind={kind} />
-  //     </Button>
-  //   </>
-  // );
 };
 
 const CreateNodeIcon = ({ kind }: { kind: Types.NodeKind }) => {

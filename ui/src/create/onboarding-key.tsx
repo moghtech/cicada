@@ -1,23 +1,25 @@
 import { CopyIconButton } from "@/components/copy-button";
 import { useInvalidate, useWrite } from "@/lib/hooks";
-import { Button, Flex, Group, Modal, Text, TextInput } from "@mantine/core";
+import { Button, Flex, Menu, Text, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
-import { Plus } from "lucide-react";
+import { CircleCheckBig, Plus } from "lucide-react";
 import { useState } from "react";
 
 const CreateOnboardingKey = () => {
   const [opened, { open, close }] = useDisclosure(false);
   return (
-    <>
-      <Modal opened={opened} onClose={close} title="Create Onboarding Key">
+    <Menu opened={opened} onClose={close} position="bottom-start" width={400}>
+      <Menu.Target>
+        <Button onClick={open} rightSection={<Plus size="1rem" />}>
+          Create Onboarding Key
+        </Button>
+      </Menu.Target>
+      <Menu.Dropdown p="1rem">
         <CreateOnboardingKeyForm close={close} />
-      </Modal>
-      <Button onClick={open} rightSection={<Plus size="1rem" />}>
-        Create Onboarding Key
-      </Button>
-    </>
+      </Menu.Dropdown>
+    </Menu>
   );
 };
 
@@ -46,9 +48,9 @@ const CreateOnboardingKeyForm = ({ close }: { close: () => void }) => {
     validate: {
       name: (name) => (name.length ? null : "Name cannot be empty"),
       public_key: (public_key) =>
-        !public_key.length || public_key.length === 64
+        !public_key.length || public_key.length === 60
           ? null
-          : "Public key should be 64 characters",
+          : "Public key should be 60 characters",
     },
   });
 
@@ -58,16 +60,16 @@ const CreateOnboardingKeyForm = ({ close }: { close: () => void }) => {
         <Text>
           Save the onboarding private key. It cannot be retrieved again later.
         </Text>
-        <Flex gap="md" align="center">
-          <Text ff="monospace" opacity={0.6}>
-            Private Key:
-          </Text>
-          <TextInput value={createdPrivateKey} disabled />
+        <Flex gap="md" align="center" w="100%">
+          <TextInput value={createdPrivateKey} w="100%" disabled />
           <CopyIconButton content={createdPrivateKey} />
         </Flex>
-        <Group justify="flex-end" mt="md">
-          <Button onClick={() => close()}>Close</Button>
-        </Group>
+        <Button
+          leftSection={<CircleCheckBig size="1rem" />}
+          onClick={() => close()}
+        >
+          Done
+        </Button>
       </Flex>
     );
   }
@@ -89,15 +91,17 @@ const CreateOnboardingKeyForm = ({ close }: { close: () => void }) => {
         {...form.getInputProps("public_key")}
         withAsterisk
         autoFocus
-        label="Public Key (Optional)"
+        label="Pre-existing Public Key (Optional)"
         placeholder="Enter public key"
         key={form.key("public_key")}
       />
-      <Group justify="flex-end" mt="md">
-        <Button type="submit" loading={isPending}>
-          Create
-        </Button>
-      </Group>
+      <Button
+        leftSection={<Plus size="1rem" />}
+        type="submit"
+        loading={isPending}
+      >
+        Create Onboarding Key
+      </Button>
     </form>
   );
 };
