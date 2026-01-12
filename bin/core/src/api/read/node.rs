@@ -1,16 +1,10 @@
-use anyhow::Context;
-use axum::http::StatusCode;
 use cicada_client::{
   api::read::node::{FindNode, GetNode, ListNodes},
   entities::node::{NodeListItem, NodeRecord},
 };
-use mogh_error::AddStatusCode;
 use resolver_api::Resolve;
 
-use crate::{
-  api::read::ReadArgs,
-  db::{DB, query::node},
-};
+use crate::{api::read::ReadArgs, db::query};
 
 #[allow(unused)]
 #[utoipa::path(
@@ -30,12 +24,13 @@ impl Resolve<ReadArgs> for ListNodes {
     self,
     _: &ReadArgs,
   ) -> Result<Self::Response, Self::Error> {
-    node::list_nodes(self.filesystem, self.parent)
+    query::node::list_nodes(self.filesystem, self.parent)
       .await
       .map_err(Into::into)
   }
 }
 
+#[allow(unused)]
 #[utoipa::path(
   post,
   path = "/read/GetNode",
@@ -47,25 +42,18 @@ impl Resolve<ReadArgs> for ListNodes {
     (status = 500, description = "Request failed", body = mogh_error::Serror),
   ),
 )]
-pub async fn get_node(
-  body: GetNode,
-) -> mogh_error::Result<NodeRecord> {
-  DB.select(body.id.as_record_id())
-    .await
-    .context("Failed to find node with given id.")?
-    .context("Failed to find node with given id.")
-    .status_code(StatusCode::NOT_FOUND)
-}
+pub fn get_node() {}
 
 impl Resolve<ReadArgs> for GetNode {
   async fn resolve(
     self,
     _: &ReadArgs,
   ) -> Result<Self::Response, Self::Error> {
-    get_node(self).await
+    query::node::get_node(&self.id.0).await
   }
 }
 
+#[allow(unused)]
 #[utoipa::path(
   post,
   path = "/read/FindNode",
@@ -77,34 +65,13 @@ impl Resolve<ReadArgs> for GetNode {
     (status = 500, description = "Request failed", body = mogh_error::Serror),
   ),
 )]
-pub async fn find_node(
-  body: FindNode,
-) -> mogh_error::Result<NodeRecord> {
-  DB.query(
-    "
-SELECT * FROM Node
-WHERE filesystem = $filesystem
-AND ($inode IS NONE OR inode = $inode)
-AND ($parent IS NONE OR parent = $parent)
-AND ($name IS NONE OR name = $name)",
-  )
-  .bind(("filesystem", body.filesystem))
-  .bind(("inode", body.inode))
-  .bind(("parent", body.parent))
-  .bind(("name", body.name))
-  .await
-  .context("Failed to query database")?
-  .take::<Option<NodeRecord>>(0)
-  .context("Failed to get query result")?
-  .context("Failed to find Node with given parameters.")
-  .status_code(StatusCode::NOT_FOUND)
-}
+pub fn find_node() {}
 
 impl Resolve<ReadArgs> for FindNode {
   async fn resolve(
     self,
     _: &ReadArgs,
   ) -> Result<Self::Response, Self::Error> {
-    find_node(self).await
+    query::node::find_node(self).await
   }
 }

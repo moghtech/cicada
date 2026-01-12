@@ -5,42 +5,42 @@ use typeshare::typeshare;
 
 use crate::{
   api::read::CicadaReadRequest,
-  entities::device::{DeviceId, DeviceRecord},
+  entities::onboarding_key::{OnboardingKeyId, OnboardingKeyRecord},
 };
 
 //
 
-/// List devices. Response: [ListDevicesResponse].
+/// List onboarding keys. Response: [ListOnboardingKeysResponse].
 #[typeshare]
 #[derive(
   Debug, Clone, Serialize, Deserialize, Resolve, EmptyTraits,
 )]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaReadRequest)]
-#[response(ListDevicesResponse)]
+#[response(ListOnboardingKeysResponse)]
 #[error(mogh_error::Error)]
-pub struct ListDevices {}
+pub struct ListOnboardingKeys {}
 
-/// Response for [ListDevices].
+/// Response for [ListOnboardingKeys].
 #[typeshare]
-pub type ListDevicesResponse = Vec<DeviceRecord>;
+pub type ListOnboardingKeysResponse = Vec<OnboardingKeyRecord>;
 
 //
 
-/// Get a device. Response: [DeviceRecord].
+/// Get an onboarding key. Response: [OnboardingKeyRecord].
 #[typeshare]
 #[derive(
   Debug, Clone, Serialize, Deserialize, Resolve, EmptyTraits,
 )]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaReadRequest)]
-#[response(GetDeviceResponse)]
+#[response(GetOnboardingKeyResponse)]
 #[error(mogh_error::Error)]
-pub struct GetDevice {
-  /// The device id
-  pub id: DeviceId,
+pub struct GetOnboardingKey {
+  /// The onboarding key id
+  pub id: OnboardingKeyId,
 }
 
-/// Response for [GetDevice].
+/// Response for [GetOnboardingKey].
 #[typeshare]
-pub type GetDeviceResponse = DeviceRecord;
+pub type GetOnboardingKeyResponse = OnboardingKeyRecord;

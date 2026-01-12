@@ -152,45 +152,44 @@ export default function Login({
                 <Text size="sm">Log In</Text>
               </Flex>
             </Group>
-            {!secondFactorPending && (
-              <Flex gap="sm" align="center" wrap="wrap">
-                {(
-                  [
-                    [options?.oidc, "Oidc"],
-                    [options?.github, "Github"],
-                    [options?.google, "Google"],
-                  ] as Array<
-                    [boolean | undefined, MoghAuth.Types.ExternalLoginProvider]
-                  >
-                ).map(
-                  ([enabled, provider]) =>
-                    enabled && (
-                      <Button
-                        key={provider}
-                        onClick={() =>
-                          cicada_client().auth.externalLogin(provider)
-                        }
-                        leftSection={
-                          provider === "Oidc" ? (
-                            <KeyRound size="1rem" />
-                          ) : (
-                            // <img
-                            //   src={`/icons/${provider.toLowerCase()}.svg`}
-                            //   alt={provider}
-                            //   width="1rem"
-                            //   height="1rem"
-                            // />
-                            <KeyRound size="1rem" />
-                          )
-                        }
-                        w={110}
-                      >
-                        {provider}
-                      </Button>
-                    )
-                )}
-              </Flex>
-            )}
+            <Flex gap="sm" align="center" wrap="wrap">
+              {(
+                [
+                  [options?.oidc, "Oidc"],
+                  [options?.github, "Github"],
+                  [options?.google, "Google"],
+                ] as Array<
+                  [boolean | undefined, MoghAuth.Types.ExternalLoginProvider]
+                >
+              ).map(
+                ([enabled, provider]) =>
+                  enabled && (
+                    <Button
+                      key={provider}
+                      onClick={() =>
+                        cicada_client().auth.externalLogin(provider)
+                      }
+                      leftSection={
+                        provider === "Oidc" ? (
+                          <KeyRound size="1rem" />
+                        ) : (
+                          // <img
+                          //   src={`/icons/${provider.toLowerCase()}.svg`}
+                          //   alt={provider}
+                          //   width="1rem"
+                          //   height="1rem"
+                          // />
+                          <KeyRound size="1rem" />
+                        )
+                      }
+                      w={110}
+                      disabled={secondFactorPending}
+                    >
+                      {provider}
+                    </Button>
+                  )
+              )}
+            </Flex>
           </Flex>
         }
         component="form"

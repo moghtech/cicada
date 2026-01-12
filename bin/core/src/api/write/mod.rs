@@ -1,6 +1,8 @@
 use anyhow::Context as _;
 use axum::{Extension, Router, extract::Path, routing::post};
-use cicada_client::api::write::{device::*, filesystem::*, node::*};
+use cicada_client::api::write::{
+  device::*, filesystem::*, node::*, onboarding_key::*,
+};
 use derive_variants::{EnumVariants, ExtractVariant as _};
 use mogh_error::{Json, Response};
 use resolver_api::Resolve;
@@ -18,9 +20,10 @@ use crate::{
 pub mod device;
 pub mod filesystem;
 pub mod node;
+pub mod onboarding_key;
 
 pub struct WriteArgs {
-  _client: Client,
+  client: Client,
 }
 
 #[typeshare]
@@ -37,6 +40,11 @@ pub enum WriteRequest {
   CreateDevice(CreateDevice),
   UpdateDevice(UpdateDevice),
   DeleteDevice(DeleteDevice),
+
+  // ==== ONBOARDING KEY ====
+  CreateOnboardingKey(CreateOnboardingKey),
+  UpdateOnboardingKey(UpdateOnboardingKey),
+  DeleteOnboardingKey(DeleteOnboardingKey),
 
   // ==== FILESYSTEM ====
   CreateFilesystem(CreateFilesystem),
@@ -72,6 +80,15 @@ async fn handler(
   Extension(client): Extension<Client>,
   Json(request): Json<WriteRequest>,
 ) -> mogh_error::Result<axum::response::Response> {
+  // Most of the write API is only for user clients.
+  // This blocks non user access apart from device routes.
+  if !matches!(
+    &request,
+    WriteRequest::CreateDevice(_) | WriteRequest::UpdateDevice(_)
+  ) {
+    client.only_users()?;
+  }
+
   let req_id = Uuid::new_v4();
 
   let res = tokio::spawn(task(req_id, request, client))
@@ -86,12 +103,12 @@ async fn handler(
 async fn task(
   req_id: Uuid,
   request: WriteRequest,
-  _client: Client,
+  client: Client,
 ) -> mogh_error::Result<axum::response::Response> {
   let variant = request.extract_variant();
   info!("/write request | {variant}");
 
-  let res = request.resolve(&WriteArgs { _client }).await;
+  let res = request.resolve(&WriteArgs { client }).await;
 
   if let Err(e) = &res {
     warn!(

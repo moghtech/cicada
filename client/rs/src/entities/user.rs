@@ -1,4 +1,3 @@
-use anyhow::anyhow;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use surrealdb_types::{RecordId, RecordIdKey, SurrealValue};

@@ -24,8 +24,9 @@ pub fn create_filesystem() {}
 impl Resolve<WriteArgs> for CreateFilesystem {
   async fn resolve(
     self,
-    _: &WriteArgs,
+    WriteArgs { client }: &WriteArgs,
   ) -> Result<Self::Response, Self::Error> {
+    let _user = client.as_user()?;
     query::filesystem::create_filesystem(self)
       .await
       .map_err(Into::into)

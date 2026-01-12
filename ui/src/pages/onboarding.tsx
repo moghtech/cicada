@@ -1,28 +1,30 @@
 import { DataTable, SortableHeader } from "@/components/data-table";
-import CreateFilesystem from "@/create/filesystem";
+import CreateOnboardingKey from "@/create/onboarding-key";
 import { useRead } from "@/lib/hooks";
 import { Flex, Group, Text } from "@mantine/core";
 import { HardDrive } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-const FilesystemsPage = () => {
-  const { data } = useRead("ListFilesystems", {});
+const OnboardingKeysPage = () => {
+  const { data } = useRead("ListOnboardingKeys", {});
   const nav = useNavigate();
   return (
     <Flex direction="column" gap="lg">
       <Group>
         <HardDrive size={20} />
         <Text fz="h2" opacity={0.6}>
-          Filesystems
+          Onboarding Keys
         </Text>
       </Group>
       <Group>
-        <CreateFilesystem />
+        <CreateOnboardingKey />
       </Group>
       <DataTable
-        tableKey="filesystems-table-v1"
+        tableKey="onboarding-keys-table-v1"
         data={data ?? []}
-        onRowClick={(fs) => nav("/filesystems/" + fs.id)}
+        onRowClick={(onboarding_key) =>
+          nav("/onboarding-keys/" + onboarding_key.id)
+        }
         columns={[
           {
             header: ({ column }) => (
@@ -58,4 +60,4 @@ const FilesystemsPage = () => {
   );
 };
 
-export default FilesystemsPage;
+export default OnboardingKeysPage;

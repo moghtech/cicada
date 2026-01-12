@@ -96,11 +96,43 @@ export type DeleteFilesystemResponse = FilesystemRecord;
 /** Response for [DeleteNode]. */
 export type DeleteNodeResponse = NodeRecord;
 
+export type OnboardingKeyId = string;
+
+export interface OnboardingKeyRecord {
+	/** The unique onboarding key id */
+	id: OnboardingKeyId;
+	/** The name of the onboarding key */
+	name: string;
+	/**
+	 * The onboarding public key.
+	 * This is used to authenticate onboarding requests.
+	 */
+	public_key: string;
+	/**
+	 * Whether onboarding key is enabled.
+	 * Disabled onboarding keys cannot onboard devices.
+	 */
+	enabled: boolean;
+	/** Created at as ISO8601 timestamp. */
+	created_at: Iso8601Timestamp;
+	/** Updated at as ISO8601 timestamp. */
+	updated_at: Iso8601Timestamp;
+}
+
+/** Response for [DeleteOnboardingKey]. */
+export type DeleteOnboardingKeyResponse = OnboardingKeyRecord;
+
 /** Response for [FindNode]. */
 export type FindNodeResponse = NodeRecord;
 
+/** Response for [GetDevice]. */
+export type GetDeviceResponse = DeviceRecord;
+
 /** Response for [GetNode]. */
 export type GetNodeResponse = NodeRecord;
+
+/** Response for [GetOnboardingKey]. */
+export type GetOnboardingKeyResponse = OnboardingKeyRecord;
 
 export type UserId = string;
 
@@ -180,6 +212,9 @@ export interface NodeListItem {
 /** Response for [ListNodes]. */
 export type ListNodesResponse = NodeListItem[];
 
+/** Response for [ListOnboardingKeys]. */
+export type ListOnboardingKeysResponse = OnboardingKeyRecord[];
+
 /** Response for [UpdateDevice]. */
 export type UpdateDeviceResponse = DeviceRecord;
 
@@ -188,6 +223,9 @@ export type UpdateFilesystemResponse = FilesystemRecord;
 
 /** Response for [UpdateNode]. */
 export type UpdateNodeResponse = NodeRecord;
+
+/** Response for [UpdateOnboardingKey]. */
+export type UpdateOnboardingKeyResponse = OnboardingKeyRecord;
 
 /** Create a device. Response: [CreateDeviceResponse]. */
 export interface CreateDevice {
@@ -231,6 +269,32 @@ export interface CreateNode {
 	data?: string;
 }
 
+/** Create an onboarding key. Response: [CreateOnboardingKeyResponse]. */
+export interface CreateOnboardingKey {
+	/** The name of the onboarding_key */
+	name: string;
+	/**
+	 * Optionally provide a pre-existing Spki encoded public key
+	 * generated using another method. Otherwise a new keypair will be
+	 * generated and the private key returned. The private key will not be
+	 * stored otherwise.
+	 */
+	public_key?: string;
+	/** Whether device is enabled. Default: true */
+	enabled: boolean;
+}
+
+/** Response for [CreateOnboardingKey]. */
+export interface CreateOnboardingKeyResponse {
+	/**
+	 * Pkcs8 encoded private key.
+	 * Only present if user *does not* pass pre existing public key to [CreateOnboardingKey].
+	 */
+	private_key?: string;
+	/** The created onboarding key record */
+	created: OnboardingKeyRecord;
+}
+
 /**
  * Delete a device. Response: [DeleteDeviceResponse].
  * 
@@ -268,6 +332,16 @@ export interface DeleteNode {
 }
 
 /**
+ * Delete a onboarding_key. Response: [DeleteOnboardingKeyResponse].
+ * 
+ * WARNING. This will also delete all nodes on the onboarding_key.
+ */
+export interface DeleteOnboardingKey {
+	/** The onboarding_key ID */
+	id: OnboardingKeyId;
+}
+
+/**
  * Find a node. Response: [NodeRecord].
  * 
  * Query using either:
@@ -288,10 +362,22 @@ export interface FindNode {
 	name?: string;
 }
 
+/** Get a device. Response: [DeviceRecord]. */
+export interface GetDevice {
+	/** The device id */
+	id: DeviceId;
+}
+
 /** Get a node. Response: [NodeRecord]. */
 export interface GetNode {
 	/** The node id */
 	id: NodeId;
+}
+
+/** Get an onboarding key. Response: [OnboardingKeyRecord]. */
+export interface GetOnboardingKey {
+	/** The onboarding key id */
+	id: OnboardingKeyId;
 }
 
 /**
@@ -347,6 +433,10 @@ export interface ListNodes {
 	parent?: U64;
 }
 
+/** List onboarding keys. Response: [ListOnboardingKeysResponse]. */
+export interface ListOnboardingKeys {
+}
+
 /** Update a device. Response: [UpdateDeviceResponse]. */
 export interface UpdateDevice {
 	/** The device ID */
@@ -382,9 +472,22 @@ export interface UpdateNode {
 	data?: string;
 }
 
+/** Update an onboarding key. Response: [UpdateOnboardingKeyResponse]. */
+export interface UpdateOnboardingKey {
+	/** The onboarding_key ID */
+	id: OnboardingKeyId;
+	/** The name of the onboarding key */
+	name?: string;
+	/** The onboarding key public key */
+	public_key?: string;
+	/** Whether the onboarding key is enabled / can onboard. */
+	enabled?: boolean;
+}
+
 export enum ClientType {
 	User = "User",
 	Device = "Device",
+	OnboardingKey = "OnboardingKey",
 }
 
 export type ReadRequest = 
@@ -392,6 +495,9 @@ export type ReadRequest =
 	| { type: "GetUser", params: GetUser }
 	| { type: "GetUsername", params: GetUsername }
 	| { type: "ListDevices", params: ListDevices }
+	| { type: "GetDevice", params: GetDevice }
+	| { type: "ListOnboardingKeys", params: ListOnboardingKeys }
+	| { type: "GetOnboardingKey", params: GetOnboardingKey }
 	| { type: "ListFilesystems", params: ListFilesystems }
 	| { type: "ListNodes", params: ListNodes }
 	| { type: "GetNode", params: GetNode }
@@ -456,6 +562,9 @@ export type WriteRequest =
 	| { type: "CreateDevice", params: CreateDevice }
 	| { type: "UpdateDevice", params: UpdateDevice }
 	| { type: "DeleteDevice", params: DeleteDevice }
+	| { type: "CreateOnboardingKey", params: CreateOnboardingKey }
+	| { type: "UpdateOnboardingKey", params: UpdateOnboardingKey }
+	| { type: "DeleteOnboardingKey", params: DeleteOnboardingKey }
 	| { type: "CreateFilesystem", params: CreateFilesystem }
 	| { type: "UpdateFilesystem", params: UpdateFilesystem }
 	| { type: "DeleteFilesystem", params: DeleteFilesystem }

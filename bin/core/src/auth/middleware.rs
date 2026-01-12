@@ -8,7 +8,10 @@ use axum::{
   response::Response,
 };
 use cicada_client::{
-  entities::{ClientType, device::DeviceRecord, user::UserRecord},
+  entities::{
+    ClientType, device::DeviceRecord,
+    onboarding_key::OnboardingKeyRecord, user::UserRecord,
+  },
   pki_auth_prologue,
 };
 use futures_util::TryFutureExt as _;
@@ -20,7 +23,7 @@ use mogh_rate_limit::WithFailureRateLimit as _;
 use crate::{
   auth::{GENERAL_RATE_LIMITER, JWT_PROVIDER},
   config::core_keys,
-  db::query::{device::find_device_with_public_key, user::get_user},
+  db::query,
 };
 
 #[derive(Clone)]
@@ -29,6 +32,8 @@ pub enum Client {
   User(UserRecord),
   /// The device
   Device(DeviceRecord),
+  /// The onboarding key
+  OnboardingKey(OnboardingKeyRecord),
 }
 
 impl Client {
@@ -36,6 +41,42 @@ impl Client {
     match self {
       Client::User(user_record) => user_record.sanitize(),
       Client::Device(device_record) => device_record.sanitize(),
+      Client::OnboardingKey(onboarding_key_record) => {
+        onboarding_key_record.sanitize()
+      }
+    }
+  }
+
+  pub fn only_users(&self) -> mogh_error::Result<()> {
+    if matches!(self, Client::User(_)) {
+      Ok(())
+    } else {
+      Err(
+        anyhow!("This method is only for user type clients")
+          .status_code(StatusCode::UNAUTHORIZED),
+      )
+    }
+  }
+
+  pub fn not_onboarding_key(&self) -> mogh_error::Result<()> {
+    if matches!(self, Client::OnboardingKey(_)) {
+      Err(
+        anyhow!("This method is not for onboarding type clients")
+          .status_code(StatusCode::UNAUTHORIZED),
+      )
+    } else {
+      Ok(())
+    }
+  }
+
+  pub fn as_user(&self) -> mogh_error::Result<&UserRecord> {
+    if let Client::User(user) = self {
+      Ok(user)
+    } else {
+      Err(
+        anyhow!("This method is only for user type clients")
+          .status_code(StatusCode::UNAUTHORIZED),
+      )
     }
   }
 }
@@ -76,7 +117,7 @@ pub async fn get_client_from_request(
       // USE JWT
       let jwt = jwt.to_str().context("JWT is not valid UTF-8")?;
       let user_id = JWT_PROVIDER.decode_sub(jwt)?;
-      let user = get_user(&user_id).await?;
+      let user = query::user::get_user(&user_id).await?;
       if user.enabled {
         Ok(Client::User(user))
       } else {
@@ -129,11 +170,24 @@ pub async fn get_client_from_request(
         }
         // Check against device public keys
         ClientType::Device => {
-          let device = find_device_with_public_key(public_key)
-            .await?
-            .context("Invalid client credentials")?;
+          let device =
+            query::device::find_device_with_public_key(public_key)
+              .await?
+              .context("Invalid client credentials")?;
           if device.enabled {
             Ok(Client::Device(device))
+          } else {
+            Err(anyhow!("Invalid client credentials"))
+          }
+        }
+        // Check against onboarding key public keys
+        ClientType::OnboardingKey => {
+          let onboarding_key =
+            query::onboarding_key::find_onboarding_key_with_public_key(public_key)
+              .await?
+              .context("Invalid client credentials")?;
+          if onboarding_key.enabled {
+            Ok(Client::OnboardingKey(onboarding_key))
           } else {
             Err(anyhow!("Invalid client credentials"))
           }

@@ -1,4 +1,3 @@
-use anyhow::anyhow;
 use serde::{Deserialize, Serialize};
 use surrealdb_types::{RecordId, RecordIdKey, SurrealValue};
 use typeshare::typeshare;

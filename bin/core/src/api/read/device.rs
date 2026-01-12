@@ -1,11 +1,10 @@
 use cicada_client::{
-  api::read::device::ListDevices, entities::device::DeviceRecord,
+  api::read::device::{GetDevice, ListDevices},
+  entities::device::DeviceRecord,
 };
 use resolver_api::Resolve;
 
-use crate::{
-  api::read::ReadArgs, db::query::device::list_all_devices,
-};
+use crate::{api::read::ReadArgs, db::query};
 
 #[allow(unused)]
 #[utoipa::path(
@@ -25,6 +24,29 @@ impl Resolve<ReadArgs> for ListDevices {
     self,
     _: &ReadArgs,
   ) -> Result<Self::Response, Self::Error> {
-    list_all_devices().await.map_err(Into::into)
+    query::device::list_all_devices().await.map_err(Into::into)
+  }
+}
+
+#[allow(unused)]
+#[utoipa::path(
+  post,
+  path = "/read/GetDevice",
+  description = "Get a device by id",
+  request_body(content = GetDevice),
+  responses(
+    (status = 200, description = "The device", body = DeviceRecord),
+    (status = 404, description = "Failed to find device with given id", body = mogh_error::Serror),
+    (status = 500, description = "Request failed", body = mogh_error::Serror),
+  ),
+)]
+pub fn get_device(body: GetDevice) {}
+
+impl Resolve<ReadArgs> for GetDevice {
+  async fn resolve(
+    self,
+    _: &ReadArgs,
+  ) -> Result<Self::Response, Self::Error> {
+    query::device::get_device(&self.id.0).await
   }
 }

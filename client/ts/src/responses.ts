@@ -7,6 +7,11 @@ export type ReadResponses = {
 
   // ==== DEVICE ====
   ListDevices: Types.ListDevicesResponse;
+  GetDevice: Types.GetDeviceResponse;
+
+  // ==== ONBOARDING KEY ====
+  ListOnboardingKeys: Types.ListOnboardingKeysResponse;
+  GetOnboardingKey: Types.GetOnboardingKeyResponse;
 
   // ==== FILESYSTEM ====
   ListFilesystems: Types.ListFilesystemsResponse;
@@ -22,6 +27,11 @@ export type WriteResponses = {
   CreateDevice: Types.CreateDeviceResponse;
   UpdateDevice: Types.UpdateDeviceResponse;
   DeleteDevice: Types.DeleteDeviceResponse;
+
+  // ==== ONBOARDING KEY ====
+  CreateOnboardingKey: Types.CreateOnboardingKeyResponse;
+  UpdateOnboardingKey: Types.UpdateOnboardingKeyResponse;
+  DeleteOnboardingKey: Types.DeleteOnboardingKeyResponse;
 
   // ==== FILESYSTEM ====
   CreateFilesystem: Types.CreateFilesystemResponse;

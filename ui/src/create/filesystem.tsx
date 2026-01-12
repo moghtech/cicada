@@ -38,7 +38,10 @@ const CreateFilesystemForm = ({ close }: { close: () => void }) => {
     },
   });
   return (
-    <form onSubmit={form.onSubmit((form) => mutate(form))}>
+    <form
+      onSubmit={form.onSubmit((form) => mutate(form))}
+      style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
+    >
       <TextInput
         {...form.getInputProps("name")}
         withAsterisk

@@ -1,0 +1,51 @@
+-- ===============
+--  OnboardingKey
+-- ===============
+
+DEFINE TABLE IF NOT EXISTS OnboardingKey SCHEMAFULL;
+
+-- name
+DEFINE FIELD OVERWRITE name
+  ON TABLE OnboardingKey
+  TYPE string;
+
+-- public_key
+DEFINE FIELD OVERWRITE public_key
+  ON TABLE OnboardingKey
+  TYPE string;
+
+-- enabled
+DEFINE FIELD OVERWRITE enabled
+  ON TABLE OnboardingKey
+  TYPE bool
+  DEFAULT false;
+
+-- created_at
+DEFINE FIELD OVERWRITE created_at
+  ON TABLE OnboardingKey
+  TYPE datetime
+  VALUE $before OR time::now()
+  DEFAULT time::now();
+
+-- updated_at
+DEFINE FIELD OVERWRITE updated_at
+  ON TABLE OnboardingKey
+  TYPE datetime
+  VALUE time::now()
+  DEFAULT time::now();
+
+-------------
+-- Indexes --
+-------------
+
+-- name | unique
+DEFINE INDEX OVERWRITE Name
+  ON TABLE OnboardingKey
+  FIELDS name
+  UNIQUE;
+
+-- public_key | unique
+DEFINE INDEX OVERWRITE PublicKey
+  ON TABLE OnboardingKey
+  FIELDS public_key
+  UNIQUE;

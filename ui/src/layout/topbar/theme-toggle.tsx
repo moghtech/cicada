@@ -12,7 +12,12 @@ export const ThemeToggle = () => {
   return (
     <Menu position="bottom-end" offset={17}>
       <Menu.Target>
-        <ActionIcon aria-label="ThemeToggle" variant="subtle" size="lg">
+        <ActionIcon
+          aria-label="ThemeToggle"
+          variant="subtle"
+          size="lg"
+          c="inherit"
+        >
           <ThemeIcon />
         </ActionIcon>
       </Menu.Target>

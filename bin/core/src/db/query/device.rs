@@ -14,6 +14,16 @@ pub async fn list_all_devices() -> anyhow::Result<Vec<DeviceRecord>> {
     .context("Failed to query for Devices")
 }
 
+pub async fn get_device(
+  device_id: &str,
+) -> mogh_error::Result<DeviceRecord> {
+  DB.select::<Option<DeviceRecord>>(("Device", device_id))
+    .await
+    .context("Failed to query database for device")?
+    .context("No device found with given ID")
+    .status_code(StatusCode::NOT_FOUND)
+}
+
 pub async fn find_device_with_public_key(
   public_key: String,
 ) -> anyhow::Result<Option<DeviceRecord>> {

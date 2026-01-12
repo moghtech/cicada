@@ -1,7 +1,5 @@
 use cicada_client::{
-  api::write::device::{
-    CreateDevice, DeleteDevice, UpdateDevice,
-  },
+  api::write::device::{CreateDevice, DeleteDevice, UpdateDevice},
   entities::device::DeviceRecord,
 };
 use resolver_api::Resolve;
@@ -26,9 +24,7 @@ impl Resolve<WriteArgs> for CreateDevice {
     self,
     _: &WriteArgs,
   ) -> Result<Self::Response, Self::Error> {
-    query::device::create_device(self)
-      .await
-      .map_err(Into::into)
+    query::device::create_device(self).await.map_err(Into::into)
   }
 }
 
@@ -52,9 +48,7 @@ impl Resolve<WriteArgs> for UpdateDevice {
     self,
     _: &WriteArgs,
   ) -> Result<Self::Response, Self::Error> {
-    query::device::update_device(self)
-      .await
-      .map_err(Into::into)
+    query::device::update_device(self).await.map_err(Into::into)
   }
 }
 

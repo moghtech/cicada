@@ -1,7 +1,10 @@
 use anyhow::Context as _;
 use axum::http::StatusCode;
 use cicada_client::{
-  api::write::node::{CreateNode, UpdateNode},
+  api::{
+    read::node::FindNode,
+    write::node::{CreateNode, UpdateNode},
+  },
   entities::{
     filesystem::FilesystemId,
     node::{NodeKind, NodeListItem, NodeRecord},
@@ -11,13 +14,6 @@ use futures_util::{TryStreamExt as _, stream::FuturesUnordered};
 use mogh_error::AddStatusCode as _;
 
 use crate::db::DB;
-
-pub async fn get_node(node_id: &str) -> anyhow::Result<NodeRecord> {
-  DB.select::<Option<NodeRecord>>(("Node", node_id))
-    .await
-    .context("Failed to query database for node")?
-    .context("No node found with given ID")
-}
 
 pub async fn list_nodes(
   filesystem: Option<FilesystemId>,
@@ -35,6 +31,39 @@ AND ($parent IS NONE OR parent = $parent)",
   .context("Failed to query database for nodes")?
   .take(0)
   .context("Failed to get node query result")
+}
+
+pub async fn get_node(
+  node_id: &str,
+) -> mogh_error::Result<NodeRecord> {
+  DB.select::<Option<NodeRecord>>(("Node", node_id))
+    .await
+    .context("Failed to query database for node")?
+    .context("No node found with given ID")
+    .status_code(StatusCode::NOT_FOUND)
+}
+
+pub async fn find_node(
+  body: FindNode,
+) -> mogh_error::Result<NodeRecord> {
+  DB.query(
+    "
+SELECT * FROM Node
+WHERE filesystem = $filesystem
+AND ($inode IS NONE OR inode = $inode)
+AND ($parent IS NONE OR parent = $parent)
+AND ($name IS NONE OR name = $name)",
+  )
+  .bind(("filesystem", body.filesystem))
+  .bind(("inode", body.inode))
+  .bind(("parent", body.parent))
+  .bind(("name", body.name))
+  .await
+  .context("Failed to query database")?
+  .take::<Option<NodeRecord>>(0)
+  .context("Failed to get query result")?
+  .context("Failed to find Node with given parameters.")
+  .status_code(StatusCode::NOT_FOUND)
 }
 
 pub async fn create_node(

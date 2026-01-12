@@ -7,16 +7,16 @@ use crate::entities::Iso8601Timestamp;
 #[typeshare]
 #[derive(Debug, Clone, Serialize, Deserialize, SurrealValue)]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
-pub struct DeviceRecord {
-  /// The unique Device id
-  pub id: DeviceId,
-  /// The name of the Device
+pub struct OnboardingKeyRecord {
+  /// The unique onboarding key id
+  pub id: OnboardingKeyId,
+  /// The name of the onboarding key
   pub name: String,
-  /// The device public key.
-  /// This is used to authenticate device requests.
+  /// The onboarding public key.
+  /// This is used to authenticate onboarding requests.
   pub public_key: String,
-  /// Whether device is enabled.
-  /// Disabled devices cannot access any files.
+  /// Whether onboarding key is enabled.
+  /// Disabled onboarding keys cannot onboard devices.
   pub enabled: bool,
   /// Created at as ISO8601 timestamp.
   #[cfg_attr(feature = "utoipa", schema(value_type = String))]
@@ -26,13 +26,13 @@ pub struct DeviceRecord {
   pub updated_at: Iso8601Timestamp,
 }
 
-impl DeviceRecord {
+impl OnboardingKeyRecord {
   pub fn sanitize(&mut self) {}
 }
 
 #[typeshare(serialized_as = "string")]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
-pub struct DeviceId(pub String);
+pub struct OnboardingKeyId(pub String);
 
-crate::surreal_id!(DeviceId, "Device");
+crate::surreal_id!(OnboardingKeyId, "OnboardingKey");

@@ -16,11 +16,15 @@ import {
   File,
   FolderOpen,
   HardDrive,
+  KeyRound,
   Link2,
+  Server,
 } from "lucide-react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
 export const Sidebar = ({ close }: { close: () => void }) => {
+  const devicesPage = location.pathname.startsWith("/devices");
+  const onboardingKeysPage = location.pathname.startsWith("/onboarding-keys");
   const { filesystem: selected_filesystem, inode: _selected_inode } =
     useParams() as {
       filesystem?: string;
@@ -39,31 +43,67 @@ export const Sidebar = ({ close }: { close: () => void }) => {
   };
 
   return (
-    <ScrollArea>
-      <Flex direction="column" gap="lg" m={16}>
-        <Filesystems filesystem={selected_filesystem} close={close} />
-        <Divider />
-        {selected_filesystem ? (
-          <Flex direction="column" gap="sm">
-            <Flex gap="sm" opacity={0.7} align="center">
-              <FolderOpen size="1rem" />
-              <Text>Files</Text>
-            </Flex>
+    <Flex direction="column" justify="space-between" gap="lg" h="100%" m={16}>
+      {/* TOP AREA (scrolling) */}
+      <ScrollArea>
+        <Flex direction="column" gap="0.5rem">
+          <Button
+            variant={devicesPage ? "filled" : "subtle"}
+            c="inherit"
+            onClick={() => nav("/devices")}
+            leftSection={<Server size="1rem" />}
+            justify="flex-start"
+            fullWidth
+          >
+            Devices
+          </Button>
+          <Button
+            variant={onboardingKeysPage ? "filled" : "subtle"}
+            c="inherit"
+            onClick={() => nav("/onboarding-keys")}
+            leftSection={<KeyRound size="1rem" />}
+            justify="flex-start"
+            fullWidth
+          >
+            Onboarding
+          </Button>
 
+          <Filesystems filesystem={selected_filesystem} close={close} />
+          <Divider
+            label={
+              <Flex gap="sm" opacity={0.7} align="center">
+                <FolderOpen size="1rem" />
+                <Text>Files</Text>
+              </Flex>
+            }
+          />
+          {selected_filesystem ? (
             <NodeTree
               filesystem={selected_filesystem}
               parent={1}
               selected={selected_inode}
               nav={nav}
             />
-          </Flex>
-        ) : (
-          <Center>
-            <Text>No Filesystem Selected</Text>
-          </Center>
-        )}
+          ) : (
+            <Center>
+              <Text>No Filesystem Selected</Text>
+            </Center>
+          )}
+        </Flex>
+      </ScrollArea>
+
+      {/* BOTTOM AREA */}
+      <Flex direction="column" gap="lg">
+        {/* <Button
+          onClick={() => nav("/devices")}
+          leftSection={<Server size="1rem" />}
+          style={{ justifySelf: "flex-end" }}
+          fullWidth
+        >
+          Devices
+        </Button> */}
       </Flex>
-    </ScrollArea>
+    </Flex>
   );
 };
 
@@ -85,25 +125,32 @@ const Filesystems = ({
   }
 
   return (
-    <Flex direction="column" gap="sm">
-      <Flex gap="sm" opacity={0.7} align="center">
-        <HardDrive size="1rem" />
-        <Text>Filesystems</Text>
+    <>
+      <Divider
+        label={
+          <Flex gap="sm" opacity={0.7} align="center">
+            <HardDrive size="1rem" />
+            <Text>Filesystems</Text>
+          </Flex>
+        }
+      />
+      <Flex direction="column" gap="sm">
+        {filesystems.map((fs) => (
+          <Button
+            key={fs.id}
+            variant={fs.id === filesystem ? "filled" : "subtle"}
+            c="inherit"
+            justify="start"
+            component={Link}
+            to={`/filesystems/${fs.id}`}
+            onClick={close}
+            leftSection={<HardDrive size="1rem" />}
+          >
+            {fs.name}
+          </Button>
+        ))}
       </Flex>
-      {filesystems.map((fs) => (
-        <Button
-          key={fs.id}
-          variant={fs.id === filesystem ? "default" : "subtle"}
-          color="inherit"
-          justify="start"
-          component={Link}
-          to={`/filesystems/${fs.id}`}
-          onClick={close}
-        >
-          {fs.name}
-        </Button>
-      ))}
-    </Flex>
+    </>
   );
 };
 
@@ -158,7 +205,7 @@ const NodeTree = ({
         return (
           <Button
             variant={selected && selected === inode ? "default" : "subtle"}
-            c="inherit"
+            color="inherit"
             p="0rem 0.5rem"
             mb="0.25rem"
             justify="space-between"

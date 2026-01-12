@@ -5,7 +5,7 @@ use axum::{
   Extension, Router, extract::Path, http::StatusCode, routing::post,
 };
 use cicada_client::api::read::{
-  device::*, filesystem::*, node::*, *,
+  device::*, filesystem::*, node::*, onboarding_key::*, *,
 };
 use mogh_error::{AddStatusCodeError, Json, Response};
 use resolver_api::Resolve;
@@ -23,6 +23,7 @@ use crate::{
 pub mod device;
 pub mod filesystem;
 pub mod node;
+pub mod onboarding_key;
 
 pub struct ReadArgs {
   client: Client,
@@ -41,6 +42,11 @@ enum ReadRequest {
 
   // ==== DEVICE ====
   ListDevices(ListDevices),
+  GetDevice(GetDevice),
+
+  // ==== ONBOARDING KEY ====
+  ListOnboardingKeys(ListOnboardingKeys),
+  GetOnboardingKey(GetOnboardingKey),
 
   // ==== FILESYSTEM ====
   ListFilesystems(ListFilesystems),
@@ -74,6 +80,8 @@ async fn handler(
   Extension(client): Extension<Client>,
   Json(request): Json<ReadRequest>,
 ) -> mogh_error::Result<axum::response::Response> {
+  // Onboarding keys can't be used to directly access read api.
+  client.not_onboarding_key()?;
   let timer = Instant::now();
   let req_id = Uuid::new_v4();
   // debug!("/read request | user: {}", user.username);

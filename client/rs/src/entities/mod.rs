@@ -14,6 +14,8 @@ pub mod filesystem;
 /// Nodes represent entries in a filesystem.
 /// They represent either Files or Folders.
 pub mod node;
+/// Onboard device access.
+pub mod onboarding_key;
 /// Cicada users.
 pub mod user;
 
@@ -44,6 +46,7 @@ pub enum ClientType {
   #[default]
   User,
   Device,
+  OnboardingKey,
 }
 
 #[typeshare]
@@ -186,7 +189,7 @@ macro_rules! surreal_id {
   ($typ:ident, $table:expr) => {
     impl $typ {
       pub fn as_record_id(&self) -> RecordId {
-        RecordId::new($table, self.0.as_str())
+        surrealdb_types::RecordId::new($table, self.0.as_str())
       }
     }
 
@@ -208,10 +211,10 @@ macro_rules! surreal_id {
         Self: Sized,
       {
         let surrealdb_types::Value::RecordId(id) = value else {
-          return Err(anyhow!("Value is not RecordId"));
+          return Err(anyhow::anyhow!("Value is not RecordId"));
         };
         let RecordIdKey::String(id) = id.key else {
-          return Err(anyhow!("RecordIdKey is not String"));
+          return Err(anyhow::anyhow!("RecordIdKey is not String"));
         };
         Ok(Self(id))
       }
