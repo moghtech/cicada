@@ -4,8 +4,11 @@ import CreateNode from "@/create/node";
 import { Page } from "@/layout/page";
 import { useInvalidate, useRead, useWrite } from "@/lib/hooks";
 import { ICONS } from "@/lib/icons";
-import { Button, Text } from "@mantine/core";
+import { Button, Flex, List, Text } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
+import { RowSelectionState } from "@tanstack/react-table";
 import { Types } from "cicada_client";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const FolderPage = ({
@@ -31,6 +34,11 @@ const FolderPage = ({
       filesystem: filesystem?.id,
       parent: node?.inode ?? 1,
     }).data ?? [];
+  const byId = useMemo(
+    () =>
+      children && Object.fromEntries(children.map((node) => [node.id, node])),
+    [children]
+  );
   const { mutateAsync: deleteFolder, isPending: deleteFolderPending } =
     useWrite("DeleteNode", {
       onSuccess: () => {
@@ -38,6 +46,17 @@ const FolderPage = ({
         nav(`/filesystems/${node?.filesystem}/${node?.parent ?? 1}`);
       },
     });
+
+  const [selected, setSelected] = useState<RowSelectionState>({});
+  const selectedIds = useMemo(() => Object.keys(selected), [selected]);
+
+  const { mutateAsync: batchDelete } = useWrite("BatchDeleteNodes", {
+    onSuccess: () => {
+      notifications.show({ message: "Files deleted." });
+      inv(["ListNodes"]);
+      setSelected({});
+    },
+  });
 
   return (
     <Page
@@ -63,7 +82,7 @@ const FolderPage = ({
           {Object.values(Types.NodeKind).map((kind) => (
             <CreateNode key={kind} kind={kind} parent={node?.inode ?? 1} />
           ))}
-          {node === undefined && filesystem && (
+          {!selectedIds.length && node === undefined && filesystem && (
             <ConfirmDelete
               entityType="Filesystem"
               name={filesystem.name}
@@ -72,13 +91,46 @@ const FolderPage = ({
               disabled={false}
             />
           )}
-          {node && (
+          {!selectedIds.length && node && (
             <ConfirmDelete
               entityType="Folder"
               name={node.name}
               onConfirm={() => deleteFolder({ id: node.id })}
               loading={deleteFolderPending}
               disabled={false}
+            />
+          )}
+          {!!selectedIds.length && (
+            <ConfirmDelete
+              name=""
+              entityType="Files"
+              onConfirm={async () => {
+                if (selectedIds.length) {
+                  await batchDelete({ ids: selectedIds });
+                }
+              }}
+              disabled={!selectedIds.length}
+              info={
+                <>
+                  <Text fw="bold" fz="lg">
+                    To Delete:
+                  </Text>
+                  <List>
+                    {selectedIds.map((id) => {
+                      const Icon = byId?.[id] && ICONS[byId?.[id].kind];
+                      return (
+                        <List.Item key={id}>
+                          <Flex align="center" gap="0.4rem">
+                            <Icon size="1rem" />
+                            <Text fw="bold">{byId?.[id]?.name}</Text>
+                            <Text opacity={0.6}>({byId?.[id].kind})</Text>
+                          </Flex>
+                        </List.Item>
+                      );
+                    })}
+                  </List>
+                </>
+              }
             />
           )}
         </>
@@ -90,6 +142,10 @@ const FolderPage = ({
         onRowClick={(node) =>
           nav(`/filesystems/${filesystem?.id}/${node.inode}`)
         }
+        selectOptions={{
+          selectKey: (row) => row.id,
+          state: [selected, setSelected],
+        }}
         columns={[
           {
             header: ({ column }) => (

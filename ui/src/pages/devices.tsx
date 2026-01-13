@@ -4,6 +4,7 @@ import { Page } from "@/layout/page";
 import { useInvalidate, useRead, useWrite } from "@/lib/hooks";
 import { ICONS } from "@/lib/icons";
 import { List, Text } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
 import { RowSelectionState } from "@tanstack/react-table";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -20,6 +21,7 @@ const DevicesPage = () => {
   const selectedIds = useMemo(() => Object.keys(selected), [selected]);
   const { mutateAsync: batchDelete } = useWrite("BatchDeleteDevices", {
     onSuccess: () => {
+      notifications.show({ message: "Devices deleted." });
       inv(["ListDevices"]);
       setSelected({});
     },

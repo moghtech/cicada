@@ -9,6 +9,9 @@ export interface NoData {
 /** Response for [BatchDeleteDevices]. */
 export type BatchDeleteDevicesResponse = NoData;
 
+/** Response for [BatchDeleteNodes]. */
+export type BatchDeleteNodesResponse = NoData;
+
 /** Response for [BatchDeleteOnboardingKeys]. */
 export type BatchDeleteOnboardingKeysResponse = NoData;
 
@@ -243,6 +246,16 @@ export type UpdateOnboardingKeyResponse = OnboardingKeyRecord;
 export interface BatchDeleteDevices {
 	/** The onboarding_key ID */
 	ids: DeviceId[];
+}
+
+/**
+ * Batch delete files / folders. Response: [BatchDeleteNodesResponse].
+ * 
+ * Note. Not compatible with 'move_children'.
+ */
+export interface BatchDeleteNodes {
+	/** The onboarding_key ID */
+	ids: NodeId[];
 }
 
 /** Batch delete onboarding keys. Response: [BatchDeleteOnboardingKeysResponse]. */
@@ -588,5 +601,6 @@ export type WriteRequest =
 	| { type: "DeleteFilesystem", params: DeleteFilesystem }
 	| { type: "CreateNode", params: CreateNode }
 	| { type: "UpdateNode", params: UpdateNode }
-	| { type: "DeleteNode", params: DeleteNode };
+	| { type: "DeleteNode", params: DeleteNode }
+	| { type: "BatchDeleteNodes", params: BatchDeleteNodes };
 

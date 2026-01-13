@@ -44,4 +44,5 @@ export type WriteResponses = {
   CreateNode: Types.CreateNodeResponse;
   UpdateNode: Types.UpdateNodeResponse;
   DeleteNode: Types.DeleteNodeResponse;
+  BatchDeleteNodes: Types.BatchDeleteNodesResponse;
 };

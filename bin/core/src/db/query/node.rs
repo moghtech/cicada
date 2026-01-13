@@ -7,7 +7,7 @@ use cicada_client::{
   },
   entities::{
     filesystem::FilesystemId,
-    node::{NodeKind, NodeListItem, NodeRecord},
+    node::{NodeId, NodeKind, NodeListItem, NodeRecord},
   },
 };
 use futures_util::{TryStreamExt as _, stream::FuturesUnordered};
@@ -135,6 +135,62 @@ fn delete_children(
       .bind(("ids", ids))
       .await
       .context("Failed to delete children nodes")?;
+    Ok(())
+  })
+}
+
+pub async fn batch_delete_nodes(
+  ids: Vec<NodeId>,
+) -> anyhow::Result<()> {
+  // Get the top layer nodes
+  let nodes = DB
+    .query("SELECT * OMIT data FROM Node WHERE $ids.any(id);")
+    .bind(("ids", ids.clone()))
+    .await
+    .context("Failed to select nodes")?
+    .take::<Vec<NodeListItem>>(0)
+    .context("Invalid node query response")?;
+  if nodes.is_empty() {
+    return Ok(());
+  }
+  batch_delete_nodes_rec(nodes).await?;
+  Ok(())
+}
+
+/// Queries for children of given nodes,
+/// deletes the children recursively,
+/// then deletes given nodes themselves.
+/// 
+/// This ordering ensured no dangling children are left,
+/// as parents won't be deleted until after their children.
+pub fn batch_delete_nodes_rec(
+  nodes: Vec<NodeListItem>,
+) -> std::pin::Pin<Box<impl Future<Output = anyhow::Result<()>>>> {
+  Box::pin(async move {
+    let filesystem_inodes = nodes
+      .iter()
+      .map(|node| (node.filesystem.clone(), node.inode))
+      .collect::<Vec<_>>();
+    let ids =
+      nodes.into_iter().map(|node| node.id).collect::<Vec<_>>();
+    // Get the children of top layer by querying for nodes with deleted node as parent.
+    // Make sure when querying by inode to also select correct filesystem.
+    let children = DB
+      .query("SELECT * OMIT data FROM Node WHERE $filesystem_inodes.any([filesystem, parent]);")
+      .bind(("filesystem_inodes", filesystem_inodes))
+      .await
+      .context("Failed to select children nodes")?
+      .take::<Vec<NodeListItem>>(0)
+      .context("Invalid children node query response")?;
+    // Delete children layer if necessary
+    if !children.is_empty() {
+      batch_delete_nodes_rec(children).await?;
+    }
+    // Delete top layer
+    DB.query("DELETE Node WHERE $ids.any(id) RETURN NONE;")
+      .bind(("ids", ids))
+      .await
+      .context("Failed to delete nodes")?;
     Ok(())
   })
 }

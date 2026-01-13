@@ -7,7 +7,7 @@ use typeshare::typeshare;
 use crate::{
   api::write::CicadaWriteRequest,
   entities::{
-    U64,
+    NoData, U64,
     filesystem::FilesystemId,
     node::{NodeId, NodeKind, NodeRecord},
   },
@@ -122,3 +122,31 @@ pub struct DeleteNode {
 /// Response for [DeleteNode].
 #[typeshare]
 pub type DeleteNodeResponse = NodeRecord;
+
+//
+
+/// Batch delete files / folders. Response: [BatchDeleteNodesResponse].
+///
+/// Note. Not compatible with 'move_children'.
+#[typeshare]
+#[derive(
+  Debug,
+  Clone,
+  Serialize,
+  Deserialize,
+  SurrealValue,
+  Resolve,
+  EmptyTraits,
+)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
+#[empty_traits(CicadaWriteRequest)]
+#[response(BatchDeleteNodesResponse)]
+#[error(mogh_error::Error)]
+pub struct BatchDeleteNodes {
+  /// The onboarding_key ID
+  pub ids: Vec<NodeId>,
+}
+
+/// Response for [BatchDeleteNodes].
+#[typeshare]
+pub type BatchDeleteNodesResponse = NoData;

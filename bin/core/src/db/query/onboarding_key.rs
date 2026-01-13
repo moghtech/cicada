@@ -81,7 +81,7 @@ pub async fn delete_onboarding_key(
 
 pub async fn batch_delete_onboarding_keys(
   ids: Vec<OnboardingKeyId>,
-) -> mogh_error::Result<()> {
+) -> anyhow::Result<()> {
   DB.query("DELETE OnboardingKey WHERE $ids.any(id) RETURN NONE;")
     .bind(("ids", ids))
     .await

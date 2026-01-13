@@ -1,3 +1,4 @@
+import { ConfirmButton } from "@/components/confirm-button";
 import { useManageAuth, useUserInvalidate } from "@/lib/hooks";
 import { Button } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
@@ -51,19 +52,21 @@ export const EnrollPasskey = ({ user }: { user: Types.UserRecord }) => {
           onClick={() => beginEnrollment({})}
           variant="default"
           hidden={!!user?.passkey}
+          w={220}
         >
           Enroll Passkey 2FA
         </Button>
       )}
       {user?.passkey !== null && (
-        <Button
-          leftSection={<Trash size="1rem" />}
+        <ConfirmButton
+          icon={<Trash size="1rem" />}
           loading={unenrollPending}
           onClick={() => unenroll({})}
           color="red"
+          w={220}
         >
           Unenroll Passkey 2FA
-        </Button>
+        </ConfirmButton>
       )}
     </>
   );

@@ -1,4 +1,4 @@
-use cicada_client::{api::write::device::*, entities::NoData};
+use cicada_client::api::write::device::*;
 use resolver_api::Resolve;
 
 use crate::{api::write::WriteArgs, db::query};
@@ -93,6 +93,6 @@ impl Resolve<WriteArgs> for BatchDeleteDevices {
     _: &WriteArgs,
   ) -> Result<Self::Response, Self::Error> {
     query::device::batch_delete_devices(self.ids).await?;
-    Ok(NoData {})
+    Ok(BatchDeleteDevicesResponse {})
   }
 }

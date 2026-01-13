@@ -1,6 +1,5 @@
 use cicada_client::{
-  api::write::node::{CreateNode, DeleteNode, UpdateNode},
-  entities::node::NodeRecord,
+  api::write::node::*, entities::node::NodeRecord,
 };
 use resolver_api::Resolve;
 
@@ -74,5 +73,30 @@ impl Resolve<WriteArgs> for DeleteNode {
     _: &WriteArgs,
   ) -> Result<Self::Response, Self::Error> {
     query::node::delete_node(&self.id.0, self.move_children).await
+  }
+}
+
+//
+
+#[allow(unused)]
+#[utoipa::path(
+  post,
+  path = "/write/BatchDeleteNodes",
+  description = "Batch delete multiple files / folders",
+  request_body(content = BatchDeleteNodes),
+  responses(
+    (status = 200, description = "Nodes deleted", body = BatchDeleteNodesResponse),
+    (status = 500, description = "Request failed", body = mogh_error::Serror)
+  ),
+)]
+pub fn batch_delete_nodes() {}
+
+impl Resolve<WriteArgs> for BatchDeleteNodes {
+  async fn resolve(
+    self,
+    _: &WriteArgs,
+  ) -> Result<Self::Response, Self::Error> {
+    query::node::batch_delete_nodes(self.ids).await?;
+    Ok(BatchDeleteNodesResponse {})
   }
 }

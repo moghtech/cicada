@@ -71,7 +71,7 @@ pub async fn delete_device(
 
 pub async fn batch_delete_devices(
   ids: Vec<DeviceId>,
-) -> mogh_error::Result<()> {
+) -> anyhow::Result<()> {
   DB.query("DELETE Device WHERE $ids.any(id) RETURN NONE;")
     .bind(("ids", ids))
     .await

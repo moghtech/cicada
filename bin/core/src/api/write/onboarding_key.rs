@@ -1,6 +1,4 @@
-use cicada_client::{
-  api::write::onboarding_key::*, entities::NoData,
-};
+use cicada_client::api::write::onboarding_key::*;
 use mogh_pki::key::EncodedKeyPair;
 use resolver_api::Resolve;
 
@@ -119,6 +117,6 @@ impl Resolve<WriteArgs> for BatchDeleteOnboardingKeys {
   ) -> Result<Self::Response, Self::Error> {
     query::onboarding_key::batch_delete_onboarding_keys(self.ids)
       .await?;
-    Ok(NoData {})
+    Ok(BatchDeleteOnboardingKeysResponse {})
   }
 }

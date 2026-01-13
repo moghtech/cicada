@@ -57,6 +57,7 @@ pub enum WriteRequest {
   CreateNode(CreateNode),
   UpdateNode(UpdateNode),
   DeleteNode(DeleteNode),
+  BatchDeleteNodes(BatchDeleteNodes),
 }
 
 pub fn router() -> Router {

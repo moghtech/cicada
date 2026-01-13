@@ -171,9 +171,9 @@ const ProfileInner = ({ user }: { user: Types.UserRecord }) => {
                     original: { linked },
                   },
                 }) => (
-                  <Button color={linked ? "green" : "red"}>
+                  <Badge color={linked ? "green" : "red"}>
                     {linked ? "Linked" : "Unlinked"}
-                  </Button>
+                  </Badge>
                 ),
               },
               {

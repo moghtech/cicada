@@ -1,3 +1,4 @@
+import { ConfirmButton } from "@/components/confirm-button";
 import { CopyIconButton } from "@/components/copy-button";
 import { useManageAuth, useUserInvalidate } from "@/lib/hooks";
 import {
@@ -121,20 +122,22 @@ export const EnrollTotp = ({ user }: { user: Types.UserRecord }) => {
             variant="default"
             hidden={!!user?.totp_secret}
             onClick={() => onOpenChange(true)}
+            w={220}
           >
             Enroll TOTP 2FA
           </Button>
         </>
       )}
       {user.totp_secret && (
-        <Button
-          leftSection={<Trash size="1rem" />}
+        <ConfirmButton
+          icon={<Trash size="1rem" />}
           loading={unenrollPending}
           onClick={() => unenroll({})}
           color="red"
+          w={220}
         >
           Unenroll TOTP 2FA
-        </Button>
+        </ConfirmButton>
       )}
     </>
   );
