@@ -125,7 +125,15 @@ impl AuthImpl for CicadaAuthImpl {
   }
 
   fn host(&self) -> &str {
-    &core_config().host
+    static AUTH_HOST: LazyLock<String> =
+      LazyLock::new(|| format!("{}/auth", core_config().host));
+    &AUTH_HOST
+  }
+
+  fn post_link_redirect(&self) -> &str {
+    static POST_LINK_REDIRECT: LazyLock<String> =
+      LazyLock::new(|| format!("{}/profile", core_config().host));
+    &POST_LINK_REDIRECT
   }
 
   fn get_user(
@@ -142,6 +150,14 @@ impl AuthImpl for CicadaAuthImpl {
     &self,
   ) -> mogh_auth_server::DynFuture<mogh_error::Result<bool>> {
     Box::pin(async { no_users_exist().await.map_err(Into::into) })
+  }
+
+  fn locked_usernames(&self) -> &'static [String] {
+    &core_config().lock_login_credentials_for
+  }
+
+  fn registration_disabled(&self) -> bool {
+    core_config().disable_user_registration
   }
 
   // =========
@@ -171,6 +187,10 @@ impl AuthImpl for CicadaAuthImpl {
   // ==============
   // = LOCAL AUTH =
   // ==============
+
+  fn local_auth_enabled(&self) -> bool {
+    core_config().local_auth
+  }
 
   fn local_login_rate_limiter(&self) -> &RateLimiter {
     &LOCAL_LOGIN_RATE_LIMITER
@@ -471,9 +491,9 @@ impl AuthImpl for CicadaAuthImpl {
     })
   }
 
-  // ===============
+  // ============
   // = TOTP 2FA =
-  // ===============
+  // ============
 
   fn update_user_stored_totp(
     &self,
@@ -504,6 +524,28 @@ impl AuthImpl for CicadaAuthImpl {
         user_id,
         UpdateUser {
           totp_secret: Some(String::new()),
+          ..Default::default()
+        },
+      )
+      .await
+      .map(|_| ())
+      .map_err(Into::into)
+    })
+  }
+
+  // ============
+  // = SKIP 2FA =
+  // ============
+  fn update_user_external_skip_2fa(
+    &self,
+    user_id: String,
+    external_skip_2fa: bool,
+  ) -> mogh_auth_server::DynFuture<mogh_error::Result<()>> {
+    Box::pin(async move {
+      update_user_fields(
+        user_id,
+        UpdateUser {
+          external_skip_2fa: Some(external_skip_2fa),
           ..Default::default()
         },
       )

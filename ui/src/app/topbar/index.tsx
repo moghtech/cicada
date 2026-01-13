@@ -30,7 +30,7 @@ export const Topbar = ({
           }
           onClick={() => nav("/")}
         >
-          <Text size="1.5rem" fw="450" lts="0.1rem">
+          <Text fz="h2" fw="450" lts="0.1rem">
             CICADA
           </Text>
         </Button>

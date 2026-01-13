@@ -79,6 +79,12 @@ DEFINE FIELD OVERWRITE totp_secret
   TYPE string
   DEFAULT "";
 
+-- external_skip_2fa
+DEFINE FIELD OVERWRITE external_skip_2fa
+  ON TABLE User
+  TYPE bool
+  DEFAULT true;
+
 -- created_at
 DEFINE FIELD OVERWRITE created_at
   ON TABLE User

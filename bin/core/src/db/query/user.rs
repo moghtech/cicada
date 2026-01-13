@@ -169,6 +169,8 @@ pub struct UpdateUser {
   pub google_id: Option<String>,
   #[serde(skip_serializing_if = "Option::is_none")]
   pub totp_secret: Option<String>,
+  #[serde(skip_serializing_if = "Option::is_none")]
+  pub external_skip_2fa: Option<bool>,
 }
 
 /// Uses merge strategy for non optional field types.

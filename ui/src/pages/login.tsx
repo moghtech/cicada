@@ -137,19 +137,19 @@ export default function Login({
     <Center h="80vh">
       <Fieldset
         legend={
-          <Flex gap="lg" align="center" justify="space-between">
+          <Flex gap="4rem" align="center" justify="space-between">
             <Group gap="sm">
               <img
                 src="/mogh-512x512.png"
-                width={32}
-                height={32}
+                width={42}
+                height={42}
                 alt="moghtech"
               />
               <Flex direction="column">
-                <Text size="xl" fw="bold">
-                  Cicada
+                <Text fz="h2" fw="450" lts="0.1rem">
+                  CICADA
                 </Text>
-                <Text size="sm">Log In</Text>
+                <Text size="md" opacity={0.6} mt={-8}>Log In</Text>
               </Flex>
             </Group>
             <Flex gap="sm" align="center" wrap="wrap">

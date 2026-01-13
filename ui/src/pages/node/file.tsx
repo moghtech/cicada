@@ -11,7 +11,13 @@ import { notifications } from "@mantine/notifications";
 import { Page } from "@/layout/page";
 import { ICONS } from "@/lib/icons";
 
-const FilePage = ({ node }: { node: Types.NodeRecord | undefined }) => {
+const FilePage = ({
+  filesystem,
+  node,
+}: {
+  filesystem: Types.FilesystemRecord | undefined;
+  node: Types.NodeRecord | undefined;
+}) => {
   const inv = useInvalidate();
   const nav = useNavigate();
   const [{ data }, setEdit] = useLocalStorage<{ data: string | undefined }>({
@@ -44,8 +50,23 @@ const FilePage = ({ node }: { node: Types.NodeRecord | undefined }) => {
 
   return (
     <Page
-      title={"File: " + node.name}
-      icon={ICONS.File}
+      fullTitle={
+        <>
+          <ICONS.Filesystem size={24} opacity={0.6} />
+          <Text fz="h1" opacity={0.6}>
+            Filesystem:
+          </Text>
+          <Text fz="h1">{filesystem?.name}</Text>
+          <Text fz="h1" opacity={0.6}>
+            |
+          </Text>
+          <ICONS.File size={24} />
+          <Text fz="h1" opacity={0.6}>
+            File:
+          </Text>
+          <Text fz="h1">{node?.name ?? "Root"}</Text>
+        </>
+      }
       actions={
         <>
           <Button

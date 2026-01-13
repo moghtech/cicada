@@ -4,21 +4,19 @@ import CreateNode from "@/create/node";
 import { Page } from "@/layout/page";
 import { useInvalidate, useRead, useWrite } from "@/lib/hooks";
 import { ICONS } from "@/lib/icons";
+import { Text } from "@mantine/core";
 import { Types } from "cicada_client";
 import { useNavigate } from "react-router-dom";
 
 const FolderPage = ({
-  filesystem: _filesystem,
+  filesystem,
   node,
 }: {
-  filesystem: string;
+  filesystem: Types.FilesystemRecord | undefined;
   node: Types.NodeRecord | undefined;
 }) => {
   const nav = useNavigate();
   const inv = useInvalidate();
-  const filesystem = useRead("ListFilesystems", {}).data?.find(
-    (fs) => fs.id === _filesystem
-  );
   const { mutateAsync: deleteFs, isPending: deleteFsPending } = useWrite(
     "DeleteFilesystem",
     {
@@ -43,8 +41,23 @@ const FolderPage = ({
 
   return (
     <Page
-      title={node?.name ?? "Root"}
-      icon={ICONS.Folder}
+      fullTitle={
+        <>
+          <ICONS.Filesystem size={24} opacity={0.6} />
+          <Text fz="h1" opacity={0.6}>
+            Filesystem:
+          </Text>
+          <Text fz="h1">{filesystem?.name}</Text>
+          <Text fz="h1" opacity={0.6}>
+            |
+          </Text>
+          <ICONS.Folder size={24} />
+          <Text fz="h1" opacity={0.6}>
+            Folder:
+          </Text>
+          <Text fz="h1">{node?.name ?? "Root"}</Text>
+        </>
+      }
       actions={
         <>
           {Object.values(Types.NodeKind).map((kind) => (

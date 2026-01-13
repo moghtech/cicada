@@ -15,26 +15,21 @@ pub struct UserRecord {
   pub name: String,
   /// Whether user is enabled.
   /// Disabled users cannot log in and have no API access.
-  #[serde(default)]
   pub enabled: bool,
   // =========
   // = LOGIN =
   // =========
   /// Hashed user password.
   /// Empty if local login is not set.
-  #[serde(default)]
   pub password: String,
   /// OIDC subject identifier
   /// Empty if OIDC login is not linked.
-  #[serde(default)]
   pub oidc_subject: String,
   /// Github identifier.
   /// Empty if Github login is not linked.
-  #[serde(default)]
   pub github_id: String,
   /// Google identifier.
   /// Empty if Google login is not linked.
-  #[serde(default)]
   pub google_id: String,
   // =======
   // = 2FA =
@@ -42,8 +37,9 @@ pub struct UserRecord {
   /// User passkey config for 2fa
   pub passkey: Option<JsonValue>,
   /// User totp secret.
-  #[serde(default)]
   pub totp_secret: String,
+  /// Allow external logins to skip 2fa.
+  pub external_skip_2fa: bool,
   // ===============
   // = TIMESTAMPS =
   // ===============

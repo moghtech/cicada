@@ -1,4 +1,5 @@
 import { useRead } from "@/lib/hooks";
+import { ICONS } from "@/lib/icons";
 import {
   ActionIcon,
   Button,
@@ -11,15 +12,7 @@ import {
   Tree,
   TreeNodeData,
 } from "@mantine/core";
-import {
-  ChevronRight,
-  File,
-  FolderOpen,
-  HardDrive,
-  KeyRound,
-  Link2,
-  Server,
-} from "lucide-react";
+import { ChevronRight, Link2 } from "lucide-react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
 export const Sidebar = ({ close }: { close: () => void }) => {
@@ -51,7 +44,7 @@ export const Sidebar = ({ close }: { close: () => void }) => {
             variant={devicesPage ? "filled" : "subtle"}
             c="inherit"
             onClick={() => nav("/devices")}
-            leftSection={<Server size="1rem" />}
+            leftSection={<ICONS.Device size="1rem" />}
             justify="flex-start"
             fullWidth
           >
@@ -61,7 +54,7 @@ export const Sidebar = ({ close }: { close: () => void }) => {
             variant={onboardingKeysPage ? "filled" : "subtle"}
             c="inherit"
             onClick={() => nav("/onboarding-keys")}
-            leftSection={<KeyRound size="1rem" />}
+            leftSection={<ICONS.OnboardingKey size="1rem" />}
             justify="flex-start"
             fullWidth
           >
@@ -72,7 +65,7 @@ export const Sidebar = ({ close }: { close: () => void }) => {
           <Divider
             label={
               <Flex gap="sm" opacity={0.7} align="center">
-                <FolderOpen size="1rem" />
+                <ICONS.Folder size="1rem" />
                 <Text>Files</Text>
               </Flex>
             }
@@ -129,7 +122,7 @@ const Filesystems = ({
       <Divider
         label={
           <Flex gap="sm" opacity={0.7} align="center">
-            <HardDrive size="1rem" />
+            <ICONS.Filesystem size="1rem" />
             <Text>Filesystems</Text>
           </Flex>
         }
@@ -143,7 +136,7 @@ const Filesystems = ({
           component={Link}
           to={`/filesystems/${fs.id}`}
           onClick={close}
-          leftSection={<HardDrive size="1rem" />}
+          leftSection={<ICONS.Filesystem size="1rem" />}
         >
           {fs.name}
         </Button>
@@ -239,7 +232,7 @@ const NodeTree = ({
                 }}
               />
             ) : (
-              <File
+              <ICONS.File
                 size="1rem"
                 style={{
                   marginRight: "0.5rem",

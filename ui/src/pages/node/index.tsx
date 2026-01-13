@@ -7,7 +7,7 @@ const Folder = lazy(() => import("@/pages/node/folder"));
 const File = lazy(() => import("@/pages/node/file"));
 
 const NodePage = () => {
-  const { filesystem, inode: _inode } = useParams() as {
+  const { filesystem: _filesystem, inode: _inode } = useParams() as {
     filesystem: string;
     inode?: string;
   };
@@ -15,8 +15,11 @@ const NodePage = () => {
   const inode = n_inode ?? 1;
   const { data: node } = useRead(
     "FindNode",
-    { filesystem, inode },
+    { filesystem: _filesystem, inode },
     { enabled: inode > 1 }
+  );
+  const filesystem = useRead("ListFilesystems", {}).data?.find(
+    (fs) => fs.id === _filesystem
   );
   if (inode === 1 || node?.kind === "Folder") {
     return (
@@ -26,7 +29,7 @@ const NodePage = () => {
       />
     );
   } else if (node?.kind === "File") {
-    return <File node={node} />;
+    return <File filesystem={filesystem} node={node} />;
   } else {
     return (
       <Center>
