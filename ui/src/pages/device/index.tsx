@@ -1,5 +1,7 @@
 import ConfirmDelete from "@/components/confirm-delete";
+import { Page } from "@/layout/page";
 import { useRead, useWrite } from "@/lib/hooks";
+import { ICONS } from "@/lib/icons";
 import {
   ActionIcon,
   Center,
@@ -13,7 +15,7 @@ import {
 } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { Types } from "cicada_client";
-import { Save, Server } from "lucide-react";
+import { Save } from "lucide-react";
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -76,10 +78,10 @@ const DeviceInner = ({
   const [publicKey, setPublicKey] = useState(device.public_key);
 
   return (
-    <Flex direction="column" gap="lg">
-      <Group>
-        <Server size={20} />
-        <Text fz="h2">{device.name}</Text>
+    <Page
+      title={device.name}
+      icon={ICONS.Device}
+      rightTitle={
         <Switch
           label="Enabled"
           checked={device.enabled}
@@ -87,9 +89,8 @@ const DeviceInner = ({
             updateDevice({ id: device.id, enabled: e.target.checked })
           }
         />
-      </Group>
-
-      <Group>
+      }
+      actions={
         <ConfirmDelete
           entityType="Device"
           name={device.name}
@@ -97,15 +98,15 @@ const DeviceInner = ({
           loading={deleteDevicePending}
           disabled={false}
         />
-      </Group>
-
+      }
+    >
       <Fieldset legend={<Text size="lg">Config</Text>}>
         <Flex direction="column" gap="lg">
           <Group>
             <Text ff="monospace">Public Key:</Text>
 
             <TextInput
-              w={520}
+              w={550}
               maw="90vw"
               value={publicKey}
               onChange={(e) => setPublicKey(e.target.value)}
@@ -123,6 +124,6 @@ const DeviceInner = ({
           </Group>
         </Flex>
       </Fieldset>
-    </Flex>
+    </Page>
   );
 };

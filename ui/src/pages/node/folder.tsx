@@ -1,10 +1,10 @@
 import ConfirmDelete from "@/components/confirm-delete";
 import { DataTable, SortableHeader } from "@/components/data-table";
 import CreateNode from "@/create/node";
+import { Page } from "@/layout/page";
 import { useInvalidate, useRead, useWrite } from "@/lib/hooks";
-import { Flex, Group } from "@mantine/core";
+import { ICONS } from "@/lib/icons";
 import { Types } from "cicada_client";
-import { FolderOpen, HardDrive } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const FolderPage = ({
@@ -40,40 +40,37 @@ const FolderPage = ({
         nav(`/filesystems/${node?.filesystem}/${node?.parent ?? 1}`);
       },
     });
+
   return (
-    <Flex direction="column" gap="lg">
-      <Group>
-        <HardDrive size={20} />
-        <h2 style={{ opacity: 0.6 }}>Filesystem:</h2>
-        <h2>{filesystem?.name}</h2>
-        <h2 style={{ opacity: 0.6 }}>|</h2>
-        <FolderOpen size={20} />
-        <h2 style={{ opacity: 0.6 }}>Folder:</h2>
-        <h2>{node?.name ?? "Root"}</h2>
-      </Group>
-      <Group>
-        {Object.values(Types.NodeKind).map((kind) => (
-          <CreateNode key={kind} kind={kind} parent={node?.inode ?? 1} />
-        ))}
-        {node === undefined && filesystem && (
-          <ConfirmDelete
-            entityType="Filesystem"
-            name={filesystem.name}
-            onConfirm={() => deleteFs({ id: filesystem.id })}
-            loading={deleteFsPending}
-            disabled={false}
-          />
-        )}
-        {node && (
-          <ConfirmDelete
-            entityType="Folder"
-            name={node.name}
-            onConfirm={() => deleteFolder({ id: node.id })}
-            loading={deleteFolderPending}
-            disabled={false}
-          />
-        )}
-      </Group>
+    <Page
+      title={node?.name ?? "Root"}
+      icon={ICONS.Folder}
+      actions={
+        <>
+          {Object.values(Types.NodeKind).map((kind) => (
+            <CreateNode key={kind} kind={kind} parent={node?.inode ?? 1} />
+          ))}
+          {node === undefined && filesystem && (
+            <ConfirmDelete
+              entityType="Filesystem"
+              name={filesystem.name}
+              onConfirm={() => deleteFs({ id: filesystem.id })}
+              loading={deleteFsPending}
+              disabled={false}
+            />
+          )}
+          {node && (
+            <ConfirmDelete
+              entityType="Folder"
+              name={node.name}
+              onConfirm={() => deleteFolder({ id: node.id })}
+              loading={deleteFolderPending}
+              disabled={false}
+            />
+          )}
+        </>
+      }
+    >
       <DataTable
         tableKey="filesystem-table-v1"
         data={children}
@@ -117,7 +114,7 @@ const FolderPage = ({
           },
         ]}
       />
-    </Flex>
+    </Page>
   );
 };
 

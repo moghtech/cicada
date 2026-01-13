@@ -4,7 +4,6 @@ import {
   Button,
   Center,
   Fieldset,
-  Flex,
   Group,
   Loader,
   PasswordInput,
@@ -13,13 +12,15 @@ import {
 } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { MoghAuth, Types } from "cicada_client";
-import { CirclePlus, Save, User } from "lucide-react";
+import { CirclePlus, Save } from "lucide-react";
 import { useMemo, useState } from "react";
 import { EnrollPasskey } from "./passkey";
 import { EnrollTotp } from "./totp";
 import { CICADA_BASE_URL } from "@/main";
 import { DataTable } from "@/components/data-table";
 import ConfirmDelete from "@/components/confirm-delete";
+import { ICONS } from "@/lib/icons";
+import { Page } from "@/layout/page";
 
 const ProfilePage = () => {
   const user = useUser().data;
@@ -99,15 +100,9 @@ const ProfileInner = ({ user }: { user: Types.UserRecord }) => {
   );
   const linkedCount = loginProviders.filter(({ linked }) => linked).length;
   const linkWithOauth = useLinkWithOauth();
-  return (
-    <Flex direction="column" gap="lg">
-      <Group>
-        <User size={20} />
-        <Text fz="h2" opacity={0.6}>
-          Profile
-        </Text>
-      </Group>
 
+  return (
+    <Page title="Profile" icon={ICONS.User}>
       <Fieldset legend={<Text size="lg">Login</Text>}>
         <Group>
           <Text ff="monospace">Username:</Text>
@@ -211,7 +206,7 @@ const ProfileInner = ({ user }: { user: Types.UserRecord }) => {
           <EnrollTotp user={user} />
         </Group>
       </Fieldset>
-    </Flex>
+    </Page>
   );
 };
 

@@ -5,7 +5,7 @@ import { Topbar } from "./topbar";
 import { Sidebar } from "./sidebar";
 import { Suspense } from "react";
 
-export const Layout = () => {
+export const App = () => {
   const [opened, { toggle, close }] = useDisclosure();
   return (
     <AppShell

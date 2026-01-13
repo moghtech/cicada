@@ -1,24 +1,19 @@
 import { DataTable, SortableHeader } from "@/components/data-table";
 import CreateFilesystem from "@/create/filesystem";
+import { Page } from "@/layout/page";
 import { useRead } from "@/lib/hooks";
-import { Flex, Group, Text } from "@mantine/core";
-import { HardDrive } from "lucide-react";
+import { ICONS } from "@/lib/icons";
 import { useNavigate } from "react-router-dom";
 
 const FilesystemsPage = () => {
   const { data } = useRead("ListFilesystems", {});
   const nav = useNavigate();
   return (
-    <Flex direction="column" gap="lg">
-      <Group>
-        <HardDrive size={20} />
-        <Text fz="h2" opacity={0.6}>
-          Filesystems
-        </Text>
-      </Group>
-      <Group>
-        <CreateFilesystem />
-      </Group>
+    <Page
+      title="Filesystems"
+      icon={ICONS.Filesystem}
+      actions={<CreateFilesystem />}
+    >
       <DataTable
         tableKey="filesystems-table-v1"
         data={data ?? []}
@@ -54,7 +49,7 @@ const FilesystemsPage = () => {
           },
         ]}
       />
-    </Flex>
+    </Page>
   );
 };
 

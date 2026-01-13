@@ -7,7 +7,7 @@ import {
   Routes,
   useLocation,
 } from "react-router-dom";
-import { Layout } from "./layout";
+import { App } from "@/app";
 import { useAuthState, useUser } from "./lib/hooks";
 import { Center, Loader } from "@mantine/core";
 import { MoghAuth } from "cicada_client";
@@ -17,7 +17,8 @@ const Login = lazy(() => import("@/pages/login"));
 const Profile = lazy(() => import("@/pages/profile"));
 const Devices = lazy(() => import("@/pages/devices"));
 const Device = lazy(() => import("@/pages/device"));
-const OnboardingKeys = lazy(() => import("@/pages/onboarding"));
+const OnboardingKeys = lazy(() => import("@/pages/onboarding-keys"));
+const OnboardingKey = lazy(() => import("@/pages/onboarding-key"));
 const Filesystems = lazy(() => import("@/pages/filesystems"));
 const Node = lazy(() => import("@/pages/node"));
 const UserDisabled = lazy(() => import("@/pages/user-disabled"));
@@ -43,7 +44,7 @@ export const Router = () => {
       <Routes>
         <Route path="login" element={<Login />} />
         <Route element={<RequireAuth />}>
-          <Route path="/" element={<Layout />}>
+          <Route path="/" element={<App />}>
             <Route path="" element={<Filesystems />} />
             <Route path="filesystems/:filesystem" element={<Node />} />
             <Route path="filesystems/:filesystem/:inode" element={<Node />} />
@@ -51,6 +52,10 @@ export const Router = () => {
             <Route path="devices" element={<Devices />} />
             <Route path="devices/:device" element={<Device />} />
             <Route path="onboarding-keys" element={<OnboardingKeys />} />
+            <Route
+              path="onboarding-keys/:onboardingKey"
+              element={<OnboardingKey />}
+            />
           </Route>
         </Route>
       </Routes>

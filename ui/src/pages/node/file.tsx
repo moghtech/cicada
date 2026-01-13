@@ -1,13 +1,15 @@
 import { useInvalidate, useWrite } from "@/lib/hooks";
-import { Button, Center, Flex, Text } from "@mantine/core";
+import { Button, Center, Text } from "@mantine/core";
 import { useNavigate } from "react-router-dom";
-import { File, History } from "lucide-react";
+import { History } from "lucide-react";
 import { language_from_path, MonacoEditor } from "@/components/monaco";
 import { useLocalStorage } from "@mantine/hooks";
 import ConfirmSave from "@/components/confirm-save";
 import ConfirmDelete from "@/components/confirm-delete";
 import { Types } from "cicada_client";
 import { notifications } from "@mantine/notifications";
+import { Page } from "@/layout/page";
+import { ICONS } from "@/lib/icons";
 
 const FilePage = ({ node }: { node: Types.NodeRecord | undefined }) => {
   const inv = useInvalidate();
@@ -41,19 +43,17 @@ const FilePage = ({ node }: { node: Types.NodeRecord | undefined }) => {
   }
 
   return (
-    <Flex direction="column" gap="lg">
-      <Flex align="center" gap="md" wrap="wrap">
-        <Flex gap="sm" align="center" wrap="wrap">
-          <File size={20} />
-          <h2 style={{ opacity: 0.6 }}>File:</h2>
-          <h2>{node.name}</h2>
-        </Flex>
-        <Flex gap="sm" align="center" wrap="wrap">
-          <Button disabled={!data} onClick={() => setEdit({ data: undefined })}>
-            <Flex align="center" gap="0.5rem">
-              <History size="1rem" />
-              Reset
-            </Flex>
+    <Page
+      title={"File: " + node.name}
+      icon={ICONS.File}
+      actions={
+        <>
+          <Button
+            leftSection={<History size="1rem" />}
+            disabled={!data}
+            onClick={() => setEdit({ data: undefined })}
+          >
+            Reset
           </Button>
           <ConfirmSave
             name={node.name}
@@ -73,14 +73,15 @@ const FilePage = ({ node }: { node: Types.NodeRecord | undefined }) => {
             loading={deleteNodePending}
             disabled={false}
           />
-        </Flex>
-      </Flex>
+        </>
+      }
+    >
       <MonacoEditor
         language={language_from_path(node.name)}
         value={data ?? node.data ?? ""}
         onValueChange={(data) => setEdit({ data })}
       />
-    </Flex>
+    </Page>
   );
 };
 

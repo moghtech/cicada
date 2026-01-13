@@ -1,9 +1,10 @@
 import ConfirmDelete from "@/components/confirm-delete";
 import { DataTable, SortableHeader } from "@/components/data-table";
+import { Page } from "@/layout/page";
 import { useInvalidate, useRead, useWrite } from "@/lib/hooks";
-import { Flex, Group, List, Text } from "@mantine/core";
+import { ICONS } from "@/lib/icons";
+import { List, Text } from "@mantine/core";
 import { RowSelectionState } from "@tanstack/react-table";
-import { HardDrive } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -24,23 +25,13 @@ const DevicesPage = () => {
     },
   });
   return (
-    <Flex direction="column" gap="lg">
-      <Group>
-        <HardDrive size={20} />
-        <Text fz="h2" opacity={0.6}>
-          Devices
-        </Text>
-      </Group>
-      <Group>
+    <Page
+      title="Devices"
+      icon={ICONS.Device}
+      actions={
         <ConfirmDelete
           name=""
           entityType="Devices"
-          onConfirm={async () => {
-            if (selectedIds.length) {
-              await batchDelete({ ids: selectedIds });
-            }
-          }}
-          disabled={!selectedIds.length}
           info={
             <>
               <Text fw="bold" fz="lg">
@@ -53,8 +44,15 @@ const DevicesPage = () => {
               </List>
             </>
           }
+          onConfirm={async () => {
+            if (selectedIds.length) {
+              await batchDelete({ ids: selectedIds });
+            }
+          }}
+          disabled={!selectedIds.length}
         />
-      </Group>
+      }
+    >
       <DataTable
         tableKey="devices-table-v1"
         data={data ?? []}
@@ -94,7 +92,7 @@ const DevicesPage = () => {
           },
         ]}
       />
-    </Flex>
+    </Page>
   );
 };
 
