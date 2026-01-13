@@ -21,13 +21,13 @@ export const Page = ({
   const Icon = icon ?? CircleQuestionMark;
   return (
     <Flex direction="column" gap="lg">
-      <Group>
+      <Group gap="sm">
         {fullTitle ? (
           fullTitle
         ) : (
           <>
-            <Icon size={24} />
-            <Text fz="h1">
+            <Icon size={22} />
+            <Text fz="h2">
               {title}
             </Text>
           </>
@@ -35,7 +35,7 @@ export const Page = ({
         {rightTitle}
       </Group>
 
-      {actions && <Group>{actions}</Group>}
+      {actions && <Group gap="sm">{actions}</Group>}
 
       {children}
     </Flex>

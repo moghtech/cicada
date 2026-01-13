@@ -157,31 +157,33 @@ export interface UserRecord {
 	 * Whether user is enabled.
 	 * Disabled users cannot log in and have no API access.
 	 */
-	enabled?: boolean;
+	enabled: boolean;
 	/**
 	 * Hashed user password.
 	 * Empty if local login is not set.
 	 */
-	password?: string;
+	password: string;
 	/**
 	 * OIDC subject identifier
 	 * Empty if OIDC login is not linked.
 	 */
-	oidc_subject?: string;
+	oidc_subject: string;
 	/**
 	 * Github identifier.
 	 * Empty if Github login is not linked.
 	 */
-	github_id?: string;
+	github_id: string;
 	/**
 	 * Google identifier.
 	 * Empty if Google login is not linked.
 	 */
-	google_id?: string;
+	google_id: string;
 	/** User passkey config for 2fa */
 	passkey?: JsonValue;
 	/** User totp secret. */
-	totp_secret?: string;
+	totp_secret: string;
+	/** Allow external logins to skip 2fa. */
+	external_skip_2fa: boolean;
 	/** Created at as ISO8601 timestamp. */
 	created_at: Iso8601Timestamp;
 	/** Updated at as ISO8601 timestamp. */

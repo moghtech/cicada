@@ -102,6 +102,10 @@ impl AuthUserImpl for AuthUser {
       Some(&self.0.totp_secret)
     }
   }
+
+  fn external_skip_2fa(&self) -> bool {
+    self.0.external_skip_2fa
+  }
 }
 
 pub struct CicadaAuthImpl {

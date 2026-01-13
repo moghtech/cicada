@@ -4,7 +4,7 @@ import CreateNode from "@/create/node";
 import { Page } from "@/layout/page";
 import { useInvalidate, useRead, useWrite } from "@/lib/hooks";
 import { ICONS } from "@/lib/icons";
-import { Text } from "@mantine/core";
+import { Button, Text } from "@mantine/core";
 import { Types } from "cicada_client";
 import { useNavigate } from "react-router-dom";
 
@@ -43,19 +43,19 @@ const FolderPage = ({
     <Page
       fullTitle={
         <>
-          <ICONS.Filesystem size={24} opacity={0.6} />
-          <Text fz="h1" opacity={0.6}>
+          <ICONS.Filesystem size={22} opacity={0.6} />
+          <Text fz="h2" opacity={0.6}>
             Filesystem:
           </Text>
-          <Text fz="h1">{filesystem?.name}</Text>
-          <Text fz="h1" opacity={0.6}>
+          <Text fz="h2">{filesystem?.name}</Text>
+          <Text fz="h2" opacity={0.6}>
             |
           </Text>
-          <ICONS.Folder size={24} />
-          <Text fz="h1" opacity={0.6}>
+          <ICONS.Folder size={22} opacity={0.6} />
+          <Text fz="h2" opacity={0.6}>
             Folder:
           </Text>
-          <Text fz="h1">{node?.name ?? "Root"}</Text>
+          <Text fz="h2">{node?.name ?? "Root"}</Text>
         </>
       }
       actions={
@@ -96,6 +96,18 @@ const FolderPage = ({
               <SortableHeader column={column} title="Name" />
             ),
             accessorKey: "name",
+            cell: ({ row: { original: node } }) => {
+              const Icon = ICONS[node.kind];
+              return (
+                <Button
+                  variant="transparent"
+                  color="inherit"
+                  leftSection={<Icon size="1rem" />}
+                >
+                  {node.name}
+                </Button>
+              );
+            },
           },
           {
             header: ({ column }) => (

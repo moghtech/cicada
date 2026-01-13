@@ -52,19 +52,19 @@ const FilePage = ({
     <Page
       fullTitle={
         <>
-          <ICONS.Filesystem size={24} opacity={0.6} />
-          <Text fz="h1" opacity={0.6}>
+          <ICONS.Filesystem size={22} opacity={0.6} />
+          <Text fz="h2" opacity={0.6}>
             Filesystem:
           </Text>
-          <Text fz="h1">{filesystem?.name}</Text>
-          <Text fz="h1" opacity={0.6}>
+          <Text fz="h2">{filesystem?.name}</Text>
+          <Text fz="h2" opacity={0.6}>
             |
           </Text>
-          <ICONS.File size={24} />
-          <Text fz="h1" opacity={0.6}>
+          <ICONS.File size={22} opacity={0.6} />
+          <Text fz="h2" opacity={0.6}>
             File:
           </Text>
-          <Text fz="h1">{node?.name ?? "Root"}</Text>
+          <Text fz="h2">{node?.name ?? "Root"}</Text>
         </>
       }
       actions={

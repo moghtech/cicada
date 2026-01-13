@@ -1,12 +1,14 @@
 import { useLoginOptions, useManageAuth, useUser } from "@/lib/hooks";
 import {
   ActionIcon,
+  Badge,
   Button,
   Center,
   Fieldset,
   Group,
   Loader,
   PasswordInput,
+  Switch,
   Text,
   TextInput,
 } from "@mantine/core";
@@ -62,6 +64,18 @@ const ProfileInner = ({ user }: { user: Types.UserRecord }) => {
       refetchUser();
     },
   });
+  const { mutate: updateExternalSkip2fa } = useManageAuth(
+    "UpdateExternalSkip2fa",
+    {
+      onSuccess: () => {
+        notifications.show({
+          message: "External login skip 2fa mode updated.",
+        });
+        refetchUser();
+      },
+    }
+  );
+
   const { mutateAsync: unlink } = useManageAuth("UnlinkLogin", {
     onSuccess: () => {
       notifications.show({ message: "Unlinked login." });
@@ -204,6 +218,25 @@ const ProfileInner = ({ user }: { user: Types.UserRecord }) => {
         <Group>
           <EnrollPasskey user={user} />
           <EnrollTotp user={user} />
+          {(user.totp_secret || user.passkey) && (
+            <Switch
+              label={
+                <Group>
+                  Skip 2FA for external logins
+                  <Badge
+                    color={user?.external_skip_2fa ? undefined : "gray"}
+                    style={{ cursor: "pointer" }}
+                  >
+                    {user?.external_skip_2fa ? "Enabled" : "Disabled"}
+                  </Badge>
+                </Group>
+              }
+              checked={user?.external_skip_2fa}
+              onChange={(e) =>
+                updateExternalSkip2fa({ external_skip_2fa: e.target.checked })
+              }
+            />
+          )}
         </Group>
       </Fieldset>
     </Page>
