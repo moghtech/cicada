@@ -82,7 +82,7 @@ pub async fn delete_onboarding_key(
 pub async fn batch_delete_onboarding_keys(
   ids: Vec<OnboardingKeyId>,
 ) -> anyhow::Result<Vec<OnboardingKeyRecord>> {
-  DB.query("DELETE OnboardingKey WHERE $ids.any(id);")
+  DB.query("DELETE OnboardingKey WHERE $ids.any(id) RETURN BEFORE;")
     .bind(("ids", ids))
     .await
     .context("Failed to delete onboarding keys")?

@@ -126,7 +126,7 @@ export type DeleteDeviceResponse = DeviceRecord;
 export type DeleteFilesystemResponse = FilesystemRecord;
 
 /** Response for [DeleteNode]. */
-export type DeleteNodeResponse = NodeRecord;
+export type DeleteNodeResponse = NodeRecord[];
 
 /** Response for [DeleteOnboardingKey]. */
 export type DeleteOnboardingKeyResponse = OnboardingKeyRecord;

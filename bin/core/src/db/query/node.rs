@@ -190,7 +190,7 @@ pub fn batch_delete_nodes_rec(
     let ids =
       nodes.into_iter().map(|node| node.id).collect::<Vec<_>>();
     let more = DB
-      .query("DELETE Node WHERE $ids.any(id);")
+      .query("DELETE Node WHERE $ids.any(id) RETURN BEFORE;")
       .bind(("ids", ids))
       .await
       .context("Failed to delete nodes")?

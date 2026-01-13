@@ -20,8 +20,10 @@ const DevicesPage = () => {
   const [selected, setSelected] = useState<RowSelectionState>({});
   const selectedIds = useMemo(() => Object.keys(selected), [selected]);
   const { mutateAsync: batchDelete } = useWrite("BatchDeleteDevices", {
-    onSuccess: () => {
-      notifications.show({ message: "Devices deleted." });
+    onSuccess: (deleted) => {
+      notifications.show({
+        message: `Deleted ${deleted.length} device${deleted.length === 1 ? "" : "s"}.`,
+      });
       inv(["ListDevices"]);
       setSelected({});
     },

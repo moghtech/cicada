@@ -51,8 +51,10 @@ const FolderPage = ({
   const selectedIds = useMemo(() => Object.keys(selected), [selected]);
 
   const { mutateAsync: batchDelete } = useWrite("BatchDeleteNodes", {
-    onSuccess: () => {
-      notifications.show({ message: "Files deleted." });
+    onSuccess: (deleted) => {
+      notifications.show({
+        message: `Deleted ${deleted.length} filesystem node${deleted.length === 1 ? "" : "s"}.`,
+      });
       inv(["ListNodes"]);
       setSelected({});
     },

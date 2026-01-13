@@ -21,8 +21,10 @@ const OnboardingKeysPage = () => {
   const [selected, setSelected] = useState<RowSelectionState>({});
   const selectedIds = useMemo(() => Object.keys(selected), [selected]);
   const { mutateAsync: batchDelete } = useWrite("BatchDeleteOnboardingKeys", {
-    onSuccess: () => {
-      notifications.show({ message: "Onboarding keys deleted." });
+    onSuccess: (deleted) => {
+      notifications.show({
+        message: `Deleted ${deleted.length} onboarding key${deleted.length === 1 ? "" : "s"}.`,
+      });
       inv(["ListOnboardingKeys"]);
       setSelected({});
     },

@@ -72,7 +72,7 @@ pub async fn delete_device(
 pub async fn batch_delete_devices(
   ids: Vec<DeviceId>,
 ) -> anyhow::Result<Vec<DeviceRecord>> {
-  DB.query("DELETE Device WHERE $ids.any(id);")
+  DB.query("DELETE Device WHERE $ids.any(id) RETURN BEFORE;")
     .bind(("ids", ids))
     .await
     .context("Failed to delete devices")?
