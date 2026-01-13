@@ -142,7 +142,11 @@ fn delete_children(
 pub async fn batch_delete_nodes(
   ids: Vec<NodeId>,
 ) -> anyhow::Result<()> {
-  // Get the top layer nodes
+  if ids.is_empty() {
+    return Ok(());
+  }
+
+  // Start recursive delete from top layer of nodes.
   let nodes = DB
     .query("SELECT * OMIT data FROM Node WHERE $ids.any(id);")
     .bind(("ids", ids.clone()))
@@ -150,43 +154,48 @@ pub async fn batch_delete_nodes(
     .context("Failed to select nodes")?
     .take::<Vec<NodeListItem>>(0)
     .context("Invalid node query response")?;
-  if nodes.is_empty() {
-    return Ok(());
-  }
-  batch_delete_nodes_rec(nodes).await?;
-  Ok(())
+  batch_delete_nodes_rec(nodes).await
 }
 
 /// Queries for children of given nodes,
 /// deletes the children recursively,
 /// then deletes given nodes themselves.
-/// 
+///
 /// This ordering ensured no dangling children are left,
 /// as parents won't be deleted until after their children.
 pub fn batch_delete_nodes_rec(
   nodes: Vec<NodeListItem>,
 ) -> std::pin::Pin<Box<impl Future<Output = anyhow::Result<()>>>> {
   Box::pin(async move {
-    let filesystem_inodes = nodes
+    if nodes.is_empty() {
+      return Ok(());
+    }
+
+    let folder_inodes = nodes
       .iter()
+      .filter(|node| matches!(node.kind, NodeKind::Folder))
       .map(|node| (node.filesystem.clone(), node.inode))
       .collect::<Vec<_>>();
-    let ids =
-      nodes.into_iter().map(|node| node.id).collect::<Vec<_>>();
-    // Get the children of top layer by querying for nodes with deleted node as parent.
-    // Make sure when querying by inode to also select correct filesystem.
-    let children = DB
-      .query("SELECT * OMIT data FROM Node WHERE $filesystem_inodes.any([filesystem, parent]);")
-      .bind(("filesystem_inodes", filesystem_inodes))
+
+    // If theres any folder included, check to delete children
+    if !folder_inodes.is_empty() {
+      // Get the children of top layer by querying for nodes with deleted node as parent.
+      let children = DB
+      .query("SELECT * OMIT data FROM Node WHERE $folder_inodes.any([filesystem, parent]);")
+      .bind(("folder_inodes", folder_inodes))
       .await
       .context("Failed to select children nodes")?
       .take::<Vec<NodeListItem>>(0)
       .context("Invalid children node query response")?;
-    // Delete children layer if necessary
-    if !children.is_empty() {
-      batch_delete_nodes_rec(children).await?;
+      // Delete children layer if necessary
+      if !children.is_empty() {
+        batch_delete_nodes_rec(children).await?;
+      }
     }
+
     // Delete top layer
+    let ids =
+      nodes.into_iter().map(|node| node.id).collect::<Vec<_>>();
     DB.query("DELETE Node WHERE $ids.any(id) RETURN NONE;")
       .bind(("ids", ids))
       .await
