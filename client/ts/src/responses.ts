@@ -27,11 +27,13 @@ export type WriteResponses = {
   CreateDevice: Types.CreateDeviceResponse;
   UpdateDevice: Types.UpdateDeviceResponse;
   DeleteDevice: Types.DeleteDeviceResponse;
+  BatchDeleteDevices: Types.BatchDeleteDevicesResponse;
 
   // ==== ONBOARDING KEY ====
   CreateOnboardingKey: Types.CreateOnboardingKeyResponse;
   UpdateOnboardingKey: Types.UpdateOnboardingKeyResponse;
   DeleteOnboardingKey: Types.DeleteOnboardingKeyResponse;
+  BatchDeleteOnboardingKeys: Types.BatchDeleteOnboardingKeysResponse;
 
   // ==== FILESYSTEM ====
   CreateFilesystem: Types.CreateFilesystemResponse;

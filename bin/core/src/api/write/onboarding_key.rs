@@ -1,9 +1,5 @@
 use cicada_client::{
-  api::write::onboarding_key::{
-    CreateOnboardingKey, CreateOnboardingKeyResponse,
-    DeleteOnboardingKey, UpdateOnboardingKey,
-  },
-  entities::onboarding_key::OnboardingKeyRecord,
+  api::write::onboarding_key::*, entities::NoData,
 };
 use mogh_pki::key::EncodedKeyPair;
 use resolver_api::Resolve;
@@ -17,7 +13,7 @@ use crate::{api::write::WriteArgs, db::query};
   description = "Create a new onboarding key",
   request_body(content = CreateOnboardingKey),
   responses(
-    (status = 200, description = "The created onboarding key", body = OnboardingKeyRecord),
+    (status = 200, description = "The created onboarding key", body = CreateOnboardingKeyResponse),
     (status = 500, description = "Request failed", body = mogh_error::Serror)
   ),
 )]
@@ -61,7 +57,7 @@ impl Resolve<WriteArgs> for CreateOnboardingKey {
   description = "Update an onboarding key",
   request_body(content = UpdateOnboardingKey),
   responses(
-    (status = 200, description = "The updated onboarding key", body = OnboardingKeyRecord),
+    (status = 200, description = "The updated onboarding key", body = UpdateOnboardingKeyResponse),
     (status = 500, description = "Request failed", body = mogh_error::Serror)
   ),
 )]
@@ -87,7 +83,7 @@ impl Resolve<WriteArgs> for UpdateOnboardingKey {
   description = "Delete an onboarding key",
   request_body(content = DeleteOnboardingKey),
   responses(
-    (status = 200, description = "The deleted onboarding key", body = OnboardingKeyRecord),
+    (status = 200, description = "The deleted onboarding key", body = DeleteOnboardingKeyResponse),
     (status = 404, description = "OnboardingKey not found", body = mogh_error::Serror),
     (status = 500, description = "Request failed", body = mogh_error::Serror)
   ),
@@ -100,5 +96,29 @@ impl Resolve<WriteArgs> for DeleteOnboardingKey {
     _: &WriteArgs,
   ) -> Result<Self::Response, Self::Error> {
     query::onboarding_key::delete_onboarding_key(self.id.0).await
+  }
+}
+
+#[allow(unused)]
+#[utoipa::path(
+  post,
+  path = "/write/BatchDeleteOnboardingKeys",
+  description = "Batch delete onboarding keys",
+  request_body(content = BatchDeleteOnboardingKeys),
+  responses(
+    (status = 200, description = "Onboarding keys deleted", body = BatchDeleteOnboardingKeysResponse),
+    (status = 500, description = "Request failed", body = mogh_error::Serror)
+  ),
+)]
+pub fn batch_delete_onboarding_keys() {}
+
+impl Resolve<WriteArgs> for BatchDeleteOnboardingKeys {
+  async fn resolve(
+    self,
+    _: &WriteArgs,
+  ) -> Result<Self::Response, Self::Error> {
+    query::onboarding_key::batch_delete_onboarding_keys(self.ids)
+      .await?;
+    Ok(NoData {})
   }
 }

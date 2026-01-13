@@ -4,7 +4,7 @@ use cicada_client::{
   api::write::onboarding_key::{
     CreateOnboardingKey, UpdateOnboardingKey,
   },
-  entities::onboarding_key::OnboardingKeyRecord,
+  entities::onboarding_key::{OnboardingKeyId, OnboardingKeyRecord},
 };
 use mogh_error::AddStatusCode as _;
 
@@ -77,4 +77,14 @@ pub async fn delete_onboarding_key(
     .await?
     .context("No OnboardingKey matching given ID")
     .status_code(StatusCode::NOT_FOUND)
+}
+
+pub async fn batch_delete_onboarding_keys(
+  ids: Vec<OnboardingKeyId>,
+) -> mogh_error::Result<()> {
+  DB.query("DELETE OnboardingKey WHERE $ids.any(id) RETURN NONE;")
+    .bind(("ids", ids))
+    .await
+    .context("Failed to delete onboarding keys")?;
+  Ok(())
 }

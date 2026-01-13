@@ -6,7 +6,10 @@ use typeshare::typeshare;
 
 use crate::{
   api::write::CicadaWriteRequest,
-  entities::device::{DeviceId, DeviceRecord},
+  entities::{
+    NoData,
+    device::{DeviceId, DeviceRecord},
+  },
 };
 
 //
@@ -82,8 +85,6 @@ pub type UpdateDeviceResponse = DeviceRecord;
 //
 
 /// Delete a device. Response: [DeleteDeviceResponse].
-///
-/// WARNING. This will also delete all nodes on the device.
 #[typeshare]
 #[derive(
   Debug,
@@ -106,3 +107,29 @@ pub struct DeleteDevice {
 /// Response for [DeleteDevice].
 #[typeshare]
 pub type DeleteDeviceResponse = DeviceRecord;
+
+//
+
+/// Batch delete devices. Response: [BatchDeleteDevicesResponse].
+#[typeshare]
+#[derive(
+  Debug,
+  Clone,
+  Serialize,
+  Deserialize,
+  SurrealValue,
+  Resolve,
+  EmptyTraits,
+)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
+#[empty_traits(CicadaWriteRequest)]
+#[response(BatchDeleteDevicesResponse)]
+#[error(mogh_error::Error)]
+pub struct BatchDeleteDevices {
+  /// The onboarding_key ID
+  pub ids: Vec<DeviceId>,
+}
+
+/// Response for [BatchDeleteDevices].
+#[typeshare]
+pub type BatchDeleteDevicesResponse = NoData;

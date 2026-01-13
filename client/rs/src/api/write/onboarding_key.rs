@@ -6,7 +6,10 @@ use typeshare::typeshare;
 
 use crate::{
   api::write::CicadaWriteRequest,
-  entities::onboarding_key::{OnboardingKeyId, OnboardingKeyRecord},
+  entities::{
+    NoData,
+    onboarding_key::{OnboardingKeyId, OnboardingKeyRecord},
+  },
 };
 
 //
@@ -46,6 +49,7 @@ fn default_enabled() -> bool {
 /// Response for [CreateOnboardingKey].
 #[typeshare]
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 pub struct CreateOnboardingKeyResponse {
   /// Pkcs8 encoded private key.
   /// Only present if user *does not* pass pre existing public key to [CreateOnboardingKey].
@@ -92,8 +96,6 @@ pub type UpdateOnboardingKeyResponse = OnboardingKeyRecord;
 //
 
 /// Delete a onboarding_key. Response: [DeleteOnboardingKeyResponse].
-///
-/// WARNING. This will also delete all nodes on the onboarding_key.
 #[typeshare]
 #[derive(
   Debug,
@@ -116,3 +118,29 @@ pub struct DeleteOnboardingKey {
 /// Response for [DeleteOnboardingKey].
 #[typeshare]
 pub type DeleteOnboardingKeyResponse = OnboardingKeyRecord;
+
+//
+
+/// Batch delete onboarding keys. Response: [BatchDeleteOnboardingKeysResponse].
+#[typeshare]
+#[derive(
+  Debug,
+  Clone,
+  Serialize,
+  Deserialize,
+  SurrealValue,
+  Resolve,
+  EmptyTraits,
+)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
+#[empty_traits(CicadaWriteRequest)]
+#[response(BatchDeleteOnboardingKeysResponse)]
+#[error(mogh_error::Error)]
+pub struct BatchDeleteOnboardingKeys {
+  /// The onboarding key IDs
+  pub ids: Vec<OnboardingKeyId>,
+}
+
+/// Response for [BatchDeleteOnboardingKeys].
+#[typeshare]
+pub type BatchDeleteOnboardingKeysResponse = NoData;

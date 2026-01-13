@@ -2,7 +2,7 @@ use anyhow::Context as _;
 use axum::http::StatusCode;
 use cicada_client::{
   api::write::device::{CreateDevice, UpdateDevice},
-  entities::device::DeviceRecord,
+  entities::device::{DeviceId, DeviceRecord},
 };
 use mogh_error::AddStatusCode as _;
 
@@ -67,4 +67,14 @@ pub async fn delete_device(
     .await?
     .context("No Device matching given ID")
     .status_code(StatusCode::NOT_FOUND)
+}
+
+pub async fn batch_delete_devices(
+  ids: Vec<DeviceId>,
+) -> mogh_error::Result<()> {
+  DB.query("DELETE Device WHERE $ids.any(id) RETURN NONE;")
+    .bind(("ids", ids))
+    .await
+    .context("Failed to delete devices")?;
+  Ok(())
 }

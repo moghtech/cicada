@@ -1,11 +1,13 @@
 import { Button, Flex, Modal, Text } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { Trash2 } from "lucide-react";
+import { ReactNode } from "react";
 
 const ConfirmDelete = ({
   action = "Delete",
   entityType,
   name,
+  info,
   onConfirm,
   loading,
   disabled,
@@ -13,6 +15,7 @@ const ConfirmDelete = ({
   action?: string;
   entityType?: string;
   name: string;
+  info?: ReactNode;
   onConfirm: () => Promise<unknown>;
   loading?: boolean;
   disabled?: boolean;
@@ -32,6 +35,7 @@ const ConfirmDelete = ({
         }
       >
         <Flex direction="column" gap="lg">
+          {info}
           <span>Note: This action may not be undoable.</span>
           <Button
             onClick={() =>

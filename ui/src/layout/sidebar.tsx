@@ -134,22 +134,20 @@ const Filesystems = ({
           </Flex>
         }
       />
-      <Flex direction="column" gap="sm">
-        {filesystems.map((fs) => (
-          <Button
-            key={fs.id}
-            variant={fs.id === filesystem ? "filled" : "subtle"}
-            c="inherit"
-            justify="start"
-            component={Link}
-            to={`/filesystems/${fs.id}`}
-            onClick={close}
-            leftSection={<HardDrive size="1rem" />}
-          >
-            {fs.name}
-          </Button>
-        ))}
-      </Flex>
+      {filesystems.map((fs) => (
+        <Button
+          key={fs.id}
+          variant={fs.id === filesystem ? "filled" : "subtle"}
+          c="inherit"
+          justify="start"
+          component={Link}
+          to={`/filesystems/${fs.id}`}
+          onClick={close}
+          leftSection={<HardDrive size="1rem" />}
+        >
+          {fs.name}
+        </Button>
+      ))}
     </>
   );
 };

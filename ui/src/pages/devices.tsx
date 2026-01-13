@@ -1,12 +1,28 @@
+import ConfirmDelete from "@/components/confirm-delete";
 import { DataTable, SortableHeader } from "@/components/data-table";
-import { useRead } from "@/lib/hooks";
-import { Flex, Group, Text } from "@mantine/core";
+import { useInvalidate, useRead, useWrite } from "@/lib/hooks";
+import { Flex, Group, List, Text } from "@mantine/core";
+import { RowSelectionState } from "@tanstack/react-table";
 import { HardDrive } from "lucide-react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const DevicesPage = () => {
-  const { data } = useRead("ListDevices", {});
+  const inv = useInvalidate();
   const nav = useNavigate();
+  const { data } = useRead("ListDevices", {});
+  const byId = useMemo(
+    () => data && Object.fromEntries(data.map((ok) => [ok.id, ok.name])),
+    [data]
+  );
+  const [selected, setSelected] = useState<RowSelectionState>({});
+  const selectedIds = useMemo(() => Object.keys(selected), [selected]);
+  const { mutateAsync: batchDelete } = useWrite("BatchDeleteDevices", {
+    onSuccess: () => {
+      inv(["ListDevices"]);
+      setSelected({});
+    },
+  });
   return (
     <Flex direction="column" gap="lg">
       <Group>
@@ -15,10 +31,38 @@ const DevicesPage = () => {
           Devices
         </Text>
       </Group>
+      <Group>
+        <ConfirmDelete
+          name=""
+          entityType="Devices"
+          onConfirm={async () => {
+            if (selectedIds.length) {
+              await batchDelete({ ids: selectedIds });
+            }
+          }}
+          disabled={!selectedIds.length}
+          info={
+            <>
+              <Text fw="bold" fz="lg">
+                To Delete:
+              </Text>
+              <List>
+                {selectedIds.map((id) => (
+                  <List.Item key={id}>{byId?.[id]}</List.Item>
+                ))}
+              </List>
+            </>
+          }
+        />
+      </Group>
       <DataTable
         tableKey="devices-table-v1"
         data={data ?? []}
         onRowClick={(device) => nav("/devices/" + device.id)}
+        selectOptions={{
+          selectKey: (row) => row.id,
+          state: [selected, setSelected],
+        }}
         columns={[
           {
             header: ({ column }) => (

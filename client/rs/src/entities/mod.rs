@@ -26,6 +26,12 @@ pub type Iso8601Timestamp = surrealdb_types::Datetime;
 #[typeshare(serialized_as = "any")]
 pub type JsonValue = serde_json::Value;
 
+/// Represents an empty json object: `{}`
+#[typeshare]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
+pub struct NoData {}
+
 #[typeshare]
 #[derive(
   Debug,

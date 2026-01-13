@@ -1,4 +1,10 @@
-import { ReactNode, useEffect, useState } from "react";
+import {
+  Dispatch,
+  ReactNode,
+  SetStateAction,
+  useEffect,
+  useState,
+} from "react";
 import {
   Column,
   ColumnDef,
@@ -12,6 +18,7 @@ import {
 } from "@tanstack/react-table";
 import {
   Center,
+  Checkbox,
   Flex,
   Group,
   Loader,
@@ -35,7 +42,8 @@ interface DataTableProps<TData, TValue> {
   sortDescFirst?: boolean;
   selectOptions?: {
     selectKey: (row: TData) => string;
-    onSelect: (selected: string[]) => void;
+    onSelect?: (selected: string[]) => void;
+    state?: [RowSelectionState, Dispatch<SetStateAction<RowSelectionState>>];
     disableRow?: boolean | ((row: Row<TData>) => boolean);
   };
   /** Mantine Table props */
@@ -72,7 +80,10 @@ export function DataTable<TData, TValue>({
 
   // intentionally not initialized to clear selected values on table mount
   // could add some prop for adding default selected state to preserve between mounts
-  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+  const _internalState = useState<RowSelectionState>({});
+  const [rowSelection, setRowSelection] = selectOptions?.state
+    ? selectOptions.state
+    : _internalState;
 
   const table = useReactTable({
     data,
@@ -101,7 +112,7 @@ export function DataTable<TData, TValue>({
   }, [tableKey, sorting]);
 
   useEffect(() => {
-    selectOptions?.onSelect(Object.keys(rowSelection));
+    selectOptions?.onSelect?.(Object.keys(rowSelection));
   }, [rowSelection]);
 
   const rows = table.getPrePaginationRowModel().rows;
@@ -118,8 +129,22 @@ export function DataTable<TData, TValue>({
         {caption ? <Table.Caption>{caption}</Table.Caption> : null}
 
         <Table.Thead>
-          {table.getHeaderGroups().map((hg) => (
+          {table.getHeaderGroups().map((hg, i) => (
             <Table.Tr key={hg.id}>
+              {i === 0 && selectOptions && (
+                <Table.Th
+                  onClick={() =>
+                    selectOptions.disableRow !== true &&
+                    table.toggleAllRowsSelected()
+                  }
+                  style={{ cursor: "pointer" }}
+                >
+                  <Checkbox
+                    disabled={selectOptions.disableRow === true}
+                    checked={table.getIsAllRowsSelected()}
+                  />
+                </Table.Th>
+              )}
               {hg.headers.map((header) => {
                 // const canSort = header.column.getCanSort();
                 // const sortState = header.column.getIsSorted();
@@ -179,13 +204,24 @@ export function DataTable<TData, TValue>({
             rows.map((row) => (
               <Table.Tr
                 key={row.id}
-                onClick={
-                  onRowClick ? () => onRowClick(row.original) : undefined
-                }
                 style={onRowClick ? { cursor: "pointer" } : undefined}
               >
+                {selectOptions && (
+                  <Table.Td onClick={() => row.toggleSelected()}>
+                    <Checkbox
+                      aria-label="Select row"
+                      disabled={!row.getCanSelect()}
+                      checked={row.getIsSelected()}
+                    />
+                  </Table.Td>
+                )}
                 {row.getVisibleCells().map((cell) => (
-                  <Table.Td key={cell.id}>
+                  <Table.Td
+                    key={cell.id}
+                    onClick={
+                      onRowClick ? () => onRowClick(row.original) : undefined
+                    }
+                  >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </Table.Td>
                 ))}

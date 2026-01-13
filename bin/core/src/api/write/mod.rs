@@ -40,11 +40,13 @@ pub enum WriteRequest {
   CreateDevice(CreateDevice),
   UpdateDevice(UpdateDevice),
   DeleteDevice(DeleteDevice),
+  BatchDeleteDevices(BatchDeleteDevices),
 
   // ==== ONBOARDING KEY ====
   CreateOnboardingKey(CreateOnboardingKey),
   UpdateOnboardingKey(UpdateOnboardingKey),
   DeleteOnboardingKey(DeleteOnboardingKey),
+  BatchDeleteOnboardingKeys(BatchDeleteOnboardingKeys),
 
   // ==== FILESYSTEM ====
   CreateFilesystem(CreateFilesystem),
