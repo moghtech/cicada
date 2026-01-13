@@ -6,10 +6,7 @@ use typeshare::typeshare;
 
 use crate::{
   api::write::CicadaWriteRequest,
-  entities::{
-    NoData,
-    device::{DeviceId, DeviceRecord},
-  },
+  entities::device::{DeviceId, DeviceRecord},
 };
 
 //
@@ -132,4 +129,4 @@ pub struct BatchDeleteDevices {
 
 /// Response for [BatchDeleteDevices].
 #[typeshare]
-pub type BatchDeleteDevicesResponse = NoData;
+pub type BatchDeleteDevicesResponse = Vec<DeviceRecord>;

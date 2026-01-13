@@ -60,7 +60,7 @@ impl Resolve<WriteArgs> for UpdateNode {
   description = "Delete a node",
   request_body(content = DeleteNode),
   responses(
-    (status = 200, description = "The deleted node", body = NodeRecord),
+    (status = 200, description = "The deleted nodes", body = DeleteNodeResponse),
     (status = 404, description = "Node not found", body = mogh_error::Serror),
     (status = 500, description = "Request failed", body = mogh_error::Serror)
   ),
@@ -72,7 +72,7 @@ impl Resolve<WriteArgs> for DeleteNode {
     self,
     _: &WriteArgs,
   ) -> Result<Self::Response, Self::Error> {
-    query::node::delete_node(&self.id.0, self.move_children).await
+    query::node::delete_node(self.id.0, self.move_children).await
   }
 }
 
@@ -82,10 +82,10 @@ impl Resolve<WriteArgs> for DeleteNode {
 #[utoipa::path(
   post,
   path = "/write/BatchDeleteNodes",
-  description = "Batch delete multiple files / folders",
+  description = "Batch delete many files / folders recursively.",
   request_body(content = BatchDeleteNodes),
   responses(
-    (status = 200, description = "Nodes deleted", body = BatchDeleteNodesResponse),
+    (status = 200, description = "The deleted files / folders", body = BatchDeleteNodesResponse),
     (status = 500, description = "Request failed", body = mogh_error::Serror)
   ),
 )]
@@ -96,7 +96,8 @@ impl Resolve<WriteArgs> for BatchDeleteNodes {
     self,
     _: &WriteArgs,
   ) -> Result<Self::Response, Self::Error> {
-    query::node::batch_delete_nodes(self.ids).await?;
-    Ok(BatchDeleteNodesResponse {})
+    query::node::batch_delete_nodes(self.ids)
+      .await
+      .map_err(Into::into)
   }
 }

@@ -6,10 +6,7 @@ use typeshare::typeshare;
 
 use crate::{
   api::write::CicadaWriteRequest,
-  entities::{
-    NoData,
-    onboarding_key::{OnboardingKeyId, OnboardingKeyRecord},
-  },
+  entities::onboarding_key::{OnboardingKeyId, OnboardingKeyRecord},
 };
 
 //
@@ -143,4 +140,4 @@ pub struct BatchDeleteOnboardingKeys {
 
 /// Response for [BatchDeleteOnboardingKeys].
 #[typeshare]
-pub type BatchDeleteOnboardingKeysResponse = NoData;
+pub type BatchDeleteOnboardingKeysResponse = Vec<OnboardingKeyRecord>;

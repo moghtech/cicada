@@ -7,7 +7,7 @@ use typeshare::typeshare;
 use crate::{
   api::write::CicadaWriteRequest,
   entities::{
-    NoData, U64,
+    U64,
     filesystem::FilesystemId,
     node::{NodeId, NodeKind, NodeRecord},
   },
@@ -121,7 +121,7 @@ pub struct DeleteNode {
 
 /// Response for [DeleteNode].
 #[typeshare]
-pub type DeleteNodeResponse = NodeRecord;
+pub type DeleteNodeResponse = Vec<NodeRecord>;
 
 //
 
@@ -149,4 +149,4 @@ pub struct BatchDeleteNodes {
 
 /// Response for [BatchDeleteNodes].
 #[typeshare]
-pub type BatchDeleteNodesResponse = NoData;
+pub type BatchDeleteNodesResponse = Vec<NodeRecord>;

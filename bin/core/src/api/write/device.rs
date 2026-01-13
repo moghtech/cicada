@@ -81,7 +81,7 @@ impl Resolve<WriteArgs> for DeleteDevice {
   description = "Batch delete devices",
   request_body(content = BatchDeleteDevices),
   responses(
-    (status = 200, description = "Devices deleted", body = BatchDeleteDevicesResponse),
+    (status = 200, description = "The deleted devices", body = BatchDeleteDevicesResponse),
     (status = 500, description = "Request failed", body = mogh_error::Serror)
   ),
 )]
@@ -92,7 +92,8 @@ impl Resolve<WriteArgs> for BatchDeleteDevices {
     self,
     _: &WriteArgs,
   ) -> Result<Self::Response, Self::Error> {
-    query::device::batch_delete_devices(self.ids).await?;
-    Ok(BatchDeleteDevicesResponse {})
+    query::device::batch_delete_devices(self.ids)
+      .await
+      .map_err(Into::into)
   }
 }

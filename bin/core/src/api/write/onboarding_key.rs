@@ -104,7 +104,7 @@ impl Resolve<WriteArgs> for DeleteOnboardingKey {
   description = "Batch delete onboarding keys",
   request_body(content = BatchDeleteOnboardingKeys),
   responses(
-    (status = 200, description = "Onboarding keys deleted", body = BatchDeleteOnboardingKeysResponse),
+    (status = 200, description = "The deleted onboarding keys", body = BatchDeleteOnboardingKeysResponse),
     (status = 500, description = "Request failed", body = mogh_error::Serror)
   ),
 )]
@@ -116,7 +116,7 @@ impl Resolve<WriteArgs> for BatchDeleteOnboardingKeys {
     _: &WriteArgs,
   ) -> Result<Self::Response, Self::Error> {
     query::onboarding_key::batch_delete_onboarding_keys(self.ids)
-      .await?;
-    Ok(BatchDeleteOnboardingKeysResponse {})
+      .await
+      .map_err(Into::into)
   }
 }

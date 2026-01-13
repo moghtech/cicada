@@ -10,7 +10,6 @@ use cicada_client::{
     node::{NodeId, NodeKind, NodeListItem, NodeRecord},
   },
 };
-use futures_util::{TryStreamExt as _, stream::FuturesUnordered};
 use mogh_error::AddStatusCode as _;
 
 use crate::db::DB;
@@ -39,6 +38,19 @@ pub async fn get_node(
   DB.select::<Option<NodeRecord>>(("Node", node_id))
     .await
     .context("Failed to query database for node")?
+    .context("No node found with given ID")
+    .status_code(StatusCode::NOT_FOUND)
+}
+
+pub async fn get_node_list_item(
+  node_id: String,
+) -> mogh_error::Result<NodeListItem> {
+  DB.query(r#"SELECT * OMIT data FROM type::record("Node", $id)"#)
+    .bind(("id", node_id))
+    .await
+    .context("Failed to query database for node")?
+    .take::<Option<NodeListItem>>(0)
+    .context("Invalid get node list item query response")?
     .context("No node found with given ID")
     .status_code(StatusCode::NOT_FOUND)
 }
@@ -87,10 +99,10 @@ pub async fn update_node(
 }
 
 pub async fn delete_node(
-  id: &str,
+  id: String,
   move_children: Option<u64>,
-) -> mogh_error::Result<NodeRecord> {
-  let node = get_node(id).await?;
+) -> mogh_error::Result<Vec<NodeRecord>> {
+  let node = get_node_list_item(id).await?;
   if matches!(node.kind, NodeKind::Folder) {
     if let Some(parent) = move_children {
       // Moves children of this node to the new parent
@@ -100,53 +112,32 @@ pub async fn delete_node(
         .await
         .context("Failed to move children nodes to new parent")?;
     } else {
-      delete_children(node.filesystem, node.inode).await?;
+      // Do standard recursive batch delete
+      let mut deleted = Vec::new();
+      batch_delete_nodes_rec(vec![node], &mut deleted).await?;
+      return Ok(deleted);
     }
   }
-  DB.delete(node.id.as_record_id())
+  // Node is either file, or move_children is passed.
+  // In either case, only one deleted node.
+  let deleted = DB
+    .delete(node.id.as_record_id())
     .await?
-    .context("No filesystem matching given ID")
-    .status_code(StatusCode::NOT_FOUND)
-}
-
-fn delete_children(
-  filesystem: FilesystemId,
-  parent: u64,
-) -> std::pin::Pin<Box<impl Future<Output = mogh_error::Result<()>>>>
-{
-  Box::pin(async move {
-    let children = list_nodes(Some(filesystem), Some(parent)).await?;
-    // Recursively deletes any sub folders as well.
-    children
-      .iter()
-      .map(|node| async {
-        if matches!(node.kind, NodeKind::Folder) {
-          delete_children(node.filesystem.clone(), node.inode)
-            .await?;
-        }
-        mogh_error::Result::Ok(())
-      })
-      .collect::<FuturesUnordered<_>>()
-      .try_collect::<Vec<_>>()
-      .await?;
-    let ids =
-      children.into_iter().map(|node| node.id).collect::<Vec<_>>();
-    DB.query("DELETE Node WHERE $ids.any(id) RETURN NONE;")
-      .bind(("ids", ids))
-      .await
-      .context("Failed to delete children nodes")?;
-    Ok(())
-  })
+    .context("No node matching given ID")
+    .status_code(StatusCode::NOT_FOUND)?;
+  Ok(vec![deleted])
 }
 
 pub async fn batch_delete_nodes(
   ids: Vec<NodeId>,
-) -> anyhow::Result<()> {
+) -> anyhow::Result<Vec<NodeRecord>> {
   if ids.is_empty() {
-    return Ok(());
+    return Ok(Vec::new());
   }
 
-  // Start recursive delete from top layer of nodes.
+  // Start recursive delete from top layer of nodes,
+  // collecting any deleted records.
+  let mut deleted = Vec::new();
   let nodes = DB
     .query("SELECT * OMIT data FROM Node WHERE $ids.any(id);")
     .bind(("ids", ids.clone()))
@@ -154,7 +145,8 @@ pub async fn batch_delete_nodes(
     .context("Failed to select nodes")?
     .take::<Vec<NodeListItem>>(0)
     .context("Invalid node query response")?;
-  batch_delete_nodes_rec(nodes).await
+  batch_delete_nodes_rec(nodes, &mut deleted).await?;
+  Ok(deleted)
 }
 
 /// Queries for children of given nodes,
@@ -165,8 +157,9 @@ pub async fn batch_delete_nodes(
 /// as parents won't be deleted until after their children.
 pub fn batch_delete_nodes_rec(
   nodes: Vec<NodeListItem>,
+  deleted: &mut Vec<NodeRecord>,
 ) -> std::pin::Pin<Box<impl Future<Output = anyhow::Result<()>>>> {
-  Box::pin(async move {
+  Box::pin(async {
     if nodes.is_empty() {
       return Ok(());
     }
@@ -189,17 +182,21 @@ pub fn batch_delete_nodes_rec(
       .context("Invalid children node query response")?;
       // Delete children layer if necessary
       if !children.is_empty() {
-        batch_delete_nodes_rec(children).await?;
+        batch_delete_nodes_rec(children, deleted).await?;
       }
     }
 
     // Delete top layer
     let ids =
       nodes.into_iter().map(|node| node.id).collect::<Vec<_>>();
-    DB.query("DELETE Node WHERE $ids.any(id) RETURN NONE;")
+    let more = DB
+      .query("DELETE Node WHERE $ids.any(id);")
       .bind(("ids", ids))
       .await
-      .context("Failed to delete nodes")?;
+      .context("Failed to delete nodes")?
+      .take::<Vec<NodeRecord>>(0)
+      .context("Invalid delete node query response")?;
+    deleted.extend(more);
     Ok(())
   })
 }
