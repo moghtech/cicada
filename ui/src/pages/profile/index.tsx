@@ -1,8 +1,6 @@
 import { useLoginOptions, useManageAuth, useUser } from "@/lib/hooks";
 import {
   ActionIcon,
-  Badge,
-  Button,
   Center,
   Fieldset,
   Group,
@@ -12,17 +10,15 @@ import {
   TextInput,
 } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
-import { MoghAuth, Types } from "cicada_client";
-import { CirclePlus, Save } from "lucide-react";
-import { useMemo, useState } from "react";
-import { EnrollPasskey } from "./passkey";
-import { EnrollTotp } from "./totp";
-import { CICADA_BASE_URL } from "@/main";
-import { DataTable } from "@/components/data-table";
-import ConfirmDelete from "@/components/confirm-delete";
+import { Types } from "cicada_client";
+import { Save } from "lucide-react";
+import { useState } from "react";
 import { ICONS } from "@/lib/icons";
 import { Page } from "@/layout/page";
 import { EnableSwitch } from "@/components/enable-switch";
+import { LinkedLogins } from "./linked-logins";
+import { EnrollPasskey } from "./passkey";
+import { EnrollTotp } from "./totp";
 
 const ProfilePage = () => {
   const user = useUser().data;
@@ -36,14 +32,6 @@ const ProfilePage = () => {
   }
 
   return <ProfileInner user={user} />;
-};
-
-const useLinkWithOauth = () => {
-  const { mutateAsync } = useManageAuth("BeginExternalLoginLink");
-  return (provider: MoghAuth.Types.ExternalLoginProvider) =>
-    mutateAsync({}).then(() =>
-      location.replace(`${CICADA_BASE_URL}/auth/${provider.toLowerCase()}/link`)
-    );
 };
 
 const ProfileInner = ({ user }: { user: Types.UserEntity }) => {
@@ -75,44 +63,6 @@ const ProfileInner = ({ user }: { user: Types.UserEntity }) => {
       },
     }
   );
-
-  const { mutateAsync: unlink } = useManageAuth("UnlinkLogin", {
-    onSuccess: () => {
-      notifications.show({ message: "Unlinked login." });
-      refetchUser();
-    },
-  });
-  const loginProviders: Array<{
-    provider: MoghAuth.Types.LoginProvider;
-    enabled: boolean;
-    linked: boolean;
-  }> = useMemo(() => {
-    const externalLoginKinds = user?.external_logins.map((login) => login.kind);
-    return [
-      {
-        provider: "Local" as MoghAuth.Types.LoginProvider,
-        enabled: !!options?.local,
-        linked: !!user?.password,
-      },
-      {
-        provider: "Oidc" as MoghAuth.Types.LoginProvider,
-        enabled: !!options?.oidc,
-        linked: externalLoginKinds.includes(Types.ExternalLoginKind.Oidc),
-      },
-      {
-        provider: "Github" as MoghAuth.Types.LoginProvider,
-        enabled: !!options?.github,
-        linked: externalLoginKinds.includes(Types.ExternalLoginKind.Github),
-      },
-      {
-        provider: "Google" as MoghAuth.Types.LoginProvider,
-        enabled: !!options?.google,
-        linked: externalLoginKinds.includes(Types.ExternalLoginKind.Google),
-      },
-    ].filter(({ enabled }) => enabled);
-  }, [user, options]);
-  const linkedCount = loginProviders.filter(({ linked }) => linked).length;
-  const linkWithOauth = useLinkWithOauth();
 
   return (
     <Page title="Profile" icon={ICONS.User}>
@@ -156,59 +106,7 @@ const ProfileInner = ({ user }: { user: Types.UserEntity }) => {
         )}
       </Fieldset>
 
-      {!!loginProviders.length && (
-        <Fieldset legend={<Text size="lg">Providers</Text>}>
-          <DataTable
-            tableKey="login-providers-v1"
-            data={loginProviders}
-            columns={[
-              { header: "Provider", accessorKey: "provider" },
-              {
-                header: "Linked",
-                cell: ({
-                  row: {
-                    original: { linked },
-                  },
-                }) => (
-                  <Badge color={linked ? "green" : "red"}>
-                    {linked ? "Linked" : "Unlinked"}
-                  </Badge>
-                ),
-              },
-              {
-                header: "Link",
-                cell: ({
-                  row: {
-                    original: { provider, linked },
-                  },
-                }) =>
-                  linked ? (
-                    linkedCount < 2 ? (
-                      <>Must have at least 1 login linked.</>
-                    ) : (
-                      <ConfirmDelete
-                        action="Unlink"
-                        name={provider}
-                        entityType="Login"
-                        onConfirm={() => unlink({ provider })}
-                      />
-                    )
-                  ) : provider === "Local" ? (
-                    <>Set password above to enable.</>
-                  ) : (
-                    <Button
-                      variant="default"
-                      onClick={() => linkWithOauth(provider as any)}
-                      leftSection={<CirclePlus size="1rem" />}
-                    >
-                      Link {provider}
-                    </Button>
-                  ),
-              },
-            ]}
-          />
-        </Fieldset>
-      )}
+      <LinkedLogins user={user} refetchUser={refetchUser} />
 
       <Fieldset legend={<Text size="lg">2FA</Text>}>
         <Group>
