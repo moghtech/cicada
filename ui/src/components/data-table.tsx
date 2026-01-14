@@ -151,24 +151,6 @@ export function DataTable<TData, TValue>({
                 return (
                   <Table.Th key={header.id}>
                     {header.isPlaceholder ? null : (
-                      //  : canSort ? (
-                      //   <UnstyledButton
-                      //     onClick={header.column.getToggleSortingHandler()}
-                      //     style={{ width: "100%" }}
-                      //   >
-                      //     <Group justify="space-between" gap="sm" wrap="nowrap">
-                      //       <Text fw={600} size="sm" lineClamp={1}>
-                      //         {flexRender(
-                      //           header.column.columnDef.header,
-                      //           header.getContext()
-                      //         )}
-                      //       </Text>
-                      //       <Center>
-                      //         <SortIcon state={sortState} />
-                      //       </Center>
-                      //     </Group>
-                      //   </UnstyledButton>
-                      // )
                       <Text fw={600} size="sm" lineClamp={1}>
                         {flexRender(
                           header.column.columnDef.header,
@@ -186,7 +168,11 @@ export function DataTable<TData, TValue>({
         <Table.Tbody>
           {loading ? (
             <Table.Tr>
-              <Table.Td colSpan={table.getAllLeafColumns().length}>
+              <Table.Td
+                colSpan={
+                  table.getAllLeafColumns().length + (selectOptions ? 1 : 0)
+                }
+              >
                 <Group justify="center" py="lg">
                   <Loader size="sm" />
                 </Group>
@@ -194,7 +180,11 @@ export function DataTable<TData, TValue>({
             </Table.Tr>
           ) : rows.length === 0 ? (
             <Table.Tr>
-              <Table.Td colSpan={table.getAllLeafColumns().length}>
+              <Table.Td
+                colSpan={
+                  table.getAllLeafColumns().length + (selectOptions ? 1 : 0)
+                }
+              >
                 <Group justify="center" py="lg">
                   {noResults}
                 </Group>

@@ -89,8 +89,6 @@ const CreateOnboardingKeyForm = ({ close }: { close: () => void }) => {
       />
       <TextInput
         {...form.getInputProps("public_key")}
-        withAsterisk
-        autoFocus
         label="Pre-existing Public Key (Optional)"
         placeholder="Enter public key"
         key={form.key("public_key")}

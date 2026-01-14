@@ -1,9 +1,7 @@
 import ConfirmDelete from "@/components/confirm-delete";
 import { DataTable, SortableHeader } from "@/components/data-table";
-import { Page } from "@/layout/page";
 import { useInvalidate, useRead, useWrite } from "@/lib/hooks";
-import { ICONS } from "@/lib/icons";
-import { List, Text } from "@mantine/core";
+import { Group, List, Text } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { RowSelectionState } from "@tanstack/react-table";
 import { useMemo, useState } from "react";
@@ -29,10 +27,8 @@ const DevicesPage = () => {
     },
   });
   return (
-    <Page
-      title="Devices"
-      icon={ICONS.Device}
-      actions={
+    <>
+      <Group>
         <ConfirmDelete
           name=""
           entityType="Devices"
@@ -55,8 +51,7 @@ const DevicesPage = () => {
           }}
           disabled={!selectedIds.length}
         />
-      }
-    >
+      </Group>
       <DataTable
         tableKey="devices-table-v1"
         data={data ?? []}
@@ -96,7 +91,7 @@ const DevicesPage = () => {
           },
         ]}
       />
-    </Page>
+    </>
   );
 };
 

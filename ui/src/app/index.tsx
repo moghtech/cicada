@@ -19,11 +19,11 @@ export const App = () => {
     >
       <Topbar opened={opened} toggle={toggle} />
 
-      <AppShell.Navbar>
+      <AppShell.Navbar bg="main">
         <Sidebar close={close} />
       </AppShell.Navbar>
 
-      <AppShell.Main>
+      <AppShell.Main bg="main">
         <Suspense
           fallback={
             <Center h="70vh">

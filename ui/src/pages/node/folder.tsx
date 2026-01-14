@@ -62,21 +62,24 @@ const FolderPage = ({
 
   return (
     <Page
-      fullTitle={
+      title={node?.name ?? "Root"}
+      icon={ICONS.Folder}
+      customTitle={
         <>
-          <ICONS.Filesystem size={22} opacity={0.6} />
-          <Text fz="h2" opacity={0.6}>
-            Filesystem:
-          </Text>
-          <Text fz="h2">{filesystem?.name}</Text>
-          <Text fz="h2" opacity={0.6}>
-            |
-          </Text>
           <ICONS.Folder size={22} opacity={0.6} />
           <Text fz="h2" opacity={0.6}>
             Folder:
           </Text>
           <Text fz="h2">{node?.name ?? "Root"}</Text>
+        </>
+      }
+      customDescription={
+        <>
+          <ICONS.Filesystem size="1.1rem" opacity={0.6} />
+          <Text opacity={0.6} size="lg">
+            Filesystem:
+          </Text>
+          <Text size="lg">{filesystem?.name}</Text>
         </>
       }
       actions={
@@ -159,7 +162,7 @@ const FolderPage = ({
               return (
                 <Button
                   variant="transparent"
-                  color="inherit"
+                  c="inherit"
                   leftSection={<Icon size="1rem" />}
                 >
                   {node.name}

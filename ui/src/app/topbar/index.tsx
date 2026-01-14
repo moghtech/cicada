@@ -18,7 +18,8 @@ export const Topbar = ({
         alignItems: "center",
         justifyContent: "space-between",
       }}
-      p="0rem 1rem"
+      px="1rem"
+      py="0rem"
     >
       <Flex align="center" gap="md">
         <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />

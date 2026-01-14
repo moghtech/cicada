@@ -1,4 +1,5 @@
 import ConfirmDelete from "@/components/confirm-delete";
+import { EnableSwitch } from "@/components/enable-switch";
 import { Page } from "@/layout/page";
 import { useRead, useWrite } from "@/lib/hooks";
 import { ICONS } from "@/lib/icons";
@@ -9,7 +10,6 @@ import {
   Flex,
   Group,
   Loader,
-  Switch,
   Text,
   TextInput,
 } from "@mantine/core";
@@ -81,23 +81,27 @@ const DeviceInner = ({
     <Page
       title={device.name}
       icon={ICONS.Device}
-      rightTitle={
-        <Switch
-          label="Enabled"
-          checked={device.enabled}
-          onChange={(e) =>
-            updateDevice({ id: device.id, enabled: e.target.checked })
-          }
-        />
-      }
+      description="Device"
       actions={
-        <ConfirmDelete
-          entityType="Device"
-          name={device.name}
-          onConfirm={() => deleteDevice({ id: device.id })}
-          loading={deleteDevicePending}
-          disabled={false}
-        />
+        <>
+          <ConfirmDelete
+            entityType="Device"
+            name={device.name}
+            onConfirm={() => deleteDevice({ id: device.id })}
+            loading={deleteDevicePending}
+            disabled={false}
+          />
+          <EnableSwitch
+            ml="md"
+            label="File Access"
+            color="green.8"
+            checked={device.enabled}
+            onCheckedChange={(enabled) =>
+              updateDevice({ id: device.id, enabled })
+            }
+            redDisabled
+          />
+        </>
       }
     >
       <Fieldset legend={<Text size="lg">Config</Text>}>

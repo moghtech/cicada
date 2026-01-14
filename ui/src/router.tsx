@@ -17,7 +17,6 @@ const Login = lazy(() => import("@/pages/login"));
 const Profile = lazy(() => import("@/pages/profile"));
 const Devices = lazy(() => import("@/pages/devices"));
 const Device = lazy(() => import("@/pages/device"));
-const OnboardingKeys = lazy(() => import("@/pages/onboarding-keys"));
 const OnboardingKey = lazy(() => import("@/pages/onboarding-key"));
 const Filesystems = lazy(() => import("@/pages/filesystems"));
 const Node = lazy(() => import("@/pages/node"));
@@ -51,7 +50,6 @@ export const Router = () => {
             <Route path="profile" element={<Profile />} />
             <Route path="devices" element={<Devices />} />
             <Route path="devices/:device" element={<Device />} />
-            <Route path="onboarding-keys" element={<OnboardingKeys />} />
             <Route
               path="onboarding-keys/:onboardingKey"
               element={<OnboardingKey />}

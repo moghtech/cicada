@@ -350,13 +350,13 @@ monaco.editor.defineTheme("light", {
   },
 });
 
-// background: #1f1f1fff
+// background: #242424
 monaco.editor.defineTheme("dark", {
   base: "vs-dark",
   inherit: true,
   rules: [
     {
-      background: "1f1f1fff",
+      background: "242424",
       token: "",
     },
     {
@@ -687,7 +687,7 @@ monaco.editor.defineTheme("dark", {
     },
   ],
   colors: {
-    "editor.background": "#1f1f1fff",
+    "editor.background": "#242424",
     "editor.foreground": "#f6f8fa",
     // "editor.selectionBackground": "#4c2889",
     // "editor.inactiveSelectionBackground": "#444d56",

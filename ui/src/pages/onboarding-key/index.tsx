@@ -1,4 +1,5 @@
 import ConfirmDelete from "@/components/confirm-delete";
+import { EnableSwitch } from "@/components/enable-switch";
 import { Page } from "@/layout/page";
 import { useRead, useWrite } from "@/lib/hooks";
 import { ICONS } from "@/lib/icons";
@@ -9,7 +10,6 @@ import {
   Flex,
   Group,
   Loader,
-  Switch,
   Text,
   TextInput,
 } from "@mantine/core";
@@ -79,7 +79,7 @@ const OnboardingKeyInner = ({
       notifications.show({
         message: "OnboardingKey deleted.",
       });
-      nav("/onboardingKeys");
+      nav("/devices");
     },
   });
   const [publicKey, setPublicKey] = useState(onboardingKey.public_key);
@@ -88,26 +88,27 @@ const OnboardingKeyInner = ({
     <Page
       title={onboardingKey.name}
       icon={ICONS.OnboardingKey}
-      rightTitle={
-        <Switch
-          label="Enabled"
-          checked={onboardingKey.enabled}
-          onChange={(e) =>
-            updateOnboardingKey({
-              id: onboardingKey.id,
-              enabled: e.target.checked,
-            })
-          }
-        />
-      }
+      description="Onboarding Key"
       actions={
-        <ConfirmDelete
-          entityType="Onboarding Key"
-          name={onboardingKey.name}
-          onConfirm={() => deleteOnboardingKey({ id: onboardingKey.id })}
-          loading={deleteOnboardingKeyPending}
-          disabled={false}
-        />
+        <>
+          <ConfirmDelete
+            entityType="Onboarding Key"
+            name={onboardingKey.name}
+            onConfirm={() => deleteOnboardingKey({ id: onboardingKey.id })}
+            loading={deleteOnboardingKeyPending}
+            disabled={false}
+          />
+          <EnableSwitch
+            ml="md"
+            label="Can onboard devices"
+            color="green.8"
+            checked={onboardingKey.enabled}
+            onCheckedChange={(enabled) =>
+              updateOnboardingKey({ id: onboardingKey.id, enabled })
+            }
+            redDisabled
+          />
+        </>
       }
     >
       <Fieldset legend={<Text size="lg">Config</Text>}>

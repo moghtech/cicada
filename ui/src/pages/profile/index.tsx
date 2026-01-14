@@ -8,7 +8,6 @@ import {
   Group,
   Loader,
   PasswordInput,
-  Switch,
   Text,
   TextInput,
 } from "@mantine/core";
@@ -23,6 +22,7 @@ import { DataTable } from "@/components/data-table";
 import ConfirmDelete from "@/components/confirm-delete";
 import { ICONS } from "@/lib/icons";
 import { Page } from "@/layout/page";
+import { EnableSwitch } from "@/components/enable-switch";
 
 const ProfilePage = () => {
   const user = useUser().data;
@@ -219,21 +219,11 @@ const ProfileInner = ({ user }: { user: Types.UserRecord }) => {
           <EnrollPasskey user={user} />
           <EnrollTotp user={user} />
           {(user.totp_secret || user.passkey) && (
-            <Switch
-              label={
-                <Group>
-                  Skip 2FA for external logins
-                  <Badge
-                    color={user?.external_skip_2fa ? undefined : "gray"}
-                    style={{ cursor: "pointer" }}
-                  >
-                    {user?.external_skip_2fa ? "Enabled" : "Disabled"}
-                  </Badge>
-                </Group>
-              }
-              checked={user?.external_skip_2fa}
-              onChange={(e) =>
-                updateExternalSkip2fa({ external_skip_2fa: e.target.checked })
+            <EnableSwitch
+              label="Skip 2FA for external logins"
+              checked={user.external_skip_2fa}
+              onCheckedChange={(external_skip_2fa) =>
+                updateExternalSkip2fa({ external_skip_2fa })
               }
             />
           )}

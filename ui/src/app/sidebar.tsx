@@ -16,8 +16,9 @@ import { ChevronRight, Link2 } from "lucide-react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
 export const Sidebar = ({ close }: { close: () => void }) => {
-  const devicesPage = location.pathname.startsWith("/devices");
-  const onboardingKeysPage = location.pathname.startsWith("/onboarding-keys");
+  const devicesPage =
+    location.pathname.startsWith("/devices") ||
+    location.pathname.startsWith("/onboarding-keys");
   const { filesystem: selected_filesystem, inode: _selected_inode } =
     useParams() as {
       filesystem?: string;
@@ -49,16 +50,6 @@ export const Sidebar = ({ close }: { close: () => void }) => {
             fullWidth
           >
             Devices
-          </Button>
-          <Button
-            variant={onboardingKeysPage ? "filled" : "subtle"}
-            c="inherit"
-            onClick={() => nav("/onboarding-keys")}
-            leftSection={<ICONS.OnboardingKey size="1rem" />}
-            justify="flex-start"
-            fullWidth
-          >
-            Onboarding
           </Button>
 
           <Filesystems filesystem={selected_filesystem} close={close} />
@@ -196,7 +187,7 @@ const NodeTree = ({
         return (
           <Button
             variant={selected && selected === inode ? "default" : "subtle"}
-            color="inherit"
+            c="inherit"
             p="0rem 0.5rem"
             mb="0.25rem"
             justify="space-between"
