@@ -1,0 +1,50 @@
+-- ============
+--  ExternalLogin
+-- ============
+
+DEFINE TABLE IF NOT EXISTS ExternalLogin SCHEMAFULL;
+
+-- user
+DEFINE FIELD OVERWRITE user
+  ON TABLE ExternalLogin
+  TYPE record<User>;
+
+-- kind
+DEFINE FIELD OVERWRITE kind
+  ON TABLE ExternalLogin
+  TYPE string;
+
+-- external_id
+DEFINE FIELD OVERWRITE external_id
+  ON TABLE ExternalLogin
+  TYPE string;
+
+-- created_at
+DEFINE FIELD OVERWRITE created_at
+  ON TABLE ExternalLogin
+  TYPE datetime
+  VALUE $before OR time::now()
+  DEFAULT time::now();
+
+-- updated_at
+DEFINE FIELD OVERWRITE updated_at
+  ON TABLE ExternalLogin
+  TYPE datetime
+  VALUE time::now()
+  DEFAULT time::now();
+
+-------------
+-- Indexes --
+-------------
+
+-- user + kind | unique
+DEFINE INDEX OVERWRITE UserKind
+  ON TABLE ExternalLogin
+  FIELDS user, kind
+  UNIQUE;
+
+-- kind + external_id | unique
+DEFINE INDEX OVERWRITE KindExternalId
+  ON TABLE ExternalLogin
+  FIELDS kind, external_id
+  UNIQUE;

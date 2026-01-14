@@ -1,0 +1,43 @@
+-- ===========
+--  MasterKey
+-- ===========
+
+DEFINE TABLE IF NOT EXISTS MasterKey SCHEMAFULL;
+
+-- name
+DEFINE FIELD OVERWRITE name
+  ON TABLE MasterKey
+  TYPE string;
+
+-- created_at
+DEFINE FIELD OVERWRITE created_at
+  ON TABLE MasterKey
+  TYPE datetime
+  VALUE $before OR time::now()
+  DEFAULT time::now();
+
+-- updated_at
+DEFINE FIELD OVERWRITE updated_at
+  ON TABLE MasterKey
+  TYPE datetime
+  VALUE time::now()
+  DEFAULT time::now();
+
+-------------
+-- Indexes --
+-------------
+
+-- name | unique
+DEFINE INDEX OVERWRITE Name
+  ON TABLE MasterKey
+  FIELDS name
+  UNIQUE;
+
+---------------
+-- Functions --
+---------------
+
+-- Returns the ID of the first created master key to use as encryption key default
+DEFINE FUNCTION OVERWRITE fn::first_master_key() {
+  RETURN (SELECT id, created_at FROM MasterKey ORDER BY created_at LIMIT 1)[0].id
+};

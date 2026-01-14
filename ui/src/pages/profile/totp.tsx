@@ -15,7 +15,7 @@ import { Types } from "cicada_client";
 import { Check, RotateCcwKey, Trash } from "lucide-react";
 import { useState } from "react";
 
-export const EnrollTotp = ({ user }: { user: Types.UserRecord }) => {
+export const EnrollTotp = ({ user }: { user: Types.UserEntity }) => {
   const userInvalidate = useUserInvalidate();
   const [open, setOpen] = useState(false);
   const [submitted, setSubmitted] = useState<{ uri: string; png: string }>();
@@ -56,7 +56,7 @@ export const EnrollTotp = ({ user }: { user: Types.UserRecord }) => {
 
   return (
     <>
-      {!user?.totp_secret && user?.passkey === null && (
+      {!user.totp && !user.passkey && (
         <>
           <Modal opened={open} onClose={() => onOpenChange(false)}>
             {recovery && (
@@ -120,7 +120,6 @@ export const EnrollTotp = ({ user }: { user: Types.UserRecord }) => {
           <Button
             leftSection={<RotateCcwKey size="1rem" />}
             variant="default"
-            hidden={!!user?.totp_secret}
             onClick={() => onOpenChange(true)}
             w={220}
           >
@@ -128,7 +127,7 @@ export const EnrollTotp = ({ user }: { user: Types.UserRecord }) => {
           </Button>
         </>
       )}
-      {user.totp_secret && (
+      {user.totp && (
         <ConfirmButton
           icon={<Trash size="1rem" />}
           loading={unenrollPending}

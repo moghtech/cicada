@@ -9,15 +9,23 @@ use typeshare::typeshare;
 pub mod config;
 /// A device mounting Cicada files
 pub mod device;
+/// Per-record encryption keys.
+pub mod encryption_key;
 /// Represents virtual filesystems which can be mounted to clients.
 pub mod filesystem;
+/// Master encryption keys
+pub mod master_key;
 /// Nodes represent entries in a filesystem.
 /// They represent either Files or Folders.
 pub mod node;
 /// Onboard device access.
 pub mod onboarding_key;
+/// Universal record identifier for Cicada entities.
+pub mod record_id;
 /// Cicada users.
 pub mod user;
+/// Login methods for users.
+pub mod external_login;
 
 #[typeshare(serialized_as = "number")]
 pub type U64 = u64;

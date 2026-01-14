@@ -144,7 +144,7 @@ impl Resolve<ReadArgs> for GetUsername {
     self,
     ReadArgs { .. }: &ReadArgs,
   ) -> Result<Self::Response, Self::Error> {
-    let username = get_user(&self.user_id).await?.name;
+    let username = get_user(&self.user_id).await?.username;
     Ok(GetUsernameResponse {
       username,
       avatar: None,

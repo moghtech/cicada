@@ -1,10 +1,46 @@
 use anyhow::Context as _;
-use cicada_client::entities::user::UserRecord;
+use cicada_client::entities::{
+  external_login::{ExternalLoginKind, ExternalLoginRecord},
+  user::{UserEntity, UserId, UserRecord},
+};
 use mogh_auth_client::passkey::Passkey;
 use serde::Serialize;
 use surrealdb_types::object;
 
 use crate::db::DB;
+
+pub async fn get_user_entity(
+  user_id: String,
+) -> anyhow::Result<UserEntity> {
+  let mut res = DB
+    .query(
+      "
+  SELECT * FROM ONLY $user;
+  SELECT * FROM ExternalLogin WHERE user = $user;",
+    )
+    .bind(("user", UserId(user_id)))
+    .await
+    .context("Failed to query database for user entity")?;
+  let user = res
+    .take::<Option<UserRecord>>(0)
+    .context("Invalid user query response")?
+    .context("No user found at given ID")?;
+  let external_logins = res
+    .take::<Vec<ExternalLoginRecord>>(1)
+    .context("Invalid external login query response")?;
+  Ok(UserEntity {
+    id: user.id,
+    username: user.username,
+    enabled: user.enabled,
+    password: !user.password.is_empty(),
+    external_logins,
+    passkey: user.passkey.is_some(),
+    totp: !user.totp_secret.is_empty(),
+    external_skip_2fa: user.external_skip_2fa,
+    created_at: user.created_at,
+    updated_at: user.updated_at,
+  })
+}
 
 pub async fn get_user(user_id: &str) -> anyhow::Result<UserRecord> {
   DB.select::<Option<UserRecord>>(("User", user_id))
@@ -15,12 +51,11 @@ pub async fn get_user(user_id: &str) -> anyhow::Result<UserRecord> {
 
 pub async fn no_users_exist() -> anyhow::Result<bool> {
   let no_users = DB
-    .query("SELECT * FROM User LIMIT 1;")
+    .query("SELECT * FROM ONLY User LIMIT 1;")
     .await
     .context("Failed to query database for user")?
-    .take::<Vec<UserRecord>>(0)
+    .take::<Option<UserRecord>>(0)
     .context("Failed to deserialize UserRecord")?
-    .pop()
     .is_none();
   Ok(no_users)
 }
@@ -28,57 +63,29 @@ pub async fn no_users_exist() -> anyhow::Result<bool> {
 pub async fn find_user_with_username(
   username: String,
 ) -> anyhow::Result<Option<UserRecord>> {
-  let user = DB
-    .query("SELECT * FROM User WHERE name = $name")
-    .bind(("name", username))
+  DB.query("SELECT * FROM ONLY User WHERE username = $username;")
+    .bind(("username", username))
     .await
     .context("Failed to query database for user")?
-    .take::<Vec<UserRecord>>(0)
-    .context("Failed to deserialize UserRecord")?
-    .pop();
-  Ok(user)
+    .take(0)
+    .context("Failed to deserialize UserRecord")
 }
 
-pub async fn find_user_with_oidc_subject(
-  oidc_subject: String,
+pub async fn find_user_with_external_login(
+  kind: ExternalLoginKind,
+  external_id: String,
 ) -> anyhow::Result<Option<UserRecord>> {
-  let user = DB
-    .query("SELECT * FROM User WHERE oidc_subject = $oidc_subject")
-    .bind(("oidc_subject", oidc_subject))
-    .await
-    .context("Failed to query database for user")?
-    .take::<Vec<UserRecord>>(0)
-    .context("Failed to deserialize UserRecord")?
-    .pop();
-  Ok(user)
-}
-
-pub async fn find_user_with_github_id(
-  github_id: String,
-) -> anyhow::Result<Option<UserRecord>> {
-  let user = DB
-    .query("SELECT * FROM User WHERE github_id = $github_id")
-    .bind(("github_id", github_id))
-    .await
-    .context("Failed to query database for user")?
-    .take::<Vec<UserRecord>>(0)
-    .context("Failed to deserialize UserRecord")?
-    .pop();
-  Ok(user)
-}
-
-pub async fn find_user_with_google_id(
-  google_id: String,
-) -> anyhow::Result<Option<UserRecord>> {
-  let user = DB
-    .query("SELECT * FROM User WHERE google_id = $google_id")
-    .bind(("google_id", google_id))
-    .await
-    .context("Failed to query database for user")?
-    .take::<Vec<UserRecord>>(0)
-    .context("Failed to deserialize UserRecord")?
-    .pop();
-  Ok(user)
+  DB.query(
+    "
+    SELECT VALUE user.* FROM ONLY ExternalLogin
+    WHERE kind = $kind AND external_id = $external_id;",
+  )
+  .bind(("kind", kind))
+  .bind(("external_id", external_id))
+  .await
+  .context("Failed to query database for user")?
+  .take(0)
+  .context("Failed to deserialize UserRecord")
 }
 
 pub async fn sign_up_local_user(
@@ -87,70 +94,73 @@ pub async fn sign_up_local_user(
   enabled: bool,
 ) -> anyhow::Result<String> {
   let user = DB
-    .query("CREATE User SET name = $name, enabled = $enabled, password = $password;")
-    .bind(("name", username))
+    .query("CREATE ONLY User SET username = $username, password = $password, enabled = $enabled;")
+    .bind(("username", username))
     .bind(("password", hashed_password))
     .bind(("enabled", enabled))
     .await
-    .context("Failed to create user on database")?
+    .context("Failed to query database to sign up user")?
     .take::<Option<UserRecord>>(0)
     .context("Failed to deserialize UserRecord")?
     .context("Query response missing created UserRecord")?;
   Ok(user.id.0)
 }
 
-pub async fn sign_up_oidc_user(
+pub async fn sign_up_external_user(
   username: String,
-  oidc_subject: String,
+  kind: ExternalLoginKind,
+  external_id: String,
   enabled: bool,
 ) -> anyhow::Result<String> {
   let user = DB
-    .query("CREATE User SET name = $name, enabled = $enabled, oidc_subject = $oidc_subject;")
-    .bind(("name", username))
-    .bind(("oidc_subject", oidc_subject))
+    .query(
+      "
+    BEGIN TRANSACTION;
+    let $user = CREATE ONLY User SET username = $username, enabled = $enabled; $user;
+    CREATE ExternalLogin SET user = $user.id, kind = $kind, external_id = $external_id RETURN NONE;
+    COMMIT TRANSACTION;",
+    )
+    .bind(("username", username))
     .bind(("enabled", enabled))
+    .bind(("kind", kind))
+    .bind(("external_id", external_id))
     .await
-    .context("Failed to create user on database")?
-    .take::<Option<UserRecord>>(0)
+    .context("Failed to query database to sign up external user")?
+    .take::<Option<UserRecord>>(2)
     .context("Failed to deserialize UserRecord")?
     .context("Query response missing created UserRecord")?;
   Ok(user.id.0)
 }
 
-pub async fn sign_up_github_user(
-  username: String,
-  github_id: String,
-  enabled: bool,
-) -> anyhow::Result<String> {
-  let user = DB
-    .query("CREATE User SET name = $name, enabled = $enabled, github_id = $github_id;")
-    .bind(("name", username))
-    .bind(("github_id", github_id))
-    .bind(("enabled", enabled))
+pub async fn link_external_login(
+  user_id: String,
+  kind: ExternalLoginKind,
+  external_id: String,
+) -> anyhow::Result<ExternalLoginRecord> {
+  DB.query("CREATE ONLY ExternalLogin SET user = $user, kind = $kind, external_id = $external_id;")
+    .bind(("user", UserId(user_id)))
+    .bind(("kind", kind))
+    .bind(("external_id", external_id))
     .await
-    .context("Failed to create user on database")?
-    .take::<Option<UserRecord>>(0)
-    .context("Failed to deserialize UserRecord")?
-    .context("Query response missing created UserRecord")?;
-  Ok(user.id.0)
+    .context("Failed to query database for external login")?
+    .take::<Option<ExternalLoginRecord>>(0)
+    .context("Failed to deserialize ExternalLoginRecord")?
+    .context("Missing external login creation response.")
 }
 
-pub async fn sign_up_google_user(
-  username: String,
-  google_id: String,
-  enabled: bool,
-) -> anyhow::Result<String> {
-  let user = DB
-    .query("CREATE User SET name = $name, enabled = $enabled, google_id = $google_id;")
-    .bind(("name", username))
-    .bind(("google_id", google_id))
-    .bind(("enabled", enabled))
+pub async fn unlink_external_login(
+  user_id: String,
+  kind: ExternalLoginKind,
+) -> anyhow::Result<ExternalLoginRecord> {
+  DB.query("DELETE ExternalLogin WHERE user = $user AND kind = $kind RETURN BEFORE;")
+    .bind(("user", UserId(user_id)))
+    .bind(("kind", kind))
     .await
-    .context("Failed to create user on database")?
-    .take::<Option<UserRecord>>(0)
-    .context("Failed to deserialize UserRecord")?
-    .context("Query response missing created UserRecord")?;
-  Ok(user.id.0)
+    .context("Failed to query database for external login")?
+    .take::<Vec<ExternalLoginRecord>>(0)
+    .context("Failed to deserialize ExternalLoginRecord")?
+    .pop()
+    .context("Missing external login deletion response.")
 }
 
 #[derive(Debug, Clone, Default, Serialize)]
@@ -161,12 +171,6 @@ pub struct UpdateUser {
   pub enabled: Option<bool>,
   #[serde(skip_serializing_if = "Option::is_none")]
   pub password: Option<String>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  pub oidc_subject: Option<String>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  pub github_id: Option<String>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  pub google_id: Option<String>,
   #[serde(skip_serializing_if = "Option::is_none")]
   pub totp_secret: Option<String>,
   #[serde(skip_serializing_if = "Option::is_none")]

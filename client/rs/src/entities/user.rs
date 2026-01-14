@@ -3,8 +3,47 @@ use serde_json::json;
 use surrealdb_types::{RecordId, RecordIdKey, SurrealValue};
 use typeshare::typeshare;
 
-use crate::entities::{Iso8601Timestamp, JsonValue};
+use crate::entities::{
+  Iso8601Timestamp, JsonValue, external_login::ExternalLoginRecord,
+};
 
+/// Users queryable from the API
+#[typeshare]
+#[derive(Debug, Clone, Serialize, Deserialize, SurrealValue)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
+pub struct UserEntity {
+  /// The unique user id
+  pub id: UserId,
+  /// The name of the user, ie username
+  pub username: String,
+  /// Whether user is enabled.
+  /// Disabled users cannot log in and have no API access.
+  pub enabled: bool,
+  /// Whether user has password set.
+  pub password: bool,
+  /// The external login methods the user has set.
+  pub external_logins: Vec<ExternalLoginRecord>,
+  // =======
+  // = 2FA =
+  // =======
+  /// Whether user is enrolled in passkey 2fa
+  pub passkey: bool,
+  /// Whether user is enrolled in TOTP 2fa
+  pub totp: bool,
+  /// Allow external logins to skip 2fa.
+  pub external_skip_2fa: bool,
+  // ===============
+  // = TIMESTAMPS =
+  // ===============
+  /// Created at as ISO8601 timestamp.
+  #[cfg_attr(feature = "utoipa", schema(value_type = String))]
+  pub created_at: Iso8601Timestamp,
+  /// Updated at as ISO8601 timestamp.
+  #[cfg_attr(feature = "utoipa", schema(value_type = String))]
+  pub updated_at: Iso8601Timestamp,
+}
+
+/// Users on the database
 #[typeshare]
 #[derive(Debug, Clone, Serialize, Deserialize, SurrealValue)]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
@@ -12,31 +51,20 @@ pub struct UserRecord {
   /// The unique user id
   pub id: UserId,
   /// The name of the user, ie username
-  pub name: String,
+  pub username: String,
   /// Whether user is enabled.
   /// Disabled users cannot log in and have no API access.
   pub enabled: bool,
-  // =========
-  // = LOGIN =
-  // =========
   /// Hashed user password.
   /// Empty if local login is not set.
   pub password: String,
-  /// OIDC subject identifier
-  /// Empty if OIDC login is not linked.
-  pub oidc_subject: String,
-  /// Github identifier.
-  /// Empty if Github login is not linked.
-  pub github_id: String,
-  /// Google identifier.
-  /// Empty if Google login is not linked.
-  pub google_id: String,
   // =======
   // = 2FA =
   // =======
   /// User passkey config for 2fa
   pub passkey: Option<JsonValue>,
   /// User totp secret.
+  /// TODO: encryption
   pub totp_secret: String,
   /// Allow external logins to skip 2fa.
   pub external_skip_2fa: bool,

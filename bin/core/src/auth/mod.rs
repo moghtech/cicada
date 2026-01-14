@@ -1,7 +1,9 @@
 use std::sync::{Arc, LazyLock};
 
 use async_timing_util::{Timelength, get_timelength_in_ms};
-use cicada_client::entities::user::UserRecord;
+use cicada_client::entities::{
+  external_login::ExternalLoginKind, user::UserRecord,
+};
 use mogh_auth_client::{
   api::login::LoginProvider,
   config::{NamedOauthConfig, OidcConfig},
@@ -71,7 +73,7 @@ impl AuthUserImpl for AuthUser {
   }
 
   fn username(&self) -> &str {
-    &self.0.name
+    &self.0.username
   }
 
   fn hashed_password(&self) -> Option<&str> {
@@ -284,9 +286,12 @@ impl AuthImpl for CicadaAuthImpl {
     mogh_error::Result<Option<BoxAuthUser>>,
   > {
     Box::pin(async move {
-      let user = find_user_with_oidc_subject(subject.into())
-        .await?
-        .map(|user| Box::new(AuthUser(user)) as BoxAuthUser);
+      let user = find_user_with_external_login(
+        ExternalLoginKind::Oidc,
+        subject.into(),
+      )
+      .await?
+      .map(|user| Box::new(AuthUser(user)) as BoxAuthUser);
       Ok(user)
     })
   }
@@ -298,8 +303,9 @@ impl AuthImpl for CicadaAuthImpl {
     no_users_exist: bool,
   ) -> mogh_auth_server::DynFuture<mogh_error::Result<String>> {
     Box::pin(async move {
-      sign_up_oidc_user(
+      sign_up_external_user(
         username,
+        ExternalLoginKind::Oidc,
         subject.into(),
         no_users_exist || core_config().enable_new_users,
       )
@@ -314,12 +320,10 @@ impl AuthImpl for CicadaAuthImpl {
     subject: SubjectIdentifier,
   ) -> mogh_auth_server::DynFuture<mogh_error::Result<()>> {
     Box::pin(async move {
-      update_user_fields(
+      link_external_login(
         user_id,
-        UpdateUser {
-          oidc_subject: Some(subject.into()),
-          ..Default::default()
-        },
+        ExternalLoginKind::Oidc,
+        subject.into(),
       )
       .await
       .map(|_| ())
@@ -342,9 +346,12 @@ impl AuthImpl for CicadaAuthImpl {
     mogh_error::Result<Option<BoxAuthUser>>,
   > {
     Box::pin(async move {
-      let user = find_user_with_github_id(github_id)
-        .await?
-        .map(|user| Box::new(AuthUser(user)) as BoxAuthUser);
+      let user = find_user_with_external_login(
+        ExternalLoginKind::Github,
+        github_id,
+      )
+      .await?
+      .map(|user| Box::new(AuthUser(user)) as BoxAuthUser);
       Ok(user)
     })
   }
@@ -355,12 +362,10 @@ impl AuthImpl for CicadaAuthImpl {
     github_id: String,
   ) -> mogh_auth_server::DynFuture<mogh_error::Result<()>> {
     Box::pin(async move {
-      update_user_fields(
+      link_external_login(
         user_id,
-        UpdateUser {
-          github_id: Some(github_id),
-          ..Default::default()
-        },
+        ExternalLoginKind::Github,
+        github_id,
       )
       .await
       .map(|_| ())
@@ -375,8 +380,9 @@ impl AuthImpl for CicadaAuthImpl {
     no_users_exist: bool,
   ) -> mogh_auth_server::DynFuture<mogh_error::Result<String>> {
     Box::pin(async move {
-      sign_up_github_user(
+      sign_up_external_user(
         username,
+        ExternalLoginKind::Github,
         github_id,
         no_users_exist || core_config().enable_new_users,
       )
@@ -400,9 +406,12 @@ impl AuthImpl for CicadaAuthImpl {
     mogh_error::Result<Option<BoxAuthUser>>,
   > {
     Box::pin(async move {
-      let user = find_user_with_google_id(google_id)
-        .await?
-        .map(|user| Box::new(AuthUser(user)) as BoxAuthUser);
+      let user = find_user_with_external_login(
+        ExternalLoginKind::Google,
+        google_id,
+      )
+      .await?
+      .map(|user| Box::new(AuthUser(user)) as BoxAuthUser);
       Ok(user)
     })
   }
@@ -413,12 +422,10 @@ impl AuthImpl for CicadaAuthImpl {
     google_id: String,
   ) -> mogh_auth_server::DynFuture<mogh_error::Result<()>> {
     Box::pin(async move {
-      update_user_fields(
+      link_external_login(
         user_id,
-        UpdateUser {
-          google_id: Some(google_id),
-          ..Default::default()
-        },
+        ExternalLoginKind::Google,
+        google_id,
       )
       .await
       .map(|_| ())
@@ -433,8 +440,9 @@ impl AuthImpl for CicadaAuthImpl {
     no_users_exist: bool,
   ) -> mogh_auth_server::DynFuture<mogh_error::Result<String>> {
     Box::pin(async move {
-      sign_up_google_user(
+      sign_up_external_user(
         username,
+        ExternalLoginKind::Google,
         google_id,
         no_users_exist || core_config().enable_new_users,
       )
@@ -453,28 +461,24 @@ impl AuthImpl for CicadaAuthImpl {
     provider: LoginProvider,
   ) -> mogh_auth_server::DynFuture<mogh_error::Result<()>> {
     Box::pin(async move {
-      let update = match provider {
-        LoginProvider::Local => UpdateUser {
-          password: Some(String::new()),
-          ..Default::default()
-        },
-        LoginProvider::Oidc => UpdateUser {
-          oidc_subject: Some(String::new()),
-          ..Default::default()
-        },
-        LoginProvider::Github => UpdateUser {
-          oidc_subject: Some(String::new()),
-          ..Default::default()
-        },
-        LoginProvider::Google => UpdateUser {
-          oidc_subject: Some(String::new()),
-          ..Default::default()
-        },
+      let kind = match provider {
+        LoginProvider::Local => {
+          // Handle password updates using field updater
+          let update = UpdateUser {
+            password: Some(String::new()),
+            ..Default::default()
+          };
+          return update_user_fields(user_id, update)
+            .await
+            .map(|_| ())
+            .map_err(Into::into);
+        }
+        LoginProvider::Oidc => ExternalLoginKind::Oidc,
+        LoginProvider::Github => ExternalLoginKind::Github,
+        LoginProvider::Google => ExternalLoginKind::Google,
       };
-      update_user_fields(user_id, update)
-        .await
-        .map(|_| ())
-        .map_err(Into::into)
+      unlink_external_login(user_id, kind).await?;
+      Ok(())
     })
   }
 

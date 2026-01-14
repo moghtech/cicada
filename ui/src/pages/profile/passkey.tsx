@@ -5,7 +5,7 @@ import { notifications } from "@mantine/notifications";
 import { MoghAuth, Types } from "cicada_client";
 import { Fingerprint, Trash } from "lucide-react";
 
-export const EnrollPasskey = ({ user }: { user: Types.UserRecord }) => {
+export const EnrollPasskey = ({ user }: { user: Types.UserEntity }) => {
   const userInvalidate = useUserInvalidate();
 
   const { mutate: unenroll, isPending: unenrollPending } = useManageAuth(
@@ -46,7 +46,7 @@ export const EnrollPasskey = ({ user }: { user: Types.UserRecord }) => {
 
   return (
     <>
-      {user?.passkey === null && !user?.totp_secret && (
+      {!user.passkey && !user.totp && (
         <Button
           leftSection={<Fingerprint size="1rem" />}
           onClick={() => beginEnrollment({})}
@@ -57,7 +57,7 @@ export const EnrollPasskey = ({ user }: { user: Types.UserRecord }) => {
           Enroll Passkey 2FA
         </Button>
       )}
-      {user?.passkey !== null && (
+      {user.passkey && (
         <ConfirmButton
           icon={<Trash size="1rem" />}
           loading={unenrollPending}

@@ -3,7 +3,7 @@ use resolver_api::{HasResponse, Resolve};
 use serde::{Deserialize, Serialize};
 use typeshare::typeshare;
 
-use crate::entities::user::UserRecord;
+use crate::entities::user::UserEntity;
 
 pub mod device;
 pub mod filesystem;
@@ -40,7 +40,7 @@ pub struct GetVersionResponse {
 //
 
 /// Get calling user extracted from the request authorization.
-/// Response: [User].
+/// Response: [UserEntity].
 #[typeshare]
 #[derive(
   Debug, Clone, Serialize, Deserialize, Resolve, EmptyTraits,
@@ -52,7 +52,7 @@ pub struct GetVersionResponse {
 pub struct GetUser {}
 
 #[typeshare]
-pub type GetUserResponse = UserRecord;
+pub type GetUserResponse = UserEntity;
 
 //
 

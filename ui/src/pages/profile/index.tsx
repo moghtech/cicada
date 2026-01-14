@@ -46,10 +46,10 @@ const useLinkWithOauth = () => {
     );
 };
 
-const ProfileInner = ({ user }: { user: Types.UserRecord }) => {
+const ProfileInner = ({ user }: { user: Types.UserEntity }) => {
   const { refetch: refetchUser } = useUser();
   const options = useLoginOptions().data;
-  const [username, setUsername] = useState(user.name);
+  const [username, setUsername] = useState(user.username);
   const [password, setPassword] = useState("");
   const { mutate: updateUsername } = useManageAuth("UpdateUsername", {
     onSuccess: () => {
@@ -86,32 +86,31 @@ const ProfileInner = ({ user }: { user: Types.UserRecord }) => {
     provider: MoghAuth.Types.LoginProvider;
     enabled: boolean;
     linked: boolean;
-  }> = useMemo(
-    () =>
-      [
-        {
-          provider: "Local" as MoghAuth.Types.LoginProvider,
-          enabled: !!options?.local,
-          linked: !!user?.password,
-        },
-        {
-          provider: "Oidc" as MoghAuth.Types.LoginProvider,
-          enabled: !!options?.oidc,
-          linked: !!user?.oidc_subject,
-        },
-        {
-          provider: "Github" as MoghAuth.Types.LoginProvider,
-          enabled: !!options?.github,
-          linked: !!user?.github_id,
-        },
-        {
-          provider: "Google" as MoghAuth.Types.LoginProvider,
-          enabled: !!options?.google,
-          linked: !!user?.google_id,
-        },
-      ].filter(({ enabled }) => enabled),
-    [user, options]
-  );
+  }> = useMemo(() => {
+    const externalLoginKinds = user?.external_logins.map((login) => login.kind);
+    return [
+      {
+        provider: "Local" as MoghAuth.Types.LoginProvider,
+        enabled: !!options?.local,
+        linked: !!user?.password,
+      },
+      {
+        provider: "Oidc" as MoghAuth.Types.LoginProvider,
+        enabled: !!options?.oidc,
+        linked: externalLoginKinds.includes(Types.ExternalLoginKind.Oidc),
+      },
+      {
+        provider: "Github" as MoghAuth.Types.LoginProvider,
+        enabled: !!options?.github,
+        linked: externalLoginKinds.includes(Types.ExternalLoginKind.Github),
+      },
+      {
+        provider: "Google" as MoghAuth.Types.LoginProvider,
+        enabled: !!options?.google,
+        linked: externalLoginKinds.includes(Types.ExternalLoginKind.Google),
+      },
+    ].filter(({ enabled }) => enabled);
+  }, [user, options]);
   const linkedCount = loginProviders.filter(({ linked }) => linked).length;
   const linkWithOauth = useLinkWithOauth();
 
@@ -130,7 +129,7 @@ const ProfileInner = ({ user }: { user: Types.UserRecord }) => {
 
           <ActionIcon
             onClick={() => updateUsername({ username })}
-            disabled={!username || username === user.name}
+            disabled={!username || username === user.username}
           >
             <Save size="1rem" />
           </ActionIcon>
@@ -200,9 +199,6 @@ const ProfileInner = ({ user }: { user: Types.UserRecord }) => {
                     <Button
                       variant="default"
                       onClick={() => linkWithOauth(provider as any)}
-                      disabled={
-                        provider === "Oidc" ? !!user.oidc_subject : false
-                      }
                       leftSection={<CirclePlus size="1rem" />}
                     >
                       Link {provider}
@@ -218,7 +214,7 @@ const ProfileInner = ({ user }: { user: Types.UserRecord }) => {
         <Group>
           <EnrollPasskey user={user} />
           <EnrollTotp user={user} />
-          {(user.totp_secret || user.passkey) && (
+          {(user.totp || user.passkey) && (
             <EnableSwitch
               label="Skip 2FA for external logins"
               checked={user.external_skip_2fa}

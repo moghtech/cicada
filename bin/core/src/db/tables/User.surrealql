@@ -4,8 +4,8 @@
 
 DEFINE TABLE IF NOT EXISTS User SCHEMAFULL;
 
--- name
-DEFINE FIELD OVERWRITE name
+-- username
+DEFINE FIELD OVERWRITE username
   ON TABLE User
   TYPE string;
   
@@ -15,58 +15,11 @@ DEFINE FIELD OVERWRITE enabled
   TYPE bool
   DEFAULT false;
 
-// =========
-// = LOGIN =
-// =========
-
 -- password
 DEFINE FIELD OVERWRITE password
   ON TABLE User
   TYPE string
   DEFAULT "";
-
--- oidc_subject
-DEFINE FIELD OVERWRITE oidc_subject
-  ON TABLE User
-  TYPE string
-  DEFAULT "";
-
--- Derived oidc_subject uniqueness key
-DEFINE FIELD OVERWRITE oidc_subject_unique 
-  ON TABLE User
-  TYPE string
-  VALUE IF oidc_subject == "" { record::id(id) } ELSE { oidc_subject }
-  READONLY;
-
--- github_id
-DEFINE FIELD OVERWRITE github_id
-  ON TABLE User
-  TYPE string
-  DEFAULT "";
-
--- Derived github_id uniqueness key
-DEFINE FIELD OVERWRITE github_id_unique 
-  ON TABLE User
-  TYPE string
-  VALUE IF github_id == "" { record::id(id) } ELSE { github_id }
-  READONLY;
-
--- google_id
-DEFINE FIELD OVERWRITE google_id
-  ON TABLE User
-  TYPE string
-  DEFAULT "";
-
--- Derived google_id uniqueness key
-DEFINE FIELD OVERWRITE google_id_unique 
-  ON TABLE User
-  TYPE string
-  VALUE IF google_id == "" { record::id(id) } ELSE { google_id }
-  READONLY;
-
-// =======
-// = 2FA =
-// =======
 
 -- passkey
 DEFINE FIELD OVERWRITE passkey
@@ -103,26 +56,8 @@ DEFINE FIELD OVERWRITE updated_at
 -- Indexes --
 -------------
 
--- name | unique
-DEFINE INDEX OVERWRITE Name
+-- username | unique
+DEFINE INDEX OVERWRITE Username
   ON TABLE User
-  FIELDS name
-  UNIQUE;
-
--- oidc_subject_unique | unique
-DEFINE INDEX OVERWRITE OidcSubject
-  ON TABLE User
-  FIELDS oidc_subject_unique
-  UNIQUE;
-
--- github_id_unique | unique
-DEFINE INDEX OVERWRITE GithubId
-  ON TABLE User
-  FIELDS github_id_unique
-  UNIQUE;
-
--- google_id_unique | unique
-DEFINE INDEX OVERWRITE GoogleId
-  ON TABLE User
-  FIELDS google_id_unique
+  FIELDS username
   UNIQUE;

@@ -27,7 +27,7 @@ export const Page = ({
   const Icon = icon ?? CircleQuestionMark;
   return (
     <Flex direction="column" gap="lg">
-      <Paper w="fit-content" px="md" py="xs" mb="lg" withBorder>
+      <Paper w="fit-content" px="xl" py="xs" mb="lg" withBorder>
         <Group gap="sm">
           {customTitle ? (
             customTitle

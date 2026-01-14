@@ -105,7 +105,7 @@ export type CreateDeviceResponse = DeviceRecord;
 export interface FilesystemRecord {
 	/** The unique filesystem id */
 	id: FilesystemId;
-	/** The name of the filesystem */
+	/** The name of the filesystem. Must be unique. */
 	name: string;
 	/** Created at as ISO8601 timestamp. */
 	created_at: Iso8601Timestamp;
@@ -131,6 +131,10 @@ export type DeleteNodeResponse = NodeRecord[];
 /** Response for [DeleteOnboardingKey]. */
 export type DeleteOnboardingKeyResponse = OnboardingKeyRecord;
 
+export type EncryptionKeyId = string;
+
+export type ExternalLoginId = string;
+
 /** Response for [FindNode]. */
 export type FindNodeResponse = NodeRecord;
 
@@ -145,42 +149,58 @@ export type GetOnboardingKeyResponse = OnboardingKeyRecord;
 
 export type UserId = string;
 
-export type JsonValue = any;
+/** The available kinds external of user logins. */
+export enum ExternalLoginKind {
+	Oidc = "Oidc",
+	Github = "Github",
+	Google = "Google",
+}
 
-export interface UserRecord {
+/** Stores external user logins */
+export interface ExternalLoginRecord {
+	/** The unique user login id */
+	id: ExternalLoginId;
+	/** The user which this method logs in */
+	user: UserId;
+	/**
+	 * The type of login.
+	 * - **Oidc**
+	 * - **Github**
+	 * - **Google**
+	 */
+	kind: ExternalLoginKind;
+	/**
+	 * The login method external id.
+	 * - **Oidc**: The OIDC user subject identifier
+	 * - **Github**: The Github user id
+	 * - **Google**: The Google user id
+	 */
+	external_id: string;
+	/** Created at as ISO8601 timestamp. */
+	created_at: Iso8601Timestamp;
+	/** Updated at as ISO8601 timestamp. */
+	updated_at: Iso8601Timestamp;
+}
+
+/** Users queryable from the API */
+export interface UserEntity {
 	/** The unique user id */
 	id: UserId;
 	/** The name of the user, ie username */
-	name: string;
+	username: string;
 	/**
 	 * Whether user is enabled.
 	 * Disabled users cannot log in and have no API access.
 	 */
 	enabled: boolean;
-	/**
-	 * Hashed user password.
-	 * Empty if local login is not set.
-	 */
-	password: string;
-	/**
-	 * OIDC subject identifier
-	 * Empty if OIDC login is not linked.
-	 */
-	oidc_subject: string;
-	/**
-	 * Github identifier.
-	 * Empty if Github login is not linked.
-	 */
-	github_id: string;
-	/**
-	 * Google identifier.
-	 * Empty if Google login is not linked.
-	 */
-	google_id: string;
-	/** User passkey config for 2fa */
-	passkey?: JsonValue;
-	/** User totp secret. */
-	totp_secret: string;
+	/** Whether user has password set. */
+	password: boolean;
+	/** The external login methods the user has set. */
+	external_logins: ExternalLoginRecord[];
+	/** Whether user is enrolled in passkey 2fa */
+	passkey: boolean;
+	/** Whether user is enrolled in TOTP 2fa */
+	totp: boolean;
 	/** Allow external logins to skip 2fa. */
 	external_skip_2fa: boolean;
 	/** Created at as ISO8601 timestamp. */
@@ -189,7 +209,9 @@ export interface UserRecord {
 	updated_at: Iso8601Timestamp;
 }
 
-export type GetUserResponse = UserRecord;
+export type GetUserResponse = UserEntity;
+
+export type JsonValue = any;
 
 /** Response for [ListDevices]. */
 export type ListDevicesResponse = DeviceRecord[];
@@ -225,6 +247,8 @@ export type ListNodesResponse = NodeListItem[];
 
 /** Response for [ListOnboardingKeys]. */
 export type ListOnboardingKeysResponse = OnboardingKeyRecord[];
+
+export type MasterKeyId = string;
 
 /** Response for [UpdateDevice]. */
 export type UpdateDeviceResponse = DeviceRecord;
@@ -366,6 +390,45 @@ export interface DeleteOnboardingKey {
 	id: OnboardingKeyId;
 }
 
+export type CicadaRecordId = 
+	| { table: "User", key: UserId }
+	| { table: "ExternalLogin", key: ExternalLoginId }
+	| { table: "Device", key: DeviceId }
+	| { table: "OnboardingKey", key: OnboardingKeyId }
+	| { table: "Filesystem", key: FilesystemId }
+	| { table: "Node", key: NodeId }
+	| { table: "EncryptionKey", key: EncryptionKeyId }
+	| { table: "MasterKey", key: MasterKeyId };
+
+/**
+ * Record fields are encrypted using encryption keys stored
+ * in [EncryptionKeyRecord]. These keys are themselves encrypted using
+ * a master key.
+ * 
+ * This pattern allows both record keys and master keys to be rotated.
+ */
+export interface EncryptionKeyRecord {
+	/** The unique encryption key id */
+	id: EncryptionKeyId;
+	/** The record which this key encrypts. */
+	record: CicadaRecordId;
+	/** Master key used to encrypt this key. */
+	master: MasterKeyId;
+	/** Encrypted with master key, base64 encoded. */
+	key: string;
+	/**
+	 * Key encryption nonce, base64 encoded, or empty string.
+	 * 
+	 * If non-empty, is the nonce used to encrypt this key using
+	 * the master key.
+	 */
+	nonce: string;
+	/** Created at as ISO8601 timestamp. */
+	created_at: Iso8601Timestamp;
+	/** Updated at as ISO8601 timestamp. */
+	updated_at: Iso8601Timestamp;
+}
+
 /**
  * Find a node. Response: [NodeRecord].
  * 
@@ -407,7 +470,7 @@ export interface GetOnboardingKey {
 
 /**
  * Get calling user extracted from the request authorization.
- * Response: [User].
+ * Response: [UserEntity].
  */
 export interface GetUser {
 }
@@ -462,6 +525,27 @@ export interface ListNodes {
 export interface ListOnboardingKeys {
 }
 
+/**
+ * Record fields are encrypted using encryption keys stored
+ * in EncryptedKeyRecord. These keys themselves must be encrypted using
+ * a master key.
+ * 
+ * Production master keys can be in memory (initialized via API call on startup),
+ * or point to a remote KMS.
+ * 
+ * This pattern allows both record keys and master keys to be rotated.
+ */
+export interface MasterKeyRecord {
+	/** The unique master key id */
+	id: MasterKeyId;
+	/** The name of the master key. Must be unique. */
+	name: string;
+	/** Created at as ISO8601 timestamp. */
+	created_at: Iso8601Timestamp;
+	/** Updated at as ISO8601 timestamp. */
+	updated_at: Iso8601Timestamp;
+}
+
 /** Represents an empty json object: `{}` */
 export interface NoData {
 }
@@ -511,6 +595,37 @@ export interface UpdateOnboardingKey {
 	public_key?: string;
 	/** Whether the onboarding key is enabled / can onboard. */
 	enabled?: boolean;
+}
+
+/** Users on the database */
+export interface UserRecord {
+	/** The unique user id */
+	id: UserId;
+	/** The name of the user, ie username */
+	username: string;
+	/**
+	 * Whether user is enabled.
+	 * Disabled users cannot log in and have no API access.
+	 */
+	enabled: boolean;
+	/**
+	 * Hashed user password.
+	 * Empty if local login is not set.
+	 */
+	password: string;
+	/** User passkey config for 2fa */
+	passkey?: JsonValue;
+	/**
+	 * User totp secret.
+	 * TODO: encryption
+	 */
+	totp_secret: string;
+	/** Allow external logins to skip 2fa. */
+	external_skip_2fa: boolean;
+	/** Created at as ISO8601 timestamp. */
+	created_at: Iso8601Timestamp;
+	/** Updated at as ISO8601 timestamp. */
+	updated_at: Iso8601Timestamp;
 }
 
 export enum ClientType {

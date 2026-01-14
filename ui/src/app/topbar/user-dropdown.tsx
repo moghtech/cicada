@@ -43,7 +43,7 @@ export const UserDropdown = () => {
           c="inherit"
           leftSection={<User size="1.3rem" />}
         >
-          <Username username={user?.name} />
+          <Username username={user?.username} />
         </Button>
       </Menu.Target>
       <Menu.Dropdown>

@@ -12,7 +12,7 @@ import {
   Tree,
   TreeNodeData,
 } from "@mantine/core";
-import { ChevronRight, Link2 } from "lucide-react";
+import { ChevronRight, Link2, PointerOff } from "lucide-react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
 export const Sidebar = ({ close }: { close: () => void }) => {
@@ -69,8 +69,9 @@ export const Sidebar = ({ close }: { close: () => void }) => {
               nav={nav}
             />
           ) : (
-            <Center>
-              <Text>No Filesystem Selected</Text>
+            <Center opacity={0.6} mt="xs">
+              <PointerOff size="1rem" />
+              <Text ml="xs">No Filesystem Selected</Text>
             </Center>
           )}
         </Flex>

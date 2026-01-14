@@ -31,6 +31,9 @@ pub async fn init() -> anyhow::Result<()> {
   DB.query(include_str!("tables/User.surrealql"))
     .await
     .context("Failed to initialize User table")?;
+  DB.query(include_str!("tables/ExternalLogin.surrealql"))
+    .await
+    .context("Failed to initialize ExternalLogin table")?;
   DB.query(include_str!("tables/Device.surrealql"))
     .await
     .context("Failed to initialize Device table")?;

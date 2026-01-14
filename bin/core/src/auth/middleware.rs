@@ -10,7 +10,7 @@ use axum::{
 use cicada_client::{
   entities::{
     ClientType, device::DeviceRecord,
-    onboarding_key::OnboardingKeyRecord, user::UserRecord,
+    onboarding_key::OnboardingKeyRecord, user::UserEntity,
   },
   pki_auth_prologue,
 };
@@ -29,7 +29,7 @@ use crate::{
 #[derive(Clone)]
 pub enum Client {
   /// The user
-  User(UserRecord),
+  User(UserEntity),
   /// The device
   Device(DeviceRecord),
   /// The onboarding key
@@ -39,7 +39,8 @@ pub enum Client {
 impl Client {
   pub fn sanitize(&mut self) {
     match self {
-      Client::User(user_record) => user_record.sanitize(),
+      // User entity already sanitized
+      Client::User(_) => {}
       Client::Device(device_record) => device_record.sanitize(),
       Client::OnboardingKey(onboarding_key_record) => {
         onboarding_key_record.sanitize()
@@ -69,7 +70,7 @@ impl Client {
     }
   }
 
-  pub fn as_user(&self) -> mogh_error::Result<&UserRecord> {
+  pub fn as_user(&self) -> mogh_error::Result<&UserEntity> {
     if let Client::User(user) = self {
       Ok(user)
     } else {
@@ -117,7 +118,7 @@ pub async fn get_client_from_request(
       // USE JWT
       let jwt = jwt.to_str().context("JWT is not valid UTF-8")?;
       let user_id = JWT_PROVIDER.decode_sub(jwt)?;
-      let user = query::user::get_user(&user_id).await?;
+      let user = query::user::get_user_entity(user_id).await?;
       if user.enabled {
         Ok(Client::User(user))
       } else {
