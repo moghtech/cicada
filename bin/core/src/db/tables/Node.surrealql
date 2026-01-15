@@ -39,19 +39,8 @@ DEFINE FIELD OVERWRITE data
   ON TABLE Node
   TYPE option<string>;
 
--- created_at
-DEFINE FIELD OVERWRITE created_at
-  ON TABLE Node
-  TYPE datetime
-  VALUE $before OR time::now()
-  DEFAULT time::now();
-
--- updated_at
-DEFINE FIELD OVERWRITE updated_at
-  ON TABLE Node
-  TYPE datetime
-  VALUE time::now()
-  DEFAULT time::now();
+-- Standard timestamp fields 'created_at', 'updated_at'
+fn::define_timestamp_fields("Node");
 
 -------------
 -- Indexes --
@@ -75,11 +64,12 @@ DEFINE INDEX OVERWRITE FilesystemParentNameUnique
 
 -- Get the next node inode number
 DEFINE FUNCTION OVERWRITE fn::node_next_inode($filesystem: record<Filesystem>) {
-  LET $res = SELECT math::max(inode) AS max_inode
-    FROM Node 
+  LET $max = (
+    SELECT math::max(inode) AS max
+    FROM ONLY Node 
     WHERE filesystem = $filesystem
-    GROUP ALL;
-  LET $max = $res[0].max_inode;
+    GROUP ALL
+  ).max;
   RETURN IF $max = NONE OR $max = NULL {
     2
   } ELSE {

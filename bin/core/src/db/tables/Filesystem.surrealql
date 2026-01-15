@@ -9,19 +9,8 @@ DEFINE FIELD OVERWRITE name
   ON TABLE Filesystem
   TYPE string;
 
--- created_at
-DEFINE FIELD OVERWRITE created_at
-  ON TABLE Filesystem
-  TYPE datetime
-  VALUE $before OR time::now()
-  DEFAULT time::now();
-
--- updated_at
-DEFINE FIELD OVERWRITE updated_at
-  ON TABLE Filesystem
-  TYPE datetime
-  VALUE time::now()
-  DEFAULT time::now();
+-- Standard timestamp fields 'created_at', 'updated_at'
+fn::define_timestamp_fields("Filesystem");
 
 -------------
 -- Indexes --

@@ -22,7 +22,8 @@ pub async fn list_nodes(
     "
 SELECT * OMIT data FROM Node 
 WHERE ($filesystem IS NONE OR filesystem = $filesystem)
-AND ($parent IS NONE OR parent = $parent)",
+AND ($parent IS NONE OR parent = $parent)
+ORDER BY kind DESC, name COLLATE ASC;",
   )
   .bind(("filesystem", filesystem))
   .bind(("parent", parent))

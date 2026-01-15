@@ -9,8 +9,7 @@ use typeshare::typeshare;
 use crate::entities::{
   device::DeviceId, encryption_key::EncryptionKeyId,
   external_login::ExternalLoginId, filesystem::FilesystemId,
-  master_key::MasterKeyId, node::NodeId,
-  onboarding_key::OnboardingKeyId, user::UserId,
+  node::NodeId, onboarding_key::OnboardingKeyId, user::UserId,
 };
 
 #[typeshare]
@@ -34,7 +33,6 @@ pub enum CicadaRecordId {
   Filesystem(FilesystemId),
   Node(NodeId),
   EncryptionKey(EncryptionKeyId),
-  MasterKey(MasterKeyId),
 }
 
 impl CicadaRecordId {
@@ -55,9 +53,6 @@ impl CicadaRecordId {
       CicadaTable::EncryptionKey => {
         Self::EncryptionKey(EncryptionKeyId(id.into()))
       }
-      CicadaTable::MasterKey => {
-        Self::MasterKey(MasterKeyId(id.into()))
-      }
     }
   }
 
@@ -70,7 +65,6 @@ impl CicadaRecordId {
       Self::Filesystem(id) => &id.0,
       Self::Node(id) => &id.0,
       Self::EncryptionKey(id) => &id.0,
-      Self::MasterKey(id) => &id.0,
     }
   }
 
@@ -97,9 +91,6 @@ impl CicadaRecordId {
       Self::EncryptionKey(id) => {
         surrealdb_types::RecordId::new("EncryptionKey", id.0.as_str())
       }
-      Self::MasterKey(id) => {
-        surrealdb_types::RecordId::new("MasterKey", id.0.as_str())
-      }
     }
   }
 }
@@ -118,7 +109,6 @@ impl SurrealValue for CicadaRecordId {
       Self::Filesystem(id) => id.into_value(),
       Self::Node(id) => id.into_value(),
       Self::EncryptionKey(id) => id.into_value(),
-      Self::MasterKey(id) => id.into_value(),
     }
   }
 

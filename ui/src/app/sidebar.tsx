@@ -1,3 +1,4 @@
+import CreateFilesystem from "@/create/filesystem";
 import { useRead } from "@/lib/hooks";
 import { ICONS } from "@/lib/icons";
 import {
@@ -133,6 +134,7 @@ const Filesystems = ({
           {fs.name}
         </Button>
       ))}
+      {!filesystems.length && <CreateFilesystem />}
     </>
   );
 };

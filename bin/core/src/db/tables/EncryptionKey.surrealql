@@ -1,0 +1,48 @@
+-- ===============
+--  EncryptionKey
+-- ===============
+
+DEFINE TABLE IF NOT EXISTS EncryptionKey SCHEMAFULL;
+
+-- name
+DEFINE FIELD OVERWRITE name
+  ON TABLE EncryptionKey
+  TYPE string;
+
+-- kind
+DEFINE FIELD OVERWRITE kind
+  ON TABLE EncryptionKey
+  TYPE string;
+
+-- Standard timestamp fields 'created_at', 'updated_at'
+fn::define_timestamp_fields("EncryptionKey");
+
+-------------
+-- Indexes --
+-------------
+
+-- name | unique
+DEFINE INDEX OVERWRITE Name
+  ON TABLE EncryptionKey
+  FIELDS name
+  UNIQUE;
+
+---------------
+-- Functions --
+---------------
+
+-- Easily initialize encrypted fields on other tables.
+DEFINE FUNCTION OVERWRITE fn::define_encrypted_data_field(
+  $table: string,
+  $field: string,
+) {
+  DEFINE FIELD OVERWRITE $field
+  ON TABLE $table
+  TYPE option<{
+    encryption_key: record<EncryptionKey>,
+    key: string,
+    key_nonce: string,
+    data: string,
+    data_nonce: string,
+  }>;
+};

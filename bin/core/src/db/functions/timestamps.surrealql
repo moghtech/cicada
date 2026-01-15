@@ -1,0 +1,15 @@
+DEFINE FUNCTION OVERWRITE fn::define_timestamp_fields($table: string) {
+  -- created_at
+  DEFINE FIELD OVERWRITE created_at
+    ON TABLE $table
+    TYPE datetime
+    VALUE $before OR time::now()
+    DEFAULT time::now();
+
+  -- updated_at
+  DEFINE FIELD OVERWRITE updated_at
+    ON TABLE $table
+    TYPE datetime
+    VALUE time::now()
+    DEFAULT time::now();
+}

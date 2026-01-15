@@ -3,18 +3,21 @@ use std::str::FromStr as _;
 use anyhow::Context as _;
 use serde::{Deserialize, Serialize};
 use strum::{AsRefStr, Display, EnumString};
+use surrealdb_types::SurrealValue;
 use typeshare::typeshare;
+
+use crate::entities::encryption_key::EncryptionKeyId;
 
 /// Configuration for Cicada
 pub mod config;
 /// A device mounting Cicada files
 pub mod device;
-/// Per-record encryption keys.
+/// Master encryption keys.
 pub mod encryption_key;
+/// Login methods for users.
+pub mod external_login;
 /// Represents virtual filesystems which can be mounted to clients.
 pub mod filesystem;
-/// Master encryption keys
-pub mod master_key;
 /// Nodes represent entries in a filesystem.
 /// They represent either Files or Folders.
 pub mod node;
@@ -24,8 +27,6 @@ pub mod onboarding_key;
 pub mod record_id;
 /// Cicada users.
 pub mod user;
-/// Login methods for users.
-pub mod external_login;
 
 #[typeshare(serialized_as = "number")]
 pub type U64 = u64;
@@ -39,6 +40,30 @@ pub type JsonValue = serde_json::Value;
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 pub struct NoData {}
+
+/// Stored as nested record fields for data the requires application level encryption.
+/// Implements envelope encryption, ensuring encryption master key rotation
+/// doesn't require re-encrypting the data itself.
+#[typeshare]
+#[derive(Debug, Clone, Serialize, Deserialize, SurrealValue)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
+pub struct EncryptedData {
+  /// The master encryption key
+  pub encryption_key: EncryptionKeyId,
+  /// The field key, encrypted with encryption key,
+  /// and base64 encoded.
+  pub key: String,
+  /// Unencrypted, base64 encoded random nonce used to
+  /// encrypt the 'key' with the encryption key.
+  /// May be empty string when using external KMS.
+  pub key_nonce: String,
+  /// Encrypted using the (decrypted) field key + data_nonce,
+  /// and base64 encoded.
+  pub data: String,
+  /// Unencrypted, base64 encoded random nonce used to
+  /// encrypt the 'data' with this [EncryptedData::key]
+  pub data_nonce: String,
+}
 
 #[typeshare]
 #[derive(
