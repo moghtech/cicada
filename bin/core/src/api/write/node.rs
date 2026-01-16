@@ -1,9 +1,12 @@
-use cicada_client::{
-  api::write::node::*, entities::node::NodeRecord,
-};
+use anyhow::Context;
+use cicada_client::api::write::node::*;
 use resolver_api::Resolve;
 
-use crate::{api::write::WriteArgs, db::query};
+use crate::{
+  api::write::WriteArgs,
+  db::query::{self, node::CreateNodeQuery},
+  encryption::{decrypt_node, decrypt_nodes, encrypt_data},
+};
 
 #[allow(unused)]
 #[utoipa::path(
@@ -12,7 +15,7 @@ use crate::{api::write::WriteArgs, db::query};
   description = "Create a new node",
   request_body(content = CreateNode),
   responses(
-    (status = 200, description = "The created node", body = NodeRecord),
+    (status = 200, description = "The created node", body = CreateNodeResponse),
     (status = 500, description = "Request failed", body = mogh_error::Serror)
   ),
 )]
@@ -23,7 +26,25 @@ impl Resolve<WriteArgs> for CreateNode {
     self,
     _: &WriteArgs,
   ) -> Result<Self::Response, Self::Error> {
-    query::node::create_node(self).await.map_err(Into::into)
+    let encryption_key =
+      query::encryption_key::list_all_encryption_keys()
+        .await?
+        .pop()
+        .context("No encryption key available")?;
+    let data = if let Some(data) = self.data {
+      encrypt_data(encryption_key, data.as_bytes()).await?.into()
+    } else {
+      None
+    };
+    let node = query::node::create_node(CreateNodeQuery {
+      filesystem: self.filesystem,
+      parent: self.parent,
+      name: self.name,
+      kind: self.kind,
+      data,
+    })
+    .await?;
+    decrypt_node(node).await.map_err(Into::into)
   }
 }
 
@@ -36,7 +57,7 @@ impl Resolve<WriteArgs> for CreateNode {
   description = "Update a node",
   request_body(content = UpdateNode),
   responses(
-    (status = 200, description = "The updated node", body = NodeRecord),
+    (status = 200, description = "The updated node", body = UpdateNodeResponse),
     (status = 500, description = "Request failed", body = mogh_error::Serror)
   ),
 )]
@@ -47,7 +68,41 @@ impl Resolve<WriteArgs> for UpdateNode {
     self,
     _: &WriteArgs,
   ) -> Result<Self::Response, Self::Error> {
-    query::node::update_node(self).await.map_err(Into::into)
+    let node = query::node::update_node(self).await?;
+    decrypt_node(node).await.map_err(Into::into)
+  }
+}
+
+//
+
+#[allow(unused)]
+#[utoipa::path(
+  post,
+  path = "/write/UpdateNodeData",
+  description = "Update a node's data",
+  request_body(content = UpdateNode),
+  responses(
+    (status = 200, description = "The updated node", body = UpdateNodeDataResponse),
+    (status = 500, description = "Request failed", body = mogh_error::Serror)
+  ),
+)]
+pub fn update_node_data() {}
+
+impl Resolve<WriteArgs> for UpdateNodeData {
+  async fn resolve(
+    self,
+    _: &WriteArgs,
+  ) -> Result<Self::Response, Self::Error> {
+    let encryption_key =
+      query::encryption_key::list_all_encryption_keys()
+        .await?
+        .pop()
+        .context("No encryption key available")?;
+    let data =
+      encrypt_data(encryption_key, self.data.as_bytes()).await?;
+    let node =
+      query::node::update_node_data(self.id, data.into()).await?;
+    decrypt_node(node).await.map_err(Into::into)
   }
 }
 
@@ -72,7 +127,9 @@ impl Resolve<WriteArgs> for DeleteNode {
     self,
     _: &WriteArgs,
   ) -> Result<Self::Response, Self::Error> {
-    query::node::delete_node(self.id.0, self.move_children).await
+    let deleted =
+      query::node::delete_node(self.id.0, self.move_children).await?;
+    Ok(decrypt_nodes(deleted).await)
   }
 }
 
@@ -96,8 +153,7 @@ impl Resolve<WriteArgs> for BatchDeleteNodes {
     self,
     _: &WriteArgs,
   ) -> Result<Self::Response, Self::Error> {
-    query::node::batch_delete_nodes(self.ids)
-      .await
-      .map_err(Into::into)
+    let deleted = query::node::batch_delete_nodes(self.ids).await?;
+    Ok(decrypt_nodes(deleted).await)
   }
 }

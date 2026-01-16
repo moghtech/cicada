@@ -5,7 +5,8 @@ use axum::{
   Extension, Router, extract::Path, http::StatusCode, routing::post,
 };
 use cicada_client::api::read::{
-  device::*, filesystem::*, node::*, onboarding_key::*, *,
+  device::*, encryption_key::*, filesystem::*, node::*,
+  onboarding_key::*, *,
 };
 use mogh_error::{AddStatusCodeError, Json, Response};
 use resolver_api::Resolve;
@@ -21,6 +22,7 @@ use crate::{
 };
 
 pub mod device;
+pub mod encryption_key;
 pub mod filesystem;
 pub mod node;
 pub mod onboarding_key;
@@ -55,6 +57,9 @@ enum ReadRequest {
   ListNodes(ListNodes),
   GetNode(GetNode),
   FindNode(FindNode),
+
+  // ==== ENCRYPTION KEY ====
+  ListEncryptionKeys(ListEncryptionKeys),
 }
 
 pub fn router() -> Router {

@@ -28,15 +28,21 @@ pub async fn init() -> anyhow::Result<()> {
     .use_db(&config.database.db_name)
     .await?;
 
-
-  // Must be run before defining tables.
-  DB.query(include_str!("functions/timestamps.surrealql"))
+  // All tables depend on this one
+  DB.query(include_str!("tables/functions/timestamps.surrealql"))
     .await
     .context("Failed to initialize define timestamps function.")?;
 
+  // Tables utilizing encrypted fields depend on this one
   DB.query(include_str!("tables/EncryptionKey.surrealql"))
     .await
     .context("Failed to initialize EncryptionKey table")?;
+  DB.query(include_str!("tables/functions/encrypted_data.surrealql"))
+    .await
+    .context(
+      "Failed to initialize define encrypted_data_field function.",
+    )?;
+
   DB.query(include_str!("tables/User.surrealql"))
     .await
     .context("Failed to initialize User table")?;

@@ -48,14 +48,14 @@ pub struct NoData {}
 #[derive(Debug, Clone, Serialize, Deserialize, SurrealValue)]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 pub struct EncryptedData {
-  /// The master encryption key
+  // /// The master encryption key
   pub encryption_key: EncryptionKeyId,
   /// The field key, encrypted with encryption key,
   /// and base64 encoded.
   pub key: String,
-  /// Unencrypted, base64 encoded random nonce used to
-  /// encrypt the 'key' with the encryption key.
-  /// May be empty string when using external KMS.
+  // /// Unencrypted, base64 encoded random nonce used to
+  // /// encrypt the 'key' with the encryption key.
+  // /// May be empty string when using external KMS.
   pub key_nonce: String,
   /// Encrypted using the (decrypted) field key + data_nonce,
   /// and base64 encoded.

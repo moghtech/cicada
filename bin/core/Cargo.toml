@@ -19,6 +19,7 @@ mogh_auth_client = { workspace = true, features = ["utoipa"] }
 mogh_auth_server.workspace = true
 mogh_secret_file.workspace = true
 derive_variants.workspace = true
+mogh_encryption.workspace = true
 mogh_rate_limit.workspace = true
 resolver_api.workspace = true
 mogh_config.workspace = true
@@ -44,3 +45,4 @@ strum.workspace = true
 tokio.workspace = true
 axum.workspace = true
 envy.workspace = true
+rand.workspace = true

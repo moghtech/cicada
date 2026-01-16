@@ -1,16 +1,15 @@
 use anyhow::Context as _;
 use axum::http::StatusCode;
 use cicada_client::{
-  api::{
-    read::node::FindNode,
-    write::node::{CreateNode, UpdateNode},
-  },
+  api::{read::node::FindNode, write::node::UpdateNode},
   entities::{
+    EncryptedData,
     filesystem::FilesystemId,
     node::{NodeId, NodeKind, NodeListItem, NodeRecord},
   },
 };
 use mogh_error::AddStatusCode as _;
+use surrealdb_types::SurrealValue;
 
 use crate::db::DB;
 
@@ -79,8 +78,17 @@ AND ($name IS NONE OR name = $name)",
   .status_code(StatusCode::NOT_FOUND)
 }
 
+#[derive(SurrealValue)]
+pub struct CreateNodeQuery {
+  pub filesystem: Option<FilesystemId>,
+  pub parent: Option<u64>,
+  pub name: String,
+  pub kind: Option<NodeKind>,
+  pub data: Option<EncryptedData>,
+}
+
 pub async fn create_node(
-  body: CreateNode,
+  body: CreateNodeQuery,
 ) -> anyhow::Result<NodeRecord> {
   DB.create("Node")
     .content(body)
@@ -94,6 +102,21 @@ pub async fn update_node(
 ) -> anyhow::Result<NodeRecord> {
   DB.update(body.id.as_record_id())
     .merge(serde_json::to_value(body)?)
+    .await
+    .context("Failed to update Node on database")?
+    .context("Failed to update Node on database: No update result")
+}
+
+pub async fn update_node_data(
+  id: NodeId,
+  data: Option<EncryptedData>,
+) -> anyhow::Result<NodeRecord> {
+  #[derive(SurrealValue)]
+  struct UpdateNodeDataQuery {
+    data: Option<EncryptedData>,
+  }
+  DB.update(id.as_record_id())
+    .merge(UpdateNodeDataQuery { data })
     .await
     .context("Failed to update Node on database")?
     .context("Failed to update Node on database: No update result")

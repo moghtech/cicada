@@ -5,6 +5,7 @@ import {
   FolderOpen,
   Server,
   KeyRound,
+  CircleQuestionMark,
 } from "lucide-react";
 
 export const ICONS = {
@@ -14,4 +15,5 @@ export const ICONS = {
   Filesystem: HardDrive,
   Folder: FolderOpen,
   File,
+  Unknown: CircleQuestionMark,
 };

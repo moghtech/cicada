@@ -9,14 +9,14 @@ import ConfirmDelete from "@/components/confirm-delete";
 import { Types } from "cicada_client";
 import { notifications } from "@mantine/notifications";
 import { Page } from "@/layout/page";
-import { ICONS } from "@/lib/icons";
+import { NodePageDescription, NodePageTitle } from "./title";
 
 const FilePage = ({
   filesystem,
   node,
 }: {
   filesystem: Types.FilesystemRecord | undefined;
-  node: Types.NodeRecord | undefined;
+  node: Types.NodeEntity | undefined;
 }) => {
   const inv = useInvalidate();
   const nav = useNavigate();
@@ -24,9 +24,10 @@ const FilePage = ({
     key: `node-${node?.id}-edit-v1`,
     defaultValue: { data: undefined },
   });
-  const { mutateAsync: updateNode } = useWrite("UpdateNode", {
+  const { mutateAsync: updateNodeData } = useWrite("UpdateNodeData", {
     onSuccess: () => {
       inv(["FindNode"]);
+      notifications.show({ message: "Saved changes to file." });
       setEdit({ data: undefined });
     },
   });
@@ -50,24 +51,8 @@ const FilePage = ({
 
   return (
     <Page
-      customTitle={
-        <>
-          <ICONS.File size={22} opacity={0.6} />
-          <Text fz="h2" opacity={0.6}>
-            File:
-          </Text>
-          <Text fz="h2">{node?.name ?? "Root"}</Text>
-        </>
-      }
-      customDescription={
-        <>
-          <ICONS.Filesystem size="1.1rem" opacity={0.6} />
-          <Text opacity={0.6} size="lg">
-            Filesystem:
-          </Text>
-          <Text size="lg">{filesystem?.name}</Text>
-        </>
-      }
+      customTitle={<NodePageTitle node={node} />}
+      customDescription={<NodePageDescription filesystem={filesystem} />}
       actions={
         <>
           <Button
@@ -82,11 +67,7 @@ const FilePage = ({
             disabled={!data}
             original={node.data ?? ""}
             modified={data ?? ""}
-            onConfirm={() =>
-              updateNode({ id: node.id, data }).then(() =>
-                notifications.show({ message: "Saved changes to file." })
-              )
-            }
+            onConfirm={() => updateNodeData({ id: node.id, data: data ?? "" })}
           />
           <ConfirmDelete
             entityType="File"

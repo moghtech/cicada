@@ -10,13 +10,14 @@ import { RowSelectionState } from "@tanstack/react-table";
 import { Types } from "cicada_client";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { NodePageDescription, NodePageTitle } from "./title";
 
 const FolderPage = ({
   filesystem,
   node,
 }: {
   filesystem: Types.FilesystemRecord | undefined;
-  node: Types.NodeRecord | undefined;
+  node: Types.NodeEntity | undefined;
 }) => {
   const nav = useNavigate();
   const inv = useInvalidate();
@@ -62,26 +63,8 @@ const FolderPage = ({
 
   return (
     <Page
-      title={node?.name ?? "Root"}
-      icon={ICONS.Folder}
-      customTitle={
-        <>
-          <ICONS.Folder size={22} opacity={0.6} />
-          <Text fz="h2" opacity={0.6}>
-            Folder:
-          </Text>
-          <Text fz="h2">{node?.name ?? "Root"}</Text>
-        </>
-      }
-      customDescription={
-        <>
-          <ICONS.Filesystem size="1.1rem" opacity={0.6} />
-          <Text opacity={0.6} size="lg">
-            Filesystem:
-          </Text>
-          <Text size="lg">{filesystem?.name}</Text>
-        </>
-      }
+      customTitle={<NodePageTitle node={node} />}
+      customDescription={<NodePageDescription filesystem={filesystem} />}
       actions={
         <>
           {Object.values(Types.NodeKind).map((kind) => (

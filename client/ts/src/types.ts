@@ -42,7 +42,8 @@ export enum NodeKind {
 	File = "File",
 }
 
-export interface NodeRecord {
+/** Nodes over the API, with unencrypted data */
+export interface NodeEntity {
 	/** The unique node id */
 	id: NodeId;
 	/** Filesystem ID */
@@ -71,7 +72,7 @@ export interface NodeRecord {
 }
 
 /** Response for [BatchDeleteNodes]. */
-export type BatchDeleteNodesResponse = NodeRecord[];
+export type BatchDeleteNodesResponse = NodeEntity[];
 
 export type OnboardingKeyId = string;
 
@@ -102,11 +103,59 @@ export type BatchDeleteOnboardingKeysResponse = OnboardingKeyRecord[];
 /** Response for [CreateDevice]. */
 export type CreateDeviceResponse = DeviceRecord;
 
+export type EncryptionKeyId = string;
+
+/** The available kinds external of encryption keys. */
+export enum EncryptionKeyKind {
+	/**
+	 * Store the encryption key in memory.
+	 * These must be initialized via API call after each Cicada Core startup.
+	 */
+	Memory = "Memory",
+	/**
+	 * UNSAFE DEVELOPMENT OPTION, DO NOT USE IN PRODUCTION.
+	 * Load the key from a base64 encoded file on local disk.
+	 */
+	Disk = "Disk",
+}
+
+/**
+ * Record fields are encrypted by storing them as [EncryptedData] type.
+ * These keys are themselves encrypted using an [EncryptionKeyRecord],
+ * which can point to an in-memory key or a remote KMS.
+ */
+export interface EncryptionKeyRecord {
+	/** The unique encryption key id */
+	id: EncryptionKeyId;
+	/** The name of the encryption key. Must be unique. */
+	name: string;
+	/**
+	 * The kind of encryption key.
+	 * - Memory
+	 * - Disk
+	 */
+	kind: EncryptionKeyKind;
+	/**
+	 * For on disk keys (unsafe),
+	 * store the base64url encoded key
+	 */
+	key?: string;
+	/** Created at as ISO8601 timestamp. */
+	created_at: Iso8601Timestamp;
+	/** Updated at as ISO8601 timestamp. */
+	updated_at: Iso8601Timestamp;
+}
+
+/** Response for [CreateEncryptionKey]. */
+export type CreateEncryptionKeyResponse = EncryptionKeyRecord;
+
 export interface FilesystemRecord {
 	/** The unique filesystem id */
 	id: FilesystemId;
 	/** The name of the filesystem. Must be unique. */
 	name: string;
+	/** The filesystem default encryption key. */
+	encryption_key?: EncryptionKeyId;
 	/** Created at as ISO8601 timestamp. */
 	created_at: Iso8601Timestamp;
 	/** Updated at as ISO8601 timestamp. */
@@ -117,7 +166,7 @@ export interface FilesystemRecord {
 export type CreateFilesystemResponse = FilesystemRecord;
 
 /** Response for [CreateNode]. */
-export type CreateNodeResponse = NodeRecord;
+export type CreateNodeResponse = NodeEntity;
 
 /** Response for [DeleteDevice]. */
 export type DeleteDeviceResponse = DeviceRecord;
@@ -126,23 +175,21 @@ export type DeleteDeviceResponse = DeviceRecord;
 export type DeleteFilesystemResponse = FilesystemRecord;
 
 /** Response for [DeleteNode]. */
-export type DeleteNodeResponse = NodeRecord[];
+export type DeleteNodeResponse = NodeEntity[];
 
 /** Response for [DeleteOnboardingKey]. */
 export type DeleteOnboardingKeyResponse = OnboardingKeyRecord;
 
-export type EncryptionKeyId = string;
-
 export type ExternalLoginId = string;
 
 /** Response for [FindNode]. */
-export type FindNodeResponse = NodeRecord;
+export type FindNodeResponse = NodeEntity;
 
 /** Response for [GetDevice]. */
 export type GetDeviceResponse = DeviceRecord;
 
 /** Response for [GetNode]. */
-export type GetNodeResponse = NodeRecord;
+export type GetNodeResponse = NodeEntity;
 
 /** Response for [GetOnboardingKey]. */
 export type GetOnboardingKeyResponse = OnboardingKeyRecord;
@@ -216,6 +263,9 @@ export type JsonValue = any;
 /** Response for [ListDevices]. */
 export type ListDevicesResponse = DeviceRecord[];
 
+/** Response for [ListEncryptionKeys]. */
+export type ListEncryptionKeysResponse = EncryptionKeyRecord[];
+
 /** Response for [ListFilesystems]. */
 export type ListFilesystemsResponse = FilesystemRecord[];
 
@@ -248,16 +298,20 @@ export type ListNodesResponse = NodeListItem[];
 /** Response for [ListOnboardingKeys]. */
 export type ListOnboardingKeysResponse = OnboardingKeyRecord[];
 
-export type MasterKeyId = string;
-
 /** Response for [UpdateDevice]. */
 export type UpdateDeviceResponse = DeviceRecord;
+
+/** Response for [UpdateEncryptionKey]. */
+export type UpdateEncryptionKeyResponse = EncryptionKeyRecord;
 
 /** Response for [UpdateFilesystem]. */
 export type UpdateFilesystemResponse = FilesystemRecord;
 
+/** Response for [UpdateNodeData]. */
+export type UpdateNodeDataResponse = NodeEntity;
+
 /** Response for [UpdateNode]. */
-export type UpdateNodeResponse = NodeRecord;
+export type UpdateNodeResponse = NodeEntity;
 
 /** Response for [UpdateOnboardingKey]. */
 export type UpdateOnboardingKeyResponse = OnboardingKeyRecord;
@@ -294,6 +348,19 @@ export interface CreateDevice {
 	enabled: boolean;
 }
 
+/** Create an encryption key. Response: [CreateEncryptionKeyResponse]. */
+export interface CreateEncryptionKey {
+	/** The name of the encryption key */
+	name: string;
+	/** The kind of encryption key */
+	kind: EncryptionKeyKind;
+	/**
+	 * Disk mode only. If not provided in Disk mode,
+	 * one will be generated.
+	 */
+	key?: string;
+}
+
 /** Create a filesystem. Response: [CreateFilesystemResponse]. */
 export interface CreateFilesystem {
 	/** The name of the filesystem */
@@ -324,6 +391,12 @@ export interface CreateNode {
 	 * For files, this contains the file contents.
 	 */
 	data?: string;
+	/**
+	 * Choose a specific encryption key.
+	 * Otherwise uses the current filesystem default,
+	 * followed by the current global default.
+	 */
+	encryption_key?: EncryptionKeyId;
 }
 
 /** Create an onboarding key. Response: [CreateOnboardingKeyResponse]. */
@@ -390,47 +463,33 @@ export interface DeleteOnboardingKey {
 	id: OnboardingKeyId;
 }
 
-export type CicadaRecordId = 
-	| { table: "User", key: UserId }
-	| { table: "ExternalLogin", key: ExternalLoginId }
-	| { table: "Device", key: DeviceId }
-	| { table: "OnboardingKey", key: OnboardingKeyId }
-	| { table: "Filesystem", key: FilesystemId }
-	| { table: "Node", key: NodeId }
-	| { table: "EncryptionKey", key: EncryptionKeyId }
-	| { table: "MasterKey", key: MasterKeyId };
-
 /**
- * Record fields are encrypted using encryption keys stored
- * in [EncryptionKeyRecord]. These keys are themselves encrypted using
- * a master key.
- * 
- * This pattern allows both record keys and master keys to be rotated.
+ * Stored as nested record fields for data the requires application level encryption.
+ * Implements envelope encryption, ensuring encryption master key rotation
+ * doesn't require re-encrypting the data itself.
  */
-export interface EncryptionKeyRecord {
-	/** The unique encryption key id */
-	id: EncryptionKeyId;
-	/** The record which this key encrypts. */
-	record: CicadaRecordId;
-	/** Master key used to encrypt this key. */
-	master: MasterKeyId;
-	/** Encrypted with master key, base64 encoded. */
-	key: string;
+export interface EncryptedData {
+	encryption_key: EncryptionKeyId;
 	/**
-	 * Key encryption nonce, base64 encoded, or empty string.
-	 * 
-	 * If non-empty, is the nonce used to encrypt this key using
-	 * the master key.
+	 * The field key, encrypted with encryption key,
+	 * and base64 encoded.
 	 */
-	nonce: string;
-	/** Created at as ISO8601 timestamp. */
-	created_at: Iso8601Timestamp;
-	/** Updated at as ISO8601 timestamp. */
-	updated_at: Iso8601Timestamp;
+	key: string;
+	key_nonce: string;
+	/**
+	 * Encrypted using the (decrypted) field key + data_nonce,
+	 * and base64 encoded.
+	 */
+	data: string;
+	/**
+	 * Unencrypted, base64 encoded random nonce used to
+	 * encrypt the 'data' with this [EncryptedData::key]
+	 */
+	data_nonce: string;
 }
 
 /**
- * Find a node. Response: [NodeRecord].
+ * Find a node. Response: [NodeEntity].
  * 
  * Query using either:
  * - inode number (ino)
@@ -456,7 +515,7 @@ export interface GetDevice {
 	id: DeviceId;
 }
 
-/** Get a node. Response: [NodeRecord]. */
+/** Get a node. Response: [NodeEntity]. */
 export interface GetNode {
 	/** The node id */
 	id: NodeId;
@@ -509,6 +568,10 @@ export interface GetVersionResponse {
 export interface ListDevices {
 }
 
+/** List encryption keys. Response: [ListEncryptionKeysResponse]. */
+export interface ListEncryptionKeys {
+}
+
 /** List filesystems. Response: [ListFilesystemsResponse]. */
 export interface ListFilesystems {
 }
@@ -525,29 +588,37 @@ export interface ListNodes {
 export interface ListOnboardingKeys {
 }
 
-/**
- * Record fields are encrypted using encryption keys stored
- * in EncryptedKeyRecord. These keys themselves must be encrypted using
- * a master key.
- * 
- * Production master keys can be in memory (initialized via API call on startup),
- * or point to a remote KMS.
- * 
- * This pattern allows both record keys and master keys to be rotated.
- */
-export interface MasterKeyRecord {
-	/** The unique master key id */
-	id: MasterKeyId;
-	/** The name of the master key. Must be unique. */
+/** Represents an empty json object: `{}` */
+export interface NoData {
+}
+
+/** Nodes stored on the database, with encrypted data */
+export interface NodeRecord {
+	/** The unique node id */
+	id: NodeId;
+	/** Filesystem ID */
+	filesystem: FilesystemId;
+	/** The inode number */
+	inode: U64;
+	/** The parent inode number */
+	parent: U64;
+	/** The name of the node */
 	name: string;
+	/**
+	 * The kind of node.
+	 * - Folder,
+	 * - File,
+	 */
+	kind?: NodeKind;
+	/**
+	 * Data associated with the node.
+	 * For files, this contains the file contents.
+	 */
+	data?: EncryptedData;
 	/** Created at as ISO8601 timestamp. */
 	created_at: Iso8601Timestamp;
 	/** Updated at as ISO8601 timestamp. */
 	updated_at: Iso8601Timestamp;
-}
-
-/** Represents an empty json object: `{}` */
-export interface NoData {
 }
 
 /** Update a device. Response: [UpdateDeviceResponse]. */
@@ -560,6 +631,14 @@ export interface UpdateDevice {
 	public_key?: string;
 	/** Whether the device is enabled / has access. */
 	enabled?: boolean;
+}
+
+/** Update an encryption key. Response: [UpdateEncryptionKeyResponse]. */
+export interface UpdateEncryptionKey {
+	/** The encryption key ID */
+	id: EncryptionKeyId;
+	/** The name of the encryption key */
+	name?: string;
 }
 
 /** Update a filesystem. Response: [UpdateFilesystemResponse]. */
@@ -578,11 +657,14 @@ export interface UpdateNode {
 	parent?: U64;
 	/** The name of the node */
 	name?: string;
-	/**
-	 * Data associated with the node.
-	 * For files, this contains the file contents.
-	 */
-	data?: string;
+}
+
+/** Update a filesystem node's encrypted data. Response: [UpdateNodeDataResponse]. */
+export interface UpdateNodeData {
+	/** The node id */
+	id: NodeId;
+	/** The node data */
+	data: string;
 }
 
 /** Update an onboarding key. Response: [UpdateOnboardingKeyResponse]. */
@@ -628,6 +710,15 @@ export interface UserRecord {
 	updated_at: Iso8601Timestamp;
 }
 
+export type CicadaRecordId = 
+	| { table: "User", key: UserId }
+	| { table: "ExternalLogin", key: ExternalLoginId }
+	| { table: "Device", key: DeviceId }
+	| { table: "OnboardingKey", key: OnboardingKeyId }
+	| { table: "Filesystem", key: FilesystemId }
+	| { table: "Node", key: NodeId }
+	| { table: "EncryptionKey", key: EncryptionKeyId };
+
 export enum ClientType {
 	User = "User",
 	Device = "Device",
@@ -645,7 +736,8 @@ export type ReadRequest =
 	| { type: "ListFilesystems", params: ListFilesystems }
 	| { type: "ListNodes", params: ListNodes }
 	| { type: "GetNode", params: GetNode }
-	| { type: "FindNode", params: FindNode };
+	| { type: "FindNode", params: FindNode }
+	| { type: "ListEncryptionKeys", params: ListEncryptionKeys };
 
 export enum Timelength {
 	/** `1-sec` */
@@ -716,6 +808,9 @@ export type WriteRequest =
 	| { type: "DeleteFilesystem", params: DeleteFilesystem }
 	| { type: "CreateNode", params: CreateNode }
 	| { type: "UpdateNode", params: UpdateNode }
+	| { type: "UpdateNodeData", params: UpdateNodeData }
 	| { type: "DeleteNode", params: DeleteNode }
-	| { type: "BatchDeleteNodes", params: BatchDeleteNodes };
+	| { type: "BatchDeleteNodes", params: BatchDeleteNodes }
+	| { type: "CreateEncryptionKey", params: CreateEncryptionKey }
+	| { type: "UpdateEncryptionKey", params: UpdateEncryptionKey };
 

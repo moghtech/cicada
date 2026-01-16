@@ -4,13 +4,15 @@ use utoipa_scalar::{Scalar, Servable as _};
 
 mod read {
   pub use crate::api::read::{
-    device::*, filesystem::*, node::*, onboarding_key::*, *,
+    device::*, encryption_key::*, filesystem::*, node::*,
+    onboarding_key::*, *,
   };
 }
 
 mod write {
   pub use crate::api::write::{
-    device::*, filesystem::*, node::*, onboarding_key::*,
+    device::*, encryption_key::*, filesystem::*, node::*,
+    onboarding_key::*,
   };
 }
 
@@ -36,6 +38,8 @@ mod write {
     read::list_nodes,
     read::get_node,
     read::find_node,
+    // ENCRYPTION KEY
+    read::list_encryption_keys,
     // =======
     //  WRITE
     // =======
@@ -55,6 +59,9 @@ mod write {
     write::create_node,
     write::update_node,
     write::delete_node,
+    // ENCRYPTION KEY
+    write::create_encryption_key,
+    write::update_encryption_key,
   ),
 )]
 struct CicadaApi;

@@ -8,8 +8,9 @@ use crate::{
   api::write::CicadaWriteRequest,
   entities::{
     U64,
+    encryption_key::EncryptionKeyId,
     filesystem::FilesystemId,
-    node::{NodeId, NodeKind, NodeRecord},
+    node::{NodeEntity, NodeId, NodeKind},
   },
 };
 
@@ -49,11 +50,15 @@ pub struct CreateNode {
   /// Data associated with the node.
   /// For files, this contains the file contents.
   pub data: Option<String>,
+  /// Choose a specific encryption key.
+  /// Otherwise uses the current filesystem default,
+  /// followed by the current global default.
+  pub encryption_key: Option<EncryptionKeyId>,
 }
 
 /// Response for [CreateNode].
 #[typeshare]
-pub type CreateNodeResponse = NodeRecord;
+pub type CreateNodeResponse = NodeEntity;
 
 //
 
@@ -81,15 +86,39 @@ pub struct UpdateNode {
   /// The name of the node
   #[serde(skip_serializing_if = "Option::is_none")]
   pub name: Option<String>,
-  /// Data associated with the node.
-  /// For files, this contains the file contents.
-  #[serde(skip_serializing_if = "Option::is_none")]
-  pub data: Option<String>,
 }
 
 /// Response for [UpdateNode].
 #[typeshare]
-pub type UpdateNodeResponse = NodeRecord;
+pub type UpdateNodeResponse = NodeEntity;
+
+//
+
+/// Update a filesystem node's encrypted data. Response: [UpdateNodeDataResponse].
+#[typeshare]
+#[derive(
+  Debug,
+  Clone,
+  Serialize,
+  Deserialize,
+  SurrealValue,
+  Resolve,
+  EmptyTraits,
+)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
+#[empty_traits(CicadaWriteRequest)]
+#[response(UpdateNodeResponse)]
+#[error(mogh_error::Error)]
+pub struct UpdateNodeData {
+  /// The node id
+  pub id: NodeId,
+  /// The node data
+  pub data: String,
+}
+
+/// Response for [UpdateNodeData].
+#[typeshare]
+pub type UpdateNodeDataResponse = NodeEntity;
 
 //
 
@@ -121,7 +150,7 @@ pub struct DeleteNode {
 
 /// Response for [DeleteNode].
 #[typeshare]
-pub type DeleteNodeResponse = Vec<NodeRecord>;
+pub type DeleteNodeResponse = Vec<NodeEntity>;
 
 //
 
@@ -149,4 +178,4 @@ pub struct BatchDeleteNodes {
 
 /// Response for [BatchDeleteNodes].
 #[typeshare]
-pub type BatchDeleteNodesResponse = Vec<NodeRecord>;
+pub type BatchDeleteNodesResponse = Vec<NodeEntity>;

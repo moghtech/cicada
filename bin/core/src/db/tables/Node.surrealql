@@ -35,9 +35,7 @@ DEFINE FIELD OVERWRITE kind
   READONLY;
 
 -- data
-DEFINE FIELD OVERWRITE data
-  ON TABLE Node
-  TYPE option<string>;
+fn::define_encrypted_data_field("Node", "data");
 
 -- Standard timestamp fields 'created_at', 'updated_at'
 fn::define_timestamp_fields("Node");

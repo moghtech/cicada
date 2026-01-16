@@ -8,7 +8,7 @@ use cicada_client::{
   api::read::node::{FindNode, ListNodes},
   entities::{
     filesystem::FilesystemId,
-    node::{NodeKind, NodeRecord},
+    node::{NodeEntity, NodeKind},
   },
 };
 use fuser::{FileAttr, FileType, MountOption};
@@ -63,7 +63,7 @@ impl CicadaFs {
       .context("Failed to mount CicadaFs")
   }
 
-  fn node_to_file_attr(&self, node: NodeRecord) -> FileAttr {
+  fn node_to_file_attr(&self, node: NodeEntity) -> FileAttr {
     let size = node
       .data
       .as_ref()

@@ -4,7 +4,9 @@ use cicada_client::{
 };
 use resolver_api::Resolve;
 
-use crate::{api::read::ReadArgs, db::query};
+use crate::{
+  api::read::ReadArgs, db::query, encryption::decrypt_node,
+};
 
 #[allow(unused)]
 #[utoipa::path(
@@ -49,7 +51,8 @@ impl Resolve<ReadArgs> for GetNode {
     self,
     _: &ReadArgs,
   ) -> Result<Self::Response, Self::Error> {
-    query::node::get_node(&self.id.0).await
+    let node = query::node::get_node(&self.id.0).await?;
+    decrypt_node(node).await.map_err(Into::into)
   }
 }
 
@@ -72,6 +75,7 @@ impl Resolve<ReadArgs> for FindNode {
     self,
     _: &ReadArgs,
   ) -> Result<Self::Response, Self::Error> {
-    query::node::find_node(self).await
+    let node = query::node::find_node(self).await?;
+    decrypt_node(node).await.map_err(Into::into)
   }
 }

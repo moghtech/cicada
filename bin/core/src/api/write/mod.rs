@@ -1,7 +1,8 @@
 use anyhow::Context as _;
 use axum::{Extension, Router, extract::Path, routing::post};
 use cicada_client::api::write::{
-  device::*, filesystem::*, node::*, onboarding_key::*,
+  device::*, encryption_key::*, filesystem::*, node::*,
+  onboarding_key::*,
 };
 use derive_variants::{EnumVariants, ExtractVariant as _};
 use mogh_error::{Json, Response};
@@ -18,6 +19,7 @@ use crate::{
 };
 
 pub mod device;
+pub mod encryption_key;
 pub mod filesystem;
 pub mod node;
 pub mod onboarding_key;
@@ -56,8 +58,13 @@ pub enum WriteRequest {
   // ==== NODE ====
   CreateNode(CreateNode),
   UpdateNode(UpdateNode),
+  UpdateNodeData(UpdateNodeData),
   DeleteNode(DeleteNode),
   BatchDeleteNodes(BatchDeleteNodes),
+
+  // ==== ENCRYPTION KEY ====
+  CreateEncryptionKey(CreateEncryptionKey),
+  UpdateEncryptionKey(UpdateEncryptionKey),
 }
 
 pub fn router() -> Router {

@@ -2,7 +2,9 @@ use serde::{Deserialize, Serialize};
 use surrealdb_types::{RecordId, RecordIdKey, SurrealValue};
 use typeshare::typeshare;
 
-use crate::entities::Iso8601Timestamp;
+use crate::entities::{
+  Iso8601Timestamp, encryption_key::EncryptionKeyId,
+};
 
 #[typeshare]
 #[derive(Debug, Clone, Serialize, Deserialize, SurrealValue)]
@@ -12,6 +14,8 @@ pub struct FilesystemRecord {
   pub id: FilesystemId,
   /// The name of the filesystem. Must be unique.
   pub name: String,
+  /// The filesystem default encryption key.
+  pub encryption_key: Option<EncryptionKeyId>,
   /// Created at as ISO8601 timestamp.
   #[cfg_attr(feature = "utoipa", schema(value_type = String))]
   pub created_at: Iso8601Timestamp,

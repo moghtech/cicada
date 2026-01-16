@@ -9,6 +9,7 @@ mod api;
 mod auth;
 mod config;
 mod db;
+mod encryption;
 
 async fn app() -> anyhow::Result<()> {
   dotenvy::dotenv().ok();

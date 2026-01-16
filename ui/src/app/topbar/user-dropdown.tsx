@@ -73,6 +73,7 @@ export const UserDropdown = () => {
 
           {accounts.map((login) => (
             <Account
+              key={login.user_id}
               login={login}
               current_id={user?.id}
               setOpen={setOpen}

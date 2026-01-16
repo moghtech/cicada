@@ -8,7 +8,7 @@ use crate::{
   entities::{
     U64,
     filesystem::FilesystemId,
-    node::{NodeId, NodeListItem, NodeRecord},
+    node::{NodeEntity, NodeId, NodeListItem},
   },
 };
 
@@ -37,7 +37,7 @@ pub type ListNodesResponse = Vec<NodeListItem>;
 
 //
 
-/// Get a node. Response: [NodeRecord].
+/// Get a node. Response: [NodeEntity].
 #[typeshare]
 #[derive(
   Debug, Clone, Serialize, Deserialize, Resolve, EmptyTraits,
@@ -53,11 +53,11 @@ pub struct GetNode {
 
 /// Response for [GetNode].
 #[typeshare]
-pub type GetNodeResponse = NodeRecord;
+pub type GetNodeResponse = NodeEntity;
 
 //
 
-/// Find a node. Response: [NodeRecord].
+/// Find a node. Response: [NodeEntity].
 ///
 /// Query using either:
 /// - inode number (ino)
@@ -113,4 +113,4 @@ impl FindNode {
 
 /// Response for [FindNode].
 #[typeshare]
-pub type FindNodeResponse = NodeRecord;
+pub type FindNodeResponse = NodeEntity;

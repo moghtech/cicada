@@ -21,6 +21,9 @@ pub struct EncryptionKeyRecord {
   /// - Memory
   /// - Disk
   pub kind: EncryptionKeyKind,
+  /// For on disk keys (unsafe),
+  /// store the base64url encoded key
+  pub key: Option<String>,
   /// Created at as ISO8601 timestamp.
   #[cfg_attr(feature = "utoipa", schema(value_type = String))]
   pub created_at: Iso8601Timestamp,
