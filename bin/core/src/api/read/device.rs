@@ -2,7 +2,7 @@ use cicada_client::{
   api::read::device::{GetDevice, ListDevices},
   entities::device::DeviceRecord,
 };
-use resolver_api::Resolve;
+use mogh_resolver::Resolve;
 
 use crate::{api::read::ReadArgs, db::query};
 

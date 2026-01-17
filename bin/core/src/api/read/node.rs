@@ -2,7 +2,7 @@ use cicada_client::{
   api::read::node::{FindNode, GetNode, ListNodes},
   entities::node::{NodeListItem, NodeRecord},
 };
-use resolver_api::Resolve;
+use mogh_resolver::Resolve;
 
 use crate::{
   api::read::ReadArgs, db::query, encryption::decrypt_node,

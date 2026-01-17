@@ -2,7 +2,7 @@ use anyhow::Context;
 use cicada_client::{
   api::write::node::*, entities::node::NodeEntity,
 };
-use resolver_api::Resolve;
+use mogh_resolver::Resolve;
 
 use crate::{
   api::write::WriteArgs,

@@ -1,5 +1,4 @@
-use derive_empty_traits::EmptyTraits;
-use resolver_api::Resolve;
+use mogh_resolver::Resolve;
 use serde::{Deserialize, Serialize};
 use surrealdb_types::SurrealValue;
 use typeshare::typeshare;
@@ -14,13 +13,7 @@ use crate::{
 /// Create a device. Response: [CreateDeviceResponse].
 #[typeshare]
 #[derive(
-  Debug,
-  Clone,
-  Serialize,
-  Deserialize,
-  SurrealValue,
-  Resolve,
-  EmptyTraits,
+  Debug, Clone, Serialize, Deserialize, SurrealValue, Resolve,
 )]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaWriteRequest)]
@@ -49,13 +42,7 @@ pub type CreateDeviceResponse = DeviceRecord;
 /// Update a device. Response: [UpdateDeviceResponse].
 #[typeshare]
 #[derive(
-  Debug,
-  Clone,
-  Serialize,
-  Deserialize,
-  SurrealValue,
-  Resolve,
-  EmptyTraits,
+  Debug, Clone, Serialize, Deserialize, SurrealValue, Resolve,
 )]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaWriteRequest)]
@@ -84,13 +71,7 @@ pub type UpdateDeviceResponse = DeviceRecord;
 /// Delete a device. Response: [DeleteDeviceResponse].
 #[typeshare]
 #[derive(
-  Debug,
-  Clone,
-  Serialize,
-  Deserialize,
-  SurrealValue,
-  Resolve,
-  EmptyTraits,
+  Debug, Clone, Serialize, Deserialize, SurrealValue, Resolve,
 )]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaWriteRequest)]
@@ -110,13 +91,7 @@ pub type DeleteDeviceResponse = DeviceRecord;
 /// Batch delete devices. Response: [BatchDeleteDevicesResponse].
 #[typeshare]
 #[derive(
-  Debug,
-  Clone,
-  Serialize,
-  Deserialize,
-  SurrealValue,
-  Resolve,
-  EmptyTraits,
+  Debug, Clone, Serialize, Deserialize, SurrealValue, Resolve,
 )]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaWriteRequest)]

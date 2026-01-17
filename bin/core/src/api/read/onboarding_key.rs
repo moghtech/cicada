@@ -1,5 +1,5 @@
 use cicada_client::api::read::onboarding_key::*;
-use resolver_api::Resolve;
+use mogh_resolver::Resolve;
 
 use crate::{api::read::ReadArgs, db::query};
 

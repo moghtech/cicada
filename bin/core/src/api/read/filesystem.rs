@@ -2,7 +2,7 @@ use cicada_client::{
   api::read::filesystem::ListFilesystems,
   entities::filesystem::FilesystemRecord,
 };
-use resolver_api::Resolve;
+use mogh_resolver::Resolve;
 
 use crate::{
   api::read::ReadArgs, db::query::filesystem::list_all_filesystems,

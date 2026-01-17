@@ -9,7 +9,7 @@ use cicada_client::api::read::{
   onboarding_key::*, *,
 };
 use mogh_error::{AddStatusCodeError, Json, Response};
-use resolver_api::Resolve;
+use mogh_resolver::Resolve;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use surrealdb::types::Uuid;

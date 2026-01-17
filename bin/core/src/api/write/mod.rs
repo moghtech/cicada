@@ -4,12 +4,11 @@ use cicada_client::api::write::{
   device::*, encryption_key::*, filesystem::*, node::*,
   onboarding_key::*,
 };
-use derive_variants::{EnumVariants, ExtractVariant as _};
 use mogh_error::{Json, Response};
-use resolver_api::Resolve;
+use mogh_resolver::Resolve;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-use strum::Display;
+use strum::{Display, EnumDiscriminants};
 use surrealdb::types::Uuid;
 use typeshare::typeshare;
 
@@ -30,9 +29,9 @@ pub struct WriteArgs {
 
 #[typeshare]
 #[derive(
-  Debug, Clone, Serialize, Deserialize, Resolve, EnumVariants,
+  Debug, Clone, Serialize, Deserialize, Resolve, EnumDiscriminants,
 )]
-#[variant_derive(Debug, Display)]
+#[strum_discriminants(name(WriteRequestMethod), derive(Display))]
 #[args(WriteArgs)]
 #[response(Response)]
 #[error(mogh_error::Error)]
@@ -118,14 +117,14 @@ async fn task(
   request: WriteRequest,
   client: Client,
 ) -> mogh_error::Result<axum::response::Response> {
-  let variant = request.extract_variant();
-  info!("/write request | {variant}");
+  let method: WriteRequestMethod = (&request).into();
+  info!("/write request | {method}");
 
   let res = request.resolve(&WriteArgs { client }).await;
 
   if let Err(e) = &res {
     warn!(
-      "/write request {req_id} | {variant} | error: {:#}",
+      "/write request {req_id} | {method} | error: {:#}",
       e.error
     );
   }

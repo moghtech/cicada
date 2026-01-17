@@ -1,6 +1,6 @@
 use cicada_client::api::write::onboarding_key::*;
 use mogh_pki::key::EncodedKeyPair;
-use resolver_api::Resolve;
+use mogh_resolver::Resolve;
 
 use crate::{api::write::WriteArgs, db::query};
 

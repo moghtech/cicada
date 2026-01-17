@@ -6,7 +6,7 @@ use cicada_client::{
 };
 use mogh_encryption::{BASE64URL, xchacha20poly1305};
 use mogh_error::AddStatusCodeError;
-use resolver_api::Resolve;
+use mogh_resolver::Resolve;
 
 use crate::{
   api::write::WriteArgs,

@@ -1,6 +1,5 @@
-use derive_empty_traits::EmptyTraits;
 use mogh_auth_client::api::NoData;
-use resolver_api::Resolve;
+use mogh_resolver::Resolve;
 use serde::{Deserialize, Serialize};
 use surrealdb_types::SurrealValue;
 use typeshare::typeshare;
@@ -23,7 +22,6 @@ use crate::{
   Deserialize,
   SurrealValue,
   Resolve,
-  EmptyTraits,
 )]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaWriteRequest)]
@@ -54,7 +52,6 @@ pub type CreateEncryptionKeyResponse = EncryptionKeyRecord;
   Deserialize,
   SurrealValue,
   Resolve,
-  EmptyTraits,
 )]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaWriteRequest)]
@@ -84,7 +81,6 @@ pub type UpdateEncryptionKeyResponse = EncryptionKeyRecord;
   Deserialize,
   SurrealValue,
   Resolve,
-  EmptyTraits,
 )]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaWriteRequest)]

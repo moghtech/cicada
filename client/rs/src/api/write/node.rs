@@ -1,5 +1,4 @@
-use derive_empty_traits::EmptyTraits;
-use resolver_api::Resolve;
+use mogh_resolver::Resolve;
 use serde::{Deserialize, Serialize};
 use surrealdb_types::SurrealValue;
 use typeshare::typeshare;
@@ -19,13 +18,7 @@ use crate::{
 /// Create filesystem node. Response: [CreateNodeResponse].
 #[typeshare]
 #[derive(
-  Debug,
-  Clone,
-  Serialize,
-  Deserialize,
-  SurrealValue,
-  Resolve,
-  EmptyTraits,
+  Debug, Clone, Serialize, Deserialize, SurrealValue, Resolve,
 )]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaWriteRequest)]
@@ -65,13 +58,7 @@ pub type CreateNodeResponse = NodeEntity;
 /// Update a filesystem node. Response: [UpdateNodeResponse].
 #[typeshare]
 #[derive(
-  Debug,
-  Clone,
-  Serialize,
-  Deserialize,
-  SurrealValue,
-  Resolve,
-  EmptyTraits,
+  Debug, Clone, Serialize, Deserialize, SurrealValue, Resolve,
 )]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaWriteRequest)]
@@ -97,13 +84,7 @@ pub type UpdateNodeResponse = NodeEntity;
 /// Update a filesystem node's encrypted data. Response: [UpdateNodeDataResponse].
 #[typeshare]
 #[derive(
-  Debug,
-  Clone,
-  Serialize,
-  Deserialize,
-  SurrealValue,
-  Resolve,
-  EmptyTraits,
+  Debug, Clone, Serialize, Deserialize, SurrealValue, Resolve,
 )]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaWriteRequest)]
@@ -127,13 +108,7 @@ pub type UpdateNodeDataResponse = NodeEntity;
 /// Update a filesystem node's encryption key. Response: [UpdateNodeEncryptionKeyResponse].
 #[typeshare]
 #[derive(
-  Debug,
-  Clone,
-  Serialize,
-  Deserialize,
-  SurrealValue,
-  Resolve,
-  EmptyTraits,
+  Debug, Clone, Serialize, Deserialize, SurrealValue, Resolve,
 )]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaWriteRequest)]
@@ -155,13 +130,7 @@ pub type UpdateNodeEncryptionKeyResponse = NodeEntity;
 /// Rotate a filesystem node's envelope encryption key. Response: [RotateNodeEnvelopeKeyResponse].
 #[typeshare]
 #[derive(
-  Debug,
-  Clone,
-  Serialize,
-  Deserialize,
-  SurrealValue,
-  Resolve,
-  EmptyTraits,
+  Debug, Clone, Serialize, Deserialize, SurrealValue, Resolve,
 )]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaWriteRequest)]
@@ -184,13 +153,7 @@ pub type RotateNodeEnvelopeKeyResponse = NodeEntity;
 /// is not passed, all children nodes will be recursively deleted.
 #[typeshare]
 #[derive(
-  Debug,
-  Clone,
-  Serialize,
-  Deserialize,
-  SurrealValue,
-  Resolve,
-  EmptyTraits,
+  Debug, Clone, Serialize, Deserialize, SurrealValue, Resolve,
 )]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaWriteRequest)]
@@ -215,13 +178,7 @@ pub type DeleteNodeResponse = Vec<NodeEntity>;
 /// Note. Not compatible with 'move_children'.
 #[typeshare]
 #[derive(
-  Debug,
-  Clone,
-  Serialize,
-  Deserialize,
-  SurrealValue,
-  Resolve,
-  EmptyTraits,
+  Debug, Clone, Serialize, Deserialize, SurrealValue, Resolve,
 )]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaWriteRequest)]

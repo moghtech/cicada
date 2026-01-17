@@ -1,5 +1,4 @@
-use derive_empty_traits::EmptyTraits;
-use resolver_api::Resolve;
+use mogh_resolver::Resolve;
 use serde::{Deserialize, Serialize};
 use surrealdb_types::SurrealValue;
 use typeshare::typeshare;
@@ -14,13 +13,7 @@ use crate::{
 /// Create a filesystem. Response: [CreateFilesystemResponse].
 #[typeshare]
 #[derive(
-  Debug,
-  Clone,
-  Serialize,
-  Deserialize,
-  SurrealValue,
-  Resolve,
-  EmptyTraits,
+  Debug, Clone, Serialize, Deserialize, SurrealValue, Resolve,
 )]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaWriteRequest)]
@@ -40,13 +33,7 @@ pub type CreateFilesystemResponse = FilesystemRecord;
 /// Update a filesystem. Response: [UpdateFilesystemResponse].
 #[typeshare]
 #[derive(
-  Debug,
-  Clone,
-  Serialize,
-  Deserialize,
-  SurrealValue,
-  Resolve,
-  EmptyTraits,
+  Debug, Clone, Serialize, Deserialize, SurrealValue, Resolve,
 )]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaWriteRequest)]
@@ -71,13 +58,7 @@ pub type UpdateFilesystemResponse = FilesystemRecord;
 /// WARNING. This will also delete all nodes on the filesystem.
 #[typeshare]
 #[derive(
-  Debug,
-  Clone,
-  Serialize,
-  Deserialize,
-  SurrealValue,
-  Resolve,
-  EmptyTraits,
+  Debug, Clone, Serialize, Deserialize, SurrealValue, Resolve,
 )]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaWriteRequest)]

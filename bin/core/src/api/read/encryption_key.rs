@@ -4,7 +4,7 @@ use cicada_client::{
     EncryptionKeyEntity, EncryptionKeyKind, EncryptionKeyRecord,
   },
 };
-use resolver_api::Resolve;
+use mogh_resolver::Resolve;
 
 use crate::{
   api::read::ReadArgs, db::query, encryption::encryption_keys,

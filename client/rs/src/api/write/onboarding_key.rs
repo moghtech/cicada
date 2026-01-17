@@ -1,5 +1,4 @@
-use derive_empty_traits::EmptyTraits;
-use resolver_api::Resolve;
+use mogh_resolver::Resolve;
 use serde::{Deserialize, Serialize};
 use surrealdb_types::SurrealValue;
 use typeshare::typeshare;
@@ -20,7 +19,6 @@ use crate::{
   Deserialize,
   SurrealValue,
   Resolve,
-  EmptyTraits,
 )]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaWriteRequest)]
@@ -66,7 +64,6 @@ pub struct CreateOnboardingKeyResponse {
   Deserialize,
   SurrealValue,
   Resolve,
-  EmptyTraits,
 )]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaWriteRequest)]
@@ -101,7 +98,6 @@ pub type UpdateOnboardingKeyResponse = OnboardingKeyRecord;
   Deserialize,
   SurrealValue,
   Resolve,
-  EmptyTraits,
 )]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaWriteRequest)]
@@ -127,7 +123,6 @@ pub type DeleteOnboardingKeyResponse = OnboardingKeyRecord;
   Deserialize,
   SurrealValue,
   Resolve,
-  EmptyTraits,
 )]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaWriteRequest)]

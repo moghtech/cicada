@@ -18,10 +18,9 @@ mogh_error = { workspace = true, features = ["axum", "utoipa"] }
 mogh_auth_client = { workspace = true, features = ["utoipa"] }
 mogh_auth_server.workspace = true
 mogh_secret_file.workspace = true
-derive_variants.workspace = true
 mogh_encryption.workspace = true
 mogh_rate_limit.workspace = true
-resolver_api.workspace = true
+mogh_resolver.workspace = true
 mogh_config.workspace = true
 mogh_logger.workspace = true
 mogh_server.workspace = true

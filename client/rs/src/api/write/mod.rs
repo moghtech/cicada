@@ -1,4 +1,4 @@
-use resolver_api::HasResponse;
+use mogh_resolver::HasResponse;
 
 pub mod device;
 pub mod encryption_key;
