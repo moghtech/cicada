@@ -1,11 +1,16 @@
 use anyhow::Context;
-use cicada_client::api::write::node::*;
+use cicada_client::{
+  api::write::node::*, entities::node::NodeEntity,
+};
 use resolver_api::Resolve;
 
 use crate::{
   api::write::WriteArgs,
   db::query::{self, node::CreateNodeQuery},
-  encryption::{decrypt_node, decrypt_nodes, encrypt_data},
+  encryption::{
+    decrypt_node, decrypt_nodes, encrypt_data, rotate_encryption_key,
+    rotate_envelope_key,
+  },
 };
 
 #[allow(unused)]
@@ -26,24 +31,33 @@ impl Resolve<WriteArgs> for CreateNode {
     self,
     _: &WriteArgs,
   ) -> Result<Self::Response, Self::Error> {
-    let encryption_key =
-      query::encryption_key::list_all_encryption_keys()
-        .await?
-        .pop()
-        .context("No encryption key available")?;
-    let data = if let Some(data) = self.data {
-      encrypt_data(encryption_key, data.as_bytes()).await?.into()
-    } else {
-      None
-    };
     let node = query::node::create_node(CreateNodeQuery {
       filesystem: self.filesystem,
       parent: self.parent,
       name: self.name,
       kind: self.kind,
-      data,
     })
     .await?;
+    let node = if let Some(data) = self.data {
+      let encryption_key_id = if let Some(id) = self.encryption_key {
+        id
+      } else {
+        query::encryption_key::list_all_encryption_keys()
+          .await?
+          .pop()
+          .context("No encryption keys")?
+          .id
+      };
+      let data = encrypt_data(
+        encryption_key_id.0,
+        data.as_bytes(),
+        &node.id.0,
+      )
+      .await?;
+      query::node::update_node_data(node.id, Some(data)).await?
+    } else {
+      node
+    };
     decrypt_node(node).await.map_err(Into::into)
   }
 }
@@ -93,13 +107,117 @@ impl Resolve<WriteArgs> for UpdateNodeData {
     self,
     _: &WriteArgs,
   ) -> Result<Self::Response, Self::Error> {
-    let encryption_key =
+    let encryption_key = if let Some(id) = self.encryption_key {
+      id
+    } else if let Some(id) = query::node::get_node(&self.id.0)
+      .await?
+      .data
+      .map(|data| data.encryption_key)
+    {
+      id
+    } else {
       query::encryption_key::list_all_encryption_keys()
         .await?
         .pop()
-        .context("No encryption key available")?;
+        .context("No encryption keys")?
+        .id
+    };
+    let data = encrypt_data(
+      encryption_key.0,
+      self.data.as_bytes(),
+      &self.id.0,
+    )
+    .await?;
+    let node =
+      query::node::update_node_data(self.id, data.into()).await?;
+    decrypt_node(node).await.map_err(Into::into)
+  }
+}
+
+//
+
+#[allow(unused)]
+#[utoipa::path(
+  post,
+  path = "/write/UpdateNodeEncryptionKey",
+  description = "Update a node's data",
+  request_body(content = UpdateNode),
+  responses(
+    (status = 200, description = "The updated node", body = UpdateNodeEncryptionKeyResponse),
+    (status = 500, description = "Request failed", body = mogh_error::Serror)
+  ),
+)]
+pub fn update_node_encryption_key() {}
+
+impl Resolve<WriteArgs> for UpdateNodeEncryptionKey {
+  async fn resolve(
+    self,
+    _: &WriteArgs,
+  ) -> Result<Self::Response, Self::Error> {
+    let node = query::node::get_node(&self.id.0).await?;
+    // No-op if node has no data.
+    let Some(data) = node.data else {
+      return Ok(NodeEntity {
+        id: node.id,
+        filesystem: node.filesystem,
+        inode: node.inode,
+        parent: node.parent,
+        name: node.name,
+        kind: node.kind,
+        data: None,
+        missing_key: None,
+        created_at: node.created_at,
+        updated_at: node.updated_at,
+      });
+    };
+    // Re encrypt the envelope keys with new master key
     let data =
-      encrypt_data(encryption_key, self.data.as_bytes()).await?;
+      rotate_encryption_key(data, &node.id.0, self.encryption_key.0)
+        .await?;
+    let node =
+      query::node::update_node_data(self.id, data.into()).await?;
+    decrypt_node(node).await.map_err(Into::into)
+  }
+}
+
+//
+
+#[allow(unused)]
+#[utoipa::path(
+  post,
+  path = "/write/RotateNodeEnvelopeKey",
+  description = "Update a node's data",
+  request_body(content = UpdateNode),
+  responses(
+    (status = 200, description = "The updated node", body = RotateNodeEnvelopeKeyResponse),
+    (status = 500, description = "Request failed", body = mogh_error::Serror)
+  ),
+)]
+pub fn rotate_node_envelope_key() {}
+
+impl Resolve<WriteArgs> for RotateNodeEnvelopeKey {
+  async fn resolve(
+    self,
+    _: &WriteArgs,
+  ) -> Result<Self::Response, Self::Error> {
+    let node = query::node::get_node(&self.id.0).await?;
+    // No-op if node has no data.
+    let Some(data) = node.data else {
+      return Ok(NodeEntity {
+        id: node.id,
+        filesystem: node.filesystem,
+        inode: node.inode,
+        parent: node.parent,
+        name: node.name,
+        kind: node.kind,
+        data: None,
+        missing_key: None,
+        created_at: node.created_at,
+        updated_at: node.updated_at,
+      });
+    };
+    // Re encrypt data with new envelope key
+    let data = rotate_envelope_key(data, &node.id.0).await?;
     let node =
       query::node::update_node_data(self.id, data.into()).await?;
     decrypt_node(node).await.map_err(Into::into)

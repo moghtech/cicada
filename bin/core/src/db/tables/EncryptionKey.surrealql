@@ -21,6 +21,24 @@ DEFINE FIELD OVERWRITE key
   TYPE option<string>
   READONLY;
 
+-- verification
+DEFINE FIELD OVERWRITE verification
+  ON TABLE EncryptionKey
+  TYPE string
+  READONLY;
+
+-- verification_encrypted
+DEFINE FIELD OVERWRITE verification_encrypted
+  ON TABLE EncryptionKey
+  TYPE string
+  READONLY;
+
+-- verification_nonce
+DEFINE FIELD OVERWRITE verification_nonce
+  ON TABLE EncryptionKey
+  TYPE string
+  READONLY;
+
 -- Standard timestamp fields 'created_at', 'updated_at'
 fn::define_timestamp_fields("EncryptionKey");
 

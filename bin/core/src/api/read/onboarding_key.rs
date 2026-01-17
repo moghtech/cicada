@@ -1,7 +1,4 @@
-use cicada_client::{
-  api::read::onboarding_key::{GetOnboardingKey, ListOnboardingKeys},
-  entities::onboarding_key::OnboardingKeyRecord,
-};
+use cicada_client::api::read::onboarding_key::*;
 use resolver_api::Resolve;
 
 use crate::{api::read::ReadArgs, db::query};
@@ -13,7 +10,7 @@ use crate::{api::read::ReadArgs, db::query};
   description = "List onboarding keys",
   request_body(content = ListOnboardingKeys),
   responses(
-    (status = 200, description = "List of onboarding keys", body = Vec<OnboardingKeyRecord>),
+    (status = 200, description = "List of onboarding keys", body = ListOnboardingKeysResponse),
     (status = 500, description = "Request failed", body = mogh_error::Serror)
   ),
 )]
@@ -24,9 +21,13 @@ impl Resolve<ReadArgs> for ListOnboardingKeys {
     self,
     _: &ReadArgs,
   ) -> Result<Self::Response, Self::Error> {
-    query::onboarding_key::list_all_onboarding_keys().await.map_err(Into::into)
+    query::onboarding_key::list_all_onboarding_keys()
+      .await
+      .map_err(Into::into)
   }
 }
+
+//
 
 #[allow(unused)]
 #[utoipa::path(
@@ -35,7 +36,7 @@ impl Resolve<ReadArgs> for ListOnboardingKeys {
   description = "Get an onboarding key by id",
   request_body(content = GetOnboardingKey),
   responses(
-    (status = 200, description = "The onboarding key", body = OnboardingKeyRecord),
+    (status = 200, description = "The onboarding key", body = GetOnboardingKeyResponse),
     (status = 404, description = "Failed to find onboarding key with given id", body = mogh_error::Serror),
     (status = 500, description = "Request failed", body = mogh_error::Serror),
   ),

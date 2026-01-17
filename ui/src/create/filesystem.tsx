@@ -56,6 +56,7 @@ const CreateFilesystemForm = ({ close }: { close: () => void }) => {
         leftSection={<Plus size="1rem" />}
         type="submit"
         loading={isPending}
+        disabled={!form.isValid()}
       >
         Create Filesystem
       </Button>

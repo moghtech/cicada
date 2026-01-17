@@ -1,5 +1,5 @@
-import { useInvalidate, useWrite } from "@/lib/hooks";
-import { Button, Center, Text } from "@mantine/core";
+import { useInvalidate, useRead, useWrite } from "@/lib/hooks";
+import { Button, Center, Group, Text } from "@mantine/core";
 import { useNavigate } from "react-router-dom";
 import { History } from "lucide-react";
 import { language_from_path, MonacoEditor } from "@/components/monaco";
@@ -10,6 +10,7 @@ import { Types } from "cicada_client";
 import { notifications } from "@mantine/notifications";
 import { Page } from "@/layout/page";
 import { NodePageDescription, NodePageTitle } from "./title";
+import InitializeEncryptionKey from "@/components/initialize-key";
 
 const FilePage = ({
   filesystem,
@@ -24,6 +25,9 @@ const FilePage = ({
     key: `node-${node?.id}-edit-v1`,
     defaultValue: { data: undefined },
   });
+  const missing_key = useRead("ListEncryptionKeys", {}).data?.find(
+    (key) => key.id === node?.missing_key,
+  );
   const { mutateAsync: updateNodeData } = useWrite("UpdateNodeData", {
     onSuccess: () => {
       inv(["FindNode"]);
@@ -38,7 +42,7 @@ const FilePage = ({
         notifications.show({ message: "File deleted." });
         nav(`/filesystems/${node?.filesystem}/${node?.parent}`);
       },
-    }
+    },
   );
 
   if (!node) {
@@ -79,11 +83,25 @@ const FilePage = ({
         </>
       }
     >
-      <MonacoEditor
-        language={language_from_path(node.name)}
-        value={data ?? node.data ?? ""}
-        onValueChange={(data) => setEdit({ data })}
-      />
+      {node.missing_key ? (
+        <>
+          <Text fz="h2">Failed to read data: missing encryption key</Text>
+          {missing_key?.kind === Types.EncryptionKeyKind.Memory && (
+            <Group>
+              <InitializeEncryptionKey
+                key_id={missing_key.id}
+                onInit={() => inv(["FindNode"])}
+              />
+            </Group>
+          )}
+        </>
+      ) : (
+        <MonacoEditor
+          language={language_from_path(node.name)}
+          value={data ?? node.data ?? ""}
+          onValueChange={(data) => setEdit({ data })}
+        />
+      )}
     </Page>
   );
 };

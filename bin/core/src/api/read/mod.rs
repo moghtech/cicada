@@ -60,6 +60,7 @@ enum ReadRequest {
 
   // ==== ENCRYPTION KEY ====
   ListEncryptionKeys(ListEncryptionKeys),
+  GetEncryptionKey(GetEncryptionKey),
 }
 
 pub fn router() -> Router {

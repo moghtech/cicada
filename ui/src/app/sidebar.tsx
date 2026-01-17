@@ -20,6 +20,7 @@ export const Sidebar = ({ close }: { close: () => void }) => {
   const devicesPage =
     location.pathname.startsWith("/devices") ||
     location.pathname.startsWith("/onboarding-keys");
+  const encryptionPage = location.pathname.startsWith("/encryption-keys");
   const { filesystem: selected_filesystem, inode: _selected_inode } =
     useParams() as {
       filesystem?: string;
@@ -51,6 +52,16 @@ export const Sidebar = ({ close }: { close: () => void }) => {
             fullWidth
           >
             Devices
+          </Button>
+          <Button
+            variant={encryptionPage ? "filled" : "subtle"}
+            c="inherit"
+            onClick={() => nav("/encryption-keys")}
+            leftSection={<ICONS.EncryptionKey size="1rem" />}
+            justify="flex-start"
+            fullWidth
+          >
+            Encryption
           </Button>
 
           <Filesystems filesystem={selected_filesystem} close={close} />

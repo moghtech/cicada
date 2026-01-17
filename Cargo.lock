@@ -876,6 +876,7 @@ dependencies = [
  "axum 0.8.8",
  "cicada_client",
  "colored",
+ "dashmap",
  "derive_variants",
  "dotenvy",
  "envy",

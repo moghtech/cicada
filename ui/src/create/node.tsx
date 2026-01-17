@@ -80,6 +80,7 @@ const CreateNodeForm = ({
         leftSection={<CreateNodeIcon kind={kind} />}
         type="submit"
         loading={isPending}
+        disabled={!form.isValid()}
       >
         Create {kind}
       </Button>

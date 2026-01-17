@@ -1,9 +1,4 @@
-use cicada_client::{
-  api::write::filesystem::{
-    CreateFilesystem, DeleteFilesystem, UpdateFilesystem,
-  },
-  entities::filesystem::FilesystemRecord,
-};
+use cicada_client::api::write::filesystem::*;
 use resolver_api::Resolve;
 
 use crate::{api::write::WriteArgs, db::query};
@@ -15,7 +10,7 @@ use crate::{api::write::WriteArgs, db::query};
   description = "Create a new filesystem",
   request_body(content = CreateFilesystem),
   responses(
-    (status = 200, description = "The created filesystem", body = FilesystemRecord),
+    (status = 200, description = "The created filesystem", body = CreateFilesystemResponse),
     (status = 500, description = "Request failed", body = mogh_error::Serror)
   ),
 )]
@@ -42,7 +37,7 @@ impl Resolve<WriteArgs> for CreateFilesystem {
   description = "Update a filesystem",
   request_body(content = UpdateFilesystem),
   responses(
-    (status = 200, description = "The updated filesystem", body = FilesystemRecord),
+    (status = 200, description = "The updated filesystem", body = UpdateFilesystemResponse),
     (status = 500, description = "Request failed", body = mogh_error::Serror)
   ),
 )]
@@ -68,7 +63,7 @@ impl Resolve<WriteArgs> for UpdateFilesystem {
   description = "Delete a filesystem",
   request_body(content = DeleteFilesystem),
   responses(
-    (status = 200, description = "The deleted filesystem", body = FilesystemRecord),
+    (status = 200, description = "The deleted filesystem", body = DeleteFilesystemResponse),
     (status = 404, description = "Filesystem not found", body = mogh_error::Serror),
     (status = 500, description = "Request failed", body = mogh_error::Serror)
   ),

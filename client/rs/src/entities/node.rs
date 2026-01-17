@@ -3,7 +3,8 @@ use surrealdb_types::{RecordId, RecordIdKey, SurrealValue};
 use typeshare::typeshare;
 
 use crate::entities::{
-  EncryptedData, Iso8601Timestamp, U64, filesystem::FilesystemId,
+  EncryptedData, Iso8601Timestamp, U64,
+  encryption_key::EncryptionKeyId, filesystem::FilesystemId,
 };
 
 #[typeshare]
@@ -56,6 +57,11 @@ pub struct NodeEntity {
   /// For files, this contains the file contents.
   #[serde(skip_serializing_if = "Option::is_none")]
   pub data: Option<String>,
+  /// If the data could not be decrypted
+  /// due to missing encryption key, give the missing ID
+  /// for the user to know to initialize.
+  #[serde(skip_serializing_if = "Option::is_none")]
+  pub missing_key: Option<EncryptionKeyId>,
   /// Created at as ISO8601 timestamp.
   #[cfg_attr(feature = "utoipa", schema(value_type = String))]
   pub created_at: Iso8601Timestamp,

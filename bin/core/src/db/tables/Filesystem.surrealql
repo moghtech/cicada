@@ -9,6 +9,11 @@ DEFINE FIELD OVERWRITE name
   ON TABLE Filesystem
   TYPE string;
 
+-- encryption_key
+DEFINE FIELD OVERWRITE encryption_key
+  ON TABLE Filesystem
+  TYPE option<record<EncryptionKey>>;
+
 -- Standard timestamp fields 'created_at', 'updated_at'
 fn::define_timestamp_fields("Filesystem");
 

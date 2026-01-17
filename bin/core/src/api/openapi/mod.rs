@@ -62,6 +62,7 @@ mod write {
     // ENCRYPTION KEY
     write::create_encryption_key,
     write::update_encryption_key,
+    write::initialize_encryption_key,
   ),
 )]
 struct CicadaApi;

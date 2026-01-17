@@ -59,12 +59,15 @@ pub enum WriteRequest {
   CreateNode(CreateNode),
   UpdateNode(UpdateNode),
   UpdateNodeData(UpdateNodeData),
+  UpdateNodeEncryptionKey(UpdateNodeEncryptionKey),
+  RotateNodeEnvelopeKey(RotateNodeEnvelopeKey),
   DeleteNode(DeleteNode),
   BatchDeleteNodes(BatchDeleteNodes),
 
   // ==== ENCRYPTION KEY ====
   CreateEncryptionKey(CreateEncryptionKey),
   UpdateEncryptionKey(UpdateEncryptionKey),
+  InitializeEncryptionKey(InitializeEncryptionKey),
 }
 
 pub fn router() -> Router {

@@ -5,7 +5,7 @@ use typeshare::typeshare;
 
 use crate::{
   api::read::CicadaReadRequest,
-  entities::encryption_key::EncryptionKeyRecord,
+  entities::encryption_key::{EncryptionKeyEntity, EncryptionKeyId},
 };
 
 //
@@ -23,4 +23,24 @@ pub struct ListEncryptionKeys {}
 
 /// Response for [ListEncryptionKeys].
 #[typeshare]
-pub type ListEncryptionKeysResponse = Vec<EncryptionKeyRecord>;
+pub type ListEncryptionKeysResponse = Vec<EncryptionKeyEntity>;
+
+//
+
+/// Get an encryption key. Response: [EncryptionKeyEntity].
+#[typeshare]
+#[derive(
+  Debug, Clone, Serialize, Deserialize, Resolve, EmptyTraits,
+)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
+#[empty_traits(CicadaReadRequest)]
+#[response(GetEncryptionKeyResponse)]
+#[error(mogh_error::Error)]
+pub struct GetEncryptionKey {
+  /// The encryption key id
+  pub id: EncryptionKeyId,
+}
+
+/// Response for [GetEncryptionKey].
+#[typeshare]
+pub type GetEncryptionKeyResponse = EncryptionKeyEntity;

@@ -23,6 +23,7 @@ export type ReadResponses = {
 
   // ==== ENCRYPTION KEY ====
   ListEncryptionKeys: Types.ListEncryptionKeysResponse;
+  GetEncryptionKey: Types.GetEncryptionKeyResponse;
 };
 
 export type WriteResponses = {
@@ -47,10 +48,13 @@ export type WriteResponses = {
   CreateNode: Types.CreateNodeResponse;
   UpdateNode: Types.UpdateNodeResponse;
   UpdateNodeData: Types.UpdateNodeDataResponse;
+  UpdateNodeEncryptionKey: Types.UpdateNodeEncryptionKeyResponse;
+  RotateNodeEnvelopeKey: Types.RotateNodeEnvelopeKeyResponse;
   DeleteNode: Types.DeleteNodeResponse;
   BatchDeleteNodes: Types.BatchDeleteNodesResponse;
 
   // ==== ENCRYPTION KEY ====
   CreateEncryptionKey: Types.CreateEncryptionKeyResponse;
   UpdateEncryptionKey: Types.UpdateEncryptionKeyResponse;
+  InitializeEncryptionKey: Types.InitializeEncryptionKeyResponse;
 };

@@ -42,6 +42,8 @@ export enum NodeKind {
 	File = "File",
 }
 
+export type EncryptionKeyId = string;
+
 /** Nodes over the API, with unencrypted data */
 export interface NodeEntity {
 	/** The unique node id */
@@ -65,6 +67,12 @@ export interface NodeEntity {
 	 * For files, this contains the file contents.
 	 */
 	data?: string;
+	/**
+	 * If the data could not be decrypted
+	 * due to missing encryption key, give the missing ID
+	 * for the user to know to initialize.
+	 */
+	missing_key?: EncryptionKeyId;
 	/** Created at as ISO8601 timestamp. */
 	created_at: Iso8601Timestamp;
 	/** Updated at as ISO8601 timestamp. */
@@ -103,8 +111,6 @@ export type BatchDeleteOnboardingKeysResponse = OnboardingKeyRecord[];
 /** Response for [CreateDevice]. */
 export type CreateDeviceResponse = DeviceRecord;
 
-export type EncryptionKeyId = string;
-
 /** The available kinds external of encryption keys. */
 export enum EncryptionKeyKind {
 	/**
@@ -140,6 +146,18 @@ export interface EncryptionKeyRecord {
 	 * store the base64url encoded key
 	 */
 	key?: string;
+	/** 32 random bytes base64url encoded */
+	verification: string;
+	/**
+	 * verification bytes encrypted using the master key
+	 * and verification nonce.
+	 */
+	verification_encrypted: string;
+	/**
+	 * The nonce to use to verify that 'verification_encrypted'
+	 * decrypts to 'verification'.
+	 */
+	verification_nonce: string;
 	/** Created at as ISO8601 timestamp. */
 	created_at: Iso8601Timestamp;
 	/** Updated at as ISO8601 timestamp. */
@@ -187,6 +205,36 @@ export type FindNodeResponse = NodeEntity;
 
 /** Response for [GetDevice]. */
 export type GetDeviceResponse = DeviceRecord;
+
+/**
+ * Record fields are encrypted by storing them as [EncryptedData] type.
+ * These keys are themselves encrypted using an [EncryptionKeyRecord],
+ * which can point to an in-memory key or a remote KMS.
+ */
+export interface EncryptionKeyEntity {
+	/** The unique encryption key id */
+	id: EncryptionKeyId;
+	/** The name of the encryption key. Must be unique. */
+	name: string;
+	/**
+	 * The kind of encryption key.
+	 * - Memory
+	 * - Disk
+	 */
+	kind: EncryptionKeyKind;
+	/**
+	 * For Memory keys:
+	 * Whether the key has been initialized.
+	 */
+	initialized: boolean;
+	/** Created at as ISO8601 timestamp. */
+	created_at: Iso8601Timestamp;
+	/** Updated at as ISO8601 timestamp. */
+	updated_at: Iso8601Timestamp;
+}
+
+/** Response for [GetEncryptionKey]. */
+export type GetEncryptionKeyResponse = EncryptionKeyEntity;
 
 /** Response for [GetNode]. */
 export type GetNodeResponse = NodeEntity;
@@ -258,13 +306,20 @@ export interface UserEntity {
 
 export type GetUserResponse = UserEntity;
 
+/** Represents an empty json object: `{}` */
+export interface NoData {
+}
+
+/** Response for [InitializeEncryptionKey]. */
+export type InitializeEncryptionKeyResponse = NoData;
+
 export type JsonValue = any;
 
 /** Response for [ListDevices]. */
 export type ListDevicesResponse = DeviceRecord[];
 
 /** Response for [ListEncryptionKeys]. */
-export type ListEncryptionKeysResponse = EncryptionKeyRecord[];
+export type ListEncryptionKeysResponse = EncryptionKeyEntity[];
 
 /** Response for [ListFilesystems]. */
 export type ListFilesystemsResponse = FilesystemRecord[];
@@ -298,6 +353,9 @@ export type ListNodesResponse = NodeListItem[];
 /** Response for [ListOnboardingKeys]. */
 export type ListOnboardingKeysResponse = OnboardingKeyRecord[];
 
+/** Response for [RotateNodeEnvelopeKey]. */
+export type RotateNodeEnvelopeKeyResponse = NodeEntity;
+
 /** Response for [UpdateDevice]. */
 export type UpdateDeviceResponse = DeviceRecord;
 
@@ -309,6 +367,9 @@ export type UpdateFilesystemResponse = FilesystemRecord;
 
 /** Response for [UpdateNodeData]. */
 export type UpdateNodeDataResponse = NodeEntity;
+
+/** Response for [UpdateNodeEncryptionKey]. */
+export type UpdateNodeEncryptionKeyResponse = NodeEntity;
 
 /** Response for [UpdateNode]. */
 export type UpdateNodeResponse = NodeEntity;
@@ -515,6 +576,12 @@ export interface GetDevice {
 	id: DeviceId;
 }
 
+/** Get an encryption key. Response: [EncryptionKeyEntity]. */
+export interface GetEncryptionKey {
+	/** The encryption key id */
+	id: EncryptionKeyId;
+}
+
 /** Get a node. Response: [NodeEntity]. */
 export interface GetNode {
 	/** The node id */
@@ -564,6 +631,17 @@ export interface GetVersionResponse {
 	version: string;
 }
 
+/**
+ * Initialize an in-memory encryption key after application startup.
+ * Response: [InitializeEncryptionKeyResponse].
+ */
+export interface InitializeEncryptionKey {
+	/** The encryption key ID */
+	id: EncryptionKeyId;
+	/** base64url encoded master key */
+	key: string;
+}
+
 /** List devices. Response: [ListDevicesResponse]. */
 export interface ListDevices {
 }
@@ -586,10 +664,6 @@ export interface ListNodes {
 
 /** List onboarding keys. Response: [ListOnboardingKeysResponse]. */
 export interface ListOnboardingKeys {
-}
-
-/** Represents an empty json object: `{}` */
-export interface NoData {
 }
 
 /** Nodes stored on the database, with encrypted data */
@@ -619,6 +693,12 @@ export interface NodeRecord {
 	created_at: Iso8601Timestamp;
 	/** Updated at as ISO8601 timestamp. */
 	updated_at: Iso8601Timestamp;
+}
+
+/** Rotate a filesystem node's envelope encryption key. Response: [RotateNodeEnvelopeKeyResponse]. */
+export interface RotateNodeEnvelopeKey {
+	/** The node id */
+	id: NodeId;
 }
 
 /** Update a device. Response: [UpdateDeviceResponse]. */
@@ -665,6 +745,16 @@ export interface UpdateNodeData {
 	id: NodeId;
 	/** The node data */
 	data: string;
+	/** Optionally update the encryption key used as master in the envelope encryption. */
+	encryption_key?: EncryptionKeyId;
+}
+
+/** Update a filesystem node's encryption key. Response: [UpdateNodeEncryptionKeyResponse]. */
+export interface UpdateNodeEncryptionKey {
+	/** The node id */
+	id: NodeId;
+	/** Update the encryption key used as master in the envelope encryption. */
+	encryption_key: EncryptionKeyId;
 }
 
 /** Update an onboarding key. Response: [UpdateOnboardingKeyResponse]. */
@@ -737,7 +827,8 @@ export type ReadRequest =
 	| { type: "ListNodes", params: ListNodes }
 	| { type: "GetNode", params: GetNode }
 	| { type: "FindNode", params: FindNode }
-	| { type: "ListEncryptionKeys", params: ListEncryptionKeys };
+	| { type: "ListEncryptionKeys", params: ListEncryptionKeys }
+	| { type: "GetEncryptionKey", params: GetEncryptionKey };
 
 export enum Timelength {
 	/** `1-sec` */
@@ -809,8 +900,11 @@ export type WriteRequest =
 	| { type: "CreateNode", params: CreateNode }
 	| { type: "UpdateNode", params: UpdateNode }
 	| { type: "UpdateNodeData", params: UpdateNodeData }
+	| { type: "UpdateNodeEncryptionKey", params: UpdateNodeEncryptionKey }
+	| { type: "RotateNodeEnvelopeKey", params: RotateNodeEnvelopeKey }
 	| { type: "DeleteNode", params: DeleteNode }
 	| { type: "BatchDeleteNodes", params: BatchDeleteNodes }
 	| { type: "CreateEncryptionKey", params: CreateEncryptionKey }
-	| { type: "UpdateEncryptionKey", params: UpdateEncryptionKey };
+	| { type: "UpdateEncryptionKey", params: UpdateEncryptionKey }
+	| { type: "InitializeEncryptionKey", params: InitializeEncryptionKey };
 

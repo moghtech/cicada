@@ -1,12 +1,13 @@
 use anyhow::Context as _;
 use axum::http::StatusCode;
 use cicada_client::{
-  api::write::encryption_key::{
-    CreateEncryptionKey, UpdateEncryptionKey,
+  api::write::encryption_key::UpdateEncryptionKey,
+  entities::encryption_key::{
+    EncryptionKeyKind, EncryptionKeyRecord,
   },
-  entities::encryption_key::EncryptionKeyRecord,
 };
 use mogh_error::AddStatusCode as _;
+use surrealdb_types::SurrealValue;
 
 use crate::db::DB;
 
@@ -25,13 +26,23 @@ pub async fn get_encryption_key(
     encryption_key_id,
   ))
   .await
-  .context("Failed to query database for node")?
-  .context("No node found with given ID")
+  .context("Failed to query database for encryption key")?
+  .context("No encryption key found with given ID")
   .status_code(StatusCode::NOT_FOUND)
 }
 
+#[derive(SurrealValue)]
+pub struct CreateEncryptionKeyQuery {
+  pub name: String,
+  pub kind: EncryptionKeyKind,
+  pub key: Option<String>,
+  pub verification: String,
+  pub verification_encrypted: String,
+  pub verification_nonce: String,
+}
+
 pub async fn create_encryption_key(
-  body: CreateEncryptionKey,
+  body: CreateEncryptionKeyQuery,
 ) -> anyhow::Result<EncryptionKeyRecord> {
   DB.create("EncryptionKey")
     .content(body)

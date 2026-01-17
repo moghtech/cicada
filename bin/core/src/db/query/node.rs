@@ -84,7 +84,6 @@ pub struct CreateNodeQuery {
   pub parent: Option<u64>,
   pub name: String,
   pub kind: Option<NodeKind>,
-  pub data: Option<EncryptedData>,
 }
 
 pub async fn create_node(

@@ -10,6 +10,32 @@ use crate::entities::Iso8601Timestamp;
 /// These keys are themselves encrypted using an [EncryptionKeyRecord],
 /// which can point to an in-memory key or a remote KMS.
 #[typeshare]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
+pub struct EncryptionKeyEntity {
+  /// The unique encryption key id
+  pub id: EncryptionKeyId,
+  /// The name of the encryption key. Must be unique.
+  pub name: String,
+  /// The kind of encryption key.
+  /// - Memory
+  /// - Disk
+  pub kind: EncryptionKeyKind,
+  /// For Memory keys:
+  /// Whether the key has been initialized.
+  pub initialized: bool,
+  /// Created at as ISO8601 timestamp.
+  #[cfg_attr(feature = "utoipa", schema(value_type = String))]
+  pub created_at: Iso8601Timestamp,
+  /// Updated at as ISO8601 timestamp.
+  #[cfg_attr(feature = "utoipa", schema(value_type = String))]
+  pub updated_at: Iso8601Timestamp,
+}
+
+/// Record fields are encrypted by storing them as [EncryptedData] type.
+/// These keys are themselves encrypted using an [EncryptionKeyRecord],
+/// which can point to an in-memory key or a remote KMS.
+#[typeshare]
 #[derive(Debug, Clone, Serialize, Deserialize, SurrealValue)]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 pub struct EncryptionKeyRecord {
@@ -24,6 +50,14 @@ pub struct EncryptionKeyRecord {
   /// For on disk keys (unsafe),
   /// store the base64url encoded key
   pub key: Option<String>,
+  /// 32 random bytes base64url encoded
+  pub verification: String,
+  /// verification bytes encrypted using the master key
+  /// and verification nonce.
+  pub verification_encrypted: String,
+  /// The nonce to use to verify that 'verification_encrypted'
+  /// decrypts to 'verification'.
+  pub verification_nonce: String,
   /// Created at as ISO8601 timestamp.
   #[cfg_attr(feature = "utoipa", schema(value_type = String))]
   pub created_at: Iso8601Timestamp,
@@ -83,4 +117,3 @@ impl SurrealValue for EncryptionKeyKind {
     kind.parse().context("Invalid EncryptionKeyKind")
   }
 }
-
