@@ -23,8 +23,6 @@ pub mod filesystem;
 pub mod node;
 /// Onboard device access.
 pub mod onboarding_key;
-/// Universal record identifier for Cicada entities.
-pub mod record_id;
 /// Cicada users.
 pub mod user;
 
