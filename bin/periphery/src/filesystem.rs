@@ -3,7 +3,7 @@ use std::{
   time::{Duration, UNIX_EPOCH},
 };
 
-use anyhow::Context;
+use anyhow::Context as _;
 use cicada_client::{
   api::read::node::{FindNode, ListNodes},
   entities::{

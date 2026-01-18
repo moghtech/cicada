@@ -26,6 +26,6 @@ impl Resolve<ReadArgs> for ListFilesystems {
     self,
     _: &ReadArgs,
   ) -> Result<Self::Response, Self::Error> {
-    list_all_filesystems().await.map_err(Into::into)
+    list_all_filesystems().await
   }
 }

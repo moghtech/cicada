@@ -1,4 +1,3 @@
-use anyhow::Context as _;
 use axum::http::StatusCode;
 use cicada_client::{
   api::{read::node::FindNode, write::node::UpdateNode},
@@ -9,6 +8,7 @@ use cicada_client::{
   },
 };
 use mogh_error::AddStatusCode as _;
+use mogh_error::anyhow::Context as _;
 use surrealdb_types::SurrealValue;
 
 use crate::db::DB;
@@ -16,7 +16,7 @@ use crate::db::DB;
 pub async fn list_nodes(
   filesystem: Option<FilesystemId>,
   parent: Option<u64>,
-) -> anyhow::Result<Vec<NodeListItem>> {
+) -> mogh_error::Result<Vec<NodeListItem>> {
   DB.query(
     "
 SELECT * OMIT data FROM Node 
@@ -30,6 +30,7 @@ ORDER BY kind DESC, name COLLATE ASC;",
   .context("Failed to query database for nodes")?
   .take(0)
   .context("Failed to get node query result")
+  .map_err(Into::into)
 }
 
 pub async fn get_node(
@@ -88,28 +89,30 @@ pub struct CreateNodeQuery {
 
 pub async fn create_node(
   body: CreateNodeQuery,
-) -> anyhow::Result<NodeRecord> {
+) -> mogh_error::Result<NodeRecord> {
   DB.create("Node")
     .content(body)
     .await
     .context("Failed to create Node on database")?
     .context("Failed to create Node on database: No creation result")
+    .map_err(Into::into)
 }
 
 pub async fn update_node(
   body: UpdateNode,
-) -> anyhow::Result<NodeRecord> {
+) -> mogh_error::Result<NodeRecord> {
   DB.update(body.id.as_record_id())
     .merge(serde_json::to_value(body)?)
     .await
     .context("Failed to update Node on database")?
     .context("Failed to update Node on database: No update result")
+    .status_code(StatusCode::NOT_FOUND)
 }
 
 pub async fn update_node_data(
   id: NodeId,
   data: Option<EncryptedData>,
-) -> anyhow::Result<NodeRecord> {
+) -> mogh_error::Result<NodeRecord> {
   #[derive(SurrealValue)]
   struct UpdateNodeDataQuery {
     data: Option<EncryptedData>,
@@ -119,6 +122,7 @@ pub async fn update_node_data(
     .await
     .context("Failed to update Node on database")?
     .context("Failed to update Node on database: No update result")
+    .map_err(Into::into)
 }
 
 pub async fn delete_node(
@@ -153,7 +157,7 @@ pub async fn delete_node(
 
 pub async fn batch_delete_nodes(
   ids: Vec<NodeId>,
-) -> anyhow::Result<Vec<NodeRecord>> {
+) -> mogh_error::Result<Vec<NodeRecord>> {
   if ids.is_empty() {
     return Ok(Vec::new());
   }
@@ -181,7 +185,8 @@ pub async fn batch_delete_nodes(
 pub fn batch_delete_nodes_rec(
   nodes: Vec<NodeListItem>,
   deleted: &mut Vec<NodeRecord>,
-) -> std::pin::Pin<Box<impl Future<Output = anyhow::Result<()>>>> {
+) -> std::pin::Pin<Box<impl Future<Output = mogh_error::Result<()>>>>
+{
   Box::pin(async {
     if nodes.is_empty() {
       return Ok(());

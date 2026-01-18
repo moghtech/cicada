@@ -847,7 +847,6 @@ dependencies = [
 name = "cicada_client"
 version = "0.1.0"
 dependencies = [
- "anyhow",
  "async_timing_util",
  "http 1.4.0",
  "mogh_auth_client",
@@ -870,7 +869,6 @@ dependencies = [
 name = "cicada_core"
 version = "0.1.0"
 dependencies = [
- "anyhow",
  "async_timing_util",
  "axum 0.8.8",
  "cicada_client",
@@ -2951,7 +2949,7 @@ dependencies = [
 
 [[package]]
 name = "mogh_error"
-version = "1.0.0"
+version = "1.0.3"
 dependencies = [
  "anyhow",
  "axum 0.8.8",
@@ -3282,7 +3280,7 @@ version = "5.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "51e219e79014df21a225b1860a479e2dcd7cbd9130f4defd4bd0e191ea31d67d"
 dependencies = [
- "base64 0.22.1",
+ "base64 0.21.7",
  "chrono",
  "getrandom 0.2.16",
  "http 1.4.0",

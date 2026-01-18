@@ -1,6 +1,5 @@
 use std::{path::PathBuf, sync::OnceLock};
 
-use anyhow::Context as _;
 use cicada_client::entities::config::{
   core::{CoreConfig, DatabaseConfig, Env},
   logger::LogConfig,
@@ -8,6 +7,7 @@ use cicada_client::entities::config::{
 use colored::Colorize as _;
 use mogh_auth_client::config::{NamedOauthConfig, OidcConfig};
 use mogh_config::ConfigLoader;
+use mogh_error::anyhow::Context as _;
 use mogh_pki::key::RotatableKeyPair;
 use mogh_secret_file::maybe_read_item_from_file;
 

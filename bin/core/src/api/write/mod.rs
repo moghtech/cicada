@@ -1,9 +1,9 @@
-use anyhow::Context as _;
 use axum::{Extension, Router, extract::Path, routing::post};
 use cicada_client::api::write::{
   device::*, encryption_key::*, filesystem::*, node::*,
   onboarding_key::*,
 };
+use mogh_error::anyhow::Context as _;
 use mogh_error::{Json, Response};
 use mogh_resolver::Resolve;
 use serde::{Deserialize, Serialize};

@@ -1,6 +1,5 @@
 use std::time::{SystemTime, UNIX_EPOCH};
 
-use anyhow::{Context as _, anyhow};
 use axum::{
   extract::{OriginalUri, Request},
   http::{HeaderMap, Method, StatusCode, Uri},
@@ -17,6 +16,7 @@ use cicada_client::{
 use futures_util::TryFutureExt as _;
 use mogh_auth_server::request_ip::RequestIp;
 use mogh_error::AddStatusCodeError as _;
+use mogh_error::anyhow::{Context as _, anyhow};
 use mogh_pki::{key::Pkcs8PrivateKey, one_way::OneWayNoiseHandshake};
 use mogh_rate_limit::WithFailureRateLimit as _;
 
@@ -107,7 +107,7 @@ pub async fn get_client_from_request(
   method: &Method,
   uri: &Uri,
   headers: &HeaderMap,
-) -> anyhow::Result<Client> {
+) -> mogh_error::Result<Client> {
   match (
     headers.get("authorization"),
     headers.get("x-api-type"),
@@ -122,7 +122,7 @@ pub async fn get_client_from_request(
       if user.enabled {
         Ok(Client::User(user))
       } else {
-        Err(anyhow!("Invalid client credentials"))
+        Err(anyhow!("Invalid client credentials").into())
       }
     }
     (None, Some(client_type), Some(signature), Some(timestamp)) => {
@@ -147,7 +147,7 @@ pub async fn get_client_from_request(
 
       // Ensure timestamp is ~now
       if (now - timestamp).abs() > 1_000 {
-        return Err(anyhow!("Invalid client credentials"));
+        return Err(anyhow!("Invalid client credentials").into());
       }
 
       let prologue = pki_auth_prologue(method, uri, timestamp);
@@ -178,7 +178,7 @@ pub async fn get_client_from_request(
           if device.enabled {
             Ok(Client::Device(device))
           } else {
-            Err(anyhow!("Invalid client credentials"))
+            Err(anyhow!("Invalid client credentials").into())
           }
         }
         // Check against onboarding key public keys
@@ -190,7 +190,7 @@ pub async fn get_client_from_request(
           if onboarding_key.enabled {
             Ok(Client::OnboardingKey(onboarding_key))
           } else {
-            Err(anyhow!("Invalid client credentials"))
+            Err(anyhow!("Invalid client credentials").into())
           }
         }
       }
@@ -199,7 +199,7 @@ pub async fn get_client_from_request(
       // AUTH FAIL
       Err(anyhow!(
         "Must attach either AUTHORIZATION header with jwt OR headers X-API-TYPE and X-API-SIGNATURE"
-      ))
+      ).into())
     }
   }
 }

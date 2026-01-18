@@ -1,17 +1,19 @@
-use anyhow::Context as _;
 use axum::http::StatusCode;
 use cicada_client::{
   api::write::device::{CreateDevice, UpdateDevice},
   entities::device::{DeviceId, DeviceRecord},
 };
 use mogh_error::AddStatusCode as _;
+use mogh_error::anyhow::Context as _;
 
 use crate::db::DB;
 
-pub async fn list_all_devices() -> anyhow::Result<Vec<DeviceRecord>> {
+pub async fn list_all_devices()
+-> mogh_error::Result<Vec<DeviceRecord>> {
   DB.select("Device")
     .await
     .context("Failed to query for Devices")
+    .map_err(Into::into)
 }
 
 pub async fn get_device(
@@ -26,7 +28,7 @@ pub async fn get_device(
 
 pub async fn find_device_with_public_key(
   public_key: String,
-) -> anyhow::Result<Option<DeviceRecord>> {
+) -> mogh_error::Result<Option<DeviceRecord>> {
   let device = DB
     .query("SELECT * FROM Device WHERE public_key = $public_key")
     .bind(("public_key", public_key))
@@ -40,7 +42,7 @@ pub async fn find_device_with_public_key(
 
 pub async fn create_device(
   body: CreateDevice,
-) -> anyhow::Result<DeviceRecord> {
+) -> mogh_error::Result<DeviceRecord> {
   DB.create("Device")
     .content(body)
     .await
@@ -48,16 +50,18 @@ pub async fn create_device(
     .context(
       "Failed to create Device on database: No creation result",
     )
+    .map_err(Into::into)
 }
 
 pub async fn update_device(
   body: UpdateDevice,
-) -> anyhow::Result<DeviceRecord> {
+) -> mogh_error::Result<DeviceRecord> {
   DB.update(body.id.as_record_id())
     .merge(serde_json::to_value(body)?)
     .await
     .context("Failed to update Device on database")?
     .context("Failed to update Device on database: No update result")
+    .map_err(Into::into)
 }
 
 pub async fn delete_device(
@@ -71,11 +75,12 @@ pub async fn delete_device(
 
 pub async fn batch_delete_devices(
   ids: Vec<DeviceId>,
-) -> anyhow::Result<Vec<DeviceRecord>> {
+) -> mogh_error::Result<Vec<DeviceRecord>> {
   DB.query("DELETE Device WHERE $ids.any(id) RETURN BEFORE;")
     .bind(("ids", ids))
     .await
     .context("Failed to delete devices")?
     .take(0)
     .context("Invalid delete device query response")
+    .map_err(Into::into)
 }

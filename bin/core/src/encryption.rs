@@ -1,6 +1,5 @@
 use std::sync::OnceLock;
 
-use anyhow::{Context, anyhow};
 use cicada_client::entities::{
   EncryptedData,
   encryption_key::{EncryptionKeyId, EncryptionKeyKind},
@@ -11,6 +10,7 @@ use futures_util::{StreamExt as _, stream::FuturesOrdered};
 use mogh_encryption::{
   AssociatedData, BASE64URL, EnvelopeEncryptedData, xchacha20poly1305,
 };
+use mogh_error::anyhow::{Context as _, anyhow};
 
 use crate::db::query;
 
@@ -21,7 +21,7 @@ impl EncryptionKeys {
   pub async fn get_or_insert_key(
     &self,
     id: &str,
-  ) -> anyhow::Result<[u8; 32]> {
+  ) -> mogh_error::Result<[u8; 32]> {
     if let Some(master_key) = self.0.get(id) {
       // Early exit without db query if already known
       // such query wouldn't be able to get the key.
@@ -40,7 +40,7 @@ impl EncryptionKeys {
         self.0.insert(id.to_string(), None);
         Err(anyhow!(
           "Missing in memory encryption key. Initialize it via API call."
-        ))
+        ).into())
       }
       EncryptionKeyKind::Disk => {
         let key = encryption_key
@@ -76,7 +76,7 @@ pub async fn encrypt_data<A: AssociatedData>(
   encryption_key_id: String,
   data: &[u8],
   associated_data: &A,
-) -> anyhow::Result<EncryptedData> {
+) -> mogh_error::Result<EncryptedData> {
   let master_key = encryption_keys()
     .get_or_insert_key(&encryption_key_id)
     .await?;
@@ -97,7 +97,7 @@ pub async fn encrypt_data<A: AssociatedData>(
 pub async fn decrypt_data<A: AssociatedData, T: TryFrom<Vec<u8>>>(
   data: EncryptedData,
   associated_data: &A,
-) -> anyhow::Result<Option<T>>
+) -> mogh_error::Result<Option<T>>
 where
   T::Error: Send + Sync + std::error::Error + 'static,
 {
@@ -133,7 +133,7 @@ pub async fn rotate_encryption_key<A: AssociatedData>(
   data: EncryptedData,
   associated_data: &A,
   new_encryption_key_id: String,
-) -> anyhow::Result<EncryptedData> {
+) -> mogh_error::Result<EncryptedData> {
   let old_master_key = encryption_keys()
     .get_or_insert_key(&data.encryption_key.0)
     .await?;
@@ -170,7 +170,7 @@ pub async fn rotate_encryption_key<A: AssociatedData>(
 pub async fn rotate_envelope_key<A: AssociatedData>(
   data: EncryptedData,
   associated_data: &A,
-) -> anyhow::Result<EncryptedData> {
+) -> mogh_error::Result<EncryptedData> {
   let encryption_key = data.encryption_key.clone();
   let data = decrypt_data::<A, Vec<u8>>(data, associated_data)
     .await?
@@ -180,7 +180,7 @@ pub async fn rotate_envelope_key<A: AssociatedData>(
 
 pub async fn decrypt_node(
   node: NodeRecord,
-) -> anyhow::Result<NodeEntity> {
+) -> mogh_error::Result<NodeEntity> {
   let (data, missing_key) = if let Some(data) = node.data {
     let key = data.encryption_key.clone();
     if let Some(data) = decrypt_data(data, &node.id.0).await? {
@@ -219,7 +219,7 @@ pub async fn decrypt_nodes(
     .filter_map(|node| {
       node
         .inspect_err(|e| {
-          warn!("Failed to decrypt node in list | {e:#}")
+          warn!("Failed to decrypt node in list | {:#}", e.error)
         })
         .ok()
     })
@@ -228,11 +228,11 @@ pub async fn decrypt_nodes(
 
 pub fn base64url_to_array<const LENGTH: usize>(
   base64url: &[u8],
-) -> anyhow::Result<[u8; LENGTH]> {
+) -> mogh_error::Result<[u8; LENGTH]> {
   let vec = BASE64URL
     .decode(base64url)
     .context("Invalid base64url encoding")?;
-  vec
-    .try_into()
-    .map_err(|_| anyhow!("Invalid decoded base64url bytes length"))
+  vec.try_into().map_err(|_| {
+    anyhow!("Invalid decoded base64url bytes length").into()
+  })
 }

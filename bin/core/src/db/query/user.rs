@@ -1,9 +1,9 @@
-use anyhow::Context as _;
 use cicada_client::entities::{
   external_login::{ExternalLoginKind, ExternalLoginRecord},
   user::{UserEntity, UserId, UserRecord},
 };
 use mogh_auth_client::passkey::Passkey;
+use mogh_error::{AddStatusCode, StatusCode, anyhow::Context as _};
 use serde::Serialize;
 use surrealdb_types::object;
 
@@ -11,7 +11,7 @@ use crate::db::DB;
 
 pub async fn get_user_entity(
   user_id: String,
-) -> anyhow::Result<UserEntity> {
+) -> mogh_error::Result<UserEntity> {
   let mut res = DB
     .query(
       "
@@ -24,7 +24,8 @@ pub async fn get_user_entity(
   let user = res
     .take::<Option<UserRecord>>(0)
     .context("Invalid user query response")?
-    .context("No user found at given ID")?;
+    .context("No user found at given ID")
+    .status_code(StatusCode::NOT_FOUND)?;
   let external_logins = res
     .take::<Vec<ExternalLoginRecord>>(1)
     .context("Invalid external login query response")?;
@@ -42,14 +43,17 @@ pub async fn get_user_entity(
   })
 }
 
-pub async fn get_user(user_id: &str) -> anyhow::Result<UserRecord> {
+pub async fn get_user(
+  user_id: &str,
+) -> mogh_error::Result<UserRecord> {
   DB.select::<Option<UserRecord>>(("User", user_id))
     .await
     .context("Failed to query database for user")?
     .context("No user found with given ID")
+    .status_code(StatusCode::NOT_FOUND)
 }
 
-pub async fn no_users_exist() -> anyhow::Result<bool> {
+pub async fn no_users_exist() -> mogh_error::Result<bool> {
   let no_users = DB
     .query("SELECT * FROM ONLY User LIMIT 1;")
     .await
@@ -62,19 +66,20 @@ pub async fn no_users_exist() -> anyhow::Result<bool> {
 
 pub async fn find_user_with_username(
   username: String,
-) -> anyhow::Result<Option<UserRecord>> {
+) -> mogh_error::Result<Option<UserRecord>> {
   DB.query("SELECT * FROM ONLY User WHERE username = $username;")
     .bind(("username", username))
     .await
     .context("Failed to query database for user")?
     .take(0)
     .context("Failed to deserialize UserRecord")
+    .map_err(Into::into)
 }
 
 pub async fn find_user_with_external_login(
   kind: ExternalLoginKind,
   external_id: String,
-) -> anyhow::Result<Option<UserRecord>> {
+) -> mogh_error::Result<Option<UserRecord>> {
   DB.query(
     "
     SELECT VALUE user.* FROM ONLY ExternalLogin
@@ -86,13 +91,14 @@ pub async fn find_user_with_external_login(
   .context("Failed to query database for user")?
   .take(0)
   .context("Failed to deserialize UserRecord")
+  .map_err(Into::into)
 }
 
 pub async fn sign_up_local_user(
   username: String,
   hashed_password: String,
   enabled: bool,
-) -> anyhow::Result<String> {
+) -> mogh_error::Result<String> {
   let user = DB
     .query("CREATE ONLY User SET username = $username, password = $password, enabled = $enabled;")
     .bind(("username", username))
@@ -111,7 +117,7 @@ pub async fn sign_up_external_user(
   kind: ExternalLoginKind,
   external_id: String,
   enabled: bool,
-) -> anyhow::Result<String> {
+) -> mogh_error::Result<String> {
   let user = DB
     .query(
       "
@@ -136,7 +142,7 @@ pub async fn link_external_login(
   user_id: String,
   kind: ExternalLoginKind,
   external_id: String,
-) -> anyhow::Result<ExternalLoginRecord> {
+) -> mogh_error::Result<ExternalLoginRecord> {
   DB.query("CREATE ONLY ExternalLogin SET user = $user, kind = $kind, external_id = $external_id;")
     .bind(("user", UserId(user_id)))
     .bind(("kind", kind))
@@ -146,12 +152,13 @@ pub async fn link_external_login(
     .take::<Option<ExternalLoginRecord>>(0)
     .context("Failed to deserialize ExternalLoginRecord")?
     .context("Missing external login creation response.")
+    .status_code(StatusCode::NOT_FOUND)
 }
 
 pub async fn unlink_external_login(
   user_id: String,
   kind: ExternalLoginKind,
-) -> anyhow::Result<ExternalLoginRecord> {
+) -> mogh_error::Result<ExternalLoginRecord> {
   DB.query("DELETE ExternalLogin WHERE user = $user AND kind = $kind RETURN BEFORE;")
     .bind(("user", UserId(user_id)))
     .bind(("kind", kind))
@@ -161,6 +168,7 @@ pub async fn unlink_external_login(
     .context("Failed to deserialize ExternalLoginRecord")?
     .pop()
     .context("Missing external login deletion response.")
+    .status_code(StatusCode::NOT_FOUND)
 }
 
 #[derive(Debug, Clone, Default, Serialize)]
@@ -182,12 +190,13 @@ pub struct UpdateUser {
 pub async fn update_user_fields(
   id: String,
   update: UpdateUser,
-) -> anyhow::Result<UserRecord> {
+) -> mogh_error::Result<UserRecord> {
   DB.update(("User", id))
     .merge(serde_json::to_value(update)?)
     .await
     .context("Failed to query database")?
     .context("No user update result")
+    .status_code(StatusCode::NOT_FOUND)
 }
 
 /// Because passkey is Option type,
@@ -196,7 +205,7 @@ pub async fn update_user_fields(
 pub async fn update_user_passkey(
   id: String,
   passkey: Option<Passkey>,
-) -> anyhow::Result<UserRecord> {
+) -> mogh_error::Result<UserRecord> {
   let passkey: Option<serde_json::Value> =
     if let Some(passkey) = passkey {
       serde_json::from_str(&serde_json::to_string(&passkey)?)?
@@ -208,4 +217,5 @@ pub async fn update_user_passkey(
     .await
     .context("Failed to query database")?
     .context("No user update result")
+    .status_code(StatusCode::NOT_FOUND)
 }

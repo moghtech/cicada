@@ -1,7 +1,7 @@
-use anyhow::Context;
 use cicada_client::{
   api::write::node::*, entities::node::NodeEntity,
 };
+use mogh_error::anyhow::Context as _;
 use mogh_resolver::Resolve;
 
 use crate::{
@@ -58,7 +58,7 @@ impl Resolve<WriteArgs> for CreateNode {
     } else {
       node
     };
-    decrypt_node(node).await.map_err(Into::into)
+    decrypt_node(node).await
   }
 }
 
@@ -83,7 +83,7 @@ impl Resolve<WriteArgs> for UpdateNode {
     _: &WriteArgs,
   ) -> Result<Self::Response, Self::Error> {
     let node = query::node::update_node(self).await?;
-    decrypt_node(node).await.map_err(Into::into)
+    decrypt_node(node).await
   }
 }
 
@@ -130,7 +130,7 @@ impl Resolve<WriteArgs> for UpdateNodeData {
     .await?;
     let node =
       query::node::update_node_data(self.id, data.into()).await?;
-    decrypt_node(node).await.map_err(Into::into)
+    decrypt_node(node).await
   }
 }
 
@@ -176,7 +176,7 @@ impl Resolve<WriteArgs> for UpdateNodeEncryptionKey {
         .await?;
     let node =
       query::node::update_node_data(self.id, data.into()).await?;
-    decrypt_node(node).await.map_err(Into::into)
+    decrypt_node(node).await
   }
 }
 
@@ -220,7 +220,7 @@ impl Resolve<WriteArgs> for RotateNodeEnvelopeKey {
     let data = rotate_envelope_key(data, &node.id.0).await?;
     let node =
       query::node::update_node_data(self.id, data.into()).await?;
-    decrypt_node(node).await.map_err(Into::into)
+    decrypt_node(node).await
   }
 }
 

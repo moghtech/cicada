@@ -1,6 +1,6 @@
 use std::sync::LazyLock;
 
-use anyhow::Context as _;
+use mogh_error::anyhow::Context as _;
 use surrealdb::{Surreal, engine::any::Any, opt::auth};
 
 use crate::config::core_config;
@@ -9,7 +9,7 @@ pub mod query;
 
 pub static DB: LazyLock<Surreal<Any>> = LazyLock::new(Surreal::init);
 
-pub async fn init() -> anyhow::Result<()> {
+pub async fn init() -> mogh_error::Result<()> {
   let config = core_config();
 
   DB.connect(&config.database.uri)

@@ -1,4 +1,3 @@
-use anyhow::{Context, anyhow};
 use axum::http::StatusCode;
 use cicada_client::{
   api::write::encryption_key::*,
@@ -6,6 +5,7 @@ use cicada_client::{
 };
 use mogh_encryption::{BASE64URL, xchacha20poly1305};
 use mogh_error::AddStatusCodeError;
+use mogh_error::anyhow::{Context as _, anyhow};
 use mogh_resolver::Resolve;
 
 use crate::{
@@ -97,9 +97,7 @@ impl Resolve<WriteArgs> for UpdateEncryptionKey {
     self,
     _: &WriteArgs,
   ) -> Result<Self::Response, Self::Error> {
-    query::encryption_key::update_encryption_key(self)
-      .await
-      .map_err(Into::into)
+    query::encryption_key::update_encryption_key(self).await
   }
 }
 

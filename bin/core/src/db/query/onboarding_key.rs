@@ -1,4 +1,3 @@
-use anyhow::Context as _;
 use axum::http::StatusCode;
 use cicada_client::{
   api::write::onboarding_key::{
@@ -7,14 +6,16 @@ use cicada_client::{
   entities::onboarding_key::{OnboardingKeyId, OnboardingKeyRecord},
 };
 use mogh_error::AddStatusCode as _;
+use mogh_error::anyhow::Context as _;
 
 use crate::db::DB;
 
 pub async fn list_all_onboarding_keys()
--> anyhow::Result<Vec<OnboardingKeyRecord>> {
+-> mogh_error::Result<Vec<OnboardingKeyRecord>> {
   DB.select("OnboardingKey")
     .await
     .context("Failed to query for OnboardingKeys")
+    .map_err(Into::into)
 }
 
 pub async fn get_onboarding_key(
@@ -32,7 +33,7 @@ pub async fn get_onboarding_key(
 
 pub async fn find_onboarding_key_with_public_key(
   public_key: String,
-) -> anyhow::Result<Option<OnboardingKeyRecord>> {
+) -> mogh_error::Result<Option<OnboardingKeyRecord>> {
   let onboarding_key = DB
     .query(
       "SELECT * FROM OnboardingKey WHERE public_key = $public_key",
@@ -48,7 +49,7 @@ pub async fn find_onboarding_key_with_public_key(
 
 pub async fn create_onboarding_key(
   body: CreateOnboardingKey,
-) -> anyhow::Result<OnboardingKeyRecord> {
+) -> mogh_error::Result<OnboardingKeyRecord> {
   DB.create("OnboardingKey")
     .content(body)
     .await
@@ -56,11 +57,12 @@ pub async fn create_onboarding_key(
     .context(
       "Failed to create OnboardingKey on database: No creation result",
     )
+    .map_err(Into::into)
 }
 
 pub async fn update_onboarding_key(
   body: UpdateOnboardingKey,
-) -> anyhow::Result<OnboardingKeyRecord> {
+) -> mogh_error::Result<OnboardingKeyRecord> {
   DB.update(body.id.as_record_id())
     .merge(serde_json::to_value(body)?)
     .await
@@ -68,6 +70,7 @@ pub async fn update_onboarding_key(
     .context(
       "Failed to update OnboardingKey on database: No update result",
     )
+    .status_code(StatusCode::NOT_FOUND)
 }
 
 pub async fn delete_onboarding_key(
@@ -81,11 +84,12 @@ pub async fn delete_onboarding_key(
 
 pub async fn batch_delete_onboarding_keys(
   ids: Vec<OnboardingKeyId>,
-) -> anyhow::Result<Vec<OnboardingKeyRecord>> {
+) -> mogh_error::Result<Vec<OnboardingKeyRecord>> {
   DB.query("DELETE OnboardingKey WHERE $ids.any(id) RETURN BEFORE;")
     .bind(("ids", ids))
     .await
     .context("Failed to delete onboarding keys")?
     .take(0)
     .context("Invalid delete onboarding keys query response")
+    .map_err(Into::into)
 }

@@ -24,7 +24,7 @@ impl Resolve<ReadArgs> for ListDevices {
     self,
     _: &ReadArgs,
   ) -> Result<Self::Response, Self::Error> {
-    query::device::list_all_devices().await.map_err(Into::into)
+    query::device::list_all_devices().await
   }
 }
 

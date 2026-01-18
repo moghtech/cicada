@@ -11,7 +11,7 @@ mod config;
 mod db;
 mod encryption;
 
-async fn app() -> anyhow::Result<()> {
+async fn app() -> mogh_error::Result<()> {
   dotenvy::dotenv().ok();
   let config = core_config();
   mogh_logger::init(&config.logging)?;
@@ -37,21 +37,25 @@ async fn app() -> anyhow::Result<()> {
     rustls::crypto::aws_lc_rs::default_provider()
       .install_default()
       .map_err(|_| {
-        anyhow::Error::msg("Failed to install tls crypto provider")
+        mogh_error::Error::msg(
+          "Failed to install tls crypto provider",
+        )
       })?;
 
     db::init().await?;
 
-    anyhow::Ok(())
+    mogh_error::Ok(())
   }
   .instrument(startup_span)
   .await?;
 
-  mogh_server::serve_app(api::app(), config).await
+  mogh_server::serve_app(api::app(), config)
+    .await
+    .map_err(Into::into)
 }
 
 #[tokio::main]
-async fn main() -> anyhow::Result<()> {
+async fn main() -> mogh_error::Result<()> {
   let mut term_signal = tokio::signal::unix::signal(
     tokio::signal::unix::SignalKind::terminate(),
   )?;

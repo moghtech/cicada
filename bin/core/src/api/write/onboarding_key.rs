@@ -66,9 +66,7 @@ impl Resolve<WriteArgs> for UpdateOnboardingKey {
     self,
     _: &WriteArgs,
   ) -> Result<Self::Response, Self::Error> {
-    query::onboarding_key::update_onboarding_key(self)
-      .await
-      .map_err(Into::into)
+    query::onboarding_key::update_onboarding_key(self).await
   }
 }
 
@@ -117,6 +115,5 @@ impl Resolve<WriteArgs> for BatchDeleteOnboardingKeys {
   ) -> Result<Self::Response, Self::Error> {
     query::onboarding_key::batch_delete_onboarding_keys(self.ids)
       .await
-      .map_err(Into::into)
   }
 }

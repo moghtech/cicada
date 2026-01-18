@@ -1,4 +1,4 @@
-use anyhow::Context;
+use mogh_error::anyhow::{self, Context as _};
 use serde::{Deserialize, Serialize};
 use strum::{AsRefStr, Display, EnumString};
 use surrealdb_types::{RecordId, RecordIdKey, SurrealValue};

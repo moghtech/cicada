@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use anyhow::Context;
+use mogh_error::anyhow::{self, Context as _};
 use serde::{Deserialize, Serialize};
 use strum::{AsRefStr, Display, EnumDiscriminants, EnumString};
 use surrealdb_types::{RecordIdKey, SurrealValue};

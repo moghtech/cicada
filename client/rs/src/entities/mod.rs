@@ -1,6 +1,6 @@
 use std::str::FromStr as _;
 
-use anyhow::Context as _;
+use mogh_error::anyhow::{self, Context as _};
 use serde::{Deserialize, Serialize};
 use strum::{AsRefStr, Display, EnumString};
 use surrealdb_types::SurrealValue;
@@ -245,15 +245,19 @@ macro_rules! surreal_id {
 
       fn from_value(
         value: surrealdb_types::Value,
-      ) -> anyhow::Result<Self>
+      ) -> mogh_error::anyhow::Result<Self>
       where
         Self: Sized,
       {
         let surrealdb_types::Value::RecordId(id) = value else {
-          return Err(anyhow::anyhow!("Value is not RecordId"));
+          return Err(mogh_error::anyhow::anyhow!(
+            "Value is not RecordId"
+          ));
         };
         let RecordIdKey::String(id) = id.key else {
-          return Err(anyhow::anyhow!("RecordIdKey is not String"));
+          return Err(mogh_error::anyhow::anyhow!(
+            "RecordIdKey is not String"
+          ));
         };
         Ok(Self(id))
       }

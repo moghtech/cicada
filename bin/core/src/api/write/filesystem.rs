@@ -22,9 +22,7 @@ impl Resolve<WriteArgs> for CreateFilesystem {
     WriteArgs { client }: &WriteArgs,
   ) -> Result<Self::Response, Self::Error> {
     let _user = client.as_user()?;
-    query::filesystem::create_filesystem(self)
-      .await
-      .map_err(Into::into)
+    query::filesystem::create_filesystem(self).await
   }
 }
 
@@ -48,9 +46,7 @@ impl Resolve<WriteArgs> for UpdateFilesystem {
     self,
     _: &WriteArgs,
   ) -> Result<Self::Response, Self::Error> {
-    query::filesystem::update_filesystem(self)
-      .await
-      .map_err(Into::into)
+    query::filesystem::update_filesystem(self).await
   }
 }
 

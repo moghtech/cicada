@@ -26,9 +26,7 @@ impl Resolve<ReadArgs> for ListNodes {
     self,
     _: &ReadArgs,
   ) -> Result<Self::Response, Self::Error> {
-    query::node::list_nodes(self.filesystem, self.parent)
-      .await
-      .map_err(Into::into)
+    query::node::list_nodes(self.filesystem, self.parent).await
   }
 }
 
@@ -52,7 +50,7 @@ impl Resolve<ReadArgs> for GetNode {
     _: &ReadArgs,
   ) -> Result<Self::Response, Self::Error> {
     let node = query::node::get_node(&self.id.0).await?;
-    decrypt_node(node).await.map_err(Into::into)
+    decrypt_node(node).await
   }
 }
 
@@ -76,6 +74,6 @@ impl Resolve<ReadArgs> for FindNode {
     _: &ReadArgs,
   ) -> Result<Self::Response, Self::Error> {
     let node = query::node::find_node(self).await?;
-    decrypt_node(node).await.map_err(Into::into)
+    decrypt_node(node).await
   }
 }

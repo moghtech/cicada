@@ -3,11 +3,11 @@ use std::{
   time::{SystemTime, UNIX_EPOCH},
 };
 
-use anyhow::{Context, anyhow};
 use http::{Method, Uri};
 use mogh_auth_client::api::{
   login::MoghAuthLoginRequest, manage::MoghAuthManageRequest,
 };
+use mogh_error::anyhow::{self, Context, anyhow};
 use mogh_error::deserialize_error;
 use mogh_pki::one_way::OneWayNoiseHandshake;
 use serde::{Serialize, de::DeserializeOwned};

@@ -155,7 +155,7 @@ impl AuthImpl for CicadaAuthImpl {
   fn no_users_exist(
     &self,
   ) -> mogh_auth_server::DynFuture<mogh_error::Result<bool>> {
-    Box::pin(async { no_users_exist().await.map_err(Into::into) })
+    Box::pin(async { no_users_exist().await })
   }
 
   fn locked_usernames(&self) -> &'static [String] {
@@ -215,7 +215,6 @@ impl AuthImpl for CicadaAuthImpl {
         no_users_exist || core_config().enable_new_users,
       )
       .await
-      .map_err(Into::into)
     })
   }
 
@@ -248,7 +247,6 @@ impl AuthImpl for CicadaAuthImpl {
       )
       .await
       .map(|_| ())
-      .map_err(Into::into)
     })
   }
 
@@ -267,7 +265,6 @@ impl AuthImpl for CicadaAuthImpl {
       )
       .await
       .map(|_| ())
-      .map_err(Into::into)
     })
   }
 
@@ -310,7 +307,6 @@ impl AuthImpl for CicadaAuthImpl {
         no_users_exist || core_config().enable_new_users,
       )
       .await
-      .map_err(Into::into)
     })
   }
 
@@ -327,7 +323,6 @@ impl AuthImpl for CicadaAuthImpl {
       )
       .await
       .map(|_| ())
-      .map_err(Into::into)
     })
   }
 
@@ -369,7 +364,6 @@ impl AuthImpl for CicadaAuthImpl {
       )
       .await
       .map(|_| ())
-      .map_err(Into::into)
     })
   }
 
@@ -387,7 +381,6 @@ impl AuthImpl for CicadaAuthImpl {
         no_users_exist || core_config().enable_new_users,
       )
       .await
-      .map_err(Into::into)
     })
   }
 
@@ -429,7 +422,6 @@ impl AuthImpl for CicadaAuthImpl {
       )
       .await
       .map(|_| ())
-      .map_err(Into::into)
     })
   }
 
@@ -447,7 +439,6 @@ impl AuthImpl for CicadaAuthImpl {
         no_users_exist || core_config().enable_new_users,
       )
       .await
-      .map_err(Into::into)
     })
   }
 
@@ -470,8 +461,7 @@ impl AuthImpl for CicadaAuthImpl {
           };
           return update_user_fields(user_id, update)
             .await
-            .map(|_| ())
-            .map_err(Into::into);
+            .map(|_| ());
         }
         LoginProvider::Oidc => ExternalLoginKind::Oidc,
         LoginProvider::Github => ExternalLoginKind::Github,
@@ -492,10 +482,7 @@ impl AuthImpl for CicadaAuthImpl {
     passkey: Option<Passkey>,
   ) -> mogh_auth_server::DynFuture<mogh_error::Result<()>> {
     Box::pin(async {
-      update_user_passkey(user_id, passkey)
-        .await
-        .map(|_| ())
-        .map_err(Into::into)
+      update_user_passkey(user_id, passkey).await.map(|_| ())
     })
   }
 
@@ -519,7 +506,6 @@ impl AuthImpl for CicadaAuthImpl {
       )
       .await
       .map(|_| ())
-      .map_err(Into::into)
     })
   }
 
@@ -537,7 +523,6 @@ impl AuthImpl for CicadaAuthImpl {
       )
       .await
       .map(|_| ())
-      .map_err(Into::into)
     })
   }
 
@@ -559,7 +544,6 @@ impl AuthImpl for CicadaAuthImpl {
       )
       .await
       .map(|_| ())
-      .map_err(Into::into)
     })
   }
 }

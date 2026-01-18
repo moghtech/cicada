@@ -21,9 +21,7 @@ impl Resolve<ReadArgs> for ListOnboardingKeys {
     self,
     _: &ReadArgs,
   ) -> Result<Self::Response, Self::Error> {
-    query::onboarding_key::list_all_onboarding_keys()
-      .await
-      .map_err(Into::into)
+    query::onboarding_key::list_all_onboarding_keys().await
   }
 }
 

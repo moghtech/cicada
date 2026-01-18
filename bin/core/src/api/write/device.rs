@@ -21,7 +21,7 @@ impl Resolve<WriteArgs> for CreateDevice {
     self,
     _: &WriteArgs,
   ) -> Result<Self::Response, Self::Error> {
-    query::device::create_device(self).await.map_err(Into::into)
+    query::device::create_device(self).await
   }
 }
 
@@ -45,7 +45,7 @@ impl Resolve<WriteArgs> for UpdateDevice {
     self,
     _: &WriteArgs,
   ) -> Result<Self::Response, Self::Error> {
-    query::device::update_device(self).await.map_err(Into::into)
+    query::device::update_device(self).await
   }
 }
 
@@ -92,8 +92,6 @@ impl Resolve<WriteArgs> for BatchDeleteDevices {
     self,
     _: &WriteArgs,
   ) -> Result<Self::Response, Self::Error> {
-    query::device::batch_delete_devices(self.ids)
-      .await
-      .map_err(Into::into)
+    query::device::batch_delete_devices(self.ids).await
   }
 }

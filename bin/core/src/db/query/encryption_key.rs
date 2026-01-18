@@ -1,4 +1,3 @@
-use anyhow::Context as _;
 use axum::http::StatusCode;
 use cicada_client::{
   api::write::encryption_key::UpdateEncryptionKey,
@@ -7,15 +6,17 @@ use cicada_client::{
   },
 };
 use mogh_error::AddStatusCode as _;
+use mogh_error::anyhow::Context as _;
 use surrealdb_types::SurrealValue;
 
 use crate::db::DB;
 
 pub async fn list_all_encryption_keys()
--> anyhow::Result<Vec<EncryptionKeyRecord>> {
+-> mogh_error::Result<Vec<EncryptionKeyRecord>> {
   DB.select("EncryptionKey")
     .await
     .context("Failed to query for EncryptionKeys")
+    .map_err(Into::into)
 }
 
 pub async fn get_encryption_key(
@@ -43,7 +44,7 @@ pub struct CreateEncryptionKeyQuery {
 
 pub async fn create_encryption_key(
   body: CreateEncryptionKeyQuery,
-) -> anyhow::Result<EncryptionKeyRecord> {
+) -> mogh_error::Result<EncryptionKeyRecord> {
   DB.create("EncryptionKey")
     .content(body)
     .await
@@ -51,11 +52,12 @@ pub async fn create_encryption_key(
     .context(
       "Failed to create EncryptionKey on database: No creation result",
     )
+    .map_err(Into::into)
 }
 
 pub async fn update_encryption_key(
   body: UpdateEncryptionKey,
-) -> anyhow::Result<EncryptionKeyRecord> {
+) -> mogh_error::Result<EncryptionKeyRecord> {
   DB.update(body.id.as_record_id())
     .merge(serde_json::to_value(body)?)
     .await
@@ -63,4 +65,5 @@ pub async fn update_encryption_key(
     .context(
       "Failed to update EncryptionKey on database: No update result",
     )
+    .map_err(Into::into)
 }
