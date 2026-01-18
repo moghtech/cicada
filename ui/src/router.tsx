@@ -30,7 +30,7 @@ export const Router = () => {
 
   if (jwt_redeem_ready) {
     return (
-      <Center>
+      <Center mt="30vh">
         <Loader size="xl" />
       </Center>
     );
@@ -83,7 +83,7 @@ const RequireAuth = () => {
     // Will just show the spinner without navigate to login,
     // which won't help because its not a login issue.
     return (
-      <Center>
+      <Center mt="30vh">
         <Loader size="xl" />
       </Center>
     );

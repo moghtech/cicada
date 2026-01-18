@@ -35,3 +35,12 @@ DEFINE INDEX OVERWRITE Name
 DEFINE FUNCTION OVERWRITE fn::first_filesystem() {
   RETURN (SELECT id, created_at FROM Filesystem ORDER BY created_at LIMIT 1)[0].id
 };
+
+----------
+-- Init --
+----------
+
+-- Initializes a default filesystem if none exist
+IF fn::first_filesystem() = NONE {
+  CREATE Filesystem SET name = "Default";
+}
