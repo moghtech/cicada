@@ -49,7 +49,7 @@ async fn app() -> mogh_error::Result<()> {
   .instrument(startup_span)
   .await?;
 
-  mogh_server::serve_app(api::app(), config)
+  mogh_server::serve_app(api::app(), config, None)
     .await
     .map_err(Into::into)
 }

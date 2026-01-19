@@ -355,6 +355,7 @@ impl AuthImpl for CicadaAuthImpl {
     &self,
     user_id: String,
     github_id: String,
+    _avatar_url: String,
   ) -> mogh_auth_server::DynFuture<mogh_error::Result<()>> {
     Box::pin(async move {
       link_external_login(
@@ -371,6 +372,7 @@ impl AuthImpl for CicadaAuthImpl {
     &self,
     username: String,
     github_id: String,
+    _avatar_url: String,
     no_users_exist: bool,
   ) -> mogh_auth_server::DynFuture<mogh_error::Result<String>> {
     Box::pin(async move {
@@ -413,6 +415,7 @@ impl AuthImpl for CicadaAuthImpl {
     &self,
     user_id: String,
     google_id: String,
+    _avatar_url: String,
   ) -> mogh_auth_server::DynFuture<mogh_error::Result<()>> {
     Box::pin(async move {
       link_external_login(
@@ -429,6 +432,7 @@ impl AuthImpl for CicadaAuthImpl {
     &self,
     username: String,
     google_id: String,
+    _avatar_url: String,
     no_users_exist: bool,
   ) -> mogh_auth_server::DynFuture<mogh_error::Result<String>> {
     Box::pin(async move {

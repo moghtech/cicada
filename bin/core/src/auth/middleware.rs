@@ -17,7 +17,7 @@ use futures_util::TryFutureExt as _;
 use mogh_auth_server::request_ip::RequestIp;
 use mogh_error::AddStatusCodeError as _;
 use mogh_error::anyhow::{Context as _, anyhow};
-use mogh_pki::{key::Pkcs8PrivateKey, one_way::OneWayNoiseHandshake};
+use mogh_pki::{Pkcs8PrivateKey, one_way::OneWayNoiseHandshake};
 use mogh_rate_limit::WithFailureRateLimit as _;
 
 use crate::{

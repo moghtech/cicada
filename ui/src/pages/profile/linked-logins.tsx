@@ -12,7 +12,9 @@ const useLinkWithExternalLogin = () => {
   const { mutateAsync } = useManageAuth("BeginExternalLoginLink");
   return (provider: MoghAuth.Types.ExternalLoginProvider) =>
     mutateAsync({}).then(() =>
-      location.replace(`${CICADA_BASE_URL}/auth/${provider.toLowerCase()}/link`)
+      location.replace(
+        `${CICADA_BASE_URL}/auth/${provider.toLowerCase()}/link`,
+      ),
     );
 };
 
@@ -31,29 +33,29 @@ export const LinkedLogins = ({
   }> = useMemo(() => {
     return [
       {
-        provider: "Local" as MoghAuth.Types.LoginProvider,
+        provider: MoghAuth.Types.LoginProvider.Local,
         enabled: !!options?.local,
         data: user.password ? "########" : undefined,
       },
       {
-        provider: "Oidc" as MoghAuth.Types.LoginProvider,
+        provider: MoghAuth.Types.LoginProvider.Oidc,
         enabled: !!options?.oidc,
         data: user.external_logins.find(
-          (login) => login.kind === Types.ExternalLoginKind.Oidc
+          (login) => login.kind === Types.ExternalLoginKind.Oidc,
         )?.external_id,
       },
       {
-        provider: "Github" as MoghAuth.Types.LoginProvider,
+        provider: MoghAuth.Types.LoginProvider.Github,
         enabled: !!options?.github,
         data: user.external_logins.find(
-          (login) => login.kind === Types.ExternalLoginKind.Github
+          (login) => login.kind === Types.ExternalLoginKind.Github,
         )?.external_id,
       },
       {
-        provider: "Google" as MoghAuth.Types.LoginProvider,
+        provider: MoghAuth.Types.LoginProvider.Google,
         enabled: !!options?.google,
         data: user.external_logins.find(
-          (login) => login.kind === Types.ExternalLoginKind.Google
+          (login) => login.kind === Types.ExternalLoginKind.Google,
         )?.external_id,
       },
     ].filter(({ enabled }) => enabled);

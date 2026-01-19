@@ -6,7 +6,7 @@ use cicada_client::entities::config::{
 };
 use colored::Colorize;
 use mogh_config::ConfigLoader;
-use mogh_pki::key::{RotatableKeyPair, SpkiPublicKey};
+use mogh_pki::{RotatableKeyPair, SpkiPublicKey};
 use mogh_secret_file::maybe_read_item_from_file;
 
 /// Should call in startup to ensure Periphery errors without valid private key.
@@ -14,7 +14,7 @@ pub fn periphery_keys() -> &'static RotatableKeyPair {
   static PERIPHERY_KEYS: OnceLock<RotatableKeyPair> = OnceLock::new();
   PERIPHERY_KEYS.get_or_init(|| {
     RotatableKeyPair::from_private_key_spec(
-      mogh_pki::PkiType::OneWay,
+      mogh_pki::PkiKind::OneWay,
       &periphery_config().private_key,
     )
     .unwrap()

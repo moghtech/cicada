@@ -8,7 +8,7 @@ use colored::Colorize as _;
 use mogh_auth_client::config::{NamedOauthConfig, OidcConfig};
 use mogh_config::ConfigLoader;
 use mogh_error::anyhow::Context as _;
-use mogh_pki::key::RotatableKeyPair;
+use mogh_pki::RotatableKeyPair;
 use mogh_secret_file::maybe_read_item_from_file;
 
 /// Should call in startup to ensure Core errors without valid private key.
@@ -16,7 +16,7 @@ pub fn core_keys() -> &'static RotatableKeyPair {
   static CORE_KEYS: OnceLock<RotatableKeyPair> = OnceLock::new();
   CORE_KEYS.get_or_init(|| {
     RotatableKeyPair::from_private_key_spec(
-      mogh_pki::PkiType::OneWay,
+      mogh_pki::PkiKind::OneWay,
       &core_config().private_key,
     )
     .unwrap()

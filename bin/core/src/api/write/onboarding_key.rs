@@ -1,5 +1,5 @@
 use cicada_client::api::write::onboarding_key::*;
-use mogh_pki::key::EncodedKeyPair;
+use mogh_pki::EncodedKeyPair;
 use mogh_resolver::Resolve;
 
 use crate::{api::write::WriteArgs, db::query};
@@ -28,7 +28,7 @@ impl Resolve<WriteArgs> for CreateOnboardingKey {
     {
       (None, public_key)
     } else {
-      let keys = EncodedKeyPair::generate(mogh_pki::PkiType::OneWay)?;
+      let keys = EncodedKeyPair::generate(mogh_pki::PkiKind::OneWay)?;
       (Some(keys.private.into_inner()), keys.public.into_inner())
     };
     let created = query::onboarding_key::create_onboarding_key(
