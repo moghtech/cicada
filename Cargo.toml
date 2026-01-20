@@ -33,8 +33,8 @@ cicada_client = { path = "client/rs" }
 
 # MOGH
 mogh_error = { version = "1.0.3", default-features = false }
-mogh_auth_client = "0.1.0"
-mogh_auth_server = "0.2.0"
+mogh_auth_client = "1.0.0"
+mogh_auth_server = "1.0.0"
 mogh_secret_file = "1.0.0"
 mogh_config = "1.0.1"
 mogh_encryption = "0.1.0"

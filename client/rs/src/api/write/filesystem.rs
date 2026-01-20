@@ -10,6 +10,19 @@ use crate::{
 
 //
 
+#[cfg(feature = "utoipa")]
+#[utoipa::path(
+  post,
+  path = "/write/CreateFilesystem",
+  description = "Create a new filesystem",
+  request_body(content = CreateFilesystem),
+  responses(
+    (status = 200, description = "The created filesystem", body = CreateFilesystemResponse),
+    (status = 500, description = "Request failed", body = mogh_error::Serror)
+  ),
+)]
+pub fn create_filesystem() {}
+
 /// Create a filesystem. Response: [CreateFilesystemResponse].
 #[typeshare]
 #[derive(
@@ -29,6 +42,19 @@ pub struct CreateFilesystem {
 pub type CreateFilesystemResponse = FilesystemRecord;
 
 //
+
+#[cfg(feature = "utoipa")]
+#[utoipa::path(
+  post,
+  path = "/write/UpdateFilesystem",
+  description = "Update a filesystem",
+  request_body(content = UpdateFilesystem),
+  responses(
+    (status = 200, description = "The updated filesystem", body = UpdateFilesystemResponse),
+    (status = 500, description = "Request failed", body = mogh_error::Serror)
+  ),
+)]
+pub fn update_filesystem() {}
 
 /// Update a filesystem. Response: [UpdateFilesystemResponse].
 #[typeshare]
@@ -52,6 +78,20 @@ pub struct UpdateFilesystem {
 pub type UpdateFilesystemResponse = FilesystemRecord;
 
 //
+
+#[cfg(feature = "utoipa")]
+#[utoipa::path(
+  post,
+  path = "/write/DeleteFilesystem",
+  description = "Delete a filesystem",
+  request_body(content = DeleteFilesystem),
+  responses(
+    (status = 200, description = "The deleted filesystem", body = DeleteFilesystemResponse),
+    (status = 404, description = "Filesystem not found", body = mogh_error::Serror),
+    (status = 500, description = "Request failed", body = mogh_error::Serror)
+  ),
+)]
+pub fn delete_filesystem() {}
 
 /// Delete a filesystem. Response: [DeleteFilesystemResponse].
 ///

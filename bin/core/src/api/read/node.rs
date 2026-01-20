@@ -1,25 +1,9 @@
-use cicada_client::{
-  api::read::node::{FindNode, GetNode, ListNodes},
-  entities::node::{NodeListItem, NodeRecord},
-};
+use cicada_client::api::read::node::{FindNode, GetNode, ListNodes};
 use mogh_resolver::Resolve;
 
 use crate::{
   api::read::ReadArgs, db::query, encryption::decrypt_node,
 };
-
-#[allow(unused)]
-#[utoipa::path(
-  post,
-  path = "/read/ListNodes",
-  description = "List available folders and files",
-  request_body(content = ListNodes),
-  responses(
-    (status = 200, description = "List of filesystem nodes", body = Vec<NodeListItem>),
-    (status = 500, description = "Request failed", body = mogh_error::Serror)
-  ),
-)]
-pub fn list_nodes() {}
 
 impl Resolve<ReadArgs> for ListNodes {
   async fn resolve(
@@ -30,20 +14,6 @@ impl Resolve<ReadArgs> for ListNodes {
   }
 }
 
-#[allow(unused)]
-#[utoipa::path(
-  post,
-  path = "/read/GetNode",
-  description = "Get a folder or file by id",
-  request_body(content = GetNode),
-  responses(
-    (status = 200, description = "The filesystem node", body = NodeRecord),
-    (status = 404, description = "Failed to find node with given id", body = mogh_error::Serror),
-    (status = 500, description = "Request failed", body = mogh_error::Serror),
-  ),
-)]
-pub fn get_node() {}
-
 impl Resolve<ReadArgs> for GetNode {
   async fn resolve(
     self,
@@ -53,20 +23,6 @@ impl Resolve<ReadArgs> for GetNode {
     decrypt_node(node).await
   }
 }
-
-#[allow(unused)]
-#[utoipa::path(
-  post,
-  path = "/read/FindNode",
-  description = "Find a node by filesystem + inode OR filesystem + parent inode + name",
-  request_body(content = FindNode),
-  responses(
-    (status = 200, description = "The filesystem node", body = NodeRecord),
-    (status = 404, description = "Failed to find node with given parameters", body = mogh_error::Serror),
-    (status = 500, description = "Request failed", body = mogh_error::Serror),
-  ),
-)]
-pub fn find_node() {}
 
 impl Resolve<ReadArgs> for FindNode {
   async fn resolve(

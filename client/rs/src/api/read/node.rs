@@ -13,6 +13,19 @@ use crate::{
 
 //
 
+#[cfg(feature = "utoipa")]
+#[utoipa::path(
+  post,
+  path = "/read/ListNodes",
+  description = "List available folders and files for a filesystem.",
+  request_body(content = ListNodes),
+  responses(
+    (status = 200, description = "List of filesystem nodes", body = ListNodesResponse),
+    (status = 500, description = "Request failed", body = mogh_error::Serror)
+  ),
+)]
+pub fn list_nodes() {}
+
 /// List filesystem nodes. Response: [ListNodesResponse].
 #[typeshare]
 #[derive(Debug, Clone, Serialize, Deserialize, Resolve)]
@@ -34,6 +47,20 @@ pub type ListNodesResponse = Vec<NodeListItem>;
 
 //
 
+#[cfg(feature = "utoipa")]
+#[utoipa::path(
+  post,
+  path = "/read/GetNode",
+  description = "Get a folder or file by id",
+  request_body(content = GetNode),
+  responses(
+    (status = 200, description = "The filesystem node", body = GetNodeResponse),
+    (status = 404, description = "Failed to find node with given id", body = mogh_error::Serror),
+    (status = 500, description = "Request failed", body = mogh_error::Serror),
+  ),
+)]
+pub fn get_node() {}
+
 /// Get a node. Response: [NodeEntity].
 #[typeshare]
 #[derive(Debug, Clone, Serialize, Deserialize, Resolve)]
@@ -51,6 +78,20 @@ pub struct GetNode {
 pub type GetNodeResponse = NodeEntity;
 
 //
+
+#[cfg(feature = "utoipa")]
+#[utoipa::path(
+  post,
+  path = "/read/FindNode",
+  description = "Find a node by filesystem + inode OR filesystem + parent inode + name",
+  request_body(content = FindNode),
+  responses(
+    (status = 200, description = "The filesystem node", body = FindNodeResponse),
+    (status = 404, description = "Failed to find node with given parameters", body = mogh_error::Serror),
+    (status = 500, description = "Request failed", body = mogh_error::Serror),
+  ),
+)]
+pub fn find_node() {}
 
 /// Find a node. Response: [NodeEntity].
 ///

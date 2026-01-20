@@ -14,19 +14,6 @@ use crate::{
   encryption::{base64url_to_array, encryption_keys},
 };
 
-#[allow(unused)]
-#[utoipa::path(
-  post,
-  path = "/write/CreateEncryptionKey",
-  description = "Create a new encryption key",
-  request_body(content = CreateEncryptionKey),
-  responses(
-    (status = 200, description = "The created encryption key", body = CreateEncryptionKeyResponse),
-    (status = 500, description = "Request failed", body = mogh_error::Serror)
-  ),
-)]
-pub fn create_encryption_key() {}
-
 impl Resolve<WriteArgs> for CreateEncryptionKey {
   async fn resolve(
     mut self,
@@ -79,19 +66,6 @@ impl Resolve<WriteArgs> for CreateEncryptionKey {
 
 //
 
-#[allow(unused)]
-#[utoipa::path(
-  post,
-  path = "/write/UpdateEncryptionKey",
-  description = "Update a encryption key",
-  request_body(content = UpdateEncryptionKey),
-  responses(
-    (status = 200, description = "The updated encryption key", body = UpdateEncryptionKeyResponse),
-    (status = 500, description = "Request failed", body = mogh_error::Serror)
-  ),
-)]
-pub fn update_encryption_key() {}
-
 impl Resolve<WriteArgs> for UpdateEncryptionKey {
   async fn resolve(
     self,
@@ -102,19 +76,6 @@ impl Resolve<WriteArgs> for UpdateEncryptionKey {
 }
 
 //
-
-#[allow(unused)]
-#[utoipa::path(
-  post,
-  path = "/write/InitializeEncryptionKey",
-  description = "Initialize a encryption key",
-  request_body(content = InitializeEncryptionKey),
-  responses(
-    (status = 200, description = "Encryption key initialized", body = InitializeEncryptionKeyResponse),
-    (status = 500, description = "Request failed", body = mogh_error::Serror)
-  ),
-)]
-pub fn initialize_encryption_key() {}
 
 impl Resolve<WriteArgs> for InitializeEncryptionKey {
   async fn resolve(

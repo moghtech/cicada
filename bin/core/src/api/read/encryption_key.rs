@@ -26,19 +26,6 @@ fn convert_key(key: EncryptionKeyRecord) -> EncryptionKeyEntity {
   }
 }
 
-#[allow(unused)]
-#[utoipa::path(
-  post,
-  path = "/read/ListEncryptionKeys",
-  description = "List available encryption keys",
-  request_body(content = ListEncryptionKeys),
-  responses(
-    (status = 200, description = "List of encryption keys", body = ListEncryptionKeysResponse),
-    (status = 500, description = "Request failed", body = mogh_error::Serror)
-  ),
-)]
-pub fn list_encryption_keys() {}
-
 impl Resolve<ReadArgs> for ListEncryptionKeys {
   async fn resolve(
     self,
@@ -54,20 +41,6 @@ impl Resolve<ReadArgs> for ListEncryptionKeys {
 }
 
 //
-
-#[allow(unused)]
-#[utoipa::path(
-  post,
-  path = "/read/GetEncryptionKey",
-  description = "Get an encryption key by id",
-  request_body(content = GetEncryptionKey),
-  responses(
-    (status = 200, description = "The encryption key", body = GetEncryptionKeyResponse),
-    (status = 404, description = "Failed to find encryption key with given id", body = mogh_error::Serror),
-    (status = 500, description = "Request failed", body = mogh_error::Serror),
-  ),
-)]
-pub fn get_encryption_key(body: GetEncryptionKey) {}
 
 impl Resolve<ReadArgs> for GetEncryptionKey {
   async fn resolve(

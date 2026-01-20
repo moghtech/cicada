@@ -10,15 +10,23 @@ use crate::{
 
 //
 
+#[cfg(feature = "utoipa")]
+#[utoipa::path(
+  post,
+  path = "/write/CreateOnboardingKey",
+  description = "Create a new onboarding key",
+  request_body(content = CreateOnboardingKey),
+  responses(
+    (status = 200, description = "The created onboarding key", body = CreateOnboardingKeyResponse),
+    (status = 500, description = "Request failed", body = mogh_error::Serror)
+  ),
+)]
+pub fn create_onboarding_key() {}
+
 /// Create an onboarding key. Response: [CreateOnboardingKeyResponse].
 #[typeshare]
 #[derive(
-  Debug,
-  Clone,
-  Serialize,
-  Deserialize,
-  SurrealValue,
-  Resolve,
+  Debug, Clone, Serialize, Deserialize, SurrealValue, Resolve,
 )]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaWriteRequest)]
@@ -55,15 +63,23 @@ pub struct CreateOnboardingKeyResponse {
 
 //
 
+#[cfg(feature = "utoipa")]
+#[utoipa::path(
+  post,
+  path = "/write/UpdateOnboardingKey",
+  description = "Update an onboarding key",
+  request_body(content = UpdateOnboardingKey),
+  responses(
+    (status = 200, description = "The updated onboarding key", body = UpdateOnboardingKeyResponse),
+    (status = 500, description = "Request failed", body = mogh_error::Serror)
+  ),
+)]
+pub fn update_onboarding_key() {}
+
 /// Update an onboarding key. Response: [UpdateOnboardingKeyResponse].
 #[typeshare]
 #[derive(
-  Debug,
-  Clone,
-  Serialize,
-  Deserialize,
-  SurrealValue,
-  Resolve,
+  Debug, Clone, Serialize, Deserialize, SurrealValue, Resolve,
 )]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaWriteRequest)]
@@ -89,15 +105,24 @@ pub type UpdateOnboardingKeyResponse = OnboardingKeyRecord;
 
 //
 
+#[cfg(feature = "utoipa")]
+#[utoipa::path(
+  post,
+  path = "/write/DeleteOnboardingKey",
+  description = "Delete an onboarding key",
+  request_body(content = DeleteOnboardingKey),
+  responses(
+    (status = 200, description = "The deleted onboarding key", body = DeleteOnboardingKeyResponse),
+    (status = 404, description = "OnboardingKey not found", body = mogh_error::Serror),
+    (status = 500, description = "Request failed", body = mogh_error::Serror)
+  ),
+)]
+pub fn delete_onboarding_key() {}
+
 /// Delete a onboarding_key. Response: [DeleteOnboardingKeyResponse].
 #[typeshare]
 #[derive(
-  Debug,
-  Clone,
-  Serialize,
-  Deserialize,
-  SurrealValue,
-  Resolve,
+  Debug, Clone, Serialize, Deserialize, SurrealValue, Resolve,
 )]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaWriteRequest)]
@@ -114,15 +139,23 @@ pub type DeleteOnboardingKeyResponse = OnboardingKeyRecord;
 
 //
 
+#[cfg(feature = "utoipa")]
+#[utoipa::path(
+  post,
+  path = "/write/BatchDeleteOnboardingKeys",
+  description = "Batch delete onboarding keys",
+  request_body(content = BatchDeleteOnboardingKeys),
+  responses(
+    (status = 200, description = "The deleted onboarding keys", body = BatchDeleteOnboardingKeysResponse),
+    (status = 500, description = "Request failed", body = mogh_error::Serror)
+  ),
+)]
+pub fn batch_delete_onboarding_keys() {}
+
 /// Batch delete onboarding keys. Response: [BatchDeleteOnboardingKeysResponse].
 #[typeshare]
 #[derive(
-  Debug,
-  Clone,
-  Serialize,
-  Deserialize,
-  SurrealValue,
-  Resolve,
+  Debug, Clone, Serialize, Deserialize, SurrealValue, Resolve,
 )]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaWriteRequest)]

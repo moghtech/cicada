@@ -10,6 +10,19 @@ use crate::{
 
 //
 
+#[cfg(feature = "utoipa")]
+#[utoipa::path(
+  post,
+  path = "/write/CreateDevice",
+  description = "Create a new device",
+  request_body(content = CreateDevice),
+  responses(
+    (status = 200, description = "The created device", body = CreateDeviceResponse),
+    (status = 500, description = "Request failed", body = mogh_error::Serror)
+  ),
+)]
+pub fn create_device() {}
+
 /// Create a device. Response: [CreateDeviceResponse].
 #[typeshare]
 #[derive(
@@ -38,6 +51,19 @@ fn default_enabled() -> bool {
 pub type CreateDeviceResponse = DeviceRecord;
 
 //
+
+#[cfg(feature = "utoipa")]
+#[utoipa::path(
+  post,
+  path = "/write/UpdateDevice",
+  description = "Update a device",
+  request_body(content = UpdateDevice),
+  responses(
+    (status = 200, description = "The updated device", body = UpdateDeviceResponse),
+    (status = 500, description = "Request failed", body = mogh_error::Serror)
+  ),
+)]
+pub fn update_device() {}
 
 /// Update a device. Response: [UpdateDeviceResponse].
 #[typeshare]
@@ -68,6 +94,20 @@ pub type UpdateDeviceResponse = DeviceRecord;
 
 //
 
+#[cfg(feature = "utoipa")]
+#[utoipa::path(
+  post,
+  path = "/write/DeleteDevice",
+  description = "Delete a device",
+  request_body(content = DeleteDevice),
+  responses(
+    (status = 200, description = "The deleted device", body = DeleteDeviceResponse),
+    (status = 404, description = "Device not found", body = mogh_error::Serror),
+    (status = 500, description = "Request failed", body = mogh_error::Serror)
+  ),
+)]
+pub fn delete_device() {}
+
 /// Delete a device. Response: [DeleteDeviceResponse].
 #[typeshare]
 #[derive(
@@ -87,6 +127,19 @@ pub struct DeleteDevice {
 pub type DeleteDeviceResponse = DeviceRecord;
 
 //
+
+#[cfg(feature = "utoipa")]
+#[utoipa::path(
+  post,
+  path = "/write/BatchDeleteDevices",
+  description = "Batch delete devices",
+  request_body(content = BatchDeleteDevices),
+  responses(
+    (status = 200, description = "The deleted devices", body = BatchDeleteDevicesResponse),
+    (status = 500, description = "Request failed", body = mogh_error::Serror)
+  ),
+)]
+pub fn batch_delete_devices() {}
 
 /// Batch delete devices. Response: [BatchDeleteDevicesResponse].
 #[typeshare]

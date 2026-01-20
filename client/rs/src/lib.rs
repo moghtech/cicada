@@ -7,6 +7,9 @@ use crate::entities::ClientType;
 pub mod api;
 pub mod entities;
 
+#[cfg(feature = "utoipa")]
+pub mod openapi;
+
 mod request;
 
 pub struct CicadaClient {

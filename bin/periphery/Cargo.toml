@@ -12,7 +12,7 @@ path = "src/main.rs"
 
 [dependencies]
 # LOCAL
-cicada_client = { workspace = true, features = ["blocking", "logger"] }
+cicada_client = { workspace = true, features = ["periphery"] }
 mogh_secret_file.workspace = true
 mogh_config.workspace = true
 mogh_logger.workspace = true

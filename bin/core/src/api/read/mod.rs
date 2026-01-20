@@ -102,27 +102,14 @@ async fn handler(
 
 //
 
-#[utoipa::path(
-  post,
-  path = "/read/GetVersion",
-  description = "Get the Cicada Core version",
-  request_body(content = GetVersion),
-  responses(
-    (status = 200, description = "Cicada Core version", body = GetVersionResponse),
-  ),
-)]
-fn get_version() -> mogh_error::Result<GetVersionResponse> {
-  Ok(GetVersionResponse {
-    version: env!("CARGO_PKG_VERSION").to_string(),
-  })
-}
-
 impl Resolve<ReadArgs> for GetVersion {
   async fn resolve(
     self,
     _: &ReadArgs,
   ) -> Result<Self::Response, Self::Error> {
-    get_version()
+    Ok(GetVersionResponse {
+      version: env!("CARGO_PKG_VERSION").to_string(),
+    })
   }
 }
 

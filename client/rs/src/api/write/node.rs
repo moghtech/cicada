@@ -15,6 +15,19 @@ use crate::{
 
 //
 
+#[cfg(feature = "utoipa")]
+#[utoipa::path(
+  post,
+  path = "/write/CreateNode",
+  description = "Create a new node",
+  request_body(content = CreateNode),
+  responses(
+    (status = 200, description = "The created node", body = CreateNodeResponse),
+    (status = 500, description = "Request failed", body = mogh_error::Serror)
+  ),
+)]
+pub fn create_node() {}
+
 /// Create filesystem node. Response: [CreateNodeResponse].
 #[typeshare]
 #[derive(
@@ -55,6 +68,19 @@ pub type CreateNodeResponse = NodeEntity;
 
 //
 
+#[cfg(feature = "utoipa")]
+#[utoipa::path(
+  post,
+  path = "/write/UpdateNode",
+  description = "Update a node",
+  request_body(content = UpdateNode),
+  responses(
+    (status = 200, description = "The updated node", body = UpdateNodeResponse),
+    (status = 500, description = "Request failed", body = mogh_error::Serror)
+  ),
+)]
+pub fn update_node() {}
+
 /// Update a filesystem node. Response: [UpdateNodeResponse].
 #[typeshare]
 #[derive(
@@ -81,6 +107,19 @@ pub type UpdateNodeResponse = NodeEntity;
 
 //
 
+#[cfg(feature = "utoipa")]
+#[utoipa::path(
+  post,
+  path = "/write/UpdateNodeData",
+  description = "Update a node's data",
+  request_body(content = UpdateNode),
+  responses(
+    (status = 200, description = "The updated node", body = UpdateNodeDataResponse),
+    (status = 500, description = "Request failed", body = mogh_error::Serror)
+  ),
+)]
+pub fn update_node_data() {}
+
 /// Update a filesystem node's encrypted data. Response: [UpdateNodeDataResponse].
 #[typeshare]
 #[derive(
@@ -105,6 +144,19 @@ pub type UpdateNodeDataResponse = NodeEntity;
 
 //
 
+#[cfg(feature = "utoipa")]
+#[utoipa::path(
+  post,
+  path = "/write/UpdateNodeEncryptionKey",
+  description = "Update a node's data",
+  request_body(content = UpdateNode),
+  responses(
+    (status = 200, description = "The updated node", body = UpdateNodeEncryptionKeyResponse),
+    (status = 500, description = "Request failed", body = mogh_error::Serror)
+  ),
+)]
+pub fn update_node_encryption_key() {}
+
 /// Update a filesystem node's encryption key. Response: [UpdateNodeEncryptionKeyResponse].
 #[typeshare]
 #[derive(
@@ -127,6 +179,19 @@ pub type UpdateNodeEncryptionKeyResponse = NodeEntity;
 
 //
 
+#[cfg(feature = "utoipa")]
+#[utoipa::path(
+  post,
+  path = "/write/RotateNodeEnvelopeKey",
+  description = "Update a node's data",
+  request_body(content = UpdateNode),
+  responses(
+    (status = 200, description = "The updated node", body = RotateNodeEnvelopeKeyResponse),
+    (status = 500, description = "Request failed", body = mogh_error::Serror)
+  ),
+)]
+pub fn rotate_node_envelope_key() {}
+
 /// Rotate a filesystem node's envelope encryption key. Response: [RotateNodeEnvelopeKeyResponse].
 #[typeshare]
 #[derive(
@@ -146,6 +211,20 @@ pub struct RotateNodeEnvelopeKey {
 pub type RotateNodeEnvelopeKeyResponse = NodeEntity;
 
 //
+
+#[cfg(feature = "utoipa")]
+#[utoipa::path(
+  post,
+  path = "/write/DeleteNode",
+  description = "Delete a node",
+  request_body(content = DeleteNode),
+  responses(
+    (status = 200, description = "The deleted nodes", body = DeleteNodeResponse),
+    (status = 404, description = "Node not found", body = mogh_error::Serror),
+    (status = 500, description = "Request failed", body = mogh_error::Serror)
+  ),
+)]
+pub fn delete_node() {}
 
 /// Delete a filesystem node. Response: [DeleteNodeResponse].
 ///
@@ -172,6 +251,19 @@ pub struct DeleteNode {
 pub type DeleteNodeResponse = Vec<NodeEntity>;
 
 //
+
+#[cfg(feature = "utoipa")]
+#[utoipa::path(
+  post,
+  path = "/write/BatchDeleteNodes",
+  description = "Batch delete many files / folders recursively.",
+  request_body(content = BatchDeleteNodes),
+  responses(
+    (status = 200, description = "The deleted files / folders", body = BatchDeleteNodesResponse),
+    (status = 500, description = "Request failed", body = mogh_error::Serror)
+  ),
+)]
+pub fn batch_delete_nodes() {}
 
 /// Batch delete files / folders. Response: [BatchDeleteNodesResponse].
 ///

@@ -9,6 +9,19 @@ use crate::{
 
 //
 
+#[cfg(feature = "utoipa")]
+#[utoipa::path(
+  post,
+  path = "/read/ListFilesystems",
+  description = "List available filesystems",
+  request_body(content = ListFilesystems),
+  responses(
+    (status = 200, description = "List of filesystems", body = ListFilesystemsResponse),
+    (status = 500, description = "Request failed", body = mogh_error::Serror)
+  ),
+)]
+pub fn list_filesystems() {}
+
 /// List filesystems. Response: [ListFilesystemsResponse].
 #[typeshare]
 #[derive(Debug, Clone, Serialize, Deserialize, Resolve)]

@@ -4,19 +4,6 @@ use mogh_resolver::Resolve;
 
 use crate::{api::write::WriteArgs, db::query};
 
-#[allow(unused)]
-#[utoipa::path(
-  post,
-  path = "/write/CreateOnboardingKey",
-  description = "Create a new onboarding key",
-  request_body(content = CreateOnboardingKey),
-  responses(
-    (status = 200, description = "The created onboarding key", body = CreateOnboardingKeyResponse),
-    (status = 500, description = "Request failed", body = mogh_error::Serror)
-  ),
-)]
-pub fn create_onboarding_key() {}
-
 impl Resolve<WriteArgs> for CreateOnboardingKey {
   async fn resolve(
     self,
@@ -48,19 +35,6 @@ impl Resolve<WriteArgs> for CreateOnboardingKey {
 
 //
 
-#[allow(unused)]
-#[utoipa::path(
-  post,
-  path = "/write/UpdateOnboardingKey",
-  description = "Update an onboarding key",
-  request_body(content = UpdateOnboardingKey),
-  responses(
-    (status = 200, description = "The updated onboarding key", body = UpdateOnboardingKeyResponse),
-    (status = 500, description = "Request failed", body = mogh_error::Serror)
-  ),
-)]
-pub fn update_onboarding_key() {}
-
 impl Resolve<WriteArgs> for UpdateOnboardingKey {
   async fn resolve(
     self,
@@ -72,20 +46,6 @@ impl Resolve<WriteArgs> for UpdateOnboardingKey {
 
 //
 
-#[allow(unused)]
-#[utoipa::path(
-  post,
-  path = "/write/DeleteOnboardingKey",
-  description = "Delete an onboarding key",
-  request_body(content = DeleteOnboardingKey),
-  responses(
-    (status = 200, description = "The deleted onboarding key", body = DeleteOnboardingKeyResponse),
-    (status = 404, description = "OnboardingKey not found", body = mogh_error::Serror),
-    (status = 500, description = "Request failed", body = mogh_error::Serror)
-  ),
-)]
-pub fn delete_onboarding_key() {}
-
 impl Resolve<WriteArgs> for DeleteOnboardingKey {
   async fn resolve(
     self,
@@ -94,19 +54,6 @@ impl Resolve<WriteArgs> for DeleteOnboardingKey {
     query::onboarding_key::delete_onboarding_key(self.id.0).await
   }
 }
-
-#[allow(unused)]
-#[utoipa::path(
-  post,
-  path = "/write/BatchDeleteOnboardingKeys",
-  description = "Batch delete onboarding keys",
-  request_body(content = BatchDeleteOnboardingKeys),
-  responses(
-    (status = 200, description = "The deleted onboarding keys", body = BatchDeleteOnboardingKeysResponse),
-    (status = 500, description = "Request failed", body = mogh_error::Serror)
-  ),
-)]
-pub fn batch_delete_onboarding_keys() {}
 
 impl Resolve<WriteArgs> for BatchDeleteOnboardingKeys {
   async fn resolve(

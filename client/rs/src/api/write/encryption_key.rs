@@ -13,15 +13,23 @@ use crate::{
 
 //
 
+#[cfg(feature = "utoipa")]
+#[utoipa::path(
+  post,
+  path = "/write/CreateEncryptionKey",
+  description = "Create a new encryption key",
+  request_body(content = CreateEncryptionKey),
+  responses(
+    (status = 200, description = "The created encryption key", body = CreateEncryptionKeyResponse),
+    (status = 500, description = "Request failed", body = mogh_error::Serror)
+  ),
+)]
+pub fn create_encryption_key() {}
+
 /// Create an encryption key. Response: [CreateEncryptionKeyResponse].
 #[typeshare]
 #[derive(
-  Debug,
-  Clone,
-  Serialize,
-  Deserialize,
-  SurrealValue,
-  Resolve,
+  Debug, Clone, Serialize, Deserialize, SurrealValue, Resolve,
 )]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaWriteRequest)]
@@ -43,15 +51,23 @@ pub type CreateEncryptionKeyResponse = EncryptionKeyRecord;
 
 //
 
+#[cfg(feature = "utoipa")]
+#[utoipa::path(
+  post,
+  path = "/write/UpdateEncryptionKey",
+  description = "Update a encryption key",
+  request_body(content = UpdateEncryptionKey),
+  responses(
+    (status = 200, description = "The updated encryption key", body = UpdateEncryptionKeyResponse),
+    (status = 500, description = "Request failed", body = mogh_error::Serror)
+  ),
+)]
+pub fn update_encryption_key() {}
+
 /// Update an encryption key. Response: [UpdateEncryptionKeyResponse].
 #[typeshare]
 #[derive(
-  Debug,
-  Clone,
-  Serialize,
-  Deserialize,
-  SurrealValue,
-  Resolve,
+  Debug, Clone, Serialize, Deserialize, SurrealValue, Resolve,
 )]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaWriteRequest)]
@@ -71,16 +87,24 @@ pub type UpdateEncryptionKeyResponse = EncryptionKeyRecord;
 
 //
 
+#[cfg(feature = "utoipa")]
+#[utoipa::path(
+  post,
+  path = "/write/InitializeEncryptionKey",
+  description = "Initialize a encryption key",
+  request_body(content = InitializeEncryptionKey),
+  responses(
+    (status = 200, description = "Encryption key initialized", body = InitializeEncryptionKeyResponse),
+    (status = 500, description = "Request failed", body = mogh_error::Serror)
+  ),
+)]
+pub fn initialize_encryption_key() {}
+
 /// Initialize an in-memory encryption key after application startup.
 /// Response: [InitializeEncryptionKeyResponse].
 #[typeshare]
 #[derive(
-  Debug,
-  Clone,
-  Serialize,
-  Deserialize,
-  SurrealValue,
-  Resolve,
+  Debug, Clone, Serialize, Deserialize, SurrealValue, Resolve,
 )]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaWriteRequest)]
