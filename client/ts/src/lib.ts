@@ -1,6 +1,6 @@
 import { MoghAuthClient } from "mogh_auth_client";
 import { ReadResponses, WriteResponses } from "./responses";
-import { ReadRequest, WriteRequest } from "./types";
+import { ReadRequest, UserEntity, WriteRequest } from "./types";
 
 export * as MoghAuth from "mogh_auth_client";
 export * as Types from "./types.js";
@@ -28,12 +28,13 @@ export function CicadaClient(url: string, options: InitOptions) {
   const request = <Params, Res>(
     path: "/user" | "/read" | "/write",
     type: string,
-    params: Params
+    params: Params,
+    method = "POST",
   ): Promise<Res> =>
     new Promise(async (res, rej) => {
       try {
-        let response = await fetch(`${url}${path}/${type}`, {
-          method: "POST",
+        let response = await fetch(`${url}${path}${type ? "/" + type : ""}`, {
+          method,
           body: JSON.stringify(params),
           headers: {
             ...(state.jwt
@@ -41,11 +42,11 @@ export function CicadaClient(url: string, options: InitOptions) {
                   authorization: state.jwt,
                 }
               : state.key && state.secret
-              ? {
-                  "x-api-key": state.key,
-                  "x-api-secret": state.secret,
-                }
-              : {}),
+                ? {
+                    "x-api-key": state.key,
+                    "x-api-secret": state.secret,
+                  }
+                : {}),
             "content-type": "application/json",
           },
           credentials: "include",
@@ -80,30 +81,33 @@ export function CicadaClient(url: string, options: InitOptions) {
       }
     });
 
+  const getUser = async () =>
+    await request<undefined, UserEntity>("/user", "", undefined, "GET");
+
   const read = async <
     T extends ReadRequest["type"],
-    Req extends Extract<ReadRequest, { type: T }>
+    Req extends Extract<ReadRequest, { type: T }>,
   >(
     type: T,
-    params: Req["params"]
+    params: Req["params"],
   ) =>
     await request<Req["params"], ReadResponses[Req["type"]]>(
       "/read",
       type,
-      params
+      params,
     );
 
   const write = async <
     T extends WriteRequest["type"],
-    Req extends Extract<WriteRequest, { type: T }>
+    Req extends Extract<WriteRequest, { type: T }>,
   >(
     type: T,
-    params: Req["params"]
+    params: Req["params"],
   ) =>
     await request<Req["params"], WriteResponses[Req["type"]]>(
       "/write",
       type,
-      params
+      params,
     );
 
   return {
@@ -120,6 +124,16 @@ export function CicadaClient(url: string, options: InitOptions) {
      * https://docs.rs/mogh_auth_client/latest/mogh_auth_client/api/index.html
      */
     auth,
+    /**
+     * Get the current (calling) user.
+     *
+     * ```
+     * const user = await cicada.getUser();
+     * ```
+     *
+     * https://docs.rs/cicada_client/latest/cicada_client/api/user/index.html
+     */
+    getUser,
     /**
      * Call the `/read` api.
      *

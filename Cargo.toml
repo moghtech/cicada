@@ -33,8 +33,8 @@ cicada_client = { path = "client/rs" }
 
 # MOGH
 mogh_error = { version = "1.0.3", default-features = false }
-mogh_auth_client = "1.0.0"
-mogh_auth_server = "1.0.0"
+mogh_auth_client = "1.2.1"
+mogh_auth_server = "1.2.3"
 mogh_secret_file = "1.0.0"
 mogh_config = "1.0.1"
 mogh_encryption = "0.1.0"
@@ -77,8 +77,8 @@ rustls = { version = "0.23.36", features = ["aws-lc-rs"] }
 anyhow = "1.0.100"
 
 # DATABASE
-surrealdb = { version = "3.0.0-beta.1", features = ["native-tls"] }
-surrealdb-types = { version = "3.0.0-beta.1" }
+surrealdb = { version = "3.0.0-beta.2", features = ["native-tls", "kv-rocksdb"] }
+surrealdb-types = { version = "3.0.0-beta.2" }
 
 # MISC
 typeshare = "1.0.5"

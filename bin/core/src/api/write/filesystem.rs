@@ -6,9 +6,8 @@ use crate::{api::write::WriteArgs, db::query};
 impl Resolve<WriteArgs> for CreateFilesystem {
   async fn resolve(
     self,
-    WriteArgs { client }: &WriteArgs,
+    WriteArgs { client: _client }: &WriteArgs,
   ) -> Result<Self::Response, Self::Error> {
-    let _user = client.as_user()?;
     query::filesystem::create_filesystem(self).await
   }
 }

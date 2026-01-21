@@ -25,12 +25,13 @@ const ConfirmSave = ({
         opened={opened}
         onClose={close}
         title={"Save changes to " + name}
-        size="100%"
+        size="auto"
       >
         <MonacoDiffEditor
           original={original}
           modified={modified}
           language={language_from_path(name)}
+          style={{ width: 1400, maxWidth: "85vw" }}
         />
         <Group mt="md" w="100%">
           <Button

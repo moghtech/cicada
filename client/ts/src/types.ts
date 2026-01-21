@@ -242,70 +242,6 @@ export type GetNodeResponse = NodeEntity;
 /** Response for [GetOnboardingKey]. */
 export type GetOnboardingKeyResponse = OnboardingKeyRecord;
 
-export type UserId = string;
-
-/** The available kinds external of user logins. */
-export enum ExternalLoginKind {
-	Oidc = "Oidc",
-	Github = "Github",
-	Google = "Google",
-}
-
-/** Stores external user logins */
-export interface ExternalLoginRecord {
-	/** The unique user login id */
-	id: ExternalLoginId;
-	/** The user which this method logs in */
-	user: UserId;
-	/**
-	 * The type of login.
-	 * - **Oidc**
-	 * - **Github**
-	 * - **Google**
-	 */
-	kind: ExternalLoginKind;
-	/**
-	 * The login method external id.
-	 * - **Oidc**: The OIDC user subject identifier
-	 * - **Github**: The Github user id
-	 * - **Google**: The Google user id
-	 */
-	external_id: string;
-	/** Created at as ISO8601 timestamp. */
-	created_at: Iso8601Timestamp;
-	/** Updated at as ISO8601 timestamp. */
-	updated_at: Iso8601Timestamp;
-}
-
-/** Users queryable from the API */
-export interface UserEntity {
-	/** The unique user id */
-	id: UserId;
-	/** The name of the user, ie username */
-	username: string;
-	/**
-	 * Whether user is enabled.
-	 * Disabled users cannot log in and have no API access.
-	 */
-	enabled: boolean;
-	/** Whether user has password set. */
-	password: boolean;
-	/** The external login methods the user has set. */
-	external_logins: ExternalLoginRecord[];
-	/** Whether user is enrolled in passkey 2fa */
-	passkey: boolean;
-	/** Whether user is enrolled in TOTP 2fa */
-	totp: boolean;
-	/** Allow external logins to skip 2fa. */
-	external_skip_2fa: boolean;
-	/** Created at as ISO8601 timestamp. */
-	created_at: Iso8601Timestamp;
-	/** Updated at as ISO8601 timestamp. */
-	updated_at: Iso8601Timestamp;
-}
-
-export type GetUserResponse = UserEntity;
-
 /** Represents an empty json object: `{}` */
 export interface NoData {
 }
@@ -376,6 +312,8 @@ export type UpdateNodeResponse = NodeEntity;
 
 /** Response for [UpdateOnboardingKey]. */
 export type UpdateOnboardingKeyResponse = OnboardingKeyRecord;
+
+export type UserId = string;
 
 /** Batch delete devices. Response: [BatchDeleteDevicesResponse]. */
 export interface BatchDeleteDevices {
@@ -549,6 +487,39 @@ export interface EncryptedData {
 	data_nonce: string;
 }
 
+/** The available kinds external of user logins. */
+export enum ExternalLoginKind {
+	Oidc = "Oidc",
+	Github = "Github",
+	Google = "Google",
+}
+
+/** Stores external user logins */
+export interface ExternalLoginRecord {
+	/** The unique user login id */
+	id: ExternalLoginId;
+	/** The user which this method logs in */
+	user: UserId;
+	/**
+	 * The type of login.
+	 * - **Oidc**
+	 * - **Github**
+	 * - **Google**
+	 */
+	kind: ExternalLoginKind;
+	/**
+	 * The login method external id.
+	 * - **Oidc**: The OIDC user subject identifier
+	 * - **Github**: The Github user id
+	 * - **Google**: The Google user id
+	 */
+	external_id: string;
+	/** Created at as ISO8601 timestamp. */
+	created_at: Iso8601Timestamp;
+	/** Updated at as ISO8601 timestamp. */
+	updated_at: Iso8601Timestamp;
+}
+
 /**
  * Find a node. Response: [NodeEntity].
  * 
@@ -570,7 +541,7 @@ export interface FindNode {
 	name?: string;
 }
 
-/** Get a device. Response: [DeviceRecord]. */
+/** Get a device by id. Response: [DeviceRecord]. */
 export interface GetDevice {
 	/** The device id */
 	id: DeviceId;
@@ -588,17 +559,10 @@ export interface GetNode {
 	id: NodeId;
 }
 
-/** Get an onboarding key. Response: [OnboardingKeyRecord]. */
+/** Get an onboarding key by id. Response: [OnboardingKeyRecord]. */
 export interface GetOnboardingKey {
 	/** The onboarding key id */
 	id: OnboardingKeyId;
-}
-
-/**
- * Get calling user extracted from the request authorization.
- * Response: [UserEntity].
- */
-export interface GetUser {
 }
 
 /**
@@ -619,7 +583,7 @@ export interface GetUsernameResponse {
 }
 
 /**
- * Get the version of the Cicada Core api.
+ * Get the version of the Cicada Core API.
  * Response: [GetVersionResponse].
  */
 export interface GetVersion {
@@ -769,6 +733,33 @@ export interface UpdateOnboardingKey {
 	enabled?: boolean;
 }
 
+/** Users queryable from the API */
+export interface UserEntity {
+	/** The unique user id */
+	id: UserId;
+	/** The name of the user, ie username */
+	username: string;
+	/**
+	 * Whether user is enabled.
+	 * Disabled users cannot log in and have no API access.
+	 */
+	enabled: boolean;
+	/** Whether user has password set. */
+	password: boolean;
+	/** The external login methods the user has set. */
+	external_logins: ExternalLoginRecord[];
+	/** Whether user is enrolled in passkey 2fa */
+	passkey: boolean;
+	/** Whether user is enrolled in TOTP 2fa */
+	totp: boolean;
+	/** Allow external logins to skip 2fa. */
+	external_skip_2fa: boolean;
+	/** Created at as ISO8601 timestamp. */
+	created_at: Iso8601Timestamp;
+	/** Updated at as ISO8601 timestamp. */
+	updated_at: Iso8601Timestamp;
+}
+
 /** Users on the database */
 export interface UserRecord {
 	/** The unique user id */
@@ -800,15 +791,6 @@ export interface UserRecord {
 	updated_at: Iso8601Timestamp;
 }
 
-export type CicadaRecordId = 
-	| { table: "User", key: UserId }
-	| { table: "ExternalLogin", key: ExternalLoginId }
-	| { table: "Device", key: DeviceId }
-	| { table: "OnboardingKey", key: OnboardingKeyId }
-	| { table: "Filesystem", key: FilesystemId }
-	| { table: "Node", key: NodeId }
-	| { table: "EncryptionKey", key: EncryptionKeyId };
-
 export enum ClientType {
 	User = "User",
 	Device = "Device",
@@ -817,7 +799,6 @@ export enum ClientType {
 
 export type ReadRequest = 
 	| { type: "GetVersion", params: GetVersion }
-	| { type: "GetUser", params: GetUser }
 	| { type: "GetUsername", params: GetUsername }
 	| { type: "ListDevices", params: ListDevices }
 	| { type: "GetDevice", params: GetDevice }

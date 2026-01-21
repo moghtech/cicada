@@ -3,6 +3,7 @@ use cicada_client::api::write::{
   device::*, encryption_key::*, filesystem::*, node::*,
   onboarding_key::*,
 };
+use mogh_auth_server::middleware::authenticate_request;
 use mogh_error::anyhow::Context as _;
 use mogh_error::{Json, Response};
 use mogh_resolver::Resolve;
@@ -12,10 +13,8 @@ use strum::{Display, EnumDiscriminants};
 use surrealdb::types::Uuid;
 use typeshare::typeshare;
 
-use crate::{
-  api::Variant,
-  auth::middleware::{Client, auth_request},
-};
+use crate::auth::CicadaAuthImpl;
+use crate::{api::Variant, auth::middleware::Client};
 
 pub mod device;
 pub mod encryption_key;
@@ -73,7 +72,9 @@ pub fn router() -> Router {
   Router::new()
     .route("/", post(handler))
     .route("/{variant}", post(variant_handler))
-    .layer(axum::middleware::from_fn(auth_request))
+    .layer(axum::middleware::from_fn(
+      authenticate_request::<CicadaAuthImpl, true>,
+    ))
 }
 
 async fn variant_handler(
@@ -101,9 +102,7 @@ async fn handler(
     client.only_users()?;
   }
 
-  let req_id = Uuid::new_v4();
-
-  let res = tokio::spawn(task(req_id, request, client))
+  let res = tokio::spawn(task(request, client))
     .await
     .context("failure in spawned task");
 
@@ -113,18 +112,19 @@ async fn handler(
 /// Spawn a task to handle write requests
 /// to ensure they finish even if client disconnects.
 async fn task(
-  req_id: Uuid,
   request: WriteRequest,
   client: Client,
 ) -> mogh_error::Result<axum::response::Response> {
+  let req_id = Uuid::new_v4();
   let method: WriteRequestMethod = (&request).into();
-  info!("/write request | {method}");
+
+  info!("WRITE REQUEST {req_id} | METHOD: {method} | {client}",);
 
   let res = request.resolve(&WriteArgs { client }).await;
 
   if let Err(e) = &res {
     warn!(
-      "/write request {req_id} | {method} | error: {:#}",
+      "WRITE REQUEST {req_id} | METHOD: {method} | ERROR: {:#}",
       e.error
     );
   }

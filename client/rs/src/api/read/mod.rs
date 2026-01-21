@@ -2,8 +2,6 @@ use mogh_resolver::{HasResponse, Resolve};
 use serde::{Deserialize, Serialize};
 use typeshare::typeshare;
 
-use crate::entities::user::UserEntity;
-
 pub mod device;
 pub mod encryption_key;
 pub mod filesystem;
@@ -46,33 +44,6 @@ pub struct GetVersionResponse {
   /// The version of the core api.
   pub version: String,
 }
-
-//
-
-#[cfg(feature = "utoipa")]
-#[utoipa::path(
-  post,
-  path = "/read/GetUser",
-  description = "Get information about the calling user.",
-  request_body(content = GetUser),
-  responses(
-    (status = 200, description = "Information about the calling user", body = GetUserResponse),
-  ),
-)]
-pub fn get_user() {}
-
-/// Get calling user extracted from the request authorization.
-/// Response: [UserEntity].
-#[typeshare]
-#[derive(Debug, Clone, Serialize, Deserialize, Resolve)]
-#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
-#[empty_traits(CicadaReadRequest)]
-#[response(GetUserResponse)]
-#[error(mogh_error::Error)]
-pub struct GetUser {}
-
-#[typeshare]
-pub type GetUserResponse = UserEntity;
 
 //
 

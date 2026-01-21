@@ -25,7 +25,6 @@ mod write {
     //  READ
     // ======
     read::get_version,
-    read::get_user,
     read::get_username,
     // DEVICE
     read::list_devices,

@@ -11,7 +11,7 @@ use mogh_auth_client::{
 };
 // use cicada_client::entities::user::u
 use mogh_auth_server::{
-  AuthImpl, RequestClientArgs,
+  AuthImpl,
   provider::{
     jwt::JwtProvider, oidc::SubjectIdentifier,
     passkey::PasskeyProvider,
@@ -21,7 +21,10 @@ use mogh_auth_server::{
 };
 use mogh_rate_limit::RateLimiter;
 
-use crate::{config::core_config, db::query::user::*};
+use crate::{
+  auth::middleware::get_client_from_auth, config::core_config,
+  db::query::user::*,
+};
 
 pub mod middleware;
 
@@ -110,20 +113,11 @@ impl AuthUserImpl for AuthUser {
   }
 }
 
-pub struct CicadaAuthImpl {
-  client: RequestClientArgs,
-}
+pub struct CicadaAuthImpl;
 
 impl AuthImpl for CicadaAuthImpl {
-  fn from_client(client: RequestClientArgs) -> Self
-  where
-    Self: Sized,
-  {
-    Self { client }
-  }
-
-  fn client(&self) -> &RequestClientArgs {
-    &self.client
+  fn new() -> Self {
+    Self
   }
 
   fn app_name(&self) -> &'static str {
@@ -164,6 +158,29 @@ impl AuthImpl for CicadaAuthImpl {
 
   fn registration_disabled(&self) -> bool {
     core_config().disable_user_registration
+  }
+
+  fn handle_request_authentication(
+    &self,
+    auth: mogh_auth_server::RequestAuthentication,
+    require_user_enabled: bool,
+    mut req: axum::extract::Request,
+  ) -> mogh_auth_server::DynFuture<
+    mogh_error::Result<axum::extract::Request>,
+  > {
+    Box::pin(async move {
+      let mut client = get_client_from_auth(
+        auth,
+        require_user_enabled,
+        req.headers(),
+      )
+      .await?;
+      // Sanitize the user for safety before
+      // attaching to the request handlers.
+      client.sanitize();
+      req.extensions_mut().insert(client);
+      Ok(req)
+    })
   }
 
   // =========
@@ -272,8 +289,8 @@ impl AuthImpl for CicadaAuthImpl {
   // = OIDC AUTH =
   // =============
 
-  fn oidc_config(&self) -> &OidcConfig {
-    &core_config().oidc
+  fn oidc_config(&self) -> Option<&OidcConfig> {
+    Some(&core_config().oidc)
   }
 
   fn find_user_with_oidc_subject(
@@ -330,8 +347,8 @@ impl AuthImpl for CicadaAuthImpl {
   // = GITHUB AUTH =
   // ===============
 
-  fn github_config(&self) -> &NamedOauthConfig {
-    &core_config().github_oauth
+  fn github_config(&self) -> Option<&NamedOauthConfig> {
+    Some(&core_config().github_oauth)
   }
 
   fn find_user_with_github_id(
@@ -390,8 +407,8 @@ impl AuthImpl for CicadaAuthImpl {
   // = GOOGLE AUTH =
   // ===============
 
-  fn google_config(&self) -> &NamedOauthConfig {
-    &core_config().google_oauth
+  fn google_config(&self) -> Option<&NamedOauthConfig> {
+    Some(&core_config().google_oauth)
   }
 
   fn find_user_with_google_id(

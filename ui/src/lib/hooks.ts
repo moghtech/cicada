@@ -40,7 +40,7 @@ export const useLogin = <
   >,
 >(
   type: T,
-  config?: C
+  config?: C,
 ) => {
   return useMutation({
     mutationKey: [type],
@@ -76,7 +76,7 @@ export const useManageAuth = <
   >,
 >(
   type: T,
-  config?: C
+  config?: C,
 ) => {
   return useMutation({
     mutationKey: [type],
@@ -161,7 +161,7 @@ export const useUser = () => {
 
   const query = useQuery({
     queryKey: ["GetUser"],
-    queryFn: () => cicada_client().read("GetUser", {}),
+    queryFn: () => cicada_client().getUser(),
     refetchInterval: 30_000,
     enabled: hasJwt,
   });
@@ -207,7 +207,7 @@ export const useRead = <
 >(
   type: T,
   params: P,
-  config?: C
+  config?: C,
 ) => {
   const hasJwt = !!MoghAuth.LOGIN_TOKENS.jwt();
   return useQuery({
@@ -240,7 +240,7 @@ export const useWrite = <
   >,
 >(
   type: T,
-  config?: C
+  config?: C,
 ) => {
   return useMutation({
     mutationKey: [type],
