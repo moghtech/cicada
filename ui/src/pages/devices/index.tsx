@@ -1,7 +1,7 @@
 import DevicesPage from "./devices";
 import OnboardingKeysPage from "./onboarding-keys";
 import { ICONS } from "@/lib/icons";
-import { TabbedPage } from "@/layout/tabbed-page";
+import { TabbedPage } from "@/components/tabbed-page";
 
 type Tab = "Devices" | "Onboarding";
 

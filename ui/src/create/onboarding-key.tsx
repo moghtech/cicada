@@ -1,4 +1,4 @@
-import { CopyIconButton } from "@/components/copy-button";
+import { CopyButton } from "@/components/copy-button";
 import { useInvalidate, useWrite } from "@/lib/hooks";
 import { Button, Flex, Menu, Text, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
@@ -62,7 +62,7 @@ const CreateOnboardingKeyForm = ({ close }: { close: () => void }) => {
         </Text>
         <Flex gap="md" align="center" w="100%">
           <TextInput value={createdPrivateKey} w="100%" disabled />
-          <CopyIconButton content={createdPrivateKey} />
+          <CopyButton content={createdPrivateKey} />
         </Flex>
         <Button
           leftSection={<CircleCheckBig size="1rem" />}

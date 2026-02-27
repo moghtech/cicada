@@ -1,5 +1,5 @@
 import InitializeEncryptionKey from "@/components/initialize-key";
-import { Page } from "@/layout/page";
+import { Page } from "@/components/page";
 import { useRead, useWrite } from "@/lib/hooks";
 import { ICONS } from "@/lib/icons";
 import {

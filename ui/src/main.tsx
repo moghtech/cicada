@@ -14,8 +14,6 @@ import { Notifications } from "@mantine/notifications";
 
 export const CICADA_BASE_URL =
   import.meta.env.VITE_CICADA_HOST ?? location.origin;
-export const UPDATE_WS_URL =
-  CICADA_BASE_URL.replace("http", "ws") + "/ws/update";
 const client = new QueryClient({
   defaultOptions: { queries: { retry: false } },
 });

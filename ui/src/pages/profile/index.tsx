@@ -14,7 +14,7 @@ import { Types } from "cicada_client";
 import { Save } from "lucide-react";
 import { useState } from "react";
 import { ICONS } from "@/lib/icons";
-import { Page } from "@/layout/page";
+import { Page } from "@/components/page";
 import { EnableSwitch } from "@/components/enable-switch";
 import { LinkedLogins } from "./linked-logins";
 import { EnrollPasskey } from "./passkey";

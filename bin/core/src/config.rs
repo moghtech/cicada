@@ -173,6 +173,12 @@ pub fn core_config() -> &'static CoreConfig {
       cors_allowed_origins: env
         .cicada_cors_allowed_origins
         .unwrap_or(config.cors_allowed_origins),
+      cors_allow_credentials: env
+        .cicada_cors_allow_credentials
+        .unwrap_or(config.cors_allow_credentials),
+      session_allow_cross_site: env
+        .cicada_session_allow_cross_site
+        .unwrap_or(config.session_allow_cross_site),
       logging: LogConfig {
         level: env
           .cicada_logging_level
@@ -213,6 +219,9 @@ pub fn core_config() -> &'static CoreConfig {
         .cicada_ssl_cert_file
         .unwrap_or(config.ssl_cert_file),
       ui_path: env.cicada_ui_path.unwrap_or(config.ui_path),
+      ui_index_force_no_cache: env
+        .cicada_ui_index_force_no_cache
+        .unwrap_or(config.ui_index_force_no_cache),
     }
   })
 }

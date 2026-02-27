@@ -1,7 +1,7 @@
 import { DataTable, SortableHeader } from "@/components/data-table";
 import InitializeEncryptionKey from "@/components/initialize-key";
 import CreateEncryptionKey from "@/create/encryption-key";
-import { Page } from "@/layout/page";
+import { Page } from "@/components/page";
 import { useRead } from "@/lib/hooks";
 import { ICONS } from "@/lib/icons";
 import { Badge } from "@mantine/core";

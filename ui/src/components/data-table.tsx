@@ -142,6 +142,7 @@ export function DataTable<TData, TValue>({
                   <Checkbox
                     disabled={selectOptions.disableRow === true}
                     checked={table.getIsAllRowsSelected()}
+                    indeterminate={table.getIsSomeRowsSelected()}
                   />
                 </Table.Th>
               )}
@@ -154,7 +155,7 @@ export function DataTable<TData, TValue>({
                       <Text fw={600} size="sm" lineClamp={1}>
                         {flexRender(
                           header.column.columnDef.header,
-                          header.getContext()
+                          header.getContext(),
                         )}
                       </Text>
                     )}

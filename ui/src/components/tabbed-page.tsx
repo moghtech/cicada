@@ -1,6 +1,6 @@
 import { Center, Group, Tabs, Text } from "@mantine/core";
 import { useLocalStorage } from "@mantine/hooks";
-import { Page } from "@/layout/page";
+import { Page } from "@/components/page";
 import { FC } from "react";
 import { CircleQuestionMark } from "lucide-react";
 

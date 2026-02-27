@@ -1,10 +1,10 @@
-import { ActionIcon, CopyButton } from "@mantine/core";
+import { ActionIcon, CopyButton as MantineCopyButton } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { Check, Copy } from "lucide-react";
 
-export const CopyIconButton = ({ content }: { content: string }) => {
+export const CopyButton = ({ content }: { content: string }) => {
   return (
-    <CopyButton value={content}>
+    <MantineCopyButton value={content}>
       {({ copied, copy }) => (
         <ActionIcon
           variant="default"
@@ -23,6 +23,6 @@ export const CopyIconButton = ({ content }: { content: string }) => {
           {copied ? <Check size="1rem" /> : <Copy size="1rem" />}
         </ActionIcon>
       )}
-    </CopyButton>
+    </MantineCopyButton>
   );
 };

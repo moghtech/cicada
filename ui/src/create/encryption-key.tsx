@@ -1,4 +1,4 @@
-import { CopyIconButton } from "@/components/copy-button";
+import { CopyButton } from "@/components/copy-button";
 import { useInvalidate, useWrite } from "@/lib/hooks";
 import { Button, Flex, Menu, Select, Text, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
@@ -65,7 +65,7 @@ const CreateEncryptionKeyForm = ({ close }: { close: () => void }) => {
         </Text>
         <Flex gap="md" align="center" w="100%">
           <TextInput value={created.key} w="100%" disabled />
-          <CopyIconButton content={created.key} />
+          <CopyButton content={created.key} />
         </Flex>
         <Button
           leftSection={<CircleCheckBig size="1rem" />}

@@ -1,7 +1,7 @@
 import ConfirmDelete from "@/components/confirm-delete";
 import { DataTable, SortableHeader } from "@/components/data-table";
 import CreateOnboardingKey from "@/create/onboarding-key";
-import { Page } from "@/layout/page";
+import { Page } from "@/components/page";
 import { useInvalidate, useRead, useWrite } from "@/lib/hooks";
 import { ICONS } from "@/lib/icons";
 import { List, Text } from "@mantine/core";

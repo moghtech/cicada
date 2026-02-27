@@ -8,7 +8,7 @@ import ConfirmSave from "@/components/confirm-save";
 import ConfirmDelete from "@/components/confirm-delete";
 import { Types } from "cicada_client";
 import { notifications } from "@mantine/notifications";
-import { Page } from "@/layout/page";
+import { Page } from "@/components/page";
 import { NodePageDescription, NodePageTitle } from "./title";
 import InitializeEncryptionKey from "@/components/initialize-key";
 

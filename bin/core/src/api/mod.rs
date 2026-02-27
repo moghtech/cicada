@@ -32,7 +32,10 @@ pub fn app() -> Router {
     // .nest("/listener", listener::router())
     // .nest("/client", ts_client::router())
     .layer(memory_session_layer(config))
-    .fallback_service(serve_static_ui(&config.ui_path))
+    .fallback_service(serve_static_ui(
+      &config.ui_path,
+      config.ui_index_force_no_cache,
+    ))
     .layer(cors_layer(config))
 }
 

@@ -157,6 +157,10 @@ pub struct Env {
 
   /// Override `cors_allowed_origins`
   pub cicada_cors_allowed_origins: Option<Vec<String>>,
+  /// Override `cors_allow_credentials`
+  pub cicada_cors_allow_credentials: Option<bool>,
+  /// Override `session_allow_cross_site`
+  pub cicada_session_allow_cross_site: Option<bool>,
 
   /// Override `logging.level`
   pub cicada_logging_level: Option<LogLevel>,
@@ -188,6 +192,8 @@ pub struct Env {
 
   /// Override `ui_path`
   pub cicada_ui_path: Option<String>,
+  /// Override `ui_index_force_no_cache`
+  pub cicada_ui_index_force_no_cache: Option<bool>,
 }
 
 fn default_core_config_paths() -> Vec<PathBuf> {
@@ -312,12 +318,20 @@ pub struct CoreConfig {
   // =======
   // = CORS =
   // =======
-  /// List of CORS allowed origins.
-  /// If empty, allows all origins (`*`).
-  /// Production setups should configure this explicitly.
+  /// List of additional CORS allowed origins.
   /// Example: `["https://cicada.example.com", "https://app.example.com"]`.
   #[serde(default)]
   pub cors_allowed_origins: Vec<String>,
+
+  /// Allow credentials from additional origins.
+  #[serde(default)]
+  pub cors_allow_credentials: bool,
+
+  /// Use SameSite=None (actually allows samesite) instead of SameSite=Lax.
+  /// The third option, SameSite=Strict, won't work with external login,
+  /// as the session cookie will be lost on redirect with auth provider.
+  #[serde(default)]
+  pub session_allow_cross_site: bool,
 
   // ===========
   // = Logging =
@@ -360,6 +374,12 @@ pub struct CoreConfig {
   /// The path to the built ui static folder.
   #[serde(default = "default_ui_path")]
   pub ui_path: String,
+
+  /// Force the `index.html` to served with
+  /// 'Cache-Content: no-cache' header instead
+  /// of using content hash as ETag.
+  #[serde(default)]
+  pub ui_index_force_no_cache: bool,
 }
 
 fn default_title() -> String {
@@ -430,6 +450,8 @@ impl Default for CoreConfig {
       auth_rate_limit_window_seconds:
         default_auth_rate_limit_window_seconds(),
       cors_allowed_origins: Default::default(),
+      cors_allow_credentials: Default::default(),
+      session_allow_cross_site: Default::default(),
       logging: Default::default(),
       pretty_startup_config: Default::default(),
       unsafe_unsanitized_startup_config: Default::default(),
@@ -437,6 +459,7 @@ impl Default for CoreConfig {
       ssl_key_file: default_ssl_key_file(),
       ssl_cert_file: default_ssl_cert_file(),
       ui_path: default_ui_path(),
+      ui_index_force_no_cache: Default::default(),
     }
   }
 }
@@ -477,10 +500,13 @@ impl CoreConfig {
       auth_rate_limit_window_seconds: config
         .auth_rate_limit_window_seconds,
       cors_allowed_origins: config.cors_allowed_origins,
+      cors_allow_credentials: config.cors_allow_credentials,
+      session_allow_cross_site: config.session_allow_cross_site,
       ssl_enabled: config.ssl_enabled,
       ssl_key_file: config.ssl_key_file,
       ssl_cert_file: config.ssl_cert_file,
       ui_path: config.ui_path,
+      ui_index_force_no_cache: config.ui_index_force_no_cache,
     }
   }
 
@@ -585,23 +611,26 @@ impl mogh_server::ServerConfig for &CoreConfig {
 
 #[cfg(feature = "core")]
 impl mogh_server::cors::CorsConfig for &CoreConfig {
-  fn allowed_origins_env_field(&self) -> &'static str {
-    "CICADA_CORS_ALLOWED_ORIGINS"
-  }
   fn allowed_origins(&self) -> &[String] {
     &self.cors_allowed_origins
+  }
+  fn allow_credentials(&self) -> bool {
+    self.cors_allow_credentials
   }
 }
 
 #[cfg(feature = "core")]
 impl mogh_server::session::SessionConfig for &CoreConfig {
-  fn expiry_seconds(&self) -> i64 {
-    60
+  fn host(&self) -> &str {
+    &self.host
   }
   fn host_env_field(&self) -> &str {
     "CICADA_HOST"
   }
-  fn host(&self) -> &str {
-    &self.host
+  fn expiry_seconds(&self) -> i64 {
+    60
+  }
+  fn allow_cross_site(&self) -> bool {
+    self.session_allow_cross_site
   }
 }

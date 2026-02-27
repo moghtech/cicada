@@ -1,6 +1,6 @@
 import ConfirmDelete from "@/components/confirm-delete";
 import { EnableSwitch } from "@/components/enable-switch";
-import { Page } from "@/layout/page";
+import { Page } from "@/components/page";
 import { useRead, useWrite } from "@/lib/hooks";
 import { ICONS } from "@/lib/icons";
 import {

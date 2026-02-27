@@ -1,5 +1,5 @@
 import { ConfirmButton } from "@/components/confirm-button";
-import { CopyIconButton } from "@/components/copy-button";
+import { CopyButton } from "@/components/copy-button";
 import { useManageAuth, useUserInvalidate } from "@/lib/hooks";
 import {
   Button,
@@ -41,7 +41,7 @@ export const EnrollTotp = ({ user }: { user: Types.UserEntity }) => {
         userInvalidate();
         notifications.show({ message: "Unenrolled in TOTP 2FA." });
       },
-    }
+    },
   );
 
   const onOpenChange = (open: boolean) => {
@@ -67,7 +67,7 @@ export const EnrollTotp = ({ user }: { user: Types.UserEntity }) => {
                     <TextInput key={code} w={200} value={code} disabled />
                   ))}
                 </Flex>
-                <CopyIconButton content={recovery.join("\n")} />
+                <CopyButton content={recovery.join("\n")} />
               </Flex>
             )}
             {!recovery && submitted && (
@@ -87,7 +87,7 @@ export const EnrollTotp = ({ user }: { user: Types.UserEntity }) => {
                 <Flex align="center" justify="space-between" gap="sm">
                   URI
                   <TextInput w={250} value={submitted.uri} disabled />
-                  <CopyIconButton content={submitted.uri} />
+                  <CopyButton content={submitted.uri} />
                 </Flex>
                 <Flex align="center" justify="space-between">
                   Confirm Code

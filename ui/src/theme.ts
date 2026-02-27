@@ -1,4 +1,9 @@
-import { colorsTuple, createTheme, MantineColorScheme, virtualColor } from "@mantine/core";
+import {
+  colorsTuple,
+  createTheme,
+  MantineColorScheme,
+  virtualColor,
+} from "@mantine/core";
 
 export const DEFAULT_COLOR_SCHEME: MantineColorScheme = "auto";
 
