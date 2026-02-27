@@ -225,7 +225,7 @@ impl TryInto<async_timing_util::Timelength> for Timelength {
 macro_rules! surreal_id {
   ($typ:ident, $table:expr) => {
     impl $typ {
-      pub fn as_record_id(&self) -> RecordId {
+      pub fn as_record_id(&self) -> surrealdb_types::RecordId {
         surrealdb_types::RecordId::new($table, self.0.as_str())
       }
     }
@@ -243,18 +243,20 @@ macro_rules! surreal_id {
 
       fn from_value(
         value: surrealdb_types::Value,
-      ) -> mogh_error::anyhow::Result<Self>
+      ) -> Result<Self, surrealdb_types::Error>
       where
         Self: Sized,
       {
         let surrealdb_types::Value::RecordId(id) = value else {
-          return Err(mogh_error::anyhow::anyhow!(
-            "Value is not RecordId"
+          return Err(surrealdb_types::Error::serialization(
+            String::from("Value is not RecordId"),
+            surrealdb_types::SerializationError::Deserialization,
           ));
         };
-        let RecordIdKey::String(id) = id.key else {
-          return Err(mogh_error::anyhow::anyhow!(
-            "RecordIdKey is not String"
+        let surrealdb_types::RecordIdKey::String(id) = id.key else {
+          return Err(surrealdb_types::Error::serialization(
+            String::from("RecordIdKey is not String"),
+            surrealdb_types::SerializationError::Deserialization,
           ));
         };
         Ok(Self(id))

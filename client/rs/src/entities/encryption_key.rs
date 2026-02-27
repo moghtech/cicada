@@ -1,7 +1,6 @@
-use mogh_error::anyhow::{self, Context as _};
 use serde::{Deserialize, Serialize};
 use strum::{AsRefStr, Display, EnumString};
-use surrealdb_types::{RecordId, RecordIdKey, SurrealValue};
+use surrealdb_types::{SerializationError, SurrealValue};
 use typeshare::typeshare;
 
 use crate::entities::Iso8601Timestamp;
@@ -107,13 +106,23 @@ impl SurrealValue for EncryptionKeyKind {
     surrealdb_types::Value::String(self.to_string())
   }
 
-  fn from_value(value: surrealdb_types::Value) -> anyhow::Result<Self>
+  fn from_value(
+    value: surrealdb_types::Value,
+  ) -> Result<Self, surrealdb_types::Error>
   where
     Self: Sized,
   {
     let surrealdb_types::Value::String(kind) = value else {
-      return Err(anyhow::anyhow!("Value is not String"));
+      return Err(surrealdb_types::Error::serialization(
+        String::from("Value is not String"),
+        SerializationError::Deserialization,
+      ));
     };
-    kind.parse().context("Invalid EncryptionKeyKind")
+    kind.parse().map_err(|e| {
+      surrealdb_types::Error::serialization(
+        format!("Invalid EncryptionKeyKind: {e:?}"),
+        SerializationError::Deserialization,
+      )
+    })
   }
 }

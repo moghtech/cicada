@@ -11,8 +11,10 @@ use cicada_client::{
     node::{NodeEntity, NodeKind},
   },
 };
-use fuser::{FileAttr, FileType, MountOption};
-use libc::ENOENT;
+use fuser::{
+  Errno, FileAttr, FileHandle, FileType, Generation, INodeNo,
+  LockOwner, MountOption, OpenFlags,
+};
 
 use crate::cicada;
 
@@ -36,7 +38,7 @@ impl CicadaFs {
     let uid = unsafe { libc::getuid() };
     let gid = unsafe { libc::getgid() };
     let root = FileAttr {
-      ino: 1,
+      ino: INodeNo::ROOT,
       size: 0,
       blocks: 0,
       atime: UNIX_EPOCH,
@@ -52,14 +54,14 @@ impl CicadaFs {
       blksize: CicadaFs::BLOCK_SIZE as u32,
       flags: 0,
     };
-    let options = &[
+    let mut config = fuser::Config::default();
+    config.mount_options = vec![
       MountOption::FSName(name),
       MountOption::RO,
-      MountOption::AllowOther,
       MountOption::AutoUnmount,
       MountOption::DefaultPermissions,
     ];
-    fuser::mount2(CicadaFs { filesystem, root }, mountpoint, options)
+    fuser::mount2(CicadaFs { filesystem, root }, mountpoint, &config)
       .context("Failed to mount CicadaFs")
   }
 
@@ -74,7 +76,7 @@ impl CicadaFs {
       NodeKind::File => (FileType::RegularFile, 0o600),
     };
     FileAttr {
-      ino: node.inode,
+      ino: INodeNo(node.inode),
       size,
       blocks: size.div_ceil(CicadaFs::BLOCK_SIZE),
       atime: UNIX_EPOCH,
@@ -99,11 +101,11 @@ impl fuser::Filesystem for CicadaFs {
   // ======
 
   fn readdir(
-    &mut self,
-    _req: &fuser::Request<'_>,
-    ino: u64,
-    _fh: u64,
-    offset: i64,
+    &self,
+    _req: &fuser::Request,
+    INodeNo(ino): INodeNo,
+    _fh: FileHandle,
+    offset: u64,
     mut reply: fuser::ReplyDirectory,
   ) {
     let nodes = match cicada().read(ListNodes {
@@ -115,7 +117,7 @@ impl fuser::Filesystem for CicadaFs {
         error!(
           "READDIR FAILED: Could not list children nodes | inode: {ino} | {e:#}"
         );
-        reply.error(ENOENT);
+        reply.error(Errno::ENOENT);
         return;
       }
     };
@@ -137,7 +139,7 @@ impl fuser::Filesystem for CicadaFs {
       entries.into_iter().enumerate().skip(offset as usize)
     {
       // i + 1 means the index of the next entry
-      if reply.add(ino, (i + 1) as i64, kind, name) {
+      if reply.add(INodeNo(ino), (i + 1) as u64, kind, name) {
         break;
       }
     }
@@ -146,15 +148,15 @@ impl fuser::Filesystem for CicadaFs {
   }
 
   fn lookup(
-    &mut self,
-    _req: &fuser::Request<'_>,
-    parent: u64,
+    &self,
+    _req: &fuser::Request,
+    INodeNo(parent): INodeNo,
     name: &std::ffi::OsStr,
     reply: fuser::ReplyEntry,
   ) {
     let Some(name) = name.to_str() else {
       error!("LOOKUP FAILED: Name {name:?} is not valid UTF-8");
-      reply.error(ENOENT);
+      reply.error(Errno::ENOENT);
       return;
     };
     let attr = match cicada().read(FindNode::with_parent_name(
@@ -167,18 +169,18 @@ impl fuser::Filesystem for CicadaFs {
         error!(
           "LOOKUP FAILED: Could not find node | Parent: {parent} | Name: {name} | {e:#}"
         );
-        reply.error(ENOENT);
+        reply.error(Errno::ENOENT);
         return;
       }
     };
-    reply.entry(&CicadaFs::TTL, &attr, 0);
+    reply.entry(&CicadaFs::TTL, &attr, Generation(0));
   }
 
   fn getattr(
-    &mut self,
-    _req: &fuser::Request<'_>,
-    ino: u64,
-    _fh: Option<u64>,
+    &self,
+    _req: &fuser::Request,
+    INodeNo(ino): INodeNo,
+    _fh: Option<FileHandle>,
     reply: fuser::ReplyAttr,
   ) {
     // handle root case
@@ -194,7 +196,7 @@ impl fuser::Filesystem for CicadaFs {
         error!(
           "LOOKUP FAILED: Could not find node | inode: {ino} | {e:#}"
         );
-        reply.error(ENOENT);
+        reply.error(Errno::ENOENT);
         return;
       }
     };
@@ -202,19 +204,19 @@ impl fuser::Filesystem for CicadaFs {
   }
 
   fn read(
-    &mut self,
-    _req: &fuser::Request<'_>,
-    ino: u64,
-    _fh: u64,
-    _offset: i64,
+    &self,
+    _req: &fuser::Request,
+    INodeNo(ino): INodeNo,
+    _fh: FileHandle,
+    _offset: u64,
     _size: u32,
-    _flags: i32,
-    _lock_owner: Option<u64>,
+    _flags: OpenFlags,
+    _lock_owner: Option<LockOwner>,
     reply: fuser::ReplyData,
   ) {
     // Root inode has no data
     if ino == 1 {
-      reply.error(ENOENT);
+      reply.error(Errno::ENOENT);
       return;
     }
     let node = match cicada()
@@ -225,7 +227,7 @@ impl fuser::Filesystem for CicadaFs {
         error!(
           "READ FAILED: Could not find node | inode: {ino} | {e:#}"
         );
-        reply.error(ENOENT);
+        reply.error(Errno::ENOENT);
         return;
       }
     };
@@ -235,7 +237,7 @@ impl fuser::Filesystem for CicadaFs {
       }
       None => {
         error!("READ FAILED: No data found for node | inode: {ino}");
-        reply.error(ENOENT);
+        reply.error(Errno::ENOENT);
       }
     }
   }
