@@ -28,7 +28,7 @@ const FolderPage = ({
         inv(["ListFilesystems"], ["ListNodes"]);
         nav("/");
       },
-    }
+    },
   );
   const children =
     useRead("ListNodes", {
@@ -38,7 +38,7 @@ const FolderPage = ({
   const byId = useMemo(
     () =>
       children && Object.fromEntries(children.map((node) => [node.id, node])),
-    [children]
+    [children],
   );
   const { mutateAsync: deleteFolder, isPending: deleteFolderPending } =
     useWrite("DeleteNode", {
@@ -68,7 +68,12 @@ const FolderPage = ({
       actions={
         <>
           {Object.values(Types.NodeKind).map((kind) => (
-            <CreateNode key={kind} kind={kind} parent={node?.inode ?? 1} />
+            <CreateNode
+              key={kind}
+              filesystem={filesystem?.id}
+              kind={kind}
+              parent={node?.inode ?? 1}
+            />
           ))}
           {!selectedIds.length && node === undefined && filesystem && (
             <ConfirmDelete

@@ -6,23 +6,26 @@ import { notifications } from "@mantine/notifications";
 import { Types } from "cicada_client";
 import { FilePlus, FolderPlus } from "lucide-react";
 
-const CreateNode = ({
-  kind,
-  parent,
-}: {
+interface CreateNodeProps {
+  filesystem: string | undefined;
   kind: Types.NodeKind;
   parent: number;
-}) => {
+}
+
+const CreateNode = (props: CreateNodeProps) => {
   const [opened, { open, close }] = useDisclosure(false);
   return (
     <Menu opened={opened} onClose={close} position="bottom-start" width={400}>
       <Menu.Target>
-        <Button onClick={open} leftSection={<CreateNodeIcon kind={kind} />}>
-          Create {kind}
+        <Button
+          onClick={open}
+          leftSection={<CreateNodeIcon kind={props.kind} />}
+        >
+          Create {props.kind}
         </Button>
       </Menu.Target>
       <Menu.Dropdown p="1rem">
-        <CreateNodeForm close={close} kind={kind} parent={parent} />
+        <CreateNodeForm close={close} {...props} />
       </Menu.Dropdown>
     </Menu>
   );
@@ -38,13 +41,12 @@ const CreateNodeIcon = ({ kind }: { kind: Types.NodeKind }) => {
 
 const CreateNodeForm = ({
   close,
+  filesystem,
   kind,
   parent,
 }: {
   close: () => void;
-  kind: Types.NodeKind;
-  parent: number;
-}) => {
+} & CreateNodeProps) => {
   const inv = useInvalidate();
   const { mutate, isPending } = useWrite("CreateNode", {
     onSuccess: () => {
@@ -64,7 +66,9 @@ const CreateNodeForm = ({
   });
   return (
     <form
-      onSubmit={form.onSubmit((form) => mutate({ ...form, kind, parent }))}
+      onSubmit={form.onSubmit((form) =>
+        mutate({ ...form, filesystem, kind, parent }),
+      )}
       style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
       autoFocus
     >
