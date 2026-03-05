@@ -120,7 +120,7 @@ export const useAuthState = () => {
   const search = new URLSearchParams(location.search);
 
   const _passkey = search.get("passkey");
-  const passkey = _passkey ? JSON.parse(_passkey) : null;
+  const passkey = _passkey ? JSON.parse(atob(_passkey)) : null;
 
   // guard against multiple reqs sent
   // maybe isPending would do this but not sure about with render loop, this for sure will.
