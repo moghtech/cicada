@@ -28,6 +28,7 @@ pub fn create_device() {}
 #[derive(
   Debug, Clone, Serialize, Deserialize, SurrealValue, Resolve,
 )]
+#[surreal(crate = "surrealdb_types")]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaWriteRequest)]
 #[response(CreateDeviceResponse)]
@@ -70,6 +71,7 @@ pub fn update_device() {}
 #[derive(
   Debug, Clone, Serialize, Deserialize, SurrealValue, Resolve,
 )]
+#[surreal(crate = "surrealdb_types")]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaWriteRequest)]
 #[response(UpdateDeviceResponse)]
@@ -113,6 +115,7 @@ pub fn delete_device() {}
 #[derive(
   Debug, Clone, Serialize, Deserialize, SurrealValue, Resolve,
 )]
+#[surreal(crate = "surrealdb_types")]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaWriteRequest)]
 #[response(DeleteDeviceResponse)]
@@ -146,6 +149,7 @@ pub fn batch_delete_devices() {}
 #[derive(
   Debug, Clone, Serialize, Deserialize, SurrealValue, Resolve,
 )]
+#[surreal(crate = "surrealdb_types")]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaWriteRequest)]
 #[response(BatchDeleteDevicesResponse)]

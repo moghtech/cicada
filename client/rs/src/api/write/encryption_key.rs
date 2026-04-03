@@ -31,6 +31,7 @@ pub fn create_encryption_key() {}
 #[derive(
   Debug, Clone, Serialize, Deserialize, SurrealValue, Resolve,
 )]
+#[surreal(crate = "surrealdb_types")]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaWriteRequest)]
 #[response(CreateEncryptionKeyResponse)]
@@ -69,6 +70,7 @@ pub fn update_encryption_key() {}
 #[derive(
   Debug, Clone, Serialize, Deserialize, SurrealValue, Resolve,
 )]
+#[surreal(crate = "surrealdb_types")]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaWriteRequest)]
 #[response(UpdateEncryptionKeyResponse)]
@@ -106,6 +108,7 @@ pub fn initialize_encryption_key() {}
 #[derive(
   Debug, Clone, Serialize, Deserialize, SurrealValue, Resolve,
 )]
+#[surreal(crate = "surrealdb_types")]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaWriteRequest)]
 #[response(InitializeEncryptionKeyResponse)]

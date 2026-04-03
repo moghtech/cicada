@@ -33,6 +33,7 @@ pub fn create_node() {}
 #[derive(
   Debug, Clone, Serialize, Deserialize, SurrealValue, Resolve,
 )]
+#[surreal(crate = "surrealdb_types")]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaWriteRequest)]
 #[response(CreateNodeResponse)]
@@ -86,6 +87,7 @@ pub fn update_node() {}
 #[derive(
   Debug, Clone, Serialize, Deserialize, SurrealValue, Resolve,
 )]
+#[surreal(crate = "surrealdb_types")]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaWriteRequest)]
 #[response(UpdateNodeResponse)]
@@ -125,6 +127,7 @@ pub fn update_node_data() {}
 #[derive(
   Debug, Clone, Serialize, Deserialize, SurrealValue, Resolve,
 )]
+#[surreal(crate = "surrealdb_types")]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaWriteRequest)]
 #[response(UpdateNodeResponse)]
@@ -162,6 +165,7 @@ pub fn update_node_encryption_key() {}
 #[derive(
   Debug, Clone, Serialize, Deserialize, SurrealValue, Resolve,
 )]
+#[surreal(crate = "surrealdb_types")]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaWriteRequest)]
 #[response(UpdateNodeEncryptionKeyResponse)]
@@ -197,6 +201,7 @@ pub fn rotate_node_envelope_key() {}
 #[derive(
   Debug, Clone, Serialize, Deserialize, SurrealValue, Resolve,
 )]
+#[surreal(crate = "surrealdb_types")]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaWriteRequest)]
 #[response(RotateNodeEnvelopeKeyResponse)]
@@ -234,6 +239,7 @@ pub fn delete_node() {}
 #[derive(
   Debug, Clone, Serialize, Deserialize, SurrealValue, Resolve,
 )]
+#[surreal(crate = "surrealdb_types")]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaWriteRequest)]
 #[response(DeleteNodeResponse)]
@@ -272,6 +278,7 @@ pub fn batch_delete_nodes() {}
 #[derive(
   Debug, Clone, Serialize, Deserialize, SurrealValue, Resolve,
 )]
+#[surreal(crate = "surrealdb_types")]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaWriteRequest)]
 #[response(BatchDeleteNodesResponse)]

@@ -10,6 +10,7 @@ use crate::entities::{
 /// Users queryable from the API
 #[typeshare]
 #[derive(Debug, Clone, Serialize, Deserialize, SurrealValue)]
+#[surreal(crate = "surrealdb_types")]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 pub struct UserEntity {
   /// The unique user id
@@ -46,6 +47,7 @@ pub struct UserEntity {
 /// Users on the database
 #[typeshare]
 #[derive(Debug, Clone, Serialize, Deserialize, SurrealValue)]
+#[surreal(crate = "surrealdb_types")]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 pub struct UserRecord {
   /// The unique user id

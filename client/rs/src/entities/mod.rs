@@ -44,6 +44,7 @@ pub struct NoData {}
 /// doesn't require re-encrypting the data itself.
 #[typeshare]
 #[derive(Debug, Clone, Serialize, Deserialize, SurrealValue)]
+#[surreal(crate = "surrealdb_types")]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 pub struct EncryptedData {
   // /// The master encryption key

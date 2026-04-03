@@ -28,6 +28,7 @@ pub fn create_filesystem() {}
 #[derive(
   Debug, Clone, Serialize, Deserialize, SurrealValue, Resolve,
 )]
+#[surreal(crate = "surrealdb_types")]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaWriteRequest)]
 #[response(CreateFilesystemResponse)]
@@ -61,6 +62,7 @@ pub fn update_filesystem() {}
 #[derive(
   Debug, Clone, Serialize, Deserialize, SurrealValue, Resolve,
 )]
+#[surreal(crate = "surrealdb_types")]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaWriteRequest)]
 #[response(UpdateFilesystemResponse)]
@@ -100,6 +102,7 @@ pub fn delete_filesystem() {}
 #[derive(
   Debug, Clone, Serialize, Deserialize, SurrealValue, Resolve,
 )]
+#[surreal(crate = "surrealdb_types")]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaWriteRequest)]
 #[response(DeleteFilesystemResponse)]

@@ -8,6 +8,7 @@ use crate::entities::{Iso8601Timestamp, user::UserId};
 /// Stores external user logins
 #[typeshare]
 #[derive(Debug, Clone, Serialize, Deserialize, SurrealValue)]
+#[surreal(crate = "surrealdb_types")]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 pub struct ExternalLoginRecord {
   /// The unique user login id

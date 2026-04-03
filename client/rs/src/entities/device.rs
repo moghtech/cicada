@@ -6,6 +6,7 @@ use crate::entities::Iso8601Timestamp;
 
 #[typeshare]
 #[derive(Debug, Clone, Serialize, Deserialize, SurrealValue)]
+#[surreal(crate = "surrealdb_types")]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 pub struct DeviceRecord {
   /// The unique Device id

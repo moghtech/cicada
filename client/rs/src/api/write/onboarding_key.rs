@@ -28,6 +28,7 @@ pub fn create_onboarding_key() {}
 #[derive(
   Debug, Clone, Serialize, Deserialize, SurrealValue, Resolve,
 )]
+#[surreal(crate = "surrealdb_types")]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaWriteRequest)]
 #[response(CreateOnboardingKeyResponse)]
@@ -81,6 +82,7 @@ pub fn update_onboarding_key() {}
 #[derive(
   Debug, Clone, Serialize, Deserialize, SurrealValue, Resolve,
 )]
+#[surreal(crate = "surrealdb_types")]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaWriteRequest)]
 #[response(UpdateOnboardingKeyResponse)]
@@ -124,6 +126,7 @@ pub fn delete_onboarding_key() {}
 #[derive(
   Debug, Clone, Serialize, Deserialize, SurrealValue, Resolve,
 )]
+#[surreal(crate = "surrealdb_types")]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaWriteRequest)]
 #[response(DeleteOnboardingKeyResponse)]
@@ -157,6 +160,7 @@ pub fn batch_delete_onboarding_keys() {}
 #[derive(
   Debug, Clone, Serialize, Deserialize, SurrealValue, Resolve,
 )]
+#[surreal(crate = "surrealdb_types")]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[empty_traits(CicadaWriteRequest)]
 #[response(BatchDeleteOnboardingKeysResponse)]

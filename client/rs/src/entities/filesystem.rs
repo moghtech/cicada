@@ -8,6 +8,7 @@ use crate::entities::{
 
 #[typeshare]
 #[derive(Debug, Clone, Serialize, Deserialize, SurrealValue)]
+#[surreal(crate = "surrealdb_types")]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 pub struct FilesystemRecord {
   /// The unique filesystem id

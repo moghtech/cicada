@@ -9,6 +9,7 @@ use crate::entities::{
 
 #[typeshare]
 #[derive(Debug, Clone, Serialize, Deserialize, SurrealValue)]
+#[surreal(crate = "surrealdb_types")]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 pub struct NodeListItem {
   /// The unique node id
@@ -36,6 +37,7 @@ pub struct NodeListItem {
 /// Nodes over the API, with unencrypted data
 #[typeshare]
 #[derive(Debug, Clone, Serialize, Deserialize, SurrealValue)]
+#[surreal(crate = "surrealdb_types")]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 pub struct NodeEntity {
   /// The unique node id
@@ -73,6 +75,7 @@ pub struct NodeEntity {
 /// Nodes stored on the database, with encrypted data
 #[typeshare]
 #[derive(Debug, Clone, Serialize, Deserialize, SurrealValue)]
+#[surreal(crate = "surrealdb_types")]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 pub struct NodeRecord {
   /// The unique node id
@@ -107,8 +110,9 @@ pub struct NodeRecord {
 #[derive(
   Debug, Clone, Copy, Default, Serialize, Deserialize, SurrealValue,
 )]
-#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
+#[surreal(crate = "surrealdb_types")]
 #[surreal(untagged)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 pub enum NodeKind {
   #[default]
   Folder,

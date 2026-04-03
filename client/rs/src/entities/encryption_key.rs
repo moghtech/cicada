@@ -36,6 +36,7 @@ pub struct EncryptionKeyEntity {
 /// which can point to an in-memory key or a remote KMS.
 #[typeshare]
 #[derive(Debug, Clone, Serialize, Deserialize, SurrealValue)]
+#[surreal(crate = "surrealdb_types")]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 pub struct EncryptionKeyRecord {
   /// The unique encryption key id
