@@ -10,6 +10,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     allowedHosts: process.env.ALLOWED_HOSTS?.split(","),
+    port: 3220,
   },
   resolve: {
     alias: {

@@ -3,12 +3,14 @@ import { useRead } from "@/lib/hooks";
 import { ICONS } from "@/lib/icons";
 import {
   ActionIcon,
+  Box,
   Button,
   Center,
   Divider,
-  Flex,
+  Group,
   Loader,
   ScrollArea,
+  Stack,
   Text,
   Tree,
   TreeNodeData,
@@ -39,13 +41,12 @@ export const Sidebar = ({ close }: { close: () => void }) => {
   };
 
   return (
-    <Flex direction="column" justify="space-between" gap="lg" h="100%" m={16}>
+    <Stack justify="space-between" gap="md" h="96%" m="xl" mt="24" mr="md">
       {/* TOP AREA (scrolling) */}
       <ScrollArea>
-        <Flex direction="column" gap="0.5rem">
+        <Stack gap="0.15rem" mr="md">
           <Button
-            variant={devicesPage ? "filled" : "subtle"}
-            c="inherit"
+            variant={devicesPage ? "default" : "subtle"}
             onClick={() => nav("/devices")}
             leftSection={<ICONS.Device size="1rem" />}
             justify="flex-start"
@@ -54,8 +55,7 @@ export const Sidebar = ({ close }: { close: () => void }) => {
             Devices
           </Button>
           <Button
-            variant={encryptionPage ? "filled" : "subtle"}
-            c="inherit"
+            variant={encryptionPage ? "default" : "subtle"}
             onClick={() => nav("/encryption-keys")}
             leftSection={<ICONS.EncryptionKey size="1rem" />}
             justify="flex-start"
@@ -67,10 +67,10 @@ export const Sidebar = ({ close }: { close: () => void }) => {
           <Filesystems filesystem={selected_filesystem} close={close} />
           <Divider
             label={
-              <Flex gap="sm" opacity={0.7} align="center">
+              <Group gap="sm" opacity={0.7} wrap="nowrap">
                 <ICONS.Folder size="1rem" />
                 <Text>Files</Text>
-              </Flex>
+              </Group>
             }
           />
           {selected_filesystem ? (
@@ -86,11 +86,11 @@ export const Sidebar = ({ close }: { close: () => void }) => {
               <Text ml="xs">No Filesystem Selected</Text>
             </Center>
           )}
-        </Flex>
+        </Stack>
       </ScrollArea>
 
       {/* BOTTOM AREA */}
-      <Flex direction="column" gap="lg">
+      <Stack gap="lg">
         {/* <Button
           onClick={() => nav("/devices")}
           leftSection={<Server size="1rem" />}
@@ -99,8 +99,8 @@ export const Sidebar = ({ close }: { close: () => void }) => {
         >
           Devices
         </Button> */}
-      </Flex>
-    </Flex>
+      </Stack>
+    </Stack>
   );
 };
 
@@ -125,17 +125,16 @@ const Filesystems = ({
     <>
       <Divider
         label={
-          <Flex gap="sm" opacity={0.7} align="center">
+          <Group gap="sm" opacity={0.7} wrap="nowrap">
             <ICONS.Filesystem size="1rem" />
             <Text>Filesystems</Text>
-          </Flex>
+          </Group>
         }
       />
       {filesystems.map((fs) => (
         <Button
           key={fs.id}
-          variant={fs.id === filesystem ? "filled" : "subtle"}
-          c="inherit"
+          variant={fs.id === filesystem ? "default" : "subtle"}
           justify="start"
           component={Link}
           to={`/filesystems/${fs.id}`}
@@ -193,7 +192,7 @@ const NodeTree = ({
       data={data}
       renderNode={({ node, expanded, hasChildren, elementProps }) => {
         if (node.value === CHILD_VALUE_IDENTIFIER) {
-          return <Flex {...elementProps}>{node.label}</Flex>;
+          return <Box {...elementProps}>{node.label}</Box>;
         }
 
         const inode = Number(node.value.split("/")[1]);
@@ -201,7 +200,6 @@ const NodeTree = ({
         return (
           <Button
             variant={selected && selected === inode ? "default" : "subtle"}
-            c="inherit"
             p="0rem 0.5rem"
             mb="0.25rem"
             justify="space-between"

@@ -17,6 +17,7 @@ const DevicesTabs = () => {
           content: OnboardingKeysPage,
         },
       ]}
+      color="orange"
     />
   );
 };

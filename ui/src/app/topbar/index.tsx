@@ -1,4 +1,4 @@
-import { AppShell, Burger, Button, Flex, Text } from "@mantine/core";
+import { AppShell, Burger, Button, Flex, Group, Text } from "@mantine/core";
 import { useNavigate } from "react-router-dom";
 import { ThemeToggle } from "mogh_ui";
 import UserDropdown from "./user-dropdown";
@@ -13,12 +13,15 @@ export const Topbar = ({
   const nav = useNavigate();
   return (
     <AppShell.Header
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-      }}
-      px="1rem"
+      renderRoot={(props) => (
+        <Group justify="space-between" wrap="nowrap" {...props} />
+      )}
+      style={(theme) => ({
+        borderColor: theme.colors["accent-border"][1],
+      })}
+      bg="accent.1"
+      pl="1.3rem"
+      pr="2rem"
       py="0rem"
     >
       <Flex align="center" gap="md">
