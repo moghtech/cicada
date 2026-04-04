@@ -25,6 +25,9 @@ pub mod node;
 pub mod onboarding_key;
 /// Cicada users.
 pub mod user;
+/// Store encrypted secret information
+/// which can be interpolated into files.
+pub mod secret;
 
 #[typeshare(serialized_as = "number")]
 pub type U64 = u64;

@@ -108,6 +108,31 @@ export interface OnboardingKeyRecord {
 /** Response for [BatchDeleteOnboardingKeys]. */
 export type BatchDeleteOnboardingKeysResponse = OnboardingKeyRecord[];
 
+export type SecretId = string;
+
+/** Secrets over the API, with unencrypted data */
+export interface SecretEntity {
+	/** The unique secret id */
+	id: SecretId;
+	/** The name of the secret */
+	name: string;
+	/**
+	 * The master encryption key for this secret, if set.
+	 * If this is not null while data is, it means
+	 * the encryption key is not initialized.
+	 */
+	encryption_key?: EncryptionKeyId;
+	/** Data associated with the secret. */
+	data?: string;
+	/** Created at as ISO8601 timestamp. */
+	created_at: Iso8601Timestamp;
+	/** Updated at as ISO8601 timestamp. */
+	updated_at: Iso8601Timestamp;
+}
+
+/** Response for [BatchDeleteSecrets]. */
+export type BatchDeleteSecretsResponse = SecretEntity[];
+
 /** Response for [CreateDevice]. */
 export type CreateDeviceResponse = DeviceRecord;
 
@@ -186,6 +211,9 @@ export type CreateFilesystemResponse = FilesystemRecord;
 /** Response for [CreateNode]. */
 export type CreateNodeResponse = NodeEntity;
 
+/** Response for [CreateSecret]. */
+export type CreateSecretResponse = SecretEntity;
+
 /** Response for [DeleteDevice]. */
 export type DeleteDeviceResponse = DeviceRecord;
 
@@ -198,10 +226,16 @@ export type DeleteNodeResponse = NodeEntity[];
 /** Response for [DeleteOnboardingKey]. */
 export type DeleteOnboardingKeyResponse = OnboardingKeyRecord;
 
+/** Response for [DeleteSecret]. */
+export type DeleteSecretResponse = SecretEntity;
+
 export type ExternalLoginId = string;
 
 /** Response for [FindNode]. */
 export type FindNodeResponse = NodeEntity;
+
+/** Response for [FindSecret]. */
+export type FindSecretResponse = SecretEntity;
 
 /** Response for [GetDevice]. */
 export type GetDeviceResponse = DeviceRecord;
@@ -241,6 +275,9 @@ export type GetNodeResponse = NodeEntity;
 
 /** Response for [GetOnboardingKey]. */
 export type GetOnboardingKeyResponse = OnboardingKeyRecord;
+
+/** Response for [GetSecret]. */
+export type GetSecretResponse = SecretEntity;
 
 /** Represents an empty json object: `{}` */
 export interface NoData {
@@ -289,8 +326,25 @@ export type ListNodesResponse = NodeListItem[];
 /** Response for [ListOnboardingKeys]. */
 export type ListOnboardingKeysResponse = OnboardingKeyRecord[];
 
+export interface SecretListItem {
+	/** The unique secret id */
+	id: SecretId;
+	/** The name of the secret */
+	name: string;
+	/** Created at as ISO8601 timestamp. */
+	created_at: Iso8601Timestamp;
+	/** Updated at as ISO8601 timestamp. */
+	updated_at: Iso8601Timestamp;
+}
+
+/** Response for [ListSecrets]. */
+export type ListSecretsResponse = SecretListItem[];
+
 /** Response for [RotateNodeEnvelopeKey]. */
 export type RotateNodeEnvelopeKeyResponse = NodeEntity;
+
+/** Response for [RotateSecretEnvelopeKey]. */
+export type RotateSecretEnvelopeKeyResponse = SecretEntity;
 
 /** Response for [UpdateDevice]. */
 export type UpdateDeviceResponse = DeviceRecord;
@@ -312,6 +366,15 @@ export type UpdateNodeResponse = NodeEntity;
 
 /** Response for [UpdateOnboardingKey]. */
 export type UpdateOnboardingKeyResponse = OnboardingKeyRecord;
+
+/** Response for [UpdateSecretData]. */
+export type UpdateSecretDataResponse = SecretEntity;
+
+/** Response for [UpdateSecretEncryptionKey]. */
+export type UpdateSecretEncryptionKeyResponse = SecretEntity;
+
+/** Response for [UpdateSecret]. */
+export type UpdateSecretResponse = SecretEntity;
 
 export type UserId = string;
 
@@ -335,6 +398,12 @@ export interface BatchDeleteNodes {
 export interface BatchDeleteOnboardingKeys {
 	/** The onboarding key IDs */
 	ids: OnboardingKeyId[];
+}
+
+/** Batch delete secrets. Response: [BatchDeleteSecretsResponse]. */
+export interface BatchDeleteSecrets {
+	/** The onboarding_key ID */
+	ids: SecretId[];
 }
 
 /** Create a device. Response: [CreateDeviceResponse]. */
@@ -424,6 +493,19 @@ export interface CreateOnboardingKeyResponse {
 	created: OnboardingKeyRecord;
 }
 
+/** Create secret. Response: [CreateSecretResponse]. */
+export interface CreateSecret {
+	/** The name of the secret */
+	name: string;
+	/** The secret data to store encrypted. */
+	data?: string;
+	/**
+	 * Choose a specific encryption key.
+	 * Otherwise chooses the current global default.
+	 */
+	encryption_key?: EncryptionKeyId;
+}
+
 /** Delete a device. Response: [DeleteDeviceResponse]. */
 export interface DeleteDevice {
 	/** The device ID */
@@ -460,6 +542,12 @@ export interface DeleteNode {
 export interface DeleteOnboardingKey {
 	/** The onboarding_key ID */
 	id: OnboardingKeyId;
+}
+
+/** Delete a secret. Response: [DeleteSecretResponse]. */
+export interface DeleteSecret {
+	/** The secret id */
+	id: SecretId;
 }
 
 /**
@@ -541,6 +629,12 @@ export interface FindNode {
 	name?: string;
 }
 
+/** Find a secret by name. Response: [SecretEntity]. */
+export interface FindSecret {
+	/** secret name */
+	name: string;
+}
+
 /** Get a device by id. Response: [DeviceRecord]. */
 export interface GetDevice {
 	/** The device id */
@@ -563,6 +657,12 @@ export interface GetNode {
 export interface GetOnboardingKey {
 	/** The onboarding key id */
 	id: OnboardingKeyId;
+}
+
+/** Get a secret. Response: [SecretEntity]. */
+export interface GetSecret {
+	/** The secret id */
+	id: SecretId;
 }
 
 /**
@@ -630,6 +730,14 @@ export interface ListNodes {
 export interface ListOnboardingKeys {
 }
 
+/** List secrets. Response: [ListSecretsResponse]. */
+export interface ListSecrets {
+	/** Filesystem id */
+	filesystem?: FilesystemId;
+	/** parent isecret number. */
+	parent?: U64;
+}
+
 /** Nodes stored on the database, with encrypted data */
 export interface NodeRecord {
 	/** The unique node id */
@@ -663,6 +771,26 @@ export interface NodeRecord {
 export interface RotateNodeEnvelopeKey {
 	/** The node id */
 	id: NodeId;
+}
+
+/** Rotate a secret's envelope encryption key. Response: [RotateSecretEnvelopeKeyResponse]. */
+export interface RotateSecretEnvelopeKey {
+	/** The secret id */
+	id: SecretId;
+}
+
+/** Secrets stored on the database, with encrypted data */
+export interface SecretRecord {
+	/** The unique secret id */
+	id: SecretId;
+	/** The name of the secret */
+	name: string;
+	/** Data associated with the secret. */
+	data?: EncryptedData;
+	/** Created at as ISO8601 timestamp. */
+	created_at: Iso8601Timestamp;
+	/** Updated at as ISO8601 timestamp. */
+	updated_at: Iso8601Timestamp;
 }
 
 /** Update a device. Response: [UpdateDeviceResponse]. */
@@ -733,12 +861,40 @@ export interface UpdateOnboardingKey {
 	enabled?: boolean;
 }
 
+/** Update a secret. Response: [UpdateSecretResponse]. */
+export interface UpdateSecret {
+	/** The secret id */
+	id: SecretId;
+	/** The name of the secret */
+	name?: string;
+}
+
+/** Update a secret's encrypted data. Response: [UpdateSecretDataResponse]. */
+export interface UpdateSecretData {
+	/** The secret id */
+	id: SecretId;
+	/** The secret data */
+	data: string;
+	/** Optionally update the encryption key used as master in the envelope encryption. */
+	encryption_key?: EncryptionKeyId;
+}
+
+/** Update a secret's encryption key. Response: [UpdateSecretEncryptionKeyResponse]. */
+export interface UpdateSecretEncryptionKey {
+	/** The secret id */
+	id: SecretId;
+	/** Update the encryption key used as master in the envelope encryption. */
+	encryption_key: EncryptionKeyId;
+}
+
 /** Users queryable from the API */
 export interface UserEntity {
 	/** The unique user id */
 	id: UserId;
 	/** The name of the user, ie username */
 	username: string;
+	/** Link for user avatar, or empty string. */
+	avatar: string;
 	/**
 	 * Whether user is enabled.
 	 * Disabled users cannot log in and have no API access.
@@ -766,6 +922,8 @@ export interface UserRecord {
 	id: UserId;
 	/** The name of the user, ie username */
 	username: string;
+	/** Link for user avatar, or empty string. */
+	avatar: string;
 	/**
 	 * Whether user is enabled.
 	 * Disabled users cannot log in and have no API access.
@@ -808,6 +966,9 @@ export type ReadRequest =
 	| { type: "ListNodes", params: ListNodes }
 	| { type: "GetNode", params: GetNode }
 	| { type: "FindNode", params: FindNode }
+	| { type: "ListSecrets", params: ListSecrets }
+	| { type: "GetSecret", params: GetSecret }
+	| { type: "FindSecret", params: FindSecret }
 	| { type: "ListEncryptionKeys", params: ListEncryptionKeys }
 	| { type: "GetEncryptionKey", params: GetEncryptionKey };
 
@@ -885,6 +1046,13 @@ export type WriteRequest =
 	| { type: "RotateNodeEnvelopeKey", params: RotateNodeEnvelopeKey }
 	| { type: "DeleteNode", params: DeleteNode }
 	| { type: "BatchDeleteNodes", params: BatchDeleteNodes }
+	| { type: "CreateSecret", params: CreateSecret }
+	| { type: "UpdateSecret", params: UpdateSecret }
+	| { type: "UpdateSecretData", params: UpdateSecretData }
+	| { type: "UpdateSecretEncryptionKey", params: UpdateSecretEncryptionKey }
+	| { type: "RotateSecretEnvelopeKey", params: RotateSecretEnvelopeKey }
+	| { type: "DeleteSecret", params: DeleteSecret }
+	| { type: "BatchDeleteSecrets", params: BatchDeleteSecrets }
 	| { type: "CreateEncryptionKey", params: CreateEncryptionKey }
 	| { type: "UpdateEncryptionKey", params: UpdateEncryptionKey }
 	| { type: "InitializeEncryptionKey", params: InitializeEncryptionKey };

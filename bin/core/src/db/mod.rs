@@ -61,6 +61,9 @@ pub async fn init() -> mogh_error::Result<()> {
   DB.query(include_str!("tables/Node.surrealql"))
     .await
     .context("Failed to initialize Node table")?;
+  DB.query(include_str!("tables/Secret.surrealql"))
+    .await
+    .context("Failed to initialize Secret table")?;
 
   Ok(())
 }

@@ -20,6 +20,11 @@ export type ReadResponses = {
   GetNode: Types.GetNodeResponse;
   FindNode: Types.FindNodeResponse;
 
+  // ==== SECRET ====
+  ListSecrets: Types.ListSecretsResponse;
+  GetSecret: Types.GetSecretResponse;
+  FindSecret: Types.FindSecretResponse;
+
   // ==== ENCRYPTION KEY ====
   ListEncryptionKeys: Types.ListEncryptionKeysResponse;
   GetEncryptionKey: Types.GetEncryptionKeyResponse;
@@ -51,6 +56,15 @@ export type WriteResponses = {
   RotateNodeEnvelopeKey: Types.RotateNodeEnvelopeKeyResponse;
   DeleteNode: Types.DeleteNodeResponse;
   BatchDeleteNodes: Types.BatchDeleteNodesResponse;
+
+  // ==== SECRET ====
+  CreateSecret: Types.CreateSecretResponse;
+  UpdateSecret: Types.UpdateSecretResponse;
+  UpdateSecretData: Types.UpdateSecretDataResponse;
+  UpdateSecretEncryptionKey: Types.UpdateSecretEncryptionKeyResponse;
+  RotateSecretEnvelopeKey: Types.RotateSecretEnvelopeKeyResponse;
+  DeleteSecret: Types.DeleteSecretResponse;
+  BatchDeleteSecrets: Types.BatchDeleteSecretsResponse;
 
   // ==== ENCRYPTION KEY ====
   CreateEncryptionKey: Types.CreateEncryptionKeyResponse;

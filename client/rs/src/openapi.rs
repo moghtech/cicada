@@ -4,14 +4,14 @@ use utoipa::OpenApi;
 mod read {
   pub use crate::api::read::{
     device::*, encryption_key::*, filesystem::*, node::*,
-    onboarding_key::*, *,
+    onboarding_key::*, secret::*, *,
   };
 }
 
 mod write {
   pub use crate::api::write::{
     device::*, encryption_key::*, filesystem::*, node::*,
-    onboarding_key::*,
+    onboarding_key::*, secret::*,
   };
 }
 
@@ -38,6 +38,10 @@ mod write {
     read::list_nodes,
     read::get_node,
     read::find_node,
+    // SECRET
+    read::list_secrets,
+    read::get_secret,
+    read::find_secret,
     // ENCRYPTION KEY
     read::list_encryption_keys,
     read::get_encryption_key,
@@ -66,6 +70,14 @@ mod write {
     write::rotate_node_envelope_key,
     write::delete_node,
     write::batch_delete_nodes,
+    // SECRET
+    write::create_secret,
+    write::update_secret,
+    write::update_secret_data,
+    write::update_secret_encryption_key,
+    write::rotate_secret_envelope_key,
+    write::delete_secret,
+    write::batch_delete_secrets,
     // ENCRYPTION KEY
     write::create_encryption_key,
     write::update_encryption_key,

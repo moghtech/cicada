@@ -4,6 +4,7 @@ use cicada_client::entities::{
   EncryptedData,
   encryption_key::{EncryptionKeyId, EncryptionKeyKind},
   node::{NodeEntity, NodeRecord},
+  secret::{SecretEntity, SecretRecord},
 };
 use dashmap::DashMap;
 use futures_util::{StreamExt as _, stream::FuturesOrdered};
@@ -220,6 +221,50 @@ pub async fn decrypt_nodes(
       node
         .inspect_err(|e| {
           warn!("Failed to decrypt node in list | {:#}", e.error)
+        })
+        .ok()
+    })
+    .collect()
+}
+
+pub async fn decrypt_secret(
+  secret: SecretRecord,
+) -> mogh_error::Result<SecretEntity> {
+  let (encryption_key, data) = if let Some(data) = secret.data {
+    let key = data.encryption_key.clone();
+    if let Some(data) = decrypt_data(data, &secret.id.0).await? {
+      (Some(key), Some(data))
+    } else {
+      (Some(key), None)
+    }
+  } else {
+    (None, None)
+  };
+  Ok(SecretEntity {
+    id: secret.id,
+    name: secret.name,
+    created_at: secret.created_at,
+    updated_at: secret.updated_at,
+    encryption_key,
+    data,
+  })
+}
+
+pub async fn decrypt_secrets(
+  secrets: Vec<SecretRecord>,
+) -> Vec<SecretEntity> {
+  // TODO: improve error handling
+  secrets
+    .into_iter()
+    .map(decrypt_secret)
+    .collect::<FuturesOrdered<_>>()
+    .collect::<Vec<_>>()
+    .await
+    .into_iter()
+    .filter_map(|secret| {
+      secret
+        .inspect_err(|e| {
+          warn!("Failed to decrypt secret in list | {:#}", e.error)
         })
         .ok()
     })

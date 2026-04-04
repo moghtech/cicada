@@ -1,7 +1,7 @@
 use axum::{Extension, Router, extract::Path, routing::post};
 use cicada_client::api::read::{
   device::*, encryption_key::*, filesystem::*, node::*,
-  onboarding_key::*, *,
+  onboarding_key::*, secret::*, *,
 };
 use mogh_auth_server::middleware::authenticate_request;
 use mogh_error::{Json, Response};
@@ -22,6 +22,7 @@ pub mod encryption_key;
 pub mod filesystem;
 pub mod node;
 pub mod onboarding_key;
+pub mod secret;
 
 pub struct ReadArgs {
   client: Client,
@@ -55,6 +56,11 @@ enum ReadRequest {
   ListNodes(ListNodes),
   GetNode(GetNode),
   FindNode(FindNode),
+
+  // ==== SECRET ====
+  ListSecrets(ListSecrets),
+  GetSecret(GetSecret),
+  FindSecret(FindSecret),
 
   // ==== ENCRYPTION KEY ====
   ListEncryptionKeys(ListEncryptionKeys),
