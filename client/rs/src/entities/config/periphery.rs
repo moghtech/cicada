@@ -148,9 +148,11 @@ pub struct PeripheryConfig {
   /// Example:
   ///
   /// ```toml
+  /// filesystem_root = "/cicada"
   /// filesystems = [
-  ///   "app1",
-  ///   "app2:/custom/app2",
+  ///   "app1",               # mounts to /cicada/app1
+  ///   "app1:relative/path", # mounts to /cicada/relative/path
+  ///   "app2:/custom/app2",  # mounts to /custom/app2
   /// ]
   /// ```
   #[serde(default)]
