@@ -8,6 +8,12 @@ DEFINE TABLE IF NOT EXISTS User SCHEMAFULL;
 DEFINE FIELD OVERWRITE username
   ON TABLE User
   TYPE string;
+
+-- avatar
+DEFINE FIELD OVERWRITE avatar
+  ON TABLE User
+  TYPE string
+  DEFAULT "";
   
 -- enabled
 DEFINE FIELD OVERWRITE enabled

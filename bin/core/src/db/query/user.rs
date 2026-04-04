@@ -32,6 +32,7 @@ pub async fn get_user_entity(
   Ok(UserEntity {
     id: user.id,
     username: user.username,
+    avatar: user.avatar,
     enabled: user.enabled,
     password: !user.password.is_empty(),
     external_logins,
@@ -114,6 +115,7 @@ pub async fn sign_up_local_user(
 
 pub async fn sign_up_external_user(
   username: String,
+  avatar: String,
   kind: ExternalLoginKind,
   external_id: String,
   enabled: bool,
@@ -122,11 +124,12 @@ pub async fn sign_up_external_user(
     .query(
       "
     BEGIN TRANSACTION;
-    let $user = CREATE ONLY User SET username = $username, enabled = $enabled; $user;
+    let $user = CREATE ONLY User SET username = $username, avatar = $avatar, enabled = $enabled; $user;
     CREATE ExternalLogin SET user = $user.id, kind = $kind, external_id = $external_id RETURN NONE;
     COMMIT TRANSACTION;",
     )
     .bind(("username", username))
+    .bind(("avatar", avatar))
     .bind(("enabled", enabled))
     .bind(("kind", kind))
     .bind(("external_id", external_id))

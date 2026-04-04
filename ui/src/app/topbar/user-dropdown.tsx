@@ -1,14 +1,14 @@
-import { useRead, useUser, useUserInvalidate } from "@/lib/hooks";
 import {
   ActionIcon,
+  Box,
   Button,
   Divider,
   Flex,
+  Group,
   Menu,
-  SimpleGrid,
+  Stack,
   Text,
 } from "@mantine/core";
-import { MoghAuth } from "cicada_client";
 import {
   ArrowLeftRight,
   Circle,
@@ -19,8 +19,11 @@ import {
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { MoghAuth } from "cicada_client";
+import { useRead, useUser, useUserInvalidate } from "@/lib/hooks";
+import { hexColorByIntention } from "mogh_ui";
 
-export const UserDropdown = () => {
+export default function UserDropdown() {
   const [_, setRerender] = useState(false);
   const rerender = () => setRerender((r) => !r);
   const [viewLogout, setViewLogout] = useState(false);
@@ -32,42 +35,51 @@ export const UserDropdown = () => {
     }
   };
   const user = useUser().data;
+  const avatar = undefined;
   const userInvalidate = useUserInvalidate();
   const accounts = MoghAuth.LOGIN_TOKENS.accounts();
   const nav = useNavigate();
   return (
-    <Menu position="bottom-end" offset={17} opened={open} onChange={setOpen}>
+    <Menu offset={13} opened={open} onChange={setOpen}>
       <Menu.Target>
         <Button
           variant="subtle"
-          c="inherit"
-          leftSection={<User size="1.3rem" />}
+          size="lg"
+          leftSection={
+            avatar ? (
+              <img
+                src={avatar}
+                alt="avatar"
+                style={{
+                  width: "1.1rem",
+                  height: "1.1rem",
+                }}
+              />
+            ) : (
+              <User size="1.3rem" />
+            )
+          }
+          pl="0.7rem"
+          pr={{ base: "-20", lg: "0.7rem" }}
         >
           <Username username={user?.username} />
         </Button>
       </Menu.Target>
-      <Menu.Dropdown>
-        <Flex
-          direction="column"
-          gap="xs"
-          m="xs"
-          mt="0.3rem"
-          mb="0.3rem"
-          miw={270}
-        >
-          <Flex align="center" justify="space-between" gap="md" w="100%">
-            <Flex align="center" gap="md" opacity={0.8} fz="sm" lh="sm">
+      <Menu.Dropdown w={350} maw="96vw">
+        <Stack gap="xs" m="xs" mt="0.3rem" mb="0.3rem">
+          <Group justify="space-between">
+            <Group opacity={0.8} fz="sm" lh="sm">
               <ArrowLeftRight size="1rem" />
               Switch accounts
-            </Flex>
+            </Group>
             <ActionIcon
               variant={viewLogout ? "filled" : "subtle"}
               c="inherit"
               onClick={() => setViewLogout((l) => !l)}
             >
-              <Settings size="1rem" />
+              <LogOut size="1rem" />
             </ActionIcon>
-          </Flex>
+          </Group>
 
           <Divider />
 
@@ -84,7 +96,7 @@ export const UserDropdown = () => {
 
           <Divider />
 
-          <SimpleGrid cols={2}>
+          <Group grow>
             <Button
               variant="subtle"
               c="inherit"
@@ -92,11 +104,16 @@ export const UserDropdown = () => {
               onClick={() => {
                 setOpen(false);
                 nav(
-                  `/login?${new URLSearchParams({ backto: `${location.pathname}${location.search}` })}`
+                  `/login?${new URLSearchParams({ backto: `${location.pathname}${location.search}` })}`,
                 );
               }}
             >
-              Add account
+              <Box component="span">
+                Add
+                <Box component="span" pl="0.25rem" visibleFrom="xs">
+                  Account
+                </Box>
+              </Box>
             </Button>
 
             <Button
@@ -108,7 +125,7 @@ export const UserDropdown = () => {
             >
               Profile
             </Button>
-          </SimpleGrid>
+          </Group>
 
           {viewLogout && (
             <Button
@@ -124,15 +141,15 @@ export const UserDropdown = () => {
               Log Out All
             </Button>
           )}
-        </Flex>
+        </Stack>
       </Menu.Dropdown>
     </Menu>
   );
-};
+}
 
-const Account = ({
+function Account({
   login,
-  current_id,
+  current_id: currentId,
   setOpen,
   rerender,
   viewLogout,
@@ -142,27 +159,26 @@ const Account = ({
   setOpen: (open: boolean) => void;
   rerender: () => void;
   viewLogout: boolean;
-}) => {
-  const user_id = useMemo(
+}) {
+  const userId = useMemo(
     () => MoghAuth.extractUserIdFromJwt(login.jwt),
-    [login.jwt]
+    [login.jwt],
   );
   const { data: user } = useRead(
     "GetUsername",
-    { user_id: user_id! },
-    { enabled: !!user_id }
+    { user_id: userId! },
+    { enabled: !!userId },
   );
-  if (!user_id || !user) return;
-  const selected = user_id === current_id;
+  if (!userId || !user) return;
+  const selected = userId === currentId;
   return (
     <Flex align="center" gap="md" w="100%">
       <Button
-        variant={selected ? "light" : "subtle"}
-        c="inherit"
+        variant={selected ? "default" : "subtle"}
         rightSection={
           <Circle
             stroke="none"
-            fill="green"
+            fill={hexColorByIntention("Good")}
             size="0.8rem"
             style={{ display: selected ? undefined : "none" }}
           />
@@ -175,20 +191,28 @@ const Account = ({
             setOpen(false);
             return;
           }
-          MoghAuth.LOGIN_TOKENS.change(user_id);
+          MoghAuth.LOGIN_TOKENS.change(userId);
           location.reload();
         }}
       >
-        <User size="1.3rem" style={{ marginRight: "0.5rem" }} />
-        <Username username={user?.username} />
+        {user.avatar && (
+          <img
+            src={user.avatar}
+            alt="avatar"
+            style={{ width: "1.1rem", height: "1.1rem", marginRight: "0.5rem" }}
+          />
+        )}
+        {!user.avatar && (
+          <User size="1.3rem" style={{ marginRight: "0.5rem" }} />
+        )}
+        <Username username={user?.username} alwaysShowUsername />
       </Button>
 
       {viewLogout && (
         <ActionIcon
-          variant="filled"
           color="red"
           onClick={() => {
-            MoghAuth.LOGIN_TOKENS.remove(user_id);
+            MoghAuth.LOGIN_TOKENS.remove(userId);
             if (selected) {
               location.reload();
             } else {
@@ -201,9 +225,15 @@ const Account = ({
       )}
     </Flex>
   );
-};
+}
 
-const Username = ({ username }: { username: string | undefined }) => {
+function Username({
+  username,
+  alwaysShowUsername,
+}: {
+  username: string | undefined;
+  alwaysShowUsername?: boolean;
+}) {
   return (
     <Text
       style={{
@@ -211,9 +241,9 @@ const Username = ({ username }: { username: string | undefined }) => {
         textOverflow: "ellipsis",
         maxWidth: 140,
       }}
-      // visibleFrom="lg"
+      visibleFrom={alwaysShowUsername ? undefined : "lg"}
     >
       {username}
     </Text>
   );
-};
+}

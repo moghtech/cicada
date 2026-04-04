@@ -117,6 +117,8 @@ pub struct Env {
   pub cicada_oidc_additional_audiences: Option<Vec<String>>,
   /// Override `oidc_additional_audiences` from file
   pub cicada_oidc_additional_audiences_file: Option<PathBuf>,
+  /// Override `oidc_auto_redirect` from file
+  pub cicada_oidc_auto_redirect: Option<bool>,
 
   /// Override `github_oauth.enabled`
   pub cicada_github_oauth_enabled: Option<bool>,

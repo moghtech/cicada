@@ -17,6 +17,8 @@ pub struct UserEntity {
   pub id: UserId,
   /// The name of the user, ie username
   pub username: String,
+  /// Link for user avatar, or empty string.
+  pub avatar: String,
   /// Whether user is enabled.
   /// Disabled users cannot log in and have no API access.
   pub enabled: bool,
@@ -54,6 +56,8 @@ pub struct UserRecord {
   pub id: UserId,
   /// The name of the user, ie username
   pub username: String,
+  /// Link for user avatar, or empty string.
+  pub avatar: String,
   /// Whether user is enabled.
   /// Disabled users cannot log in and have no API access.
   pub enabled: bool,

@@ -319,6 +319,7 @@ impl AuthImpl for CicadaAuthImpl {
     Box::pin(async move {
       sign_up_external_user(
         username,
+        String::new(),
         ExternalLoginKind::Oidc,
         subject.into(),
         no_users_exist || core_config().enable_new_users,
@@ -389,12 +390,13 @@ impl AuthImpl for CicadaAuthImpl {
     &self,
     username: String,
     github_id: String,
-    _avatar_url: String,
+    avatar: String,
     no_users_exist: bool,
   ) -> mogh_auth_server::DynFuture<mogh_error::Result<String>> {
     Box::pin(async move {
       sign_up_external_user(
         username,
+        avatar,
         ExternalLoginKind::Github,
         github_id,
         no_users_exist || core_config().enable_new_users,
@@ -449,12 +451,13 @@ impl AuthImpl for CicadaAuthImpl {
     &self,
     username: String,
     google_id: String,
-    _avatar_url: String,
+    avatar: String,
     no_users_exist: bool,
   ) -> mogh_auth_server::DynFuture<mogh_error::Result<String>> {
     Box::pin(async move {
       sign_up_external_user(
         username,
+        avatar,
         ExternalLoginKind::Google,
         google_id,
         no_users_exist || core_config().enable_new_users,

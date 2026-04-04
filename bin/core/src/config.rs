@@ -138,6 +138,9 @@ pub fn core_config() -> &'static CoreConfig {
         additional_audiences: env
           .cicada_oidc_additional_audiences
           .unwrap_or(config.oidc.additional_audiences),
+        auto_redirect: env
+          .cicada_oidc_auto_redirect
+          .unwrap_or(config.oidc.auto_redirect),
       },
       github_oauth: NamedOauthConfig {
         enabled: env

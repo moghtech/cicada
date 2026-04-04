@@ -1,7 +1,7 @@
 import { AppShell, Burger, Button, Flex, Text } from "@mantine/core";
 import { useNavigate } from "react-router-dom";
-import { UserDropdown } from "./user-dropdown";
-import { ThemeToggle } from "./theme-toggle";
+import { ThemeToggle } from "mogh_ui";
+import UserDropdown from "./user-dropdown";
 
 export const Topbar = ({
   opened,
