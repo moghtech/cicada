@@ -13,10 +13,16 @@ use crate::db::DB;
 
 pub async fn list_all_encryption_keys()
 -> mogh_error::Result<Vec<EncryptionKeyRecord>> {
-  DB.select("EncryptionKey")
-    .await
-    .context("Failed to query for EncryptionKeys")
-    .map_err(Into::into)
+  DB.query(
+    "
+SELECT * FROM EncryptionKey
+ORDER BY created_at ASC;",
+  )
+  .await
+  .context("Failed to query for EncryptionKeys")?
+  .take(0)
+  .context("Failed to get EncryptionKey query result")
+  .map_err(Into::into)
 }
 
 pub async fn get_encryption_key(

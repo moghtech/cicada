@@ -9,6 +9,7 @@ import { Types } from "cicada_client";
 import { notifications } from "@mantine/notifications";
 import InitializeEncryptionKey from "@/components/initialize-key";
 import { languageFromPath, MonacoEditor, Page } from "mogh_ui";
+import { ICONS } from "@/lib/icons";
 
 export default function SecretPage() {
   const { secret: _secret } = useParams() as {
@@ -65,6 +66,7 @@ export default function SecretPage() {
   return (
     <Page
       title={secret.name}
+      icon={ICONS.Secret}
       actions={
         <>
           <Button
@@ -95,12 +97,15 @@ export default function SecretPage() {
     >
       {missing_key ? (
         <>
-          <Text fz="h2">Failed to read data: missing encryption key</Text>
+          <Text fz="h2">
+            Failed to read data: missing encryption key{" "}
+            <b>{missing_key.name}</b>
+          </Text>
           {missing_key?.kind === Types.EncryptionKeyKind.Memory && (
             <Group>
               <InitializeEncryptionKey
                 key_id={missing_key.id}
-                onInit={() => inv(["FindSecret"])}
+                onInit={() => inv(["GetSecret", { id: _secret }])}
               />
             </Group>
           )}

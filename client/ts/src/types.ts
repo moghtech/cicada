@@ -433,6 +433,11 @@ export interface CreateEncryptionKey {
 export interface CreateFilesystem {
 	/** The name of the filesystem */
 	name: string;
+	/**
+	 * Choose a specific encryption key.
+	 * Otherwise uses the current global default.
+	 */
+	encryption_key?: EncryptionKeyId;
 }
 
 /** Create filesystem node. Response: [CreateNodeResponse]. */
@@ -819,6 +824,11 @@ export interface UpdateFilesystem {
 	id: FilesystemId;
 	/** The name of the filesystem */
 	name?: string;
+	/**
+	 * Update default encryption key for filesystem.
+	 * Note. This does not affect already created nodes.
+	 */
+	encryption_key?: EncryptionKeyId;
 }
 
 /** Update a filesystem node. Response: [UpdateNodeResponse]. */

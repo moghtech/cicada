@@ -5,7 +5,10 @@ use typeshare::typeshare;
 
 use crate::{
   api::write::CicadaWriteRequest,
-  entities::filesystem::{FilesystemId, FilesystemRecord},
+  entities::{
+    encryption_key::EncryptionKeyId,
+    filesystem::{FilesystemId, FilesystemRecord},
+  },
 };
 
 //
@@ -36,6 +39,9 @@ pub fn create_filesystem() {}
 pub struct CreateFilesystem {
   /// The name of the filesystem
   pub name: String,
+  /// Choose a specific encryption key.
+  /// Otherwise uses the current global default.
+  pub encryption_key: Option<EncryptionKeyId>,
 }
 
 /// Response for [CreateFilesystem].
@@ -73,6 +79,9 @@ pub struct UpdateFilesystem {
   /// The name of the filesystem
   #[serde(skip_serializing_if = "Option::is_none")]
   pub name: Option<String>,
+  /// Update default encryption key for filesystem.
+  /// Note. This does not affect already created nodes.
+  pub encryption_key: Option<EncryptionKeyId>,
 }
 
 /// Response for [UpdateFilesystem].

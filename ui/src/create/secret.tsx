@@ -1,23 +1,33 @@
+import EncryptionKeySelector from "@/components/encryption-key-selector";
 import { useInvalidate, useWrite } from "@/lib/hooks";
-import { Button, Menu, TextInput } from "@mantine/core";
+import { Button, Popover, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
 import { Plus } from "lucide-react";
+import { useShiftKeyListener } from "mogh_ui";
 
 export default function CreateSecret() {
-  const [opened, { open, close }] = useDisclosure(false);
+  const [opened, { open, close, toggle }] = useDisclosure(false);
+  useShiftKeyListener("N", () => open());
   return (
-    <Menu opened={opened} onClose={close} position="bottom-start" width={400}>
-      <Menu.Target>
-        <Button onClick={open} leftSection={<Plus size="1rem" />}>
+    <Popover
+      opened={opened}
+      position="bottom-start"
+      offset={21}
+      width="400"
+      onChange={toggle}
+      trapFocus
+    >
+      <Popover.Target>
+        <Button leftSection={<Plus size="1rem" />} onClick={toggle}>
           Create Secret
         </Button>
-      </Menu.Target>
-      <Menu.Dropdown p="1rem">
+      </Popover.Target>
+      <Popover.Dropdown p="lg">
         <CreateSecretForm close={close} />
-      </Menu.Dropdown>
-    </Menu>
+      </Popover.Dropdown>
+    </Popover>
   );
 }
 
@@ -31,9 +41,10 @@ function CreateSecretForm({ close }: { close: () => void }) {
     },
   });
   const form = useForm({
-    mode: "uncontrolled",
+    mode: "controlled",
     initialValues: {
       name: "",
+      encryption_key: undefined as string | undefined,
     },
     validate: {
       name: (name) => (name.length ? null : "Name cannot be empty"),
@@ -46,11 +57,16 @@ function CreateSecretForm({ close }: { close: () => void }) {
     >
       <TextInput
         {...form.getInputProps("name")}
-        withAsterisk
         autoFocus
         label="Name"
         placeholder="Enter name"
         key={form.key("name")}
+      />
+      <EncryptionKeySelector
+        label="Encryption Key"
+        selected={form.getValues().encryption_key}
+        onSelect={(id) => form.setFieldValue("encryption_key", id)}
+        withinPortal={false}
       />
       <Button
         leftSection={<Plus size="1rem" />}

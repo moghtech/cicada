@@ -84,7 +84,10 @@ const FilePage = ({
     >
       {node.missing_key ? (
         <>
-          <Text fz="h2">Failed to read data: missing encryption key</Text>
+          <Text fz="h2">
+            Failed to read data: missing encryption key{" "}
+            {missing_key && <b>{missing_key.name}</b>}
+          </Text>
           {missing_key?.kind === Types.EncryptionKeyKind.Memory && (
             <Group>
               <InitializeEncryptionKey

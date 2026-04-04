@@ -1,27 +1,37 @@
+import EncryptionKeySelector from "@/components/encryption-key-selector";
 import { useInvalidate, useWrite } from "@/lib/hooks";
-import { Button, Menu, TextInput } from "@mantine/core";
+import { Button, Popover, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
 import { Plus } from "lucide-react";
+import { useShiftKeyListener } from "mogh_ui";
 
-const CreateFilesystem = () => {
-  const [opened, { open, close }] = useDisclosure(false);
+export default function CreateFilesystem() {
+  const [opened, { open, close, toggle }] = useDisclosure(false);
+  useShiftKeyListener("N", () => open());
   return (
-    <Menu opened={opened} onClose={close} position="bottom-start" width={400}>
-      <Menu.Target>
-        <Button onClick={open} leftSection={<Plus size="1rem" />}>
+    <Popover
+      opened={opened}
+      position="bottom-start"
+      offset={21}
+      width="400"
+      onChange={toggle}
+      trapFocus
+    >
+      <Popover.Target>
+        <Button onClick={toggle} leftSection={<Plus size="1rem" />}>
           Create Filesystem
         </Button>
-      </Menu.Target>
-      <Menu.Dropdown p="1rem">
+      </Popover.Target>
+      <Popover.Dropdown p="lg">
         <CreateFilesystemForm close={close} />
-      </Menu.Dropdown>
-    </Menu>
+      </Popover.Dropdown>
+    </Popover>
   );
-};
+}
 
-const CreateFilesystemForm = ({ close }: { close: () => void }) => {
+function CreateFilesystemForm({ close }: { close: () => void }) {
   const inv = useInvalidate();
   const { mutate, isPending } = useWrite("CreateFilesystem", {
     onSuccess: () => {
@@ -31,9 +41,10 @@ const CreateFilesystemForm = ({ close }: { close: () => void }) => {
     },
   });
   const form = useForm({
-    mode: "uncontrolled",
+    mode: "controlled",
     initialValues: {
       name: "",
+      encryption_key: undefined as string | undefined,
     },
     validate: {
       name: (name) => (name.length ? null : "Name cannot be empty"),
@@ -43,14 +54,20 @@ const CreateFilesystemForm = ({ close }: { close: () => void }) => {
     <form
       onSubmit={form.onSubmit((form) => mutate(form))}
       style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
+      autoFocus
     >
       <TextInput
         {...form.getInputProps("name")}
-        withAsterisk
         autoFocus
         label="Name"
         placeholder="Enter name"
         key={form.key("name")}
+      />
+      <EncryptionKeySelector
+        label="Default Encryption Key"
+        selected={form.getValues().encryption_key}
+        onSelect={(id) => form.setFieldValue("encryption_key", id)}
+        withinPortal={false}
       />
       <Button
         leftSection={<Plus size="1rem" />}
@@ -62,6 +79,4 @@ const CreateFilesystemForm = ({ close }: { close: () => void }) => {
       </Button>
     </form>
   );
-};
-
-export default CreateFilesystem;
+}

@@ -1,6 +1,6 @@
-import { CopyButton } from "mogh_ui";
+import { CopyButton, useShiftKeyListener } from "mogh_ui";
 import { useInvalidate, useWrite } from "@/lib/hooks";
-import { Button, Flex, Menu, Select, Text, TextInput } from "@mantine/core";
+import { Button, Flex, Popover, Select, Text, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
@@ -9,18 +9,26 @@ import { CircleCheckBig, Plus } from "lucide-react";
 import { useState } from "react";
 
 const CreateEncryptionKey = () => {
-  const [opened, { open, close }] = useDisclosure(false);
+  const [opened, { open, close, toggle }] = useDisclosure(false);
+  useShiftKeyListener("N", () => open());
   return (
-    <Menu opened={opened} onClose={close} position="bottom-start" width={400}>
-      <Menu.Target>
-        <Button onClick={open} rightSection={<Plus size="1rem" />}>
+    <Popover
+      opened={opened}
+      position="bottom-start"
+      offset={21}
+      width="400"
+      onChange={toggle}
+      trapFocus
+    >
+      <Popover.Target>
+        <Button onClick={toggle} rightSection={<Plus size="1rem" />}>
           Create Encryption Key
         </Button>
-      </Menu.Target>
-      <Menu.Dropdown p="1rem">
+      </Popover.Target>
+      <Popover.Dropdown p="1rem">
         <CreateEncryptionKeyForm close={close} />
-      </Menu.Dropdown>
-    </Menu>
+      </Popover.Dropdown>
+    </Popover>
   );
 };
 
