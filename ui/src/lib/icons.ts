@@ -7,6 +7,7 @@ import {
   KeyRound,
   CircleQuestionMark,
   KeySquare,
+  SquareAsterisk,
 } from "lucide-react";
 
 export const ICONS = {
@@ -17,5 +18,6 @@ export const ICONS = {
   Folder: FolderOpen,
   File,
   EncryptionKey: KeySquare,
+  Secret: SquareAsterisk,
   Unknown: CircleQuestionMark,
 };

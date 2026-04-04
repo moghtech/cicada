@@ -36,19 +36,6 @@ pub async fn get_secret(
     .status_code(StatusCode::NOT_FOUND)
 }
 
-pub async fn get_secret_list_item(
-  secret_id: String,
-) -> mogh_error::Result<SecretListItem> {
-  DB.query(r#"SELECT * OMIT data FROM type::record("Secret", $id)"#)
-    .bind(("id", secret_id))
-    .await
-    .context("Failed to query database for secret")?
-    .take::<Option<SecretListItem>>(0)
-    .context("Invalid get secret list item query response")?
-    .context("No secret found with given ID")
-    .status_code(StatusCode::NOT_FOUND)
-}
-
 pub async fn find_secret(
   body: FindSecret,
 ) -> mogh_error::Result<SecretRecord> {

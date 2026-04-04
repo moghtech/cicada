@@ -23,6 +23,7 @@ export const Sidebar = ({ close }: { close: () => void }) => {
     location.pathname.startsWith("/devices") ||
     location.pathname.startsWith("/onboarding-keys");
   const encryptionPage = location.pathname.startsWith("/encryption-keys");
+  const secretPage = location.pathname.startsWith("/secrets");
   const { filesystem: selected_filesystem, inode: _selected_inode } =
     useParams() as {
       filesystem?: string;
@@ -62,6 +63,15 @@ export const Sidebar = ({ close }: { close: () => void }) => {
             fullWidth
           >
             Encryption
+          </Button>
+          <Button
+            variant={secretPage ? "default" : "subtle"}
+            onClick={() => nav("/secrets")}
+            leftSection={<ICONS.Secret size="1rem" />}
+            justify="flex-start"
+            fullWidth
+          >
+            Secrets
           </Button>
 
           <Filesystems filesystem={selected_filesystem} close={close} />

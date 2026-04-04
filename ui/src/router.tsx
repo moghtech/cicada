@@ -8,9 +8,10 @@ import {
   useLocation,
 } from "react-router-dom";
 import { App } from "@/app";
-import { useAuthState, useUser } from "./lib/hooks";
+import { useUser } from "./lib/hooks";
 import { Center, Loader } from "@mantine/core";
 import { MoghAuth } from "cicada_client";
+import { useAuthState } from "mogh_ui";
 
 // Lazy import pages
 const Login = lazy(() => import("@/pages/login"));
@@ -20,6 +21,8 @@ const Device = lazy(() => import("@/pages/device"));
 const OnboardingKey = lazy(() => import("@/pages/onboarding-key"));
 const Filesystems = lazy(() => import("@/pages/filesystems"));
 const Node = lazy(() => import("@/pages/node"));
+const Secrets = lazy(() => import("@/pages/secrets"));
+const Secret = lazy(() => import("@/pages/secret"));
 const EncryptionKeys = lazy(() => import("@/pages/encryption-keys"));
 const EncryptionKey = lazy(() => import("@/pages/encryption-key"));
 const UserDisabled = lazy(() => import("@/pages/user-disabled"));
@@ -56,14 +59,13 @@ export const Router = () => {
               path="onboarding-keys/:onboardingKey"
               element={<OnboardingKey />}
             />
-            <Route
-              path="encryption-keys"
-              element={<EncryptionKeys />}
-            />
+            <Route path="encryption-keys" element={<EncryptionKeys />} />
             <Route
               path="encryption-keys/:encryptionKey"
               element={<EncryptionKey />}
             />
+            <Route path="secrets" element={<Secrets />} />
+            <Route path="secrets/:secret" element={<Secret />} />
           </Route>
         </Route>
       </Routes>
@@ -77,7 +79,7 @@ const RequireAuth = () => {
 
   if (
     (error as { error?: TypeError } | undefined)?.error?.message?.startsWith(
-      "NetworkError"
+      "NetworkError",
     )
   ) {
     // Will just show the spinner without navigate to login,

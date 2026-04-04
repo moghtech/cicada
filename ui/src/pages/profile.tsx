@@ -1,4 +1,4 @@
-import { useLoginOptions, useManageAuth, useUser } from "@/lib/hooks";
+import { useUser } from "@/lib/hooks";
 import {
   ActionIcon,
   Center,
@@ -20,6 +20,8 @@ import {
   EnrollTotp,
   LinkedLogins,
   Page,
+  useLoginOptions,
+  useManageAuth,
 } from "mogh_ui";
 
 const ProfilePage = () => {

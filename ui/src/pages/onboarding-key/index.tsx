@@ -1,5 +1,5 @@
 import ConfirmDelete from "@/components/confirm-delete";
-import { useRead, useWrite } from "@/lib/hooks";
+import { useInvalidate, useRead, useWrite } from "@/lib/hooks";
 import { ICONS } from "@/lib/icons";
 import {
   ActionIcon,
@@ -62,9 +62,11 @@ const OnboardingKeyInner = ({
   refetchOnboardingKey: () => void;
 }) => {
   const nav = useNavigate();
+  const inv = useInvalidate();
   const { mutate: updateOnboardingKey } = useWrite("UpdateOnboardingKey", {
     onSuccess: () => {
       refetchOnboardingKey();
+      inv(["GetOnboardingKey", { id: onboardingKey.id }]);
       notifications.show({
         message: "OnboardingKey updated.",
       });
@@ -78,6 +80,7 @@ const OnboardingKeyInner = ({
       notifications.show({
         message: "OnboardingKey deleted.",
       });
+      inv(["ListOnboardingKeys"]);
       nav("/devices");
     },
   });
