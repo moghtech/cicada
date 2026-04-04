@@ -1,4 +1,4 @@
-import { CopyButton } from "@/components/copy-button";
+import { CopyButton } from "mogh_ui";
 import { useInvalidate, useWrite } from "@/lib/hooks";
 import { Button, Flex, Menu, Select, Text, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";

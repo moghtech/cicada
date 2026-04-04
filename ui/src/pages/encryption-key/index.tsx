@@ -1,5 +1,4 @@
 import InitializeEncryptionKey from "@/components/initialize-key";
-import { Page } from "@/components/page";
 import { useRead, useWrite } from "@/lib/hooks";
 import { ICONS } from "@/lib/icons";
 import {
@@ -13,6 +12,7 @@ import {
 } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { Types } from "cicada_client";
+import { Page } from "mogh_ui";
 import { useParams } from "react-router-dom";
 
 const EncryptionKeyPage = () => {

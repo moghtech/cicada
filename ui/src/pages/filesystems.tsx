@@ -1,6 +1,5 @@
-import { DataTable, SortableHeader } from "@/components/data-table";
+import { DataTable, Page, SortableHeader } from "mogh_ui";
 import CreateFilesystem from "@/create/filesystem";
-import { Page } from "@/components/page";
 import { useRead } from "@/lib/hooks";
 import { ICONS } from "@/lib/icons";
 import { useNavigate } from "react-router-dom";

@@ -9,14 +9,34 @@ dotenv.config({ path: ".env.development" });
 export default defineConfig({
   plugins: [react()],
   server: {
-    port: 3220,
-    allowedHosts: process.env.ALLOWED_HOST
-      ? [process.env.ALLOWED_HOST]
-      : undefined,
+    allowedHosts: process.env.ALLOWED_HOSTS?.split(","),
   },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+    },
+    dedupe: [
+      "@mantine/core",
+      "@mantine/form",
+      "@mantine/hooks",
+      "@mantine/notifications",
+      "@monaco-editor/react",
+      "@tanstack/react-table",
+      "@tanstack/react-query",
+      "lucide-react",
+      "mogh_auth_client",
+      "monaco-editor",
+      "monaco-yaml",
+      "react",
+      "react-dom",
+      "react-router-dom",
+    ],
+  },
+  css: {
+    preprocessorOptions: {
+      scss: {
+        additionalData: '@use "mogh_ui/theme.scss" as theme;',
+      },
     },
   },
 });

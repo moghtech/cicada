@@ -1,7 +1,6 @@
 import ConfirmDelete from "@/components/confirm-delete";
-import { DataTable, SortableHeader } from "@/components/data-table";
+import { DataTable, Page, SortableHeader } from "mogh_ui";
 import CreateOnboardingKey from "@/create/onboarding-key";
-import { Page } from "@/components/page";
 import { useInvalidate, useRead, useWrite } from "@/lib/hooks";
 import { ICONS } from "@/lib/icons";
 import { List, Text } from "@mantine/core";
@@ -16,7 +15,7 @@ const OnboardingKeysPage = () => {
   const { data } = useRead("ListOnboardingKeys", {});
   const byId = useMemo(
     () => data && Object.fromEntries(data.map((ok) => [ok.id, ok.name])),
-    [data]
+    [data],
   );
   const [selected, setSelected] = useState<RowSelectionState>({});
   const selectedIds = useMemo(() => Object.keys(selected), [selected]);

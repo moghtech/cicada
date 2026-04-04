@@ -2,15 +2,14 @@ import { useInvalidate, useRead, useWrite } from "@/lib/hooks";
 import { Button, Center, Group, Text } from "@mantine/core";
 import { useNavigate } from "react-router-dom";
 import { History } from "lucide-react";
-import { language_from_path, MonacoEditor } from "@/components/monaco";
 import { useLocalStorage } from "@mantine/hooks";
 import ConfirmSave from "@/components/confirm-save";
 import ConfirmDelete from "@/components/confirm-delete";
 import { Types } from "cicada_client";
 import { notifications } from "@mantine/notifications";
-import { Page } from "@/components/page";
 import { NodePageDescription, NodePageTitle } from "./title";
 import InitializeEncryptionKey from "@/components/initialize-key";
+import { languageFromPath, MonacoEditor, Page } from "mogh_ui";
 
 const FilePage = ({
   filesystem,
@@ -97,7 +96,7 @@ const FilePage = ({
         </>
       ) : (
         <MonacoEditor
-          language={language_from_path(node.name)}
+          language={languageFromPath(node.name)}
           value={data ?? node.data ?? ""}
           onValueChange={(data) => setEdit({ data })}
         />

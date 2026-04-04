@@ -1,7 +1,6 @@
-import { DataTable, SortableHeader } from "@/components/data-table";
+import { DataTable, Page, SortableHeader } from "mogh_ui";
 import InitializeEncryptionKey from "@/components/initialize-key";
 import CreateEncryptionKey from "@/create/encryption-key";
-import { Page } from "@/components/page";
 import { useRead } from "@/lib/hooks";
 import { ICONS } from "@/lib/icons";
 import { Badge } from "@mantine/core";

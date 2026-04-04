@@ -1,7 +1,7 @@
 import { Button, Flex, Group, Modal } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { language_from_path, MonacoDiffEditor } from "@/components/monaco";
 import { Save } from "lucide-react";
+import { languageFromPath, MonacoDiffEditor } from "mogh_ui";
 
 const ConfirmSave = ({
   name,
@@ -30,7 +30,7 @@ const ConfirmSave = ({
         <MonacoDiffEditor
           original={original}
           modified={modified}
-          language={language_from_path(name)}
+          language={languageFromPath(name)}
           style={{ width: 1400, maxWidth: "85vw" }}
         />
         <Group mt="md" w="100%">

@@ -1,6 +1,4 @@
 import ConfirmDelete from "@/components/confirm-delete";
-import { EnableSwitch } from "@/components/enable-switch";
-import { Page } from "@/components/page";
 import { useRead, useWrite } from "@/lib/hooks";
 import { ICONS } from "@/lib/icons";
 import {
@@ -16,6 +14,7 @@ import {
 import { notifications } from "@mantine/notifications";
 import { Types } from "cicada_client";
 import { Save } from "lucide-react";
+import { EnableSwitch, Page } from "mogh_ui";
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 

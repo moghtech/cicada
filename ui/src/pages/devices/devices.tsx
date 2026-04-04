@@ -1,5 +1,5 @@
 import ConfirmDelete from "@/components/confirm-delete";
-import { DataTable, SortableHeader } from "@/components/data-table";
+import { DataTable, SortableHeader } from "mogh_ui";
 import { useInvalidate, useRead, useWrite } from "@/lib/hooks";
 import { Group, List, Text } from "@mantine/core";
 import { notifications } from "@mantine/notifications";

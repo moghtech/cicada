@@ -14,11 +14,13 @@ import { Types } from "cicada_client";
 import { Save } from "lucide-react";
 import { useState } from "react";
 import { ICONS } from "@/lib/icons";
-import { Page } from "@/components/page";
-import { EnableSwitch } from "@/components/enable-switch";
-import { LinkedLogins } from "./linked-logins";
-import { EnrollPasskey } from "./passkey";
-import { EnrollTotp } from "./totp";
+import {
+  EnableSwitch,
+  EnrollPasskey,
+  EnrollTotp,
+  LinkedLogins,
+  Page,
+} from "mogh_ui";
 
 const ProfilePage = () => {
   const user = useUser().data;
@@ -61,7 +63,7 @@ const ProfileInner = ({ user }: { user: Types.UserEntity }) => {
         });
         refetchUser();
       },
-    }
+    },
   );
 
   return (
@@ -106,12 +108,38 @@ const ProfileInner = ({ user }: { user: Types.UserEntity }) => {
         )}
       </Fieldset>
 
-      <LinkedLogins user={user} refetchUser={refetchUser} />
+      <LinkedLogins
+        refetchUser={refetchUser}
+        passwordSet={user?.password}
+        oidcLinkedId={
+          user?.external_logins?.find(
+            (l) => l.kind === Types.ExternalLoginKind.Oidc,
+          )?.external_id
+        }
+        githubLinkedId={
+          user?.external_logins?.find(
+            (l) => l.kind === Types.ExternalLoginKind.Github,
+          )?.external_id
+        }
+        googleLinkedId={
+          user?.external_logins?.find(
+            (l) => l.kind === Types.ExternalLoginKind.Google,
+          )?.external_id
+        }
+      />
 
       <Fieldset legend={<Text size="lg">2FA</Text>}>
         <Group>
-          <EnrollPasskey user={user} />
-          <EnrollTotp user={user} />
+          <EnrollPasskey
+            userInvalidate={refetchUser}
+            passkeyEnrolled={user?.passkey}
+            totpEnrolled={user?.totp}
+          />
+          <EnrollTotp
+            userInvalidate={refetchUser}
+            passkeyEnrolled={user?.passkey}
+            totpEnrolled={user?.totp}
+          />
           {(user.totp || user.passkey) && (
             <EnableSwitch
               label="Skip 2FA for external logins"
