@@ -64,10 +64,16 @@ pub struct Env {
   /// Override `core_tls_insecure_skip_verify`
   pub periphery_core_tls_insecure_skip_verify: Option<bool>,
 
+  /// Override `connect_as`
+  pub periphery_connect_as: Option<String>,
   /// Override `private_key`
   pub periphery_private_key: Option<String>,
   /// Override `private_key` with file
   pub periphery_private_key_file: Option<PathBuf>,
+  /// Override `onboarding_key`
+  pub periphery_onboarding_key: Option<String>,
+  /// Override `onboarding_key` from file
+  pub periphery_onboarding_key_file: Option<PathBuf>,
   /// Override `core_public_key`
   pub periphery_core_public_key: Option<String>,
 
@@ -114,6 +120,10 @@ pub struct PeripheryConfig {
   #[serde(default)]
   pub core_tls_insecure_skip_verify: bool,
 
+  /// The device name to connect as.
+  #[serde(default)]
+  pub connect_as: String,
+
   /// Private key to use with Noise handshake to authenticate with Cicada Core.
   ///
   /// Supports openssl generated pem file, `openssl genpkey -algorithm X25519 -out private.key`.
@@ -125,6 +135,11 @@ pub struct PeripheryConfig {
   /// Default: file:/config/keys/periphery.key
   #[serde(default = "default_private_key")]
   pub private_key: String,
+
+  /// Provide an onboarding key to use with the new Device
+  /// creation flow.
+  #[serde(skip_serializing_if = "Option::is_none")]
+  pub onboarding_key: Option<String>,
 
   /// Specify the core public key to use with authentication signature.
   /// If not specified, will be retreived from the Core '/public_key' route.
@@ -187,7 +202,9 @@ impl Default for PeripheryConfig {
     Self {
       core_address: Default::default(),
       core_tls_insecure_skip_verify: Default::default(),
+      connect_as: Default::default(),
       private_key: default_private_key(),
+      onboarding_key: Default::default(),
       core_public_key: Default::default(),
       filesystem_root: default_filesystem_root(),
       filesystems: Default::default(),
@@ -204,11 +221,16 @@ impl PeripheryConfig {
       core_address: self.core_address.clone(),
       core_tls_insecure_skip_verify: self
         .core_tls_insecure_skip_verify,
+      connect_as: self.connect_as.clone(),
       private_key: if self.private_key.starts_with("file:") {
         self.private_key.clone()
       } else {
         empty_or_redacted(&self.private_key)
       },
+      onboarding_key: self
+        .onboarding_key
+        .as_ref()
+        .map(|key| empty_or_redacted(key)),
       core_public_key: self.core_public_key.clone(),
       filesystem_root: self.filesystem_root.clone(),
       filesystems: self.filesystems.clone(),

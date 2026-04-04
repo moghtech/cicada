@@ -80,11 +80,19 @@ pub fn periphery_config() -> &'static PeripheryConfig {
       core_tls_insecure_skip_verify: env
         .periphery_core_tls_insecure_skip_verify
         .unwrap_or(config.core_tls_insecure_skip_verify),
+      connect_as: env
+        .periphery_connect_as
+        .unwrap_or(config.connect_as),
       private_key: maybe_read_item_from_file(
         env.periphery_private_key_file,
         env.periphery_private_key,
       )
       .unwrap_or(config.private_key),
+      onboarding_key: maybe_read_item_from_file(
+        env.periphery_onboarding_key_file,
+        env.periphery_onboarding_key,
+      )
+      .or(config.onboarding_key),
       core_public_key: env
         .periphery_core_public_key
         .unwrap_or(config.core_public_key),

@@ -4,7 +4,10 @@ use cicada_client::entities::{
   onboarding_key::OnboardingKeyRecord, user::UserEntity,
 };
 use mogh_auth_server::RequestAuthentication;
-use mogh_error::{AddStatusCodeError as _, anyhow::{Context as _, anyhow}};
+use mogh_error::{
+  AddStatusCodeError as _,
+  anyhow::{Context as _, anyhow},
+};
 
 use crate::db::query;
 

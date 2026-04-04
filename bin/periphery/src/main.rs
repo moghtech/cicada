@@ -3,11 +3,17 @@ extern crate tracing;
 
 use std::sync::OnceLock;
 
+use anyhow::{Context, anyhow};
 use cicada_client::{
-  CicadaClient, api::read::filesystem::ListFilesystems,
+  CicadaClient,
+  api::{
+    read::{GetVersion, filesystem::ListFilesystems},
+    write::device::CreateDevice,
+  },
   entities::ClientType,
 };
 use futures_util::{StreamExt as _, stream::FuturesUnordered};
+use mogh_pki::Pkcs8PrivateKey;
 use tracing::Instrument;
 
 use crate::{
@@ -53,6 +59,36 @@ async fn app() -> anyhow::Result<()> {
 
     // Init + log public key. Will crash if invalid private key here.
     info!("Public Key: {}", periphery_keys().load().public);
+
+    // Make sure auth is valid, if not then try onboarding device.
+    tokio::task::spawn_blocking(|| {
+      if cicada().read(GetVersion{}).is_ok() {
+        return Ok(());
+      }
+
+      let Some(onboarding_key) = &config.onboarding_key else {
+        return Err(anyhow!("Unable to authenticate with Cicada and no onboarding key is configured."))
+      };
+
+      let onboarding_key = Pkcs8PrivateKey::from_maybe_raw_bytes(onboarding_key)?;
+      let onboarding_client = CicadaClient::new(
+        &periphery_config().core_address,
+        ClientType::OnboardingKey,
+        &onboarding_key,
+        core_public_key(),
+      )?;
+
+      onboarding_client.write(
+        CreateDevice {
+          name: config.connect_as.clone(),
+          enabled: true,
+          public_key: periphery_keys().load().public.clone().into_inner()
+        }
+      ).context("Failed to create device")?;
+
+      Ok(())
+    })
+        .await??;
 
     let filesystems =
       tokio::task::spawn_blocking(|| cicada().read(ListFilesystems {}))

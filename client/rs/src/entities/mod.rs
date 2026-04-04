@@ -23,11 +23,11 @@ pub mod filesystem;
 pub mod node;
 /// Onboard device access.
 pub mod onboarding_key;
-/// Cicada users.
-pub mod user;
 /// Store encrypted secret information
 /// which can be interpolated into files.
 pub mod secret;
+/// Cicada users.
+pub mod user;
 
 #[typeshare(serialized_as = "number")]
 pub type U64 = u64;

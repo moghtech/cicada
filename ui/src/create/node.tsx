@@ -16,7 +16,8 @@ interface CreateNodeProps {
 
 export default function CreateNode(props: CreateNodeProps) {
   const [opened, { open, close, toggle }] = useDisclosure(false);
-  useShiftKeyListener("N", () => open());
+  useShiftKeyListener("N", () => props.kind === Types.NodeKind.File && open());
+  useShiftKeyListener("F", () => props.kind === Types.NodeKind.Folder && open());
   return (
     <Popover
       opened={opened}

@@ -19,10 +19,12 @@ use mogh_auth_server::{
   rand::random_string,
   user::{AuthUserImpl, BoxAuthUser},
 };
+use mogh_pki::RotatableKeyPair;
 use mogh_rate_limit::RateLimiter;
 
 use crate::{
-  auth::middleware::get_client_from_auth, config::core_config,
+  auth::middleware::get_client_from_auth,
+  config::{core_config, core_keys},
   db::query::user::*,
 };
 
@@ -569,5 +571,9 @@ impl AuthImpl for CicadaAuthImpl {
       .await
       .map(|_| ())
     })
+  }
+
+  fn server_private_key(&self) -> Option<&RotatableKeyPair> {
+    Some(core_keys())
   }
 }

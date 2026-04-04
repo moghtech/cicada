@@ -1,32 +1,39 @@
-import { CopyButton } from "mogh_ui";
+import { CopyButton, useShiftKeyListener } from "mogh_ui";
 import { useInvalidate, useWrite } from "@/lib/hooks";
-import { Button, Flex, Menu, Text, TextInput } from "@mantine/core";
+import { Button, Flex, Menu, Popover, Text, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
 import { CircleCheckBig, Plus } from "lucide-react";
 import { useState } from "react";
 
-const CreateOnboardingKey = () => {
-  const [opened, { open, close }] = useDisclosure(false);
+export default function CreateOnboardingKey() {
+  const [opened, { open, close, toggle }] = useDisclosure(false);
+  useShiftKeyListener("N", () => open());
   return (
-    <Menu opened={opened} onClose={close} position="bottom-start" width={400}>
-      <Menu.Target>
-        <Button onClick={open} rightSection={<Plus size="1rem" />}>
+    <Popover
+      opened={opened}
+      position="bottom-start"
+      width="400"
+      onChange={toggle}
+      trapFocus
+    >
+      <Popover.Target>
+        <Button onClick={toggle} leftSection={<Plus size="1rem" />}>
           Create Onboarding Key
         </Button>
-      </Menu.Target>
-      <Menu.Dropdown p="1rem">
+      </Popover.Target>
+      <Popover.Dropdown p="1rem">
         <CreateOnboardingKeyForm close={close} />
-      </Menu.Dropdown>
-    </Menu>
+      </Popover.Dropdown>
+    </Popover>
   );
-};
+}
 
-const CreateOnboardingKeyForm = ({ close }: { close: () => void }) => {
+function CreateOnboardingKeyForm({ close }: { close: () => void }) {
   const inv = useInvalidate();
   const [createdPrivateKey, setCreatedPrivateKey] = useState<string | null>(
-    null
+    null,
   );
   const { mutate, isPending } = useWrite("CreateOnboardingKey", {
     onSuccess: ({ private_key }) => {
@@ -61,7 +68,11 @@ const CreateOnboardingKeyForm = ({ close }: { close: () => void }) => {
           Save the onboarding private key. It cannot be retrieved again later.
         </Text>
         <Flex gap="md" align="center" w="100%">
-          <TextInput value={createdPrivateKey} w="100%" disabled />
+          <TextInput
+            value={createdPrivateKey}
+            w="100%"
+            contentEditable={false}
+          />
           <CopyButton content={createdPrivateKey} />
         </Flex>
         <Button
@@ -81,7 +92,6 @@ const CreateOnboardingKeyForm = ({ close }: { close: () => void }) => {
     >
       <TextInput
         {...form.getInputProps("name")}
-        withAsterisk
         autoFocus
         label="Name"
         placeholder="Enter name"
@@ -103,6 +113,4 @@ const CreateOnboardingKeyForm = ({ close }: { close: () => void }) => {
       </Button>
     </form>
   );
-};
-
-export default CreateOnboardingKey;
+}
