@@ -87,6 +87,54 @@ impl CicadaClient {
   }
 
   #[cfg(not(feature = "blocking"))]
+  pub async fn version(&self) -> anyhow::Result<String> {
+    self
+      .reqwest
+      .get(format!("{}/version", self.address))
+      .send()
+      .await
+      .context("Failed to reach Cicada API")?
+      .text()
+      .await
+      .context("Failed to read /version response")
+  }
+
+  #[cfg(feature = "blocking")]
+  pub fn version(&self) -> anyhow::Result<String> {
+    self
+      .reqwest
+      .get(format!("{}/version", self.address))
+      .send()
+      .context("Failed to reach Cicada API")?
+      .text()
+      .context("Failed to read /version response")
+  }
+
+  #[cfg(not(feature = "blocking"))]
+  pub async fn public_key(&self) -> anyhow::Result<String> {
+    self
+      .reqwest
+      .get(format!("{}/public_key", self.address))
+      .send()
+      .await
+      .context("Failed to reach Cicada API")?
+      .text()
+      .await
+      .context("Failed to read /public_key response")
+  }
+
+  #[cfg(feature = "blocking")]
+  pub fn public_key(&self) -> anyhow::Result<String> {
+    self
+      .reqwest
+      .get(format!("{}/public_key", self.address))
+      .send()
+      .context("Failed to reach Cicada API")?
+      .text()
+      .context("Failed to read /public_key response")
+  }
+
+  #[cfg(not(feature = "blocking"))]
   pub async fn read<T>(
     &self,
     request: T,

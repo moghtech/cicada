@@ -21,12 +21,20 @@ pub fn periphery_keys() -> &'static RotatableKeyPair {
   })
 }
 
-pub fn core_public_key() -> &'static SpkiPublicKey {
-  static CORE_PUBLIC_KEY: OnceLock<SpkiPublicKey> = OnceLock::new();
-  CORE_PUBLIC_KEY.get_or_init(|| {
-    SpkiPublicKey::from_spec(&periphery_config().core_public_key)
-      .unwrap()
-  })
+pub fn core_public_key() -> Option<&'static SpkiPublicKey> {
+  static CORE_PUBLIC_KEY: OnceLock<Option<SpkiPublicKey>> =
+    OnceLock::new();
+  CORE_PUBLIC_KEY
+    .get_or_init(|| {
+      if periphery_config().core_public_key.is_empty() {
+        return None;
+      }
+      Some(
+        SpkiPublicKey::from_spec(&periphery_config().core_public_key)
+          .unwrap(),
+      )
+    })
+    .as_ref()
 }
 
 pub fn periphery_config() -> &'static PeripheryConfig {

@@ -27,26 +27,64 @@ pub struct CicadaClient {
 }
 
 impl CicadaClient {
-  pub fn new(
+  #[cfg(not(feature = "blocking"))]
+  pub async fn new(
     address: impl Into<String>,
     client_type: ClientType,
     private_key: &Pkcs8PrivateKey,
-    core_public_key: &SpkiPublicKey,
+    // If not provided, will query the given address for it.
+    core_public_key: Option<&SpkiPublicKey>,
   ) -> anyhow::Result<CicadaClient> {
     let address = address.into();
     let private_key =
       Pkcs8PrivateKey::maybe_raw_bytes(private_key.as_str())?;
-    let core_public_key = SpkiPublicKey::maybe_pem_to_raw_bytes(
-      core_public_key.as_str(),
-    )?;
-    Ok(CicadaClient {
+    let mut cicada = CicadaClient {
       reqwest: Default::default(),
       auth_address: format!("{address}/auth"),
       address,
       client_type,
       private_key,
-      core_public_key,
-    })
+      core_public_key: Default::default(),
+    };
+    // maybe load public key
+    cicada.core_public_key = if let Some(pk) = core_public_key {
+      SpkiPublicKey::maybe_pem_to_raw_bytes(pk.as_str())?
+    } else {
+      SpkiPublicKey::maybe_pem_to_raw_bytes(
+        cicada.public_key().await?.as_str(),
+      )?
+    };
+    Ok(cicada)
+  }
+
+  #[cfg(feature = "blocking")]
+  pub fn new(
+    address: impl Into<String>,
+    client_type: ClientType,
+    private_key: &Pkcs8PrivateKey,
+    // If not provided, will query the given address for it.
+    core_public_key: Option<&SpkiPublicKey>,
+  ) -> anyhow::Result<CicadaClient> {
+    let address = address.into();
+    let private_key =
+      Pkcs8PrivateKey::maybe_raw_bytes(private_key.as_str())?;
+    let mut cicada = CicadaClient {
+      reqwest: Default::default(),
+      auth_address: format!("{address}/auth"),
+      address,
+      client_type,
+      private_key,
+      core_public_key: Default::default(),
+    };
+    // maybe load public key
+    cicada.core_public_key = if let Some(pk) = core_public_key {
+      SpkiPublicKey::maybe_pem_to_raw_bytes(pk.as_str())?
+    } else {
+      SpkiPublicKey::maybe_pem_to_raw_bytes(
+        cicada.public_key()?.as_str(),
+      )?
+    };
+    Ok(cicada)
   }
 
   /// Use a custom reqwest client.

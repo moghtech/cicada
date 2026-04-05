@@ -8,7 +8,7 @@ use mogh_server::{
 
 use crate::{
   auth::{CicadaAuthImpl, middleware::Client},
-  config::core_config,
+  config::{core_config, core_keys},
 };
 
 mod openapi;
@@ -25,6 +25,10 @@ pub fn app() -> Router {
   Router::new()
     .merge(openapi::serve_docs())
     .route("/version", get(|| async { env!("CARGO_PKG_VERSION") }))
+    .route(
+      "/public_key",
+      get(|| async { core_keys().load().public().to_string() }),
+    )
     .nest("/auth", mogh_auth_server::api::router::<CicadaAuthImpl>())
     .nest("/user", user_router())
     .nest("/read", read::router())
