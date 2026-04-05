@@ -25,6 +25,7 @@ use crate::{
 
 mod config;
 mod filesystem;
+mod unmount;
 
 fn cicada() -> &'static CicadaClient {
   static CICADA: OnceLock<CicadaClient> = OnceLock::new();
@@ -159,18 +160,7 @@ async fn app() -> anyhow::Result<()> {
   .await
 }
 
-fn unmount_all(mountpoints: &[PathBuf]) {
-  for mountpoint in mountpoints {
-    info!("Unmounting {mountpoint:?}");
-    if let Err(e) = std::process::Command::new("fusermount3")
-      .arg("-u")
-      .arg(mountpoint)
-      .status()
-    {
-      error!("Failed to unmount {mountpoint:?} | {e:#}");
-    }
-  }
-}
+
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -208,7 +198,7 @@ async fn main() -> anyhow::Result<()> {
     res = tokio::spawn(app()) => res?,
     _ = shutdown => {
       SHOULD_SHUTDOWN.store(true, std::sync::atomic::Ordering::SeqCst);
-      unmount_all(&mountpoints);
+      unmount::all(&mountpoints);
       Ok(())
     },
   }
