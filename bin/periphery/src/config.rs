@@ -42,9 +42,7 @@ pub fn periphery_config() -> &'static PeripheryConfig {
     OnceLock::new();
   PERIPHERY_CONFIG.get_or_init(|| {
     let env: Env = envy::from_env()
-      .expect("failed to parse periphery environment");
-
-    println!("{env:#?}");
+      .expect("failed to parse cicada periphery environment");
 
     let config_paths = env.periphery_config_paths;
 
