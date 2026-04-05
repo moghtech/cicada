@@ -6,3 +6,4 @@ apt-get update
 apt-get install -y ca-certificates fuse3
 rm -rf /var/lib/apt/lists/*
 
+echo "user_allow_other" >> /etc/fuse.conf

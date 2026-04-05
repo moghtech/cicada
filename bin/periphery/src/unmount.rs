@@ -12,7 +12,8 @@ pub fn all(mountpoints: &[PathBuf]) {
 }
 
 fn unmount_with_retries(mountpoint: &Path) {
-  for attempt in 1..=3 {
+  let mut attempt = 1;
+  loop {
     info!("Unmounting {mountpoint:?} (attempt {attempt}/3)");
     match unmount(mountpoint) {
       Ok(status) if status.success() => return,
@@ -21,9 +22,11 @@ fn unmount_with_retries(mountpoint: &Path) {
           "fusermount3 exited with {status} for {mountpoint:?}, waiting 2s for retry..."
         );
         std::thread::sleep(Duration::from_secs(2));
+        attempt += 1;
       }
       Err(e) => {
-        error!("Failed to unmount {mountpoint:?} | {e:#}");
+        error!("[FATAL] Failed to unmount {mountpoint:?} | {e:#}");
+        return;
       }
     }
   }
