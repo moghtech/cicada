@@ -525,7 +525,9 @@ impl CoreConfig {
 /// for persistance.
 #[derive(Debug, Clone, PartialEq, Deserialize)]
 pub struct DatabaseConfig {
-  /// Full mongo uri string, eg. `mongodb://username:password@your.mongo.int:27017`
+  /// Surreal uri string:
+  /// - Local: `rocksdb:/database/database.db`
+  /// - Remote: `wss://my.surreal.db`
   #[serde(
     default = "default_database_uri",
     skip_serializing_if = "String::is_empty"
