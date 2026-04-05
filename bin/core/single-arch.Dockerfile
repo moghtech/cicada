@@ -19,12 +19,12 @@ FROM gcr.io/distroless/cc
 # Copy
 COPY ./config/core.config.toml /config/.default.config.toml
 COPY --from=ui-builder /builder/ui/dist /app/ui
-COPY --from=binaries /core /usr/local/bin/core
+COPY --from=binaries /ccore /usr/local/bin/ccore
 
 # Hint at the port
 EXPOSE 9220
 
-CMD [ "core" ]
+CMD [ "ccore" ]
 
 # Label for Ghcr
 LABEL org.opencontainers.image.source="https://github.com/moghtech/cicada"

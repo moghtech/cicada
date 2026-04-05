@@ -19,11 +19,11 @@ RUN sh ./debian-deps.sh && rm ./debian-deps.sh
 WORKDIR /app
 
 ## Copy both binaries initially, but only keep appropriate one for the TARGETPLATFORM.
-COPY --from=x86_64 /periphery /app/arch/linux/amd64
-COPY --from=aarch64 /periphery /app/arch/linux/arm64
+COPY --from=x86_64 /cperiphery /app/arch/linux/amd64
+COPY --from=aarch64 /cperiphery /app/arch/linux/arm64
 
 ARG TARGETPLATFORM
-RUN mv /app/arch/${TARGETPLATFORM} /usr/local/bin/periphery && rm -r /app/arch
+RUN mv /app/arch/${TARGETPLATFORM} /usr/local/bin/cperiphery && rm -r /app/arch
 
 COPY ./bin/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
@@ -34,7 +34,7 @@ ENV PERIPHERY_CONFIG_PATHS="/config"
 ENV PERIPHERY_PRIVATE_KEY="file:/config/keys/periphery.key"
 
 ENTRYPOINT [ "entrypoint.sh" ]
-CMD [ "periphery" ]
+CMD [ "cperiphery" ]
 
 # Label for ghcr
 LABEL org.opencontainers.image.source="https://github.com/moghtech/cicada"

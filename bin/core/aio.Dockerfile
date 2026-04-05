@@ -32,12 +32,12 @@ WORKDIR /app
 # Copy
 COPY ./config/core.config.toml /config/.default.config.toml
 COPY --from=ui-builder /builder/ui/dist /app/ui
-COPY --from=core-builder /builder/target/release/core /usr/local/bin/core
+COPY --from=core-builder /builder/target/release/ccore /usr/local/bin/ccore
 
 # Hint at the port
 EXPOSE 9220
 
-CMD [ "core" ]
+CMD [ "ccore" ]
 
 # Label for Ghcr
 LABEL org.opencontainers.image.source="https://github.com/moghtech/cicada"

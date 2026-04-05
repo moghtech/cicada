@@ -12,7 +12,7 @@ COPY ./bin/periphery/starship.toml /starship.toml
 COPY ./bin/periphery/debian-deps.sh .
 RUN sh ./debian-deps.sh && rm ./debian-deps.sh
 
-COPY --from=binaries /periphery /usr/local/bin/periphery
+COPY --from=binaries /cperiphery /usr/local/bin/cperiphery
 
 COPY ./bin/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
@@ -23,7 +23,7 @@ ENV PERIPHERY_CONFIG_PATHS="/config"
 ENV PERIPHERY_PRIVATE_KEY="file:/config/keys/periphery.key"
 
 ENTRYPOINT [ "entrypoint.sh" ]
-CMD [ "periphery" ]
+CMD [ "cperiphery" ]
 
 # Label for ghcr
 LABEL org.opencontainers.image.source="https://github.com/moghtech/cicada"

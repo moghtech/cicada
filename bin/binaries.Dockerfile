@@ -25,8 +25,8 @@ RUN \
 # Copy just the binaries to scratch image
 FROM scratch
 
-COPY --from=builder /builder/target/release/core /core
-COPY --from=builder /builder/target/release/periphery /periphery
+COPY --from=builder /builder/target/release/ccore /ccore
+COPY --from=builder /builder/target/release/cperiphery /cperiphery
 
 LABEL org.opencontainers.image.source="https://github.com/moghtech/cicada"
 LABEL org.opencontainers.image.description="Cicada Binaries"

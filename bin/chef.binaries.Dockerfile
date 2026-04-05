@@ -22,15 +22,15 @@ RUN cargo chef cook --release --recipe-path recipe.json
 # NOW copy again (this time into builder) and build app
 COPY . .
 RUN \
-  cargo build --release --bin core && \
-  cargo build --release --bin periphery && \
+  cargo build --release --bin ccore && \
+  cargo build --release --bin cperiphery && \
   cargo strip
 
 # Copy just the binaries to scratch image
 FROM scratch
 
-COPY --from=builder /builder/target/release/core /core
-COPY --from=builder /builder/target/release/periphery /periphery
+COPY --from=builder /builder/target/release/ccore /ccore
+COPY --from=builder /builder/target/release/cperiphery /cperiphery
 
 LABEL org.opencontainers.image.source="https://github.com/moghtech/cicada"
 LABEL org.opencontainers.image.description="Cicada Binaries"

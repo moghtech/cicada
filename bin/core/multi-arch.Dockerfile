@@ -20,9 +20,9 @@ WORKDIR /app
 ARG TARGETPLATFORM
 
 # Copy both binaries initially, but only keep appropriate one for the TARGETPLATFORM.
-COPY --from=x86_64 /core /app/core/linux/amd64
-COPY --from=aarch64 /core /app/core/linux/arm64
-RUN mv /app/core/${TARGETPLATFORM} /usr/local/bin/core && rm -r /app/core
+COPY --from=x86_64 /ccore /app/arch/linux/amd64
+COPY --from=aarch64 /ccore /app/arch/linux/arm64
+RUN mv /app/arch/${TARGETPLATFORM} /usr/local/bin/ccore && rm -r /app/arch
 
 # Copy default config / static ui
 COPY ./config/core.config.toml /config/.default.config.toml
@@ -31,7 +31,7 @@ COPY --from=ui /ui /app/ui
 # Hint at the port
 EXPOSE 9220
 
-CMD [ "core" ]
+CMD [ "ccore" ]
 
 # Label for Ghcr
 LABEL org.opencontainers.image.source="https://github.com/moghtech/cicada"
