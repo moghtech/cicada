@@ -108,6 +108,9 @@ pub fn periphery_config() -> &'static PeripheryConfig {
       filesystems: env
         .periphery_filesystems
         .unwrap_or(config.filesystems),
+      allow_uids: env
+        .periphery_allow_uids
+        .unwrap_or(config.allow_uids),
       logging: LogConfig {
         level: env
           .periphery_logging_level

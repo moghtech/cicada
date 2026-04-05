@@ -1,4 +1,5 @@
 use std::{
+  collections::HashSet,
   path::Path,
   time::{Duration, UNIX_EPOCH},
 };
@@ -21,6 +22,8 @@ use crate::cicada;
 pub struct CicadaFs {
   filesystem: FilesystemId,
   root: FileAttr,
+  /// When non-empty, only these UIDs (plus the mounting user) may access files.
+  allowed_uids: HashSet<u32>,
 }
 
 impl CicadaFs {
@@ -31,6 +34,7 @@ impl CicadaFs {
     name: String,
     filesystem: FilesystemId,
     mountpoint: P,
+    allow_uids: Vec<u32>,
   ) -> anyhow::Result<()>
   where
     P: AsRef<Path>,
@@ -54,14 +58,32 @@ impl CicadaFs {
       blksize: CicadaFs::BLOCK_SIZE as u32,
       flags: 0,
     };
-    let mut config = fuser::Config::default();
-    config.mount_options = vec![
+    let mut options = vec![
       MountOption::FSName(name),
       MountOption::RO,
-      MountOption::DefaultPermissions,
     ];
-    fuser::mount2(CicadaFs { filesystem, root }, mountpoint, &config)
+    let mut allowed_uids = HashSet::new();
+    if !allow_uids.is_empty() {
+      // allow_other lets other UIDs reach the filesystem,
+      // then we check req.uid() ourselves in each handler.
+      options.push(MountOption::CUSTOM("allow_other".into()));
+      allowed_uids.insert(uid);
+      allowed_uids.extend(allow_uids);
+    } else {
+      // No extra UIDs — only the mounting user can access,
+      // let the kernel handle permission checks.
+      options.push(MountOption::DefaultPermissions);
+    }
+    let mut config = fuser::Config::default();
+    config.mount_options = options;
+    let fs = CicadaFs { filesystem, root, allowed_uids };
+    fuser::mount2(fs, mountpoint, &config)
       .context("Failed to mount CicadaFs")
+  }
+
+  fn check_access(&self, req: &fuser::Request) -> bool {
+    self.allowed_uids.is_empty()
+      || self.allowed_uids.contains(&req.uid())
   }
 
   fn node_to_file_attr(&self, node: NodeEntity) -> FileAttr {
@@ -71,8 +93,8 @@ impl CicadaFs {
       .map(|data| data.len() as u64)
       .unwrap_or_default();
     let (kind, perm) = match node.kind {
-      NodeKind::Folder => (FileType::Directory, 0o700),
-      NodeKind::File => (FileType::RegularFile, 0o600),
+      NodeKind::Folder => (FileType::Directory, 0o755),
+      NodeKind::File => (FileType::RegularFile, 0o644),
     };
     FileAttr {
       ino: INodeNo(node.inode),
@@ -101,12 +123,16 @@ impl fuser::Filesystem for CicadaFs {
 
   fn readdir(
     &self,
-    _req: &fuser::Request,
+    req: &fuser::Request,
     INodeNo(ino): INodeNo,
     _fh: FileHandle,
     offset: u64,
     mut reply: fuser::ReplyDirectory,
   ) {
+    if !self.check_access(req) {
+      reply.error(Errno::EACCES);
+      return;
+    }
     let nodes = match cicada().read(ListNodes {
       filesystem: self.filesystem.clone().into(),
       parent: ino.into(),
@@ -148,11 +174,15 @@ impl fuser::Filesystem for CicadaFs {
 
   fn lookup(
     &self,
-    _req: &fuser::Request,
+    req: &fuser::Request,
     INodeNo(parent): INodeNo,
     name: &std::ffi::OsStr,
     reply: fuser::ReplyEntry,
   ) {
+    if !self.check_access(req) {
+      reply.error(Errno::EACCES);
+      return;
+    }
     let Some(name) = name.to_str() else {
       error!("LOOKUP FAILED: Name {name:?} is not valid UTF-8");
       reply.error(Errno::ENOENT);
@@ -177,11 +207,15 @@ impl fuser::Filesystem for CicadaFs {
 
   fn getattr(
     &self,
-    _req: &fuser::Request,
+    req: &fuser::Request,
     INodeNo(ino): INodeNo,
     _fh: Option<FileHandle>,
     reply: fuser::ReplyAttr,
   ) {
+    if !self.check_access(req) {
+      reply.error(Errno::EACCES);
+      return;
+    }
     // handle root case
     if ino == 1 {
       reply.attr(&CicadaFs::TTL, &self.root);
@@ -204,7 +238,7 @@ impl fuser::Filesystem for CicadaFs {
 
   fn read(
     &self,
-    _req: &fuser::Request,
+    req: &fuser::Request,
     INodeNo(ino): INodeNo,
     _fh: FileHandle,
     _offset: u64,
@@ -213,6 +247,10 @@ impl fuser::Filesystem for CicadaFs {
     _lock_owner: Option<LockOwner>,
     reply: fuser::ReplyData,
   ) {
+    if !self.check_access(req) {
+      reply.error(Errno::EACCES);
+      return;
+    }
     // Root inode has no data
     if ino == 1 {
       reply.error(Errno::ENOENT);

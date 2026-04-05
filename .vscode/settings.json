@@ -1,0 +1,8 @@
+{
+  "files.watcherExclude": {
+    ".cicada/**": true
+  },
+  "search.exclude": {
+    ".cicada/**": true
+  }
+}

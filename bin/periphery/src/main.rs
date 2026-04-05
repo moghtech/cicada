@@ -121,6 +121,7 @@ async fn app() -> anyhow::Result<()> {
         let _ = std::fs::create_dir_all(&mountpoint);
       }
 
+      let allow_uids = config.allow_uids.clone();
       handles.push(tokio::task::spawn_blocking(move || {
         info!(
           "Mounting {} ({}) to {mountpoint:?}",
@@ -130,6 +131,7 @@ async fn app() -> anyhow::Result<()> {
           filesystem.name.clone(),
           filesystem.id,
           &mountpoint,
+          allow_uids,
         ) {
           error!(
             "Failed to mount filesystem {} to {mountpoint:?} | {e:#}",

@@ -82,6 +82,9 @@ pub struct Env {
   /// Override `filesystems`
   #[serde(alias = "periphery_filesystem")]
   pub periphery_filesystems: Option<Vec<String>>,
+  /// Override `allow_uids`
+  #[serde(alias = "periphery_allow_uid")]
+  pub periphery_allow_uids: Option<Vec<u32>>,
 
   // LOGGING
   /// Override `logging.level`
@@ -173,6 +176,13 @@ pub struct PeripheryConfig {
   #[serde(default)]
   pub filesystems: Vec<String>,
 
+  /// Allow specific UIDs to access the mounted filesystems.
+  /// When empty, only the mounting user has access.
+  /// When set, `allow_other` is enabled and only the
+  /// listed UIDs (plus the mounting user) can access files.
+  #[serde(default)]
+  pub allow_uids: Vec<u32>,
+
   /// Logging configuration
   #[serde(default)]
   pub logging: LogConfig,
@@ -208,6 +218,7 @@ impl Default for PeripheryConfig {
       core_public_key: Default::default(),
       filesystem_root: default_filesystem_root(),
       filesystems: Default::default(),
+      allow_uids: Default::default(),
       logging: Default::default(),
       pretty_startup_config: Default::default(),
       unsafe_unsanitized_startup_config: Default::default(),
@@ -234,6 +245,7 @@ impl PeripheryConfig {
       core_public_key: self.core_public_key.clone(),
       filesystem_root: self.filesystem_root.clone(),
       filesystems: self.filesystems.clone(),
+      allow_uids: self.allow_uids.clone(),
       logging: self.logging.clone(),
       pretty_startup_config: self.pretty_startup_config,
       unsafe_unsanitized_startup_config: self
