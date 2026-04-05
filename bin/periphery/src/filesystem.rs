@@ -39,8 +39,11 @@ impl CicadaFs {
   where
     P: AsRef<Path>,
   {
-    let uid = unsafe { libc::getuid() };
-    let gid = unsafe { libc::getgid() };
+    let (uid, gid) = if let Some(uid) = allow_uids.first() {
+      (*uid, *uid)
+    } else {
+      (unsafe { libc::getuid() }, unsafe { libc::getgid() })
+    };
     let root = FileAttr {
       ino: INodeNo::ROOT,
       size: 0,
