@@ -117,6 +117,20 @@ impl CicadaFs {
 }
 
 impl fuser::Filesystem for CicadaFs {
+  fn access(
+    &self,
+    req: &fuser::Request,
+    _ino: INodeNo,
+    _mask: fuser::AccessFlags,
+    reply: fuser::ReplyEmpty,
+  ) {
+    if self.check_access(req) {
+      reply.ok();
+    } else {
+      reply.error(Errno::EACCES);
+    }
+  }
+
   // ======
   //  READ
   // ======
