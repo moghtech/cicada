@@ -44,10 +44,12 @@ impl CicadaFs {
     } else {
       (unsafe { libc::getuid() }, unsafe { libc::getgid() })
     };
+
     info!(
       "Mounting {} as {uid}:{gid}",
       mountpoint.as_ref().display()
     );
+    
     let root = FileAttr {
       ino: INodeNo::ROOT,
       size: 0,
@@ -65,28 +67,24 @@ impl CicadaFs {
       blksize: CicadaFs::BLOCK_SIZE as u32,
       flags: 0,
     };
-    let mut options =
-      vec![MountOption::FSName(name), MountOption::RO];
+
     let mut allowed_uids = HashSet::new();
-    if allow_uids.len() > 1 {
-      // allow_other lets other UIDs reach the filesystem,
-      // then we check req.uid() ourselves in each handler.
-      options.push(MountOption::CUSTOM("allow_other".into()));
+    if !allow_uids.is_empty() {
       allowed_uids.insert(uid);
       allowed_uids.extend(allow_uids);
-    } else {
-      // No extra UIDs — only the mounting user can access,
-      // let the kernel handle permission checks.
-      options.push(MountOption::DefaultPermissions);
     }
+
     let mut config = fuser::Config::default();
-    config.mount_options = options;
+    config.mount_options =
+      vec![MountOption::FSName(name), MountOption::RO];
     config.acl = fuser::SessionACL::All;
+
     let fs = CicadaFs {
       filesystem,
       root,
       allowed_uids,
     };
+
     fuser::mount2(fs, mountpoint, &config)
       .context("Failed to mount CicadaFs")
   }
