@@ -6,6 +6,9 @@
 FROM lukemathwalker/cargo-chef:latest-rust-1.94.1-bookworm AS chef
 WORKDIR /builder
 
+# Surreal's rocksdb dep requires libclang
+RUN apt-get update && apt-get install -y libclang-dev
+
 # Plan just the RECIPE to see if things have changed
 FROM chef AS planner
 COPY . .
