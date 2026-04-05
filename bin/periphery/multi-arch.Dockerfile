@@ -12,7 +12,6 @@ FROM ${AARCH64_BINARIES} AS aarch64
 
 FROM debian:trixie-slim
 
-COPY ./bin/periphery/starship.toml /starship.toml
 COPY ./bin/periphery/debian-deps.sh .
 RUN sh ./debian-deps.sh && rm ./debian-deps.sh
 

@@ -8,7 +8,6 @@ FROM ${BINARIES_IMAGE} AS binaries
 
 FROM debian:trixie-slim
 
-COPY ./bin/periphery/starship.toml /starship.toml
 COPY ./bin/periphery/debian-deps.sh .
 RUN sh ./debian-deps.sh && rm ./debian-deps.sh
 
