@@ -150,7 +150,7 @@ export function CicadaClient(url: string, options: InitOptions) {
      * Call the `/write` api.
      *
      * ```
-     * const node = await komodo.write("UpdateNode", {
+     * const node = await cicada.write("UpdateNode", {
      *   id: "asdfasdfdsa",
      *   parent: 3,
      * });

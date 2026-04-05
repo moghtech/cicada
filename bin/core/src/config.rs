@@ -27,7 +27,7 @@ pub fn core_config() -> &'static CoreConfig {
   static CORE_CONFIG: OnceLock<CoreConfig> = OnceLock::new();
   CORE_CONFIG.get_or_init(|| {
     let env: Env = match envy::from_env()
-      .context("Failed to parse Komodo Core environment")
+      .context("Failed to parse Cicada Core environment")
     {
       Ok(env) => env,
       Err(e) => {
