@@ -44,6 +44,10 @@ impl CicadaFs {
     } else {
       (unsafe { libc::getuid() }, unsafe { libc::getgid() })
     };
+    info!(
+      "Mounting {} as {uid}:{gid}",
+      mountpoint.as_ref().display()
+    );
     let root = FileAttr {
       ino: INodeNo::ROOT,
       size: 0,
@@ -64,7 +68,7 @@ impl CicadaFs {
     let mut options =
       vec![MountOption::FSName(name), MountOption::RO];
     let mut allowed_uids = HashSet::new();
-    if !allow_uids.is_empty() {
+    if allow_uids.len() > 1 {
       // allow_other lets other UIDs reach the filesystem,
       // then we check req.uid() ourselves in each handler.
       options.push(MountOption::CUSTOM("allow_other".into()));
