@@ -1,6 +1,6 @@
 import { CopyButton, useShiftKeyListener } from "mogh_ui";
 import { useInvalidate, useWrite } from "@/lib/hooks";
-import { Button, Flex, Menu, Popover, Text, TextInput } from "@mantine/core";
+import { Button, Flex, Popover, Text, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
