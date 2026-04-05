@@ -37,7 +37,9 @@ const OnboardingKeysPage = () => {
           <CreateOnboardingKey />
           <ConfirmDelete
             name=""
-            entityType="Onboarding Keys"
+            entityType={
+              "Onboarding Key" + (selectedIds.length === 1 ? "" : "s")
+            }
             onConfirm={async () => {
               if (selectedIds.length) {
                 await batchDelete({ ids: selectedIds });
