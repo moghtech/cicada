@@ -81,6 +81,7 @@ impl CicadaFs {
     }
     let mut config = fuser::Config::default();
     config.mount_options = options;
+    config.acl = fuser::SessionACL::All;
     let fs = CicadaFs {
       filesystem,
       root,
