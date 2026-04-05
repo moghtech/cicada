@@ -27,12 +27,13 @@ pub struct CicadaClient {
 }
 
 impl CicadaClient {
+  /// Create a new cicada client with given configuration.
+  /// If the core_public_key not provided, will query the given cicada address for it.
   #[cfg(not(feature = "blocking"))]
   pub async fn new(
     address: impl Into<String>,
     client_type: ClientType,
     private_key: &Pkcs8PrivateKey,
-    // If not provided, will query the given address for it.
     core_public_key: Option<&SpkiPublicKey>,
   ) -> anyhow::Result<CicadaClient> {
     let address = address.into();
@@ -57,12 +58,13 @@ impl CicadaClient {
     Ok(cicada)
   }
 
+  /// Create a new cicada client with given configuration.
+  /// If the core_public_key not provided, will query the given cicada address for it.
   #[cfg(feature = "blocking")]
   pub fn new(
     address: impl Into<String>,
     client_type: ClientType,
     private_key: &Pkcs8PrivateKey,
-    // If not provided, will query the given address for it.
     core_public_key: Option<&SpkiPublicKey>,
   ) -> anyhow::Result<CicadaClient> {
     let address = address.into();
