@@ -1,7 +1,7 @@
 #[macro_use]
 extern crate tracing;
 
-use std::sync::OnceLock;
+use std::sync::{OnceLock, atomic::AtomicBool};
 
 use anyhow::{Context, anyhow};
 use cicada_client::{
@@ -12,6 +12,8 @@ use cicada_client::{
   },
   entities::ClientType,
 };
+use std::path::PathBuf;
+
 use futures_util::{StreamExt as _, stream::FuturesUnordered};
 use mogh_pki::Pkcs8PrivateKey;
 use tracing::Instrument;
@@ -37,16 +39,16 @@ fn cicada() -> &'static CicadaClient {
   })
 }
 
-async fn app() -> anyhow::Result<()> {
-  dotenvy::dotenv().ok();
-  let config = periphery_config();
-  mogh_logger::init(&config.logging)?;
+static SHOULD_SHUTDOWN: AtomicBool = AtomicBool::new(false);
 
+async fn app() -> anyhow::Result<()> {
   let startup_span = info_span!("PeripheryStartup");
 
   async {
     info!("Cicada Periphery version: v{}", env!("CARGO_PKG_VERSION"));
 
+    let config = periphery_config();
+    
     match (
       config.pretty_startup_config,
       config.unsafe_unsanitized_startup_config,
@@ -88,7 +90,7 @@ async fn app() -> anyhow::Result<()> {
 
       Ok(())
     })
-        .await??;
+      .await??;
 
     let filesystems =
       tokio::task::spawn_blocking(|| cicada().read(ListFilesystems {}))
@@ -133,10 +135,12 @@ async fn app() -> anyhow::Result<()> {
             filesystem.name
           )
         }
-        warn!(
-          "Filesystem {} task has finished unexpectedly",
-          filesystem.name
-        )
+        if !SHOULD_SHUTDOWN.load(std::sync::atomic::Ordering::SeqCst) {
+          warn!(
+            "Filesystem {} task has finished unexpectedly",
+            filesystem.name
+          )
+        }
       }));
     }
 
@@ -155,13 +159,57 @@ async fn app() -> anyhow::Result<()> {
   .await
 }
 
+fn unmount_all(mountpoints: &[PathBuf]) {
+  for mountpoint in mountpoints {
+    info!("Unmounting {mountpoint:?}");
+    if let Err(e) = std::process::Command::new("fusermount3")
+      .arg("-u")
+      .arg(mountpoint)
+      .status()
+    {
+      error!("Failed to unmount {mountpoint:?} | {e:#}");
+    }
+  }
+}
+
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-  let mut term_signal = tokio::signal::unix::signal(
+  dotenvy::dotenv().ok();
+  let config = periphery_config();
+
+  mogh_logger::init(&config.logging)?;
+
+  let mut sigterm = tokio::signal::unix::signal(
     tokio::signal::unix::SignalKind::terminate(),
   )?;
+  let mut sigint = tokio::signal::unix::signal(
+    tokio::signal::unix::SignalKind::interrupt(),
+  )?;
+
+  // Collect mountpoints so we can unmount on shutdown.
+  let mountpoints: Vec<PathBuf> = config
+    .filesystems
+    .iter()
+    .map(|fs| {
+      fs.split_once(":")
+        .map(|(_, path)| config.filesystem_root.join(path))
+        .unwrap_or_else(|| config.filesystem_root.join(fs))
+    })
+    .collect();
+
+  let shutdown = async {
+    tokio::select! {
+      _ = sigterm.recv() => info!("Received SIGTERM, unmounting filesystems..."),
+      _ = sigint.recv() => info!("Received SIGINT, unmounting filesystems..."),
+    }
+  };
+
   tokio::select! {
     res = tokio::spawn(app()) => res?,
-    _ = term_signal.recv() => Ok(()),
+    _ = shutdown => {
+      SHOULD_SHUTDOWN.store(true, std::sync::atomic::Ordering::SeqCst);
+      unmount_all(&mountpoints);
+      Ok(())
+    },
   }
 }

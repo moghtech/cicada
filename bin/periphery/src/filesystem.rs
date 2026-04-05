@@ -58,7 +58,6 @@ impl CicadaFs {
     config.mount_options = vec![
       MountOption::FSName(name),
       MountOption::RO,
-      MountOption::AutoUnmount,
       MountOption::DefaultPermissions,
     ];
     fuser::mount2(CicadaFs { filesystem, root }, mountpoint, &config)

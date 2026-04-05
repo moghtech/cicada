@@ -12,11 +12,8 @@ mod db;
 mod encryption;
 
 async fn app() -> mogh_error::Result<()> {
-  dotenvy::dotenv().ok();
-  let config = core_config();
-  mogh_logger::init(&config.logging)?;
-
   let startup_span = info_span!("CoreStartup");
+  let config = core_config();
 
   async {
     info!("Cicada Core version: v{}", env!("CARGO_PKG_VERSION"));
@@ -56,6 +53,10 @@ async fn app() -> mogh_error::Result<()> {
 
 #[tokio::main]
 async fn main() -> mogh_error::Result<()> {
+  dotenvy::dotenv().ok();
+  let config = core_config();
+  mogh_logger::init(&config.logging)?;
+
   let mut term_signal = tokio::signal::unix::signal(
     tokio::signal::unix::SignalKind::terminate(),
   )?;
