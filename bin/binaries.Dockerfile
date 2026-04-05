@@ -10,9 +10,7 @@ RUN cargo install cargo-strip
 
 WORKDIR /builder
 COPY Cargo.toml Cargo.lock ./
-COPY ./lib ./lib
-COPY ./client/core/rs ./client/core/rs
-COPY ./client/periphery ./client/periphery
+COPY ./client/rs ./client/rs
 COPY ./bin/core ./bin/core
 COPY ./bin/periphery ./bin/periphery
 

@@ -16,9 +16,11 @@ RUN cargo chef prepare --recipe-path recipe.json
 
 FROM chef AS builder
 RUN cargo install cargo-strip
-COPY --from=planner /builder/recipe.json recipe.json
+
 # Build JUST dependencies - cached layer
+COPY --from=planner /builder/recipe.json recipe.json
 RUN cargo chef cook --release --recipe-path recipe.json
+
 # NOW copy again (this time into builder) and build app
 COPY . .
 RUN \

@@ -7,8 +7,7 @@ RUN cargo install cargo-strip
 WORKDIR /builder
 COPY Cargo.toml Cargo.lock ./
 COPY ./lib ./lib
-COPY ./client/core/rs ./client/core/rs
-COPY ./client/periphery ./client/periphery
+COPY ./client/rs ./client/rs
 COPY ./bin/core ./bin/core
 
 # Compile app
@@ -19,7 +18,7 @@ RUN cargo build -p cicada_core --release && \
 FROM node:22.12-alpine AS ui-builder
 WORKDIR /builder
 COPY ./ui ./ui
-COPY ./client/core/ts ./client
+COPY ./client/ts ./client
 RUN cd client && yarn && yarn build && yarn link
 RUN cd ui && yarn link cicada_client && yarn && yarn build
 

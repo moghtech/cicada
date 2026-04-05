@@ -10,7 +10,7 @@ FROM ${BINARIES_IMAGE} AS binaries
 FROM node:22.12-alpine AS ui-builder
 WORKDIR /builder
 COPY ./ui ./ui
-COPY ./client/core/ts ./client
+COPY ./client/ts ./client
 RUN cd client && yarn && yarn build && yarn link
 RUN cd ui && yarn link cicada_client && yarn && yarn build
 
