@@ -18,8 +18,9 @@ fn unmount_with_retries(mountpoint: &Path) {
       Ok(status) if status.success() => return,
       Ok(status) => {
         error!(
-          "fusermount3 exited with {status} for {mountpoint:?}"
+          "fusermount3 exited with {status} for {mountpoint:?}, waiting 2s for retry..."
         );
+        std::thread::sleep(Duration::from_secs(2));
       }
       Err(e) => {
         error!("Failed to unmount {mountpoint:?} | {e:#}");
