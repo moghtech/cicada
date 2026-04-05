@@ -16,18 +16,6 @@ homepage = "https://mogh.tech/cicada"
 [profile.release]
 strip = "debuginfo"
 
-[patch.crates-io]
-mogh_auth_client = { path = "../lib/auth/client/rs" }
-mogh_auth_server = { path = "../lib/auth/server" }
-mogh_error = { path = "../lib/crates/error" }
-mogh_secret_file = { path = "../lib/crates/secret_file" }
-mogh_config = { path = "../lib/crates/config" }
-mogh_encryption = { path = "../lib/crates/encryption" }
-mogh_logger = { path = "../lib/crates/logger" }
-mogh_pki = { path = "../lib/crates/pki" }
-mogh_server = { path = "../lib/crates/server" }
-mogh_rate_limit = { path = "../lib/crates/rate_limit" }
-
 [workspace.dependencies]
 cicada_client = { path = "client/rs" }
 
