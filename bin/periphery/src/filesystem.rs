@@ -58,10 +58,8 @@ impl CicadaFs {
       blksize: CicadaFs::BLOCK_SIZE as u32,
       flags: 0,
     };
-    let mut options = vec![
-      MountOption::FSName(name),
-      MountOption::RO,
-    ];
+    let mut options =
+      vec![MountOption::FSName(name), MountOption::RO];
     let mut allowed_uids = HashSet::new();
     if !allow_uids.is_empty() {
       // allow_other lets other UIDs reach the filesystem,
@@ -76,12 +74,17 @@ impl CicadaFs {
     }
     let mut config = fuser::Config::default();
     config.mount_options = options;
-    let fs = CicadaFs { filesystem, root, allowed_uids };
+    let fs = CicadaFs {
+      filesystem,
+      root,
+      allowed_uids,
+    };
     fuser::mount2(fs, mountpoint, &config)
       .context("Failed to mount CicadaFs")
   }
 
   fn check_access(&self, req: &fuser::Request) -> bool {
+    trace!("GOT CHECK ACCESS FROM UID: {}", req.uid());
     self.allowed_uids.is_empty()
       || self.allowed_uids.contains(&req.uid())
   }
@@ -124,6 +127,7 @@ impl fuser::Filesystem for CicadaFs {
     _mask: fuser::AccessFlags,
     reply: fuser::ReplyEmpty,
   ) {
+    trace!("GOT ACCESS FROM UID: {}", req.uid());
     if self.check_access(req) {
       reply.ok();
     } else {
