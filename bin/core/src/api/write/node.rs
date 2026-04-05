@@ -22,6 +22,7 @@ impl Resolve<WriteArgs> for CreateNode {
       filesystem: self.filesystem,
       parent: self.parent,
       name: self.name,
+      perm: self.perm,
       kind: self.kind,
     })
     .await?;
@@ -111,6 +112,7 @@ impl Resolve<WriteArgs> for UpdateNodeEncryptionKey {
         inode: node.inode,
         parent: node.parent,
         name: node.name,
+        perm: node.perm,
         kind: node.kind,
         data: None,
         missing_key: None,
@@ -144,6 +146,7 @@ impl Resolve<WriteArgs> for RotateNodeEnvelopeKey {
         inode: node.inode,
         parent: node.parent,
         name: node.name,
+        perm: node.perm,
         kind: node.kind,
         data: None,
         missing_key: None,

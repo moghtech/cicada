@@ -49,7 +49,7 @@ impl CicadaFs {
       "Mounting {} as {uid}:{gid}",
       mountpoint.as_ref().display()
     );
-    
+
     let root = FileAttr {
       ino: INodeNo::ROOT,
       size: 0,
@@ -102,8 +102,12 @@ impl CicadaFs {
       .map(|data| data.len() as u64)
       .unwrap_or_default();
     let (kind, perm) = match node.kind {
-      NodeKind::Folder => (FileType::Directory, 0o755),
-      NodeKind::File => (FileType::RegularFile, 0o644),
+      NodeKind::Folder => {
+        (FileType::Directory, node.perm.unwrap_or(0o755))
+      }
+      NodeKind::File => {
+        (FileType::RegularFile, node.perm.unwrap_or(0o644))
+      }
     };
     FileAttr {
       ino: INodeNo(node.inode),

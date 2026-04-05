@@ -22,6 +22,12 @@ pub struct NodeListItem {
   pub parent: U64,
   /// The name of the node
   pub name: String,
+  /// The file permission integer.
+  /// Usually represented as octet like 0o644.
+  /// If not provided, will use defaults:
+  /// - Folder: 0o755
+  /// - File: 0o644
+  pub perm: Option<u16>,
   /// The kind of node.
   /// - Folder,
   /// - File,
@@ -50,6 +56,12 @@ pub struct NodeEntity {
   pub parent: U64,
   /// The name of the node
   pub name: String,
+  /// The file permission integer.
+  /// Usually represented as octet like 0o644.
+  /// If not provided, will use defaults:
+  /// - Folder: 0o755
+  /// - File: 0o644
+  pub perm: Option<u16>,
   /// The kind of node.
   /// - Folder,
   /// - File,
@@ -88,6 +100,12 @@ pub struct NodeRecord {
   pub parent: U64,
   /// The name of the node
   pub name: String,
+  /// The file permission integer.
+  /// Usually represented as octet like 0o644.
+  /// If not provided, will use defaults:
+  /// - Folder: 0o755
+  /// - File: 0o644
+  pub perm: Option<u16>,
   /// The kind of node.
   /// - Folder,
   /// - File,

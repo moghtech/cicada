@@ -57,6 +57,14 @@ export interface NodeEntity {
 	/** The name of the node */
 	name: string;
 	/**
+	 * The file permission integer.
+	 * Usually represented as octet like 0o644.
+	 * If not provided, will use defaults:
+	 * - Folder: 0o755
+	 * - File: 0o644
+	 */
+	perm?: number;
+	/**
 	 * The kind of node.
 	 * - Folder,
 	 * - File,
@@ -309,6 +317,14 @@ export interface NodeListItem {
 	/** The name of the node */
 	name: string;
 	/**
+	 * The file permission integer.
+	 * Usually represented as octet like 0o644.
+	 * If not provided, will use defaults:
+	 * - Folder: 0o755
+	 * - File: 0o644
+	 */
+	perm?: number;
+	/**
 	 * The kind of node.
 	 * - Folder,
 	 * - File,
@@ -451,6 +467,14 @@ export interface CreateNode {
 	parent?: U64;
 	/** The name of the node */
 	name: string;
+	/**
+	 * The file permission integer.
+	 * Usually represented as octet like 0o644.
+	 * If not provided, will use defaults:
+	 * - Folder: 0o755
+	 * - File: 0o644
+	 */
+	perm?: number;
 	/**
 	 * The kind of node.
 	 * - Folder
@@ -756,6 +780,14 @@ export interface NodeRecord {
 	/** The name of the node */
 	name: string;
 	/**
+	 * The file permission integer.
+	 * Usually represented as octet like 0o644.
+	 * If not provided, will use defaults:
+	 * - Folder: 0o755
+	 * - File: 0o644
+	 */
+	perm?: number;
+	/**
 	 * The kind of node.
 	 * - Folder,
 	 * - File,
@@ -839,6 +871,14 @@ export interface UpdateNode {
 	parent?: U64;
 	/** The name of the node */
 	name?: string;
+	/**
+	 * The file permission integer.
+	 * Usually represented as octet like 0o644.
+	 * If not provided, will use defaults:
+	 * - Folder: 0o755
+	 * - File: 0o644
+	 */
+	perm?: number;
 }
 
 /** Update a filesystem node's encrypted data. Response: [UpdateNodeDataResponse]. */

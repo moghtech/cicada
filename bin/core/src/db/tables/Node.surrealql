@@ -27,6 +27,11 @@ DEFINE FIELD OVERWRITE name
   ON TABLE Node 
   TYPE string;
 
+-- perm
+DEFINE FIELD OVERWRITE perm 
+  ON TABLE Node 
+  TYPE option<int>;
+
 -- kind
 DEFINE FIELD OVERWRITE kind
   ON TABLE Node

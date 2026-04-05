@@ -47,6 +47,12 @@ pub struct CreateNode {
   pub parent: Option<U64>,
   /// The name of the node
   pub name: String,
+  /// The file permission integer.
+  /// Usually represented as octet like 0o644.
+  /// If not provided, will use defaults:
+  /// - Folder: 0o755
+  /// - File: 0o644
+  pub perm: Option<u16>,
   /// The kind of node.
   /// - Folder
   /// - File
@@ -101,6 +107,13 @@ pub struct UpdateNode {
   /// The name of the node
   #[serde(skip_serializing_if = "Option::is_none")]
   pub name: Option<String>,
+  /// The file permission integer.
+  /// Usually represented as octet like 0o644.
+  /// If not provided, will use defaults:
+  /// - Folder: 0o755
+  /// - File: 0o644
+  #[serde(skip_serializing_if = "Option::is_none")]
+  pub perm: Option<u16>,
 }
 
 /// Response for [UpdateNode].

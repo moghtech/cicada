@@ -198,6 +198,7 @@ pub async fn decrypt_node(
     inode: node.inode,
     parent: node.parent,
     name: node.name,
+    perm: node.perm,
     kind: node.kind,
     created_at: node.created_at,
     updated_at: node.updated_at,

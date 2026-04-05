@@ -1,5 +1,5 @@
 import { useInvalidate, useRead, useWrite } from "@/lib/hooks";
-import { Button, Center, Group, Text } from "@mantine/core";
+import { Button, Center, Group, Text, TextInput } from "@mantine/core";
 import { useNavigate } from "react-router-dom";
 import { History } from "lucide-react";
 import { useLocalStorage } from "@mantine/hooks";
@@ -10,6 +10,7 @@ import { notifications } from "@mantine/notifications";
 import { NodePageDescription, NodePageTitle } from "./title";
 import InitializeEncryptionKey from "@/components/initialize-key";
 import { languageFromPath, MonacoEditor, Page } from "mogh_ui";
+import { useEffect, useState } from "react";
 
 const FilePage = ({
   filesystem,
@@ -20,6 +21,13 @@ const FilePage = ({
 }) => {
   const inv = useInvalidate();
   const nav = useNavigate();
+
+  const [perm, setPerm] = useState("");
+  useEffect(
+    () => setPerm(node?.perm ? `0o${node?.perm?.toString(8)}` : ""),
+    [node?.perm],
+  );
+
   const [{ data }, setEdit] = useLocalStorage<{ data: string | undefined }>({
     key: `node-${node?.id}-edit-v1`,
     defaultValue: { data: undefined },
@@ -27,6 +35,12 @@ const FilePage = ({
   const missing_key = useRead("ListEncryptionKeys", {}).data?.find(
     (key) => key.id === node?.missing_key,
   );
+  const { mutateAsync: updateNode } = useWrite("UpdateNode", {
+    onSuccess: () => {
+      inv(["ListNodes"], ["FindNode"]);
+      notifications.show({ message: "Saved changes to node." });
+    },
+  });
   const { mutateAsync: updateNodeData } = useWrite("UpdateNodeData", {
     onSuccess: () => {
       inv(["FindNode"]);
@@ -78,6 +92,17 @@ const FilePage = ({
             onConfirm={() => deleteNode({ id: node.id, move_children: 1 })}
             loading={deleteNodePending}
             disabled={false}
+          />
+          <TextInput
+            label="Permissions"
+            placeholder="0o644"
+            value={perm}
+            onChange={(e) => setPerm(e.target.value)}
+            onKeyDown={(e) => {
+              if (perm && e.key === "Enter") {
+                updateNode({ id: node.id, perm: Number(perm) });
+              }
+            }}
           />
         </>
       }
