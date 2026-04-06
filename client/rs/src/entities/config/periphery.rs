@@ -30,8 +30,8 @@ pub struct Env {
   /// If not provided, will use Default config.
   ///
   /// Note. This is overridden if the equivalent arg is passed in [CliArgs].
-  #[serde(default, alias = "periphery_config_path")]
-  pub periphery_config_paths: Vec<PathBuf>,
+  #[serde(default, alias = "cicada_config_path")]
+  pub cicada_config_paths: Vec<PathBuf>,
   /// If specifying folders, use this to narrow down which
   /// files will be matched to parse into the final [PeripheryConfig].
   /// Only files inside the folders which have names containing a keywords
@@ -41,72 +41,72 @@ pub struct Env {
   /// Note. This is overridden if the equivalent arg is passed in [CliArgs].
   #[serde(
     default = "super::default_config_keywords",
-    alias = "periphery_config_keyword"
+    alias = "cicada_config_keyword"
   )]
-  pub periphery_config_keywords: Vec<String>,
+  pub cicada_config_keywords: Vec<String>,
 
   /// Will merge nested config object (eg. secrets, providers) across multiple
   /// config files. Default: `true`
   ///
   /// Note. This is overridden if the equivalent arg is passed in [CliArgs].
   #[serde(default = "super::default_merge_nested_config")]
-  pub periphery_merge_nested_config: bool,
+  pub cicada_merge_nested_config: bool,
 
   /// Will extend config arrays (eg. `allowed_ips`, `passkeys`) across multiple config files.
   /// Default: `true`
   ///
   /// Note. This is overridden if the equivalent arg is passed in [CliArgs].
   #[serde(default = "super::default_extend_config_arrays")]
-  pub periphery_extend_config_arrays: bool,
+  pub cicada_extend_config_arrays: bool,
 
   /// Override `core_address`
-  pub periphery_core_address: Option<String>,
+  pub cicada_core_address: Option<String>,
   /// Override `core_tls_insecure_skip_verify`
-  pub periphery_core_tls_insecure_skip_verify: Option<bool>,
+  pub cicada_core_tls_insecure_skip_verify: Option<bool>,
 
-  /// Override `connect_as`
-  pub periphery_connect_as: Option<String>,
   /// Override `private_key`
-  pub periphery_private_key: Option<String>,
+  pub cicada_private_key: Option<String>,
   /// Override `private_key` with file
-  pub periphery_private_key_file: Option<PathBuf>,
+  pub cicada_private_key_file: Option<PathBuf>,
   /// Override `onboarding_key`
-  pub periphery_onboarding_key: Option<String>,
+  pub cicada_onboarding_key: Option<String>,
   /// Override `onboarding_key` from file
-  pub periphery_onboarding_key_file: Option<PathBuf>,
+  pub cicada_onboarding_key_file: Option<PathBuf>,
+  /// Override `device_name`
+  pub cicada_device_name: Option<String>,
   /// Override `core_public_key`
-  pub periphery_core_public_key: Option<String>,
+  pub cicada_core_public_key: Option<String>,
 
   /// Override `filesystem_root`
-  pub periphery_filesystem_root: Option<PathBuf>,
+  pub cicada_filesystem_root: Option<PathBuf>,
   /// Override `filesystems`
-  #[serde(alias = "periphery_filesystem")]
-  pub periphery_filesystems: Option<Vec<String>>,
+  #[serde(alias = "cicada_filesystem")]
+  pub cicada_filesystems: Option<Vec<String>>,
   /// Override `allow_uids`
-  #[serde(alias = "periphery_allow_uid")]
-  pub periphery_allow_uids: Option<Vec<u32>>,
+  #[serde(alias = "cicada_allow_uid")]
+  pub cicada_allow_uids: Option<Vec<u32>>,
 
   // LOGGING
   /// Override `logging.level`
-  pub periphery_logging_level: Option<LogLevel>,
+  pub cicada_logging_level: Option<LogLevel>,
   /// Override `logging.stdio`
-  pub periphery_logging_stdio: Option<StdioLogMode>,
+  pub cicada_logging_stdio: Option<StdioLogMode>,
   /// Override `logging.pretty`
-  pub periphery_logging_pretty: Option<bool>,
+  pub cicada_logging_pretty: Option<bool>,
   /// Override `logging.location`
-  pub periphery_logging_location: Option<bool>,
+  pub cicada_logging_location: Option<bool>,
   /// Override `logging.ansi`
-  pub periphery_logging_ansi: Option<bool>,
+  pub cicada_logging_ansi: Option<bool>,
   /// Override `logging.otlp_endpoint`
-  pub periphery_logging_otlp_endpoint: Option<String>,
+  pub cicada_logging_otlp_endpoint: Option<String>,
   /// Override `logging.opentelemetry_service_name`
-  pub periphery_logging_opentelemetry_service_name: Option<String>,
+  pub cicada_logging_opentelemetry_service_name: Option<String>,
   /// Override `logging.opentelemetry_scope_name`
-  pub periphery_logging_opentelemetry_scope_name: Option<String>,
+  pub cicada_logging_opentelemetry_scope_name: Option<String>,
   /// Override `pretty_startup_config`
-  pub periphery_pretty_startup_config: Option<bool>,
+  pub cicada_pretty_startup_config: Option<bool>,
   /// Override `unsafe_unsanitized_startup_config`
-  pub periphery_unsafe_unsanitized_startup_config: Option<bool>,
+  pub cicada_unsafe_unsanitized_startup_config: Option<bool>,
 }
 
 /// # Periphery Configuration File
@@ -122,10 +122,6 @@ pub struct PeripheryConfig {
   /// without validating the Core certs
   #[serde(default)]
   pub core_tls_insecure_skip_verify: bool,
-
-  /// The device name to connect as.
-  #[serde(default)]
-  pub connect_as: String,
 
   /// Private key to use with Noise handshake to authenticate with Cicada Core.
   ///
@@ -143,6 +139,12 @@ pub struct PeripheryConfig {
   /// creation flow.
   #[serde(skip_serializing_if = "Option::is_none")]
   pub onboarding_key: Option<String>,
+
+  /// The device name to onboard as.
+  /// Note. This name is only used during onboarding.
+  /// Every device needs a unique name paired with public key.
+  #[serde(default)]
+  pub device_name: String,
 
   /// Specify the core public key to use with authentication signature.
   /// If not specified, will be retreived from the Core '/public_key' route.
@@ -212,9 +214,9 @@ impl Default for PeripheryConfig {
     Self {
       core_address: Default::default(),
       core_tls_insecure_skip_verify: Default::default(),
-      connect_as: Default::default(),
       private_key: default_private_key(),
       onboarding_key: Default::default(),
+      device_name: Default::default(),
       core_public_key: Default::default(),
       filesystem_root: default_filesystem_root(),
       filesystems: Default::default(),
@@ -232,7 +234,6 @@ impl PeripheryConfig {
       core_address: self.core_address.clone(),
       core_tls_insecure_skip_verify: self
         .core_tls_insecure_skip_verify,
-      connect_as: self.connect_as.clone(),
       private_key: if self.private_key.starts_with("file:") {
         self.private_key.clone()
       } else {
@@ -242,6 +243,7 @@ impl PeripheryConfig {
         .onboarding_key
         .as_ref()
         .map(|key| empty_or_redacted(key)),
+      device_name: self.device_name.clone(),
       core_public_key: self.core_public_key.clone(),
       filesystem_root: self.filesystem_root.clone(),
       filesystems: self.filesystems.clone(),

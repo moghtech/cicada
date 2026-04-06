@@ -83,7 +83,7 @@ async fn app() -> anyhow::Result<()> {
 
       onboarding_client.write(
         CreateDevice {
-          name: config.connect_as.clone(),
+          name: config.device_name.clone(),
           enabled: true,
           public_key: periphery_keys().load().public.clone().into_inner()
         }
