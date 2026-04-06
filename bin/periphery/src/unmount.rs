@@ -1,12 +1,11 @@
-use std::{
-  path::{Path, PathBuf},
-  time::Duration,
-};
+use std::{path::Path, time::Duration};
 
-pub fn all(mountpoints: &[PathBuf]) {
+use crate::config::filesystem_mount_options;
+
+pub fn all() {
   std::thread::scope(|s| {
-    for mountpoint in mountpoints {
-      s.spawn(|| unmount_with_retries(mountpoint));
+    for options in filesystem_mount_options() {
+      s.spawn(|| unmount_with_retries(&options.mountpoint));
     }
   });
 }
@@ -14,7 +13,7 @@ pub fn all(mountpoints: &[PathBuf]) {
 fn unmount_with_retries(mountpoint: &Path) {
   let mut attempt = 1;
   loop {
-    info!("Unmounting {mountpoint:?} (attempt {attempt}/3)");
+    info!("Unmounting {mountpoint:?} (attempt {attempt})");
     match unmount(mountpoint) {
       Ok(status) if status.success() => return,
       Ok(status) => {

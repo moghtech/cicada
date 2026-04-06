@@ -1,10 +1,7 @@
 #[macro_use]
 extern crate tracing;
 
-use std::{
-  path::PathBuf,
-  sync::{OnceLock, atomic::AtomicBool},
-};
+use std::sync::{OnceLock, atomic::AtomicBool};
 
 use cicada_client::{CicadaClient, entities::ClientType};
 use tracing::Instrument;
@@ -17,6 +14,7 @@ mod config;
 mod filesystem;
 mod mount;
 mod onboard;
+mod options;
 mod unmount;
 
 fn cicada() -> &'static CicadaClient {
@@ -81,17 +79,6 @@ async fn main() -> anyhow::Result<()> {
     tokio::signal::unix::SignalKind::interrupt(),
   )?;
 
-  // Collect mountpoints to unmount on shutdown.
-  let mountpoints: Vec<PathBuf> = config
-    .filesystems
-    .iter()
-    .map(|fs| {
-      fs.split_once(":")
-        .map(|(_, path)| config.default_mount_root.join(path))
-        .unwrap_or_else(|| config.default_mount_root.join(fs))
-    })
-    .collect();
-
   let shutdown = async {
     tokio::select! {
       _ = sigterm.recv() => warn!("Received SIGTERM, unmounting filesystems..."),
@@ -103,7 +90,7 @@ async fn main() -> anyhow::Result<()> {
     res = tokio::spawn(app()) => res?,
     _ = shutdown => {
       SHOULD_SHUTDOWN.store(true, std::sync::atomic::Ordering::SeqCst);
-      unmount::all(&mountpoints);
+      unmount::all();
       Ok(())
     },
   }

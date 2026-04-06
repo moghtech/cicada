@@ -1,13 +1,18 @@
 use std::{path::PathBuf, sync::OnceLock};
 
-use cicada_client::entities::config::{
-  logger::{LogConfig, LogLevel},
-  periphery::{Env, PeripheryConfig},
+use cicada_client::{
+  api::read::filesystem::ListFilesystems,
+  entities::config::{
+    logger::{LogConfig, LogLevel},
+    periphery::{Env, PeripheryConfig},
+  },
 };
 use colored::Colorize;
 use mogh_config::ConfigLoader;
 use mogh_pki::{RotatableKeyPair, SpkiPublicKey};
 use mogh_secret_file::maybe_read_item_from_file;
+
+use crate::{cicada, options::FilesystemMountOptions};
 
 /// Should call in startup to ensure Periphery errors without valid private key.
 pub fn periphery_keys() -> &'static RotatableKeyPair {
@@ -35,6 +40,31 @@ pub fn core_public_key() -> Option<&'static SpkiPublicKey> {
       )
     })
     .as_ref()
+}
+
+pub fn filesystem_mount_options() -> &'static [FilesystemMountOptions]
+{
+  static FILESYSTEM_MOUNT_MOUNTS: OnceLock<
+    Vec<FilesystemMountOptions>,
+  > = OnceLock::new();
+  FILESYSTEM_MOUNT_MOUNTS
+    .get_or_init(|| {
+      let Ok(filesystems) = cicada().read(ListFilesystems {})
+        .inspect_err(|e| error!("[FATAL] Failed to list cicada filesystems | {e:#}"))
+      else {
+        std::process::exit(1)
+      };
+      periphery_config()
+        .filesystems
+        .iter()
+        .flat_map(|filesystem_spec| {
+          FilesystemMountOptions::parse(filesystem_spec, &filesystems)
+            .inspect_err(|e| warn!("Failed to parse options from filesystem spec: '{filesystem_spec}' | {e:#}"))
+            .ok()
+        })
+        .collect()
+    })
+    .as_slice()
 }
 
 pub fn periphery_config() -> &'static PeripheryConfig {

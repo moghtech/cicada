@@ -1,6 +1,5 @@
 use std::{
   collections::HashSet,
-  path::PathBuf,
   time::{Duration, UNIX_EPOCH},
 };
 
@@ -17,7 +16,7 @@ use fuser::{
   LockOwner, MountOption, OpenFlags,
 };
 
-use crate::cicada;
+use crate::{cicada, options::FilesystemMountOptions};
 
 pub struct CicadaFs {
   filesystem: FilesystemId,
@@ -26,25 +25,18 @@ pub struct CicadaFs {
   allowed_uids: HashSet<u32>,
 }
 
-pub struct MountOptions {
-  pub name: String,
-  pub mountpoint: PathBuf,
-  pub uid: Option<u32>,
-  pub gid: Option<u32>,
-}
-
 impl CicadaFs {
   const TTL: Duration = Duration::from_secs(10);
   const BLOCK_SIZE: u64 = 512;
 
   pub fn mount(
-    filesystem: FilesystemId,
-    MountOptions {
+    FilesystemMountOptions {
       name,
+      id,
       mountpoint,
       uid,
       gid,
-    }: MountOptions,
+    }: FilesystemMountOptions,
     allow_uids: Vec<u32>,
   ) -> anyhow::Result<()> {
     let uid = uid.unwrap_or_else(|| unsafe { libc::getuid() });
@@ -76,7 +68,7 @@ impl CicadaFs {
     config.acl = fuser::SessionACL::All;
 
     let fs = CicadaFs {
-      filesystem,
+      filesystem: id,
       root,
       allowed_uids: allow_uids.into_iter().chain([uid]).collect(),
     };
