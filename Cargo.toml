@@ -6,7 +6,7 @@ members = [
 ]
 
 [workspace.package]
-version = "0.2.1"
+version = "0.2.2"
 edition = "2024"
 authors = ["mbecker20 <becker.maxh@gmail.com>"]
 license = "GPL-3.0-or-later"
@@ -65,7 +65,7 @@ rustls = { version = "0.23.37", features = ["aws-lc-rs"] }
 anyhow = "1.0.102"
 
 # DATABASE
-surrealdb = { version = "3.0.5", features = ["native-tls", "kv-rocksdb"] }
+surrealdb = { version = "3.0.5", features = ["native-tls", "kv-rocksdb", "kv-tikv"] }
 surrealdb-types = { version = "3.0.5" }
 
 # MISC

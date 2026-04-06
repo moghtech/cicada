@@ -70,12 +70,6 @@ impl CicadaFs {
       flags: 0,
     };
 
-    let mut allowed_uids = HashSet::new();
-    if !allow_uids.is_empty() {
-      allowed_uids.insert(uid);
-      allowed_uids.extend(allow_uids);
-    }
-
     let mut config = fuser::Config::default();
     config.mount_options =
       vec![MountOption::FSName(name), MountOption::RO];
@@ -84,7 +78,7 @@ impl CicadaFs {
     let fs = CicadaFs {
       filesystem,
       root,
-      allowed_uids,
+      allowed_uids: allow_uids.into_iter().chain([uid]).collect(),
     };
 
     fuser::mount2(fs, mountpoint, &config)
@@ -143,6 +137,7 @@ impl fuser::Filesystem for CicadaFs {
     if self.check_access(req) {
       reply.ok();
     } else {
+      debug!("DENY ACCESS to {}", req.uid());
       reply.error(Errno::EACCES);
     }
   }
@@ -160,6 +155,7 @@ impl fuser::Filesystem for CicadaFs {
     mut reply: fuser::ReplyDirectory,
   ) {
     if !self.check_access(req) {
+      debug!("DENY READDIR to {}", req.uid());
       reply.error(Errno::EACCES);
       return;
     }
@@ -169,7 +165,7 @@ impl fuser::Filesystem for CicadaFs {
     }) {
       Ok(node) => node,
       Err(e) => {
-        error!(
+        debug!(
           "READDIR FAILED: Could not list children nodes | inode: {ino} | {e:#}"
         );
         reply.error(Errno::ENOENT);
@@ -210,11 +206,12 @@ impl fuser::Filesystem for CicadaFs {
     reply: fuser::ReplyEntry,
   ) {
     if !self.check_access(req) {
+      debug!("DENY LOOKUP to {}", req.uid());
       reply.error(Errno::EACCES);
       return;
     }
     let Some(name) = name.to_str() else {
-      error!("LOOKUP FAILED: Name {name:?} is not valid UTF-8");
+      debug!("LOOKUP FAILED: Name {name:?} is not valid UTF-8");
       reply.error(Errno::ENOENT);
       return;
     };
@@ -225,7 +222,7 @@ impl fuser::Filesystem for CicadaFs {
     )) {
       Ok(node) => self.node_to_file_attr(node),
       Err(e) => {
-        error!(
+        debug!(
           "LOOKUP FAILED: Could not find node | Parent: {parent} | Name: {name} | {e:#}"
         );
         reply.error(Errno::ENOENT);
@@ -243,6 +240,7 @@ impl fuser::Filesystem for CicadaFs {
     reply: fuser::ReplyAttr,
   ) {
     if !self.check_access(req) {
+      debug!("DENY GETATTR to {}", req.uid());
       reply.error(Errno::EACCES);
       return;
     }
@@ -256,8 +254,8 @@ impl fuser::Filesystem for CicadaFs {
     {
       Ok(node) => self.node_to_file_attr(node),
       Err(e) => {
-        error!(
-          "LOOKUP FAILED: Could not find node | inode: {ino} | {e:#}"
+        debug!(
+          "GETATTR FAILED: Could not find node | inode: {ino} | {e:#}"
         );
         reply.error(Errno::ENOENT);
         return;
@@ -278,6 +276,7 @@ impl fuser::Filesystem for CicadaFs {
     reply: fuser::ReplyData,
   ) {
     if !self.check_access(req) {
+      debug!("DENY READ to {}", req.uid());
       reply.error(Errno::EACCES);
       return;
     }
@@ -291,7 +290,7 @@ impl fuser::Filesystem for CicadaFs {
     {
       Ok(node) => node,
       Err(e) => {
-        error!(
+        debug!(
           "READ FAILED: Could not find node | inode: {ino} | {e:#}"
         );
         reply.error(Errno::ENOENT);

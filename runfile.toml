@@ -3,12 +3,18 @@
 [dev-core]
 alias = "dc"
 description = "runs core --release"
-cmd = "cargo run -p cicada_core --release"
+cmd = "CICADA_CONFIG_PATH=.dev/core.config.toml cargo run -p cicada_core --release"
 
 [dev-periphery]
 alias = "dp"
 description = "runs periphery --release"
-cmd = "cargo run -p cicada_periphery --release"
+cmd = "CICADA_CONFIG_PATH=.dev/periphery.config.toml cargo run -p cicada_periphery --release"
+
+[dev-periphery-container]
+alias = "dpc"
+description = "runs periphery in container"
+path = ".dev"
+cmd = "docker compose run -it --pull=always --rm --remove-orphans cperiphery"
 
 [yarn-install]
 description = "downloads latest javacript dependencies for client and frontend"
