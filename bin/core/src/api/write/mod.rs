@@ -104,12 +104,26 @@ async fn handler(
   Extension(client): Extension<Client>,
   Json(request): Json<WriteRequest>,
 ) -> mogh_error::Result<axum::response::Response> {
-  // Most of the write API is only for user clients.
-  // This blocks non user access apart from device routes.
-  if !matches!(
+  // Only these methods can be called by onboarding key
+  if matches!(
     &request,
     WriteRequest::CreateDevice(_) | WriteRequest::UpdateDevice(_)
   ) {
+    // No check required here
+  }
+  // These methods can be called by user or device.
+  // Block onboarding keys.
+  else if matches!(
+    &request,
+    WriteRequest::CreateNode(_)
+      | WriteRequest::UpdateNodeData(_)
+      | WriteRequest::DeleteNode(_)
+  ) {
+    client.not_onboarding_key()?;
+  }
+  // The rest of the methods are user-only.
+  // Blocks devices and onboarding keys.
+  else {
     client.only_users()?;
   }
 
