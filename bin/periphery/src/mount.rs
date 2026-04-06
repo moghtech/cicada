@@ -85,10 +85,6 @@ pub async fn filesystems() -> anyhow::Result<()> {
   Ok(())
 }
 
-struct Filesystem {
-  name: String,
-}
-
 fn parse_options(spec: &str) -> anyhow::Result<MountOptions> {
   let Some((name, rest)) = spec.split_once(':') else {
     return Ok(MountOptions {
