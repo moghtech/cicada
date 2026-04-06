@@ -8,7 +8,7 @@ import ConfirmDelete from "@/components/confirm-delete";
 import { Types } from "cicada_client";
 import { notifications } from "@mantine/notifications";
 import { NodePageDescription, NodePageTitle } from "./title";
-import InitializeEncryptionKey from "@/components/initialize-key";
+import InitializeEncryptionKey from "@/components/initialize-encryption-key";
 import { languageFromPath, MonacoEditor, Page } from "mogh_ui";
 import { useEffect, useState } from "react";
 

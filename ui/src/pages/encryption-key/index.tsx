@@ -1,4 +1,4 @@
-import InitializeEncryptionKey from "@/components/initialize-key";
+import InitializeEncryptionKey from "@/components/initialize-encryption-key";
 import { useInvalidate, useRead, useWrite } from "@/lib/hooks";
 import { ICONS } from "@/lib/icons";
 import { Fieldset, Flex, Group, Text } from "@mantine/core";

@@ -1,5 +1,5 @@
 import { useInvalidate, useRead, useWrite } from "@/lib/hooks";
-import { Button, Group, Modal, Text, TextInput } from "@mantine/core";
+import { Button, Group, Modal, PasswordInput, Text } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
@@ -94,7 +94,7 @@ const InitializeEncryptionKeyForm = ({
       )}
       style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
     >
-      <TextInput
+      <PasswordInput
         {...form.getInputProps("key")}
         withAsterisk
         autoFocus

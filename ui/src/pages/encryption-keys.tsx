@@ -1,5 +1,5 @@
 import { DataTable, Page, SortableHeader } from "mogh_ui";
-import InitializeEncryptionKey from "@/components/initialize-key";
+import InitializeEncryptionKey from "@/components/initialize-encryption-key";
 import CreateEncryptionKey from "@/create/encryption-key";
 import { useRead } from "@/lib/hooks";
 import { ICONS } from "@/lib/icons";

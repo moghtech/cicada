@@ -7,7 +7,7 @@ import ConfirmSave from "@/components/confirm-save";
 import ConfirmDelete from "@/components/confirm-delete";
 import { Types } from "cicada_client";
 import { notifications } from "@mantine/notifications";
-import InitializeEncryptionKey from "@/components/initialize-key";
+import InitializeEncryptionKey from "@/components/initialize-encryption-key";
 import { languageFromPath, MonacoEditor, Page } from "mogh_ui";
 import { ICONS } from "@/lib/icons";
 
