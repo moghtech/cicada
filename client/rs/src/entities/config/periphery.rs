@@ -77,14 +77,14 @@ pub struct Env {
   /// Override `core_public_key`
   pub cicada_core_public_key: Option<String>,
 
-  /// Override `filesystem_root`
-  pub cicada_filesystem_root: Option<PathBuf>,
   /// Override `filesystems`
   #[serde(alias = "cicada_filesystem")]
   pub cicada_filesystems: Option<Vec<String>>,
   /// Override `allow_uids`
   #[serde(alias = "cicada_allow_uid")]
   pub cicada_allow_uids: Option<Vec<u32>>,
+  /// Override `default_mount_root`
+  pub cicada_default_mount_root: Option<PathBuf>,
 
   // LOGGING
   /// Override `logging.level`
@@ -151,39 +151,36 @@ pub struct PeripheryConfig {
   #[serde(default)]
   pub core_public_key: String,
 
-  /// Specify the default filesystem root when
-  /// mount points are ommitted or relative.
+  /// Specify the filesystems to mount using `filesystem_name:/path/to/mount:UID:GID` syntax.
   ///
-  /// Generally this only needs to be changed for development.
-  ///
-  /// Default: `/cicada`
-  #[serde(default = "default_filesystem_root")]
-  pub filesystem_root: PathBuf,
-
-  /// Specify the filesystems to mount using `name:/path/to/mount` syntax.
-  ///
-  /// Relative paths are relative to the filesystem root.
+  /// Relative paths are relative to the default mount root.
   /// If the path is ommitted, will mount to $filesystem_root/$name.
   ///
   /// Example:
   ///
   /// ```toml
-  /// filesystem_root = "/cicada"
+  /// default_mount_root = "/cicada"
   /// filesystems = [
-  ///   "app1",               # mounts to /cicada/app1
-  ///   "app1:relative/path", # mounts to /cicada/relative/path
-  ///   "app2:/custom/app2",  # mounts to /custom/app2
+  ///   "app1",                        # mounts app1 to /cicada/app1
+  ///   "app2:relative/path",          # mounts app2 to /cicada/relative/path
+  ///   "app3:/custom/app3",           # mounts app3 to /custom/app3
+  ///   "app4:/custom/app4:1000",      # mounts app4 to /custom/app4 with files owned by UID 1000 and GID 1000
+  ///   "app5:/custom/app5:1000:999",  # mounts app5 to /custom/app5 with files owned by UID 1000 and GID 999
   /// ]
   /// ```
   #[serde(default)]
   pub filesystems: Vec<String>,
 
   /// Allow specific UIDs to access the mounted filesystems.
-  /// When empty, only the mounting user has access.
-  /// When set, `allow_other` is enabled and only the
-  /// listed UIDs (plus the mounting user) can access files.
   #[serde(default)]
   pub allow_uids: Vec<u32>,
+
+  /// Specify the default filesystem mount root when
+  /// mount points are ommitted or relative.
+  ///
+  /// Default: `/cicada`
+  #[serde(default = "default_mount_root")]
+  pub default_mount_root: PathBuf,
 
   /// Logging configuration
   #[serde(default)]
@@ -205,7 +202,7 @@ fn default_private_key() -> String {
   String::from("file:/config/keys/periphery.key")
 }
 
-fn default_filesystem_root() -> PathBuf {
+fn default_mount_root() -> PathBuf {
   PathBuf::from("/cicada")
 }
 
@@ -218,7 +215,7 @@ impl Default for PeripheryConfig {
       onboarding_key: Default::default(),
       device_name: Default::default(),
       core_public_key: Default::default(),
-      filesystem_root: default_filesystem_root(),
+      default_mount_root: default_mount_root(),
       filesystems: Default::default(),
       allow_uids: Default::default(),
       logging: Default::default(),
@@ -245,7 +242,7 @@ impl PeripheryConfig {
         .map(|key| empty_or_redacted(key)),
       device_name: self.device_name.clone(),
       core_public_key: self.core_public_key.clone(),
-      filesystem_root: self.filesystem_root.clone(),
+      default_mount_root: self.default_mount_root.clone(),
       filesystems: self.filesystems.clone(),
       allow_uids: self.allow_uids.clone(),
       logging: self.logging.clone(),

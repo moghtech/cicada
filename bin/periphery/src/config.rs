@@ -102,9 +102,9 @@ pub fn periphery_config() -> &'static PeripheryConfig {
       core_public_key: env
         .cicada_core_public_key
         .unwrap_or(config.core_public_key),
-      filesystem_root: env
-        .cicada_filesystem_root
-        .unwrap_or(config.filesystem_root),
+      default_mount_root: env
+        .cicada_default_mount_root
+        .unwrap_or(config.default_mount_root),
       filesystems: env
         .cicada_filesystems
         .unwrap_or(config.filesystems),
