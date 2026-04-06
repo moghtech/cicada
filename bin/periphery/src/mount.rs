@@ -15,13 +15,14 @@ pub async fn filesystems() -> anyhow::Result<()> {
       let _ = std::fs::create_dir_all(&options.mountpoint);
     }
 
-    let allow_uids = config.allow_uids.clone();
     handles.push(tokio::task::spawn_blocking(move || {
       info!(
-        "Mounting {} ({}) to {:?}",
-        options.name, options.id.0, options.mountpoint,
+        "Mounting {} ({}) to {:?} with rw={}",
+        options.name, options.id.0, options.mountpoint, options.rw
       );
-      if let Err(e) = CicadaFs::mount(options.clone(), allow_uids) {
+      if let Err(e) =
+        CicadaFs::mount(options.clone(), &config.allow_uids)
+      {
         error!("Failed to mount filesystem {} | {e:#}", options.name)
       }
       if !crate::SHOULD_SHUTDOWN

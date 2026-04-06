@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::{collections::HashMap, path::PathBuf};
 
 use anyhow::Context as _;
 use cicada_client::entities::filesystem::{
@@ -12,6 +12,7 @@ pub struct FilesystemMountOptions {
   pub name: String,
   pub id: FilesystemId,
   pub mountpoint: PathBuf,
+  pub rw: bool,
   pub uid: Option<u32>,
   pub gid: Option<u32>,
 }
@@ -21,7 +22,11 @@ impl FilesystemMountOptions {
     filesystem_spec: &str,
     filesystems: &[FilesystemRecord],
   ) -> anyhow::Result<FilesystemMountOptions> {
-    let Some((name_or_id, rest)) = filesystem_spec.split_once(':')
+    let filesystem_spec = filesystem_spec.trim();
+
+    let Some((name_or_id, rest)) = filesystem_spec
+      .split_once('|')
+      .map(|(f, s)| (f.trim(), s.trim()))
     else {
       let filesystem = filesystems
         .iter()
@@ -38,6 +43,7 @@ impl FilesystemMountOptions {
         mountpoint: periphery_config()
           .default_mount_root
           .join(filesystem_spec),
+        rw: false,
         uid: None,
         gid: None,
       });
@@ -50,34 +56,40 @@ impl FilesystemMountOptions {
         format!("No filesystem found matching {name_or_id}")
       })?;
 
-    // Split UID or GID off end
-    let Some((rest, uid_or_gid)) = rest.rsplit_once(':') else {
-      // Just uses name / rest
-      return Ok(FilesystemMountOptions {
-        name: filesystem.name.clone(),
-        id: filesystem.id.clone(),
-        mountpoint: periphery_config().default_mount_root.join(rest),
-        uid: None,
-        gid: None,
-      });
-    };
+    let kv_map = rest
+      .split('|')
+      .flat_map(|kv_pair| {
+        let kv_pair = kv_pair.trim();
 
-    let uid_or_gid =
-      uid_or_gid.parse::<u32>().context("Invalid UID/GID")?;
+        let (k, v) = kv_pair.split_once('=')?;
 
-    // Split UID off end
-    let Some((mountpoint, uid)) = rest.rsplit_once(':') else {
-      // name / rest / uid
-      return Ok(FilesystemMountOptions {
-        name: filesystem.name.clone(),
-        id: filesystem.id.clone(),
-        mountpoint: periphery_config().default_mount_root.join(rest),
-        uid: Some(uid_or_gid),
-        gid: Some(uid_or_gid),
-      });
-    };
+        Some((k.trim(), v.trim()))
+      })
+      .collect::<HashMap<_, _>>();
 
-    let uid = uid.parse::<u32>().context("Invalid UID")?;
+    let mountpoint =
+      *kv_map.get("mount").unwrap_or(&filesystem.name.as_str());
+
+    let uid = kv_map.get("uid").and_then(|uid| {
+      uid
+        .parse::<u32>()
+        .inspect_err(|e| {
+          warn!("Failed to parse uid from {uid} | {e:?}")
+        })
+        .ok()
+    });
+    let gid = kv_map
+      .get("gid")
+      .and_then(|gid| {
+        gid
+          .parse::<u32>()
+          .inspect_err(|e| {
+            warn!("Failed to parse gid from {gid} | {e:?}")
+          })
+          .ok()
+      })
+      // gid inherits uid if not defined
+      .or(uid);
 
     Ok(FilesystemMountOptions {
       name: filesystem.name.clone(),
@@ -85,8 +97,27 @@ impl FilesystemMountOptions {
       mountpoint: periphery_config()
         .default_mount_root
         .join(mountpoint),
-      uid: Some(uid),
-      gid: Some(uid_or_gid),
+      rw: *kv_map.get("rw").unwrap_or(&"false") == "true",
+      uid,
+      gid,
     })
   }
 }
+
+// pub struct AllowedUid {
+//   pub uid: u32,
+//   pub rw: bool,
+// }
+
+// impl AllowedUid {
+//   pub fn parse(uid_spec: &str) -> anyhow::Result<AllowedUid> {
+//     let (uid, rw) = uid_spec
+//       .split_once('|')
+//       .map(|(uid, rw)| (uid, rw == "rw=true"))
+//       .unwrap_or((uid_spec, false));
+//     Ok(AllowedUid {
+//       uid: uid.parse().context("UID is not valid u32 integer")?,
+//       rw,
+//     })
+//   }
+// }

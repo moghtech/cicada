@@ -32,7 +32,7 @@ pub struct Env {
   /// Note. This is overridden if the equivalent arg is passed in [CliArgs].
   #[serde(default, alias = "cicada_config_path")]
   pub cicada_config_paths: Vec<PathBuf>,
-  
+
   /// If specifying folders, use this to narrow down which
   /// files will be matched to parse into the final [PeripheryConfig].
   /// Only files inside the folders which have names containing a keywords
@@ -152,9 +152,11 @@ pub struct PeripheryConfig {
   #[serde(default)]
   pub core_public_key: String,
 
-  /// Specify the filesystems to mount using `filesystem_name:/path/to/mount:UID:GID` syntax.
+  /// Specify the filesystems to mount using `filesystem_name|mount=/path/to/mount|uid=$UID|gid=$GID|rw=true` syntax.
   ///
-  /// Relative paths are relative to the default mount root.
+  /// After the `filesystem_name`, the order of the parameters does not matter.
+  ///
+  /// For the `mount` paramter, relative paths are relative to the default mount root.
   /// If the path is ommitted, will mount to $filesystem_root/$name.
   ///
   /// Example:
@@ -162,17 +164,28 @@ pub struct PeripheryConfig {
   /// ```toml
   /// default_mount_root = "/cicada"
   /// filesystems = [
-  ///   "app1",                        # mounts app1 to /cicada/app1
-  ///   "app2:relative/path",          # mounts app2 to /cicada/relative/path
-  ///   "app3:/custom/app3",           # mounts app3 to /custom/app3
-  ///   "app4:/custom/app4:1000",      # mounts app4 to /custom/app4 with files owned by UID 1000 and GID 1000
-  ///   "app5:/custom/app5:1000:999",  # mounts app5 to /custom/app5 with files owned by UID 1000 and GID 999
+  ///   "app1",                                      # mounts app1 to /cicada/app1
+  ///   "app2|mount=relative/path",                  # mounts app2 to /cicada/relative/path
+  ///   "app3|mount=/custom/app3",                   # mounts app3 to /custom/app3
+  ///   "app4|mount=/custom/app4|uid=1000|rw=true",  # mounts app4 to /custom/app4 with files owned by UID 1000 and GID 1000 with rw
+  ///   "app5|mount=/custom/app5|uid=1000|gid=999",  # mounts app5 to /custom/app5 with files owned by UID 1000 and GID 999
   /// ]
   /// ```
   #[serde(default)]
   pub filesystems: Vec<String>,
 
   /// Allow specific UIDs to access the mounted filesystems.
+  ///
+  /// To allow user other than mount owner rw, must also specify rw=true.
+  ///
+  /// Example:
+  ///
+  /// ```toml
+  /// allow_uids = [
+  ///   "1001",
+  ///   "1002|rw=true"
+  /// ]
+  /// ```
   #[serde(default)]
   pub allow_uids: Vec<u32>,
 

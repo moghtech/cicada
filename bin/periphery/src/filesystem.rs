@@ -5,16 +5,18 @@ use std::{
 
 use anyhow::Context as _;
 use cicada_client::{
-  api::read::node::{FindNode, ListNodes},
+  api::{
+    read::node::{FindNode, ListNodes},
+    write::node::{
+      CreateNode, DeleteNode, UpdateNode, UpdateNodeData,
+    },
+  },
   entities::{
     filesystem::FilesystemId,
     node::{NodeEntity, NodeKind},
   },
 };
-use fuser::{
-  Errno, FileAttr, FileHandle, FileType, Generation, INodeNo,
-  LockOwner, MountOption, OpenFlags,
-};
+use fuser::*;
 
 use crate::{cicada, options::FilesystemMountOptions};
 
@@ -34,10 +36,11 @@ impl CicadaFs {
       name,
       id,
       mountpoint,
+      rw,
       uid,
       gid,
     }: FilesystemMountOptions,
-    allow_uids: Vec<u32>,
+    allow_uids: &[u32],
   ) -> anyhow::Result<()> {
     let uid = uid.unwrap_or_else(|| unsafe { libc::getuid() });
     let gid = gid.unwrap_or_else(|| unsafe { libc::getgid() });
@@ -63,14 +66,21 @@ impl CicadaFs {
     };
 
     let mut config = fuser::Config::default();
-    config.mount_options =
-      vec![MountOption::FSName(name), MountOption::RO];
+
+    config.mount_options = vec![
+      MountOption::FSName(name),
+      if rw { MountOption::RW } else { MountOption::RO },
+    ];
     config.acl = fuser::SessionACL::All;
 
     let fs = CicadaFs {
       filesystem: id,
       root,
-      allowed_uids: allow_uids.into_iter().chain([uid]).collect(),
+      allowed_uids: allow_uids
+        .into_iter()
+        .cloned()
+        .chain([uid])
+        .collect(),
     };
 
     fuser::mount2(fs, mountpoint, &config)
@@ -296,6 +306,466 @@ impl fuser::Filesystem for CicadaFs {
       None => {
         error!("READ FAILED: No data found for node | inode: {ino}");
         reply.error(Errno::ENOENT);
+      }
+    }
+  }
+
+  fn open(
+    &self,
+    req: &fuser::Request,
+    INodeNo(ino): INodeNo,
+    _flags: OpenFlags,
+    reply: ReplyOpen,
+  ) {
+    if !self.check_access(req) {
+      debug!("DENY OPEN to {}", req.uid());
+      reply.error(Errno::EACCES);
+      return;
+    }
+    // Root inode
+    if ino == 1 {
+      reply.opened(FileHandle(0), FopenFlags::empty());
+      return;
+    }
+    // Verify the node exists
+    match cicada()
+      .read(FindNode::with_inode(self.filesystem.clone(), ino))
+    {
+      Ok(_) => reply.opened(FileHandle(0), FopenFlags::empty()),
+      Err(e) => {
+        debug!(
+          "OPEN FAILED: Could not find node | inode: {ino} | {e:#}"
+        );
+        reply.error(Errno::ENOENT);
+      }
+    }
+  }
+
+  // =======
+  // WRITE
+  // =======
+
+  fn create(
+    &self,
+    req: &fuser::Request,
+    INodeNo(parent): INodeNo,
+    name: &std::ffi::OsStr,
+    mode: u32,
+    _umask: u32,
+    _flags: i32,
+    reply: ReplyCreate,
+  ) {
+    if !self.check_access(req) {
+      debug!("DENY CREATE to {}", req.uid());
+      reply.error(Errno::EACCES);
+      return;
+    }
+    let Some(name) = name.to_str() else {
+      debug!("CREATE FAILED: Name {name:?} is not valid UTF-8");
+      reply.error(Errno::EINVAL);
+      return;
+    };
+    let perm = (mode & 0o7777) as u16;
+    match cicada().write(CreateNode {
+      filesystem: self.filesystem.clone().into(),
+      parent: parent.into(),
+      name: name.to_string(),
+      perm: Some(perm),
+      kind: Some(NodeKind::File),
+      data: Some(String::new()),
+      encryption_key: None,
+    }) {
+      Ok(node) => {
+        let attr = self.node_to_file_attr(node);
+        reply.created(
+          &CicadaFs::TTL,
+          &attr,
+          Generation(0),
+          FileHandle(0),
+          FopenFlags::empty(),
+        );
+      }
+      Err(e) => {
+        error!(
+          "CREATE FAILED: Could not create node | parent: {parent} | name: {name} | {e:#}"
+        );
+        reply.error(Errno::EIO);
+      }
+    }
+  }
+
+  fn mkdir(
+    &self,
+    req: &fuser::Request,
+    INodeNo(parent): INodeNo,
+    name: &std::ffi::OsStr,
+    mode: u32,
+    _umask: u32,
+    reply: fuser::ReplyEntry,
+  ) {
+    if !self.check_access(req) {
+      debug!("DENY MKDIR to {}", req.uid());
+      reply.error(Errno::EACCES);
+      return;
+    }
+    let Some(name) = name.to_str() else {
+      debug!("MKDIR FAILED: Name {name:?} is not valid UTF-8");
+      reply.error(Errno::EINVAL);
+      return;
+    };
+    let perm = (mode & 0o7777) as u16;
+    match cicada().write(CreateNode {
+      filesystem: self.filesystem.clone().into(),
+      parent: parent.into(),
+      name: name.to_string(),
+      perm: Some(perm),
+      kind: Some(NodeKind::Folder),
+      data: None,
+      encryption_key: None,
+    }) {
+      Ok(node) => {
+        let attr = self.node_to_file_attr(node);
+        reply.entry(&CicadaFs::TTL, &attr, Generation(0));
+      }
+      Err(e) => {
+        error!(
+          "MKDIR FAILED: Could not create folder | parent: {parent} | name: {name} | {e:#}"
+        );
+        reply.error(Errno::EIO);
+      }
+    }
+  }
+
+  fn write(
+    &self,
+    req: &fuser::Request,
+    INodeNo(ino): INodeNo,
+    _fh: FileHandle,
+    offset: u64,
+    data: &[u8],
+    _write_flags: WriteFlags,
+    _flags: OpenFlags,
+    _lock_owner: Option<LockOwner>,
+    reply: ReplyWrite,
+  ) {
+    if !self.check_access(req) {
+      debug!("DENY WRITE to {}", req.uid());
+      reply.error(Errno::EACCES);
+      return;
+    }
+    let node = match cicada()
+      .read(FindNode::with_inode(self.filesystem.clone(), ino))
+    {
+      Ok(node) => node,
+      Err(e) => {
+        debug!(
+          "WRITE FAILED: Could not find node | inode: {ino} | {e:#}"
+        );
+        reply.error(Errno::ENOENT);
+        return;
+      }
+    };
+
+    let Ok(new_data) = std::str::from_utf8(data) else {
+      debug!("WRITE FAILED: Data is not valid UTF-8 | inode: {ino}");
+      reply.error(Errno::EINVAL);
+      return;
+    };
+
+    // Merge the write into existing data at the given offset
+    let mut current = node.data.unwrap_or_default().into_bytes();
+    let offset = offset as usize;
+    let end = offset + data.len();
+    if current.len() < end {
+      current.resize(end, 0);
+    }
+    current[offset..end].copy_from_slice(data);
+
+    let merged = match String::from_utf8(current) {
+      Ok(s) => s,
+      Err(_) => {
+        debug!(
+          "WRITE FAILED: Merged data is not valid UTF-8 | inode: {ino}"
+        );
+        reply.error(Errno::EINVAL);
+        return;
+      }
+    };
+
+    match cicada().write(UpdateNodeData {
+      id: node.id,
+      data: merged,
+      encryption_key: None,
+    }) {
+      Ok(_) => reply.written(new_data.len() as u32),
+      Err(e) => {
+        error!(
+          "WRITE FAILED: Could not update node data | inode: {ino} | {e:#}"
+        );
+        reply.error(Errno::EIO);
+      }
+    }
+  }
+
+  fn setattr(
+    &self,
+    req: &fuser::Request,
+    INodeNo(ino): INodeNo,
+    mode: Option<u32>,
+    _uid: Option<u32>,
+    _gid: Option<u32>,
+    size: Option<u64>,
+    _atime: Option<fuser::TimeOrNow>,
+    _mtime: Option<fuser::TimeOrNow>,
+    _ctime: Option<std::time::SystemTime>,
+    _fh: Option<FileHandle>,
+    _crtime: Option<std::time::SystemTime>,
+    _chgtime: Option<std::time::SystemTime>,
+    _bkuptime: Option<std::time::SystemTime>,
+    _flags: Option<fuser::BsdFileFlags>,
+    reply: fuser::ReplyAttr,
+  ) {
+    if !self.check_access(req) {
+      debug!("DENY SETATTR to {}", req.uid());
+      reply.error(Errno::EACCES);
+      return;
+    }
+    if ino == 1 {
+      reply.attr(&CicadaFs::TTL, &self.root);
+      return;
+    }
+
+    let node = match cicada()
+      .read(FindNode::with_inode(self.filesystem.clone(), ino))
+    {
+      Ok(node) => node,
+      Err(e) => {
+        debug!(
+          "SETATTR FAILED: Could not find node | inode: {ino} | {e:#}"
+        );
+        reply.error(Errno::ENOENT);
+        return;
+      }
+    };
+
+    // Handle permission change
+    let perm = mode.map(|m| (m & 0o7777) as u16);
+    if perm.is_some() {
+      if let Err(e) = cicada().write(UpdateNode {
+        id: node.id.clone(),
+        parent: None,
+        name: None,
+        perm,
+      }) {
+        error!(
+          "SETATTR FAILED: Could not update permissions | inode: {ino} | {e:#}"
+        );
+        reply.error(Errno::EIO);
+        return;
+      }
+    }
+
+    // Handle truncate
+    if let Some(new_size) = size {
+      let mut current = node.data.unwrap_or_default().into_bytes();
+      current.truncate(new_size as usize);
+      let truncated = match String::from_utf8(current) {
+        Ok(s) => s,
+        Err(_) => {
+          debug!(
+            "SETATTR FAILED: Truncated data is not valid UTF-8 | inode: {ino}"
+          );
+          reply.error(Errno::EINVAL);
+          return;
+        }
+      };
+      if let Err(e) = cicada().write(UpdateNodeData {
+        id: node.id.clone(),
+        data: truncated,
+        encryption_key: None,
+      }) {
+        error!(
+          "SETATTR FAILED: Could not truncate node | inode: {ino} | {e:#}"
+        );
+        reply.error(Errno::EIO);
+        return;
+      }
+    }
+
+    // Re-read updated node for the response
+    match cicada()
+      .read(FindNode::with_inode(self.filesystem.clone(), ino))
+    {
+      Ok(node) => {
+        let attr = self.node_to_file_attr(node);
+        reply.attr(&CicadaFs::TTL, &attr);
+      }
+      Err(e) => {
+        error!(
+          "SETATTR FAILED: Could not re-read node | inode: {ino} | {e:#}"
+        );
+        reply.error(Errno::EIO);
+      }
+    }
+  }
+
+  // ========
+  // DELETE
+  // ========
+
+  fn unlink(
+    &self,
+    req: &fuser::Request,
+    INodeNo(parent): INodeNo,
+    name: &std::ffi::OsStr,
+    reply: fuser::ReplyEmpty,
+  ) {
+    if !self.check_access(req) {
+      debug!("DENY UNLINK to {}", req.uid());
+      reply.error(Errno::EACCES);
+      return;
+    }
+    let Some(name) = name.to_str() else {
+      debug!("UNLINK FAILED: Name {name:?} is not valid UTF-8");
+      reply.error(Errno::EINVAL);
+      return;
+    };
+    let node = match cicada().read(FindNode::with_parent_name(
+      self.filesystem.clone(),
+      parent,
+      name,
+    )) {
+      Ok(node) => node,
+      Err(e) => {
+        debug!(
+          "UNLINK FAILED: Could not find node | parent: {parent} | name: {name} | {e:#}"
+        );
+        reply.error(Errno::ENOENT);
+        return;
+      }
+    };
+    match cicada().write(DeleteNode {
+      id: node.id,
+      move_children: None,
+    }) {
+      Ok(_) => reply.ok(),
+      Err(e) => {
+        error!(
+          "UNLINK FAILED: Could not delete node | parent: {parent} | name: {name} | {e:#}"
+        );
+        reply.error(Errno::EIO);
+      }
+    }
+  }
+
+  fn rmdir(
+    &self,
+    req: &fuser::Request,
+    INodeNo(parent): INodeNo,
+    name: &std::ffi::OsStr,
+    reply: fuser::ReplyEmpty,
+  ) {
+    if !self.check_access(req) {
+      debug!("DENY RMDIR to {}", req.uid());
+      reply.error(Errno::EACCES);
+      return;
+    }
+    let Some(name) = name.to_str() else {
+      debug!("RMDIR FAILED: Name {name:?} is not valid UTF-8");
+      reply.error(Errno::EINVAL);
+      return;
+    };
+    let node = match cicada().read(FindNode::with_parent_name(
+      self.filesystem.clone(),
+      parent,
+      name,
+    )) {
+      Ok(node) => node,
+      Err(e) => {
+        debug!(
+          "RMDIR FAILED: Could not find node | parent: {parent} | name: {name} | {e:#}"
+        );
+        reply.error(Errno::ENOENT);
+        return;
+      }
+    };
+    match cicada().write(DeleteNode {
+      id: node.id,
+      move_children: None,
+    }) {
+      Ok(_) => reply.ok(),
+      Err(e) => {
+        error!(
+          "RMDIR FAILED: Could not delete node | parent: {parent} | name: {name} | {e:#}"
+        );
+        reply.error(Errno::EIO);
+      }
+    }
+  }
+
+  fn rename(
+    &self,
+    req: &fuser::Request,
+    INodeNo(parent): INodeNo,
+    name: &std::ffi::OsStr,
+    INodeNo(newparent): INodeNo,
+    newname: &std::ffi::OsStr,
+    _flags: RenameFlags,
+    reply: fuser::ReplyEmpty,
+  ) {
+    if !self.check_access(req) {
+      debug!("DENY RENAME to {}", req.uid());
+      reply.error(Errno::EACCES);
+      return;
+    }
+    let Some(name) = name.to_str() else {
+      debug!("RENAME FAILED: Name {name:?} is not valid UTF-8");
+      reply.error(Errno::EINVAL);
+      return;
+    };
+    let Some(newname) = newname.to_str() else {
+      debug!(
+        "RENAME FAILED: New name {newname:?} is not valid UTF-8"
+      );
+      reply.error(Errno::EINVAL);
+      return;
+    };
+    let node = match cicada().read(FindNode::with_parent_name(
+      self.filesystem.clone(),
+      parent,
+      name,
+    )) {
+      Ok(node) => node,
+      Err(e) => {
+        debug!(
+          "RENAME FAILED: Could not find node | parent: {parent} | name: {name} | {e:#}"
+        );
+        reply.error(Errno::ENOENT);
+        return;
+      }
+    };
+    let new_parent = if newparent != parent {
+      Some(newparent.into())
+    } else {
+      None
+    };
+    let new_name = if newname != name {
+      Some(newname.to_string())
+    } else {
+      None
+    };
+    match cicada().write(UpdateNode {
+      id: node.id,
+      parent: new_parent,
+      name: new_name,
+      perm: None,
+    }) {
+      Ok(_) => reply.ok(),
+      Err(e) => {
+        error!(
+          "RENAME FAILED: Could not rename node | parent: {parent} | name: {name} | {e:#}"
+        );
+        reply.error(Errno::EIO);
       }
     }
   }
