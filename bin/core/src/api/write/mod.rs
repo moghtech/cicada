@@ -76,6 +76,7 @@ pub enum WriteRequest {
   CreateEncryptionKey(CreateEncryptionKey),
   UpdateEncryptionKey(UpdateEncryptionKey),
   InitializeEncryptionKey(InitializeEncryptionKey),
+  UninitializeEncryptionKey(UninitializeEncryptionKey),
 }
 
 pub fn router() -> Router {

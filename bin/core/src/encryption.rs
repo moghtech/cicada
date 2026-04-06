@@ -19,7 +19,7 @@ use crate::db::query;
 pub struct EncryptionKeys(DashMap<String, Option<[u8; 32]>>);
 
 impl EncryptionKeys {
-  pub async fn get_or_insert_key(
+  pub async fn get_or_insert(
     &self,
     id: &str,
   ) -> mogh_error::Result<[u8; 32]> {
@@ -54,7 +54,7 @@ impl EncryptionKeys {
     }
   }
 
-  pub fn contains_key(&self, encryption_key_id: &str) -> bool {
+  pub fn contains(&self, encryption_key_id: &str) -> bool {
     // The key must exist in map and be non null
     self
       .0
@@ -63,8 +63,13 @@ impl EncryptionKeys {
       .unwrap_or_default()
   }
 
-  pub fn insert_key(&self, id: String, key: [u8; 32]) {
+  pub fn insert(&self, id: String, key: [u8; 32]) {
     self.0.insert(id, Some(key));
+  }
+
+  /// Returns true if key exists
+  pub fn remove(&self, id: &str) -> bool {
+    self.0.remove(id).is_some()
   }
 }
 
@@ -78,9 +83,8 @@ pub async fn encrypt_data<A: AssociatedData>(
   data: &[u8],
   associated_data: &A,
 ) -> mogh_error::Result<EncryptedData> {
-  let master_key = encryption_keys()
-    .get_or_insert_key(&encryption_key_id)
-    .await?;
+  let master_key =
+    encryption_keys().get_or_insert(&encryption_key_id).await?;
   let EnvelopeEncryptedData { key, data } =
     xchacha20poly1305::EncryptionProvider::default()
       .envelope_encrypt(data, master_key, associated_data)?;
@@ -103,7 +107,7 @@ where
   T::Error: Send + Sync + std::error::Error + 'static,
 {
   let Ok(master_key) = encryption_keys()
-    .get_or_insert_key(&data.encryption_key.0)
+    .get_or_insert(&data.encryption_key.0)
     .await
   else {
     return Ok(None);
@@ -136,10 +140,10 @@ pub async fn rotate_encryption_key<A: AssociatedData>(
   new_encryption_key_id: String,
 ) -> mogh_error::Result<EncryptedData> {
   let old_master_key = encryption_keys()
-    .get_or_insert_key(&data.encryption_key.0)
+    .get_or_insert(&data.encryption_key.0)
     .await?;
   let new_master_key = encryption_keys()
-    .get_or_insert_key(&new_encryption_key_id)
+    .get_or_insert(&new_encryption_key_id)
     .await?;
   // Decrypt just the envelope keys using old master
   let key = xchacha20poly1305::decrypt(

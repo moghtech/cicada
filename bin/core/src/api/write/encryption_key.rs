@@ -56,7 +56,7 @@ impl Resolve<WriteArgs> for CreateEncryptionKey {
       )
       .await?;
     // Insert the key into the in memory map for immediate usage.
-    encryption_keys().insert_key(encryption_key.id.0.clone(), key);
+    encryption_keys().insert(encryption_key.id.0.clone(), key);
     // This response always includes the encoded key,
     // if in memory key then this is only time it is made available to user.
     encryption_key.key = Some(encoded_key);
@@ -106,6 +106,7 @@ impl Resolve<WriteArgs> for InitializeEncryptionKey {
       &(),
     )
     .context("Incoming encryption key failed verification")?;
+
     if BASE64URL.encode(&verification) != encryption_key.verification
     {
       return Err(
@@ -115,8 +116,21 @@ impl Resolve<WriteArgs> for InitializeEncryptionKey {
     }
 
     // After verified, insert the key for active use.
-    encryption_keys().insert_key(encryption_key.id.0, key);
+    encryption_keys().insert(encryption_key.id.0, key);
 
     Ok(InitializeEncryptionKeyResponse {})
+  }
+}
+
+//
+
+impl Resolve<WriteArgs> for UninitializeEncryptionKey {
+  async fn resolve(
+    self,
+    _: &WriteArgs,
+  ) -> Result<Self::Response, Self::Error> {
+    Ok(UninitializeEncryptionKeyResponse {
+      removed: encryption_keys().remove(&self.id.0),
+    })
   }
 }

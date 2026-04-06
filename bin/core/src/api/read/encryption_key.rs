@@ -12,7 +12,7 @@ use crate::{
 
 fn convert_key(key: EncryptionKeyRecord) -> EncryptionKeyEntity {
   let initialized = if matches!(key.kind, EncryptionKeyKind::Memory) {
-    encryption_keys().contains_key(&key.id.0)
+    encryption_keys().contains(&key.id.0)
   } else {
     true
   };

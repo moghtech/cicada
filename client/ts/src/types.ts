@@ -725,7 +725,7 @@ export interface GetVersionResponse {
 }
 
 /**
- * Initialize an in-memory encryption key after application startup.
+ * Initialize an uninitialized in-memory encryption key.
  * Response: [InitializeEncryptionKeyResponse].
  */
 export interface InitializeEncryptionKey {
@@ -828,6 +828,26 @@ export interface SecretRecord {
 	created_at: Iso8601Timestamp;
 	/** Updated at as ISO8601 timestamp. */
 	updated_at: Iso8601Timestamp;
+}
+
+/**
+ * Uninitialize an in-memory encryption key after it has been initialized.
+ * Response: [UninitializeEncryptionKeyResponse].
+ */
+export interface UninitializeEncryptionKey {
+	/** The encryption key ID */
+	id: EncryptionKeyId;
+}
+
+/** Response for [UninitializeEncryptionKey]. */
+export interface UninitializeEncryptionKeyResponse {
+	/**
+	 * Whether an initialized encryption key was removed.
+	 * It may be `false` because:
+	 * - The encryption key was not initialized.
+	 * - There is no encryption key at id.
+	 */
+	removed: boolean;
 }
 
 /** Update a device. Response: [UpdateDeviceResponse]. */
@@ -1105,5 +1125,6 @@ export type WriteRequest =
 	| { type: "BatchDeleteSecrets", params: BatchDeleteSecrets }
 	| { type: "CreateEncryptionKey", params: CreateEncryptionKey }
 	| { type: "UpdateEncryptionKey", params: UpdateEncryptionKey }
-	| { type: "InitializeEncryptionKey", params: InitializeEncryptionKey };
+	| { type: "InitializeEncryptionKey", params: InitializeEncryptionKey }
+	| { type: "UninitializeEncryptionKey", params: UninitializeEncryptionKey };
 

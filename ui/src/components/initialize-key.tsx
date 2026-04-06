@@ -68,7 +68,10 @@ const InitializeEncryptionKeyForm = ({
     {
       onSuccess: () => {
         inv(["GetEncryptionKey"], ["ListEncryptionKeys"]);
-        notifications.show({ message: "Initialized encryption key" });
+        notifications.show({
+          message: "Initialized encryption key",
+          color: "green",
+        });
         close();
         onInit?.();
       },

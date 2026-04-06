@@ -102,7 +102,7 @@ pub type UpdateEncryptionKeyResponse = EncryptionKeyRecord;
 )]
 pub fn initialize_encryption_key() {}
 
-/// Initialize an in-memory encryption key after application startup.
+/// Initialize an uninitialized in-memory encryption key.
 /// Response: [InitializeEncryptionKeyResponse].
 #[typeshare]
 #[derive(
@@ -123,3 +123,46 @@ pub struct InitializeEncryptionKey {
 /// Response for [InitializeEncryptionKey].
 #[typeshare]
 pub type InitializeEncryptionKeyResponse = NoData;
+
+//
+
+#[cfg(feature = "utoipa")]
+#[utoipa::path(
+  post,
+  path = "/write/UninitializeEncryptionKey",
+  description = "Uninitialize a encryption key",
+  request_body(content = UninitializeEncryptionKey),
+  responses(
+    (status = 200, description = "Encryption key uninitialized", body = UninitializeEncryptionKeyResponse),
+    (status = 500, description = "Request failed", body = mogh_error::Serror)
+  ),
+)]
+pub fn uninitialize_encryption_key() {}
+
+/// Uninitialize an in-memory encryption key after it has been initialized.
+/// Response: [UninitializeEncryptionKeyResponse].
+#[typeshare]
+#[derive(
+  Debug, Clone, Serialize, Deserialize, SurrealValue, Resolve,
+)]
+#[surreal(crate = "surrealdb_types")]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
+#[empty_traits(CicadaWriteRequest)]
+#[response(UninitializeEncryptionKeyResponse)]
+#[error(mogh_error::Error)]
+pub struct UninitializeEncryptionKey {
+  /// The encryption key ID
+  pub id: EncryptionKeyId,
+}
+
+/// Response for [UninitializeEncryptionKey].
+#[typeshare]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
+pub struct UninitializeEncryptionKeyResponse {
+  /// Whether an initialized encryption key was removed.
+  /// It may be `false` because:
+  /// - The encryption key was not initialized.
+  /// - There is no encryption key at id.
+  pub removed: bool,
+}

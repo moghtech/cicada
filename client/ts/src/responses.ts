@@ -70,4 +70,5 @@ export type WriteResponses = {
   CreateEncryptionKey: Types.CreateEncryptionKeyResponse;
   UpdateEncryptionKey: Types.UpdateEncryptionKeyResponse;
   InitializeEncryptionKey: Types.InitializeEncryptionKeyResponse;
+  UninitializeEncryptionKey: Types.UninitializeEncryptionKeyResponse;
 };
