@@ -1,6 +1,6 @@
 use std::{
   collections::HashSet,
-  path::Path,
+  path::PathBuf,
   time::{Duration, UNIX_EPOCH},
 };
 
@@ -26,29 +26,31 @@ pub struct CicadaFs {
   allowed_uids: HashSet<u32>,
 }
 
+pub struct MountOptions {
+  pub name: String,
+  pub mountpoint: PathBuf,
+  pub uid: Option<u32>,
+  pub gid: Option<u32>,
+}
+
 impl CicadaFs {
   const TTL: Duration = Duration::from_secs(10);
   const BLOCK_SIZE: u64 = 512;
 
-  pub fn mount<P>(
-    name: String,
+  pub fn mount(
     filesystem: FilesystemId,
-    mountpoint: P,
+    MountOptions {
+      name,
+      mountpoint,
+      uid,
+      gid,
+    }: MountOptions,
     allow_uids: Vec<u32>,
-  ) -> anyhow::Result<()>
-  where
-    P: AsRef<Path>,
-  {
-    let (uid, gid) = if let Some(uid) = allow_uids.first() {
-      (*uid, *uid)
-    } else {
-      (unsafe { libc::getuid() }, unsafe { libc::getgid() })
-    };
+  ) -> anyhow::Result<()> {
+    let uid = uid.unwrap_or_else(|| unsafe { libc::getuid() });
+    let gid = gid.unwrap_or_else(|| unsafe { libc::getgid() });
 
-    info!(
-      "Mounting {} as {uid}:{gid}",
-      mountpoint.as_ref().display()
-    );
+    info!("Mounting {mountpoint:?} as {uid}:{gid}");
 
     let root = FileAttr {
       ino: INodeNo::ROOT,
