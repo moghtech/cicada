@@ -1,16 +1,22 @@
 services:
 
-  cicada:
-    container_name: cicada
-    image: forge.birdo.me/lab/cicada-core
+  cicada-core:
+    image: ghcr.io/moghtech/cicada-core
     restart: unless-stopped
-    expose:
-      - 9220
+    ports:
+      - 9220:9220
     volumes:
-      - /path/to/cicada/database:/database
+      # Store the auto generated key pair
+      - keys:/config/keys
+      # Store database files
+      - database:/database
     environment:
-      CICADA_TITLE: Bird Cicada
-      CICADA_HOST: https://cicada.birdo.me
-      CICADA_DATABASE_URI: rocksdb:/database/database.db
+      CICADA_TITLE: Cicada
+      CICADA_HOST: https://cicada.example.com
+      CICADA_DATABASE_URI: rocksdb:/database
       CICADA_LOCAL_AUTH: true
-      CICADA_DISABLE_USER_REGISTRATION: true
+      CICADA_DISABLE_USER_REGISTRATION: false
+
+volumes:
+  keys:
+  database:

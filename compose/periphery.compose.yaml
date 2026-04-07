@@ -1,6 +1,6 @@
 services:
-  cperiphery:
-    container_name: cicada-periphery
+
+  cicada-periphery:
     image: ghcr.io/moghtech/cicada-periphery
     cap_add:
       - SYS_ADMIN
@@ -9,21 +9,26 @@ services:
     security_opt:
       - apparmor:unconfined
     volumes:
-      - /path/to/keys:/config/keys
-      - /path/to/cicada/mnt:/cicada:rshared
-      # Mount an additional root CA
-      - /path/to/root_ca.crt:/usr/local/share/ca-certificates/root_ca.crt
+      # Persist communication keys
+      - keys:/config/keys
+      # Mount the fuse directory
+      - /cicada:/cicada:rshared
+      # Optional: Mount an additional root CA for trust
+      # - /path/to/root_ca.crt:/usr/local/share/ca-certificates/root_ca.crt
     environment:
-      CICADA_CORE_ADDRESS: https://my.cicada.url
-      CICADA_FILESYSTEM: "Default|rw=true"
-      CICADA_ALLOW_UID: 1000
+      CICADA_CORE_ADDRESS: https://cicada.example.com
+      CICADA_FILESYSTEMS: "my-filesystem|rw=true"
+      CICADA_ALLOW_UIDS: 1000
       CICADA_ONBOARDING_KEY: my-onboarding-key
       CICADA_DEVICE_NAME: my-device-name
-    # Let containers know when filesystem is ready
+    # Let containers know when filesystem is ready through health check
     healthcheck:
-      test: ["CMD", "mountpoint", "-q", "/cicada/Default"]
+      test: ["CMD", "mountpoint", "-q", "/cicada/my-filesystem"]
       start_period: 10s
       start_interval: 1s
       interval: 30s
       timeout: 1s
       retries: 3
+
+volumes:
+  keys:
