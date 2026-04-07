@@ -30,6 +30,6 @@ impl Resolve<WriteArgs> for DeleteFilesystem {
     self,
     _: &WriteArgs,
   ) -> Result<Self::Response, Self::Error> {
-    query::filesystem::delete_filesystem(self.id.0).await
+    query::filesystem::delete_filesystem(self.id).await
   }
 }

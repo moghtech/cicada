@@ -14,6 +14,7 @@ export type ReadResponses = {
 
   // ==== FILESYSTEM ====
   ListFilesystems: Types.ListFilesystemsResponse;
+  GetFilesystem: Types.GetFilesystemResponse;
 
   // ==== NODE ====
   ListNodes: Types.ListNodesResponse;

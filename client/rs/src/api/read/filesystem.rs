@@ -34,3 +34,34 @@ pub struct ListFilesystems {}
 /// Response for [ListFilesystems].
 #[typeshare]
 pub type ListFilesystemsResponse = Vec<FilesystemRecord>;
+
+//
+
+#[cfg(feature = "utoipa")]
+#[utoipa::path(
+  post,
+  path = "/read/GetFilesystem",
+  description = "Get a specific filesystem by id or name",
+  request_body(content = GetFilesystem),
+  responses(
+    (status = 200, description = "The requested filesystem", body = FilesystemRecord),
+    (status = 500, description = "Request failed", body = mogh_error::Serror)
+  ),
+)]
+pub fn get_filesystem() {}
+
+/// Get a specific filesystem by id or name. Response: [GetFilesystemResponse].
+#[typeshare]
+#[derive(Debug, Clone, Serialize, Deserialize, Resolve)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
+#[empty_traits(CicadaReadRequest)]
+#[response(GetFilesystemResponse)]
+#[error(mogh_error::Error)]
+pub struct GetFilesystem {
+  /// Filesystem id or name
+  pub id: String,
+}
+
+/// Response for [GetFilesystem].
+#[typeshare]
+pub type GetFilesystemResponse = FilesystemRecord;

@@ -1,7 +1,7 @@
 use axum::http::StatusCode;
 use cicada_client::{
   api::write::filesystem::{CreateFilesystem, UpdateFilesystem},
-  entities::filesystem::FilesystemRecord,
+  entities::filesystem::{FilesystemId, FilesystemRecord},
 };
 use mogh_error::AddStatusCode as _;
 use mogh_error::anyhow::Context as _;
@@ -14,6 +14,24 @@ pub async fn list_all_filesystems()
     .await
     .context("Failed to query for Filesystems")
     .map_err(Into::into)
+}
+
+pub async fn get_filesystem(
+  id: String,
+) -> mogh_error::Result<FilesystemRecord> {
+  DB.query(
+    "
+SELECT * FROM Filesystem
+WHERE id = $id OR name = &name",
+  )
+  .bind(("id", FilesystemId(id.clone())))
+  .bind(("name", id))
+  .await
+  .context("Failed to query database")?
+  .take::<Option<FilesystemRecord>>(0)
+  .context("Failed to get query result")?
+  .context("Failed to find Secret with given parameters.")
+  .status_code(StatusCode::NOT_FOUND)
 }
 
 pub async fn create_filesystem(
@@ -43,13 +61,13 @@ pub async fn update_filesystem(
 }
 
 pub async fn delete_filesystem(
-  id: String,
+  id: FilesystemId,
 ) -> mogh_error::Result<FilesystemRecord> {
   DB.query("DELETE Node WHERE filesystem = $filesystem RETURN NONE;")
     .bind(("Filesystem", id.clone()))
     .await
     .context("Failed to delete Filesystem nodes")?;
-  DB.delete(("Filesystem", id))
+  DB.delete(id.as_record_id())
     .await?
     .context("No Filesystem matching given ID")
     .status_code(StatusCode::NOT_FOUND)

@@ -51,6 +51,7 @@ enum ReadRequest {
 
   // ==== FILESYSTEM ====
   ListFilesystems(ListFilesystems),
+  GetFilesystem(GetFilesystem),
 
   // ==== NODE ====
   ListNodes(ListNodes),

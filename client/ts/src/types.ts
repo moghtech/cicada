@@ -278,6 +278,9 @@ export interface EncryptionKeyEntity {
 /** Response for [GetEncryptionKey]. */
 export type GetEncryptionKeyResponse = EncryptionKeyEntity;
 
+/** Response for [GetFilesystem]. */
+export type GetFilesystemResponse = FilesystemRecord;
+
 /** Response for [GetNode]. */
 export type GetNodeResponse = NodeEntity;
 
@@ -676,6 +679,12 @@ export interface GetEncryptionKey {
 	id: EncryptionKeyId;
 }
 
+/** Get a specific filesystem by id or name. Response: [GetFilesystemResponse]. */
+export interface GetFilesystem {
+	/** Filesystem id or name */
+	id: string;
+}
+
 /** Get a node. Response: [NodeEntity]. */
 export interface GetNode {
 	/** The node id */
@@ -1033,6 +1042,7 @@ export type ReadRequest =
 	| { type: "ListOnboardingKeys", params: ListOnboardingKeys }
 	| { type: "GetOnboardingKey", params: GetOnboardingKey }
 	| { type: "ListFilesystems", params: ListFilesystems }
+	| { type: "GetFilesystem", params: GetFilesystem }
 	| { type: "ListNodes", params: ListNodes }
 	| { type: "GetNode", params: GetNode }
 	| { type: "FindNode", params: FindNode }
