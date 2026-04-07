@@ -1,0 +1,16 @@
+services:
+
+  cicada:
+    container_name: cicada
+    image: forge.birdo.me/lab/cicada-core
+    restart: unless-stopped
+    expose:
+      - 9220
+    volumes:
+      - /path/to/cicada/database:/database
+    environment:
+      CICADA_TITLE: Bird Cicada
+      CICADA_HOST: https://cicada.birdo.me
+      CICADA_DATABASE_URI: rocksdb:/database/database.db
+      CICADA_LOCAL_AUTH: true
+      CICADA_DISABLE_USER_REGISTRATION: true
