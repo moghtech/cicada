@@ -31,3 +31,6 @@ cmd = """
 node ./client/ts/generate_types.mjs && \
 cd ./client/ts && yarn build"""
 
+[build-cicada]
+alias = "bc"
+cmd = "deno run --allow-all action/build.ts"
