@@ -100,7 +100,7 @@ pub async fn interpolate_secrets(
           "Using 'error message' missing behavior"
         );
         errors.push(format!(
-          "Missing secret {secret_name} with message: {}",
+          "Missing secret '{secret_name}' with message: {}",
           &missing_behavior[1..]
         ));
         return Default::default();
@@ -112,7 +112,7 @@ pub async fn interpolate_secrets(
           "Using 'none' missing behavior"
         );
         errors.push(format!(
-          "Missing secret {secret_name}"
+          "Missing secret '{secret_name}'"
         ));
         return Default::default();
       }
@@ -123,7 +123,7 @@ pub async fn interpolate_secrets(
         "Got invalid missing behavior"
       );
 
-      errors.push(format!("Missing secret {secret_name} with invalid missing behavior: {missing_behavior}"));
+      errors.push(format!("Missing secret '{secret_name}' with invalid missing behavior: {missing_behavior}"));
       Default::default()
     });
 
