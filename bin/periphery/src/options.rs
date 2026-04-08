@@ -13,6 +13,7 @@ pub struct FilesystemMountOptions {
   pub id: FilesystemId,
   pub mountpoint: PathBuf,
   pub rw: bool,
+  pub interpolated: bool,
   pub uid: Option<u32>,
   pub gid: Option<u32>,
 }
@@ -44,6 +45,7 @@ impl FilesystemMountOptions {
           .default_mount_root
           .join(filesystem_spec),
         rw: false,
+        interpolated: true,
         uid: None,
         gid: None,
       });
@@ -91,13 +93,20 @@ impl FilesystemMountOptions {
       // gid inherits uid if not defined
       .or(uid);
 
+    let rw = *kv_map.get("rw").unwrap_or(&"false") == "true";
+
     Ok(FilesystemMountOptions {
       name: filesystem.name.clone(),
       id: filesystem.id.clone(),
       mountpoint: periphery_config()
         .default_mount_root
         .join(mountpoint),
-      rw: *kv_map.get("rw").unwrap_or(&"false") == "true",
+      interpolated: kv_map
+        .get("interpolated")
+        .map(|v| v == &"true")
+        // Otherwise the default is opposite of rw
+        .unwrap_or(!rw),
+      rw,
       uid,
       gid,
     })

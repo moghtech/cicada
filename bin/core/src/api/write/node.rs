@@ -46,7 +46,7 @@ impl Resolve<WriteArgs> for CreateNode {
     } else {
       node
     };
-    decrypt_node(node).await
+    decrypt_node(node, self.interpolated).await
   }
 }
 
@@ -57,8 +57,9 @@ impl Resolve<WriteArgs> for UpdateNode {
     self,
     _: &WriteArgs,
   ) -> Result<Self::Response, Self::Error> {
+    let interpolated = self.interpolated;
     let node = query::node::update_node(self).await?;
-    decrypt_node(node).await
+    decrypt_node(node, interpolated).await
   }
 }
 
@@ -92,7 +93,7 @@ impl Resolve<WriteArgs> for UpdateNodeData {
     .await?;
     let node =
       query::node::update_node_data(self.id, data.into()).await?;
-    decrypt_node(node).await
+    decrypt_node(node, self.interpolated).await
   }
 }
 
@@ -126,7 +127,7 @@ impl Resolve<WriteArgs> for UpdateNodeEncryptionKey {
         .await?;
     let node =
       query::node::update_node_data(self.id, data.into()).await?;
-    decrypt_node(node).await
+    decrypt_node(node, self.interpolated).await
   }
 }
 
@@ -158,7 +159,7 @@ impl Resolve<WriteArgs> for RotateNodeEnvelopeKey {
     let data = rotate_envelope_key(data, &node.id.0).await?;
     let node =
       query::node::update_node_data(self.id, data.into()).await?;
-    decrypt_node(node).await
+    decrypt_node(node, self.interpolated).await
   }
 }
 
@@ -171,7 +172,7 @@ impl Resolve<WriteArgs> for DeleteNode {
   ) -> Result<Self::Response, Self::Error> {
     let deleted =
       query::node::delete_node(self.id.0, self.move_children).await?;
-    Ok(decrypt_nodes(deleted).await)
+    Ok(decrypt_nodes(deleted, self.interpolated).await)
   }
 }
 
@@ -183,6 +184,6 @@ impl Resolve<WriteArgs> for BatchDeleteNodes {
     _: &WriteArgs,
   ) -> Result<Self::Response, Self::Error> {
     let deleted = query::node::batch_delete_nodes(self.ids).await?;
-    Ok(decrypt_nodes(deleted).await)
+    Ok(decrypt_nodes(deleted, self.interpolated).await)
   }
 }

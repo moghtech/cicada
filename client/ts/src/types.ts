@@ -413,6 +413,8 @@ export interface BatchDeleteDevices {
 export interface BatchDeleteNodes {
 	/** The onboarding_key ID */
 	ids: NodeId[];
+	/** Whether to interpolate secrets into returned file contents */
+	interpolated?: boolean;
 }
 
 /** Batch delete onboarding keys. Response: [BatchDeleteOnboardingKeysResponse]. */
@@ -499,6 +501,8 @@ export interface CreateNode {
 	 * followed by the current global default.
 	 */
 	encryption_key?: EncryptionKeyId;
+	/** Whether to interpolate secrets into returned file contents */
+	interpolated?: boolean;
 }
 
 /** Create an onboarding key. Response: [CreateOnboardingKeyResponse]. */
@@ -574,6 +578,8 @@ export interface DeleteNode {
 	 * Otherwise, all children will be recursively deleted.
 	 */
 	move_children?: U64;
+	/** Whether to interpolate secrets into returned file contents */
+	interpolated?: boolean;
 }
 
 /** Delete a onboarding_key. Response: [DeleteOnboardingKeyResponse]. */
@@ -665,6 +671,8 @@ export interface FindNode {
 	parent?: U64;
 	/** file name */
 	name?: string;
+	/** Whether to interpolate secrets into file contents */
+	interpolated?: boolean;
 }
 
 /** Find a secret by name. Response: [SecretEntity]. */
@@ -695,6 +703,8 @@ export interface GetFilesystem {
 export interface GetNode {
 	/** The node id */
 	id: NodeId;
+	/** Whether to interpolate secrets into file contents */
+	interpolated?: boolean;
 }
 
 /** Get an onboarding key by id. Response: [OnboardingKeyRecord]. */
@@ -823,6 +833,8 @@ export interface NodeRecord {
 export interface RotateNodeEnvelopeKey {
 	/** The node id */
 	id: NodeId;
+	/** Whether to interpolate secrets into returned file contents */
+	interpolated?: boolean;
 }
 
 /** Rotate a secret's envelope encryption key. Response: [RotateSecretEnvelopeKeyResponse]. */
@@ -914,6 +926,8 @@ export interface UpdateNode {
 	 * - File: 0o644
 	 */
 	perm?: number;
+	/** Whether to interpolate secrets into returned file contents */
+	interpolated?: boolean;
 }
 
 /** Update a filesystem node's encrypted data. Response: [UpdateNodeDataResponse]. */
@@ -924,6 +938,8 @@ export interface UpdateNodeData {
 	data: string;
 	/** Optionally update the encryption key used as master in the envelope encryption. */
 	encryption_key?: EncryptionKeyId;
+	/** Whether to interpolate secrets into returned file contents */
+	interpolated?: boolean;
 }
 
 /** Update a filesystem node's encryption key. Response: [UpdateNodeEncryptionKeyResponse]. */
@@ -932,6 +948,8 @@ export interface UpdateNodeEncryptionKey {
 	id: NodeId;
 	/** Update the encryption key used as master in the envelope encryption. */
 	encryption_key: EncryptionKeyId;
+	/** Whether to interpolate secrets into returned file contents */
+	interpolated?: boolean;
 }
 
 /** Update an onboarding key. Response: [UpdateOnboardingKeyResponse]. */

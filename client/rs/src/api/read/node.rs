@@ -71,6 +71,9 @@ pub fn get_node() {}
 pub struct GetNode {
   /// The node id
   pub id: NodeId,
+  /// Whether to interpolate secrets into file contents
+  #[serde(default)]
+  pub interpolated: bool,
 }
 
 /// Response for [GetNode].
@@ -116,18 +119,23 @@ pub struct FindNode {
   pub parent: Option<U64>,
   /// file name
   pub name: Option<String>,
+  /// Whether to interpolate secrets into file contents
+  #[serde(default)]
+  pub interpolated: bool,
 }
 
 impl FindNode {
   pub fn with_inode(
     filesystem: FilesystemId,
     inode: u64,
+    interpolated: bool,
   ) -> FindNode {
     FindNode {
       filesystem,
       inode: inode.into(),
       parent: None,
       name: None,
+      interpolated,
     }
   }
 
@@ -135,12 +143,14 @@ impl FindNode {
     filesystem: FilesystemId,
     parent: u64,
     name: impl Into<String>,
+    interpolated: bool,
   ) -> FindNode {
     FindNode {
       filesystem,
       parent: parent.into(),
       name: name.into().into(),
       inode: None,
+      interpolated,
     }
   }
 }

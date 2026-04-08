@@ -23,6 +23,8 @@ use crate::{cicada, options::FilesystemMountOptions};
 pub struct CicadaFs {
   filesystem: FilesystemId,
   root: FileAttr,
+  /// Whether working with filesystem pre or post secret interpolation.
+  interpolated: bool,
   /// When non-empty, only these UIDs (plus the mounting user) may access files.
   allowed_uids: HashSet<u32>,
 }
@@ -37,6 +39,7 @@ impl CicadaFs {
       id,
       mountpoint,
       rw,
+      interpolated,
       uid,
       gid,
     }: FilesystemMountOptions,
@@ -76,6 +79,7 @@ impl CicadaFs {
     let fs = CicadaFs {
       filesystem: id,
       root,
+      interpolated,
       allowed_uids: allow_uids
         .into_iter()
         .cloned()
@@ -221,6 +225,7 @@ impl fuser::Filesystem for CicadaFs {
       self.filesystem.clone(),
       parent,
       name,
+      true,
     )) {
       Ok(node) => self.node_to_file_attr(node),
       Err(e) => {
@@ -251,9 +256,11 @@ impl fuser::Filesystem for CicadaFs {
       reply.attr(&CicadaFs::TTL, &self.root);
       return;
     }
-    let attr = match cicada()
-      .read(FindNode::with_inode(self.filesystem.clone(), ino))
-    {
+    let attr = match cicada().read(FindNode::with_inode(
+      self.filesystem.clone(),
+      ino,
+      true,
+    )) {
       Ok(node) => self.node_to_file_attr(node),
       Err(e) => {
         debug!(
@@ -287,9 +294,11 @@ impl fuser::Filesystem for CicadaFs {
       reply.error(Errno::ENOENT);
       return;
     }
-    let node = match cicada()
-      .read(FindNode::with_inode(self.filesystem.clone(), ino))
-    {
+    let node = match cicada().read(FindNode::with_inode(
+      self.filesystem.clone(),
+      ino,
+      true,
+    )) {
       Ok(node) => node,
       Err(e) => {
         debug!(
@@ -328,9 +337,11 @@ impl fuser::Filesystem for CicadaFs {
       return;
     }
     // Verify the node exists
-    match cicada()
-      .read(FindNode::with_inode(self.filesystem.clone(), ino))
-    {
+    match cicada().read(FindNode::with_inode(
+      self.filesystem.clone(),
+      ino,
+      true,
+    )) {
       Ok(_) => reply.opened(FileHandle(0), FopenFlags::empty()),
       Err(e) => {
         debug!(
@@ -374,6 +385,7 @@ impl fuser::Filesystem for CicadaFs {
       kind: Some(NodeKind::File),
       data: Some(String::new()),
       encryption_key: None,
+      interpolated: self.interpolated,
     }) {
       Ok(node) => {
         let attr = self.node_to_file_attr(node);
@@ -422,6 +434,7 @@ impl fuser::Filesystem for CicadaFs {
       kind: Some(NodeKind::Folder),
       data: None,
       encryption_key: None,
+      interpolated: self.interpolated,
     }) {
       Ok(node) => {
         let attr = self.node_to_file_attr(node);
@@ -453,9 +466,11 @@ impl fuser::Filesystem for CicadaFs {
       reply.error(Errno::EACCES);
       return;
     }
-    let node = match cicada()
-      .read(FindNode::with_inode(self.filesystem.clone(), ino))
-    {
+    let node = match cicada().read(FindNode::with_inode(
+      self.filesystem.clone(),
+      ino,
+      true,
+    )) {
       Ok(node) => node,
       Err(e) => {
         debug!(
@@ -496,6 +511,7 @@ impl fuser::Filesystem for CicadaFs {
       id: node.id,
       data: merged,
       encryption_key: None,
+      interpolated: self.interpolated,
     }) {
       Ok(_) => reply.written(new_data.len() as u32),
       Err(e) => {
@@ -535,9 +551,11 @@ impl fuser::Filesystem for CicadaFs {
       return;
     }
 
-    let node = match cicada()
-      .read(FindNode::with_inode(self.filesystem.clone(), ino))
-    {
+    let node = match cicada().read(FindNode::with_inode(
+      self.filesystem.clone(),
+      ino,
+      true,
+    )) {
       Ok(node) => node,
       Err(e) => {
         debug!(
@@ -556,6 +574,7 @@ impl fuser::Filesystem for CicadaFs {
         parent: None,
         name: None,
         perm,
+        interpolated: self.interpolated,
       }) {
         error!(
           "SETATTR FAILED: Could not update permissions | inode: {ino} | {e:#}"
@@ -583,6 +602,7 @@ impl fuser::Filesystem for CicadaFs {
         id: node.id.clone(),
         data: truncated,
         encryption_key: None,
+        interpolated: self.interpolated,
       }) {
         error!(
           "SETATTR FAILED: Could not truncate node | inode: {ino} | {e:#}"
@@ -593,9 +613,11 @@ impl fuser::Filesystem for CicadaFs {
     }
 
     // Re-read updated node for the response
-    match cicada()
-      .read(FindNode::with_inode(self.filesystem.clone(), ino))
-    {
+    match cicada().read(FindNode::with_inode(
+      self.filesystem.clone(),
+      ino,
+      true,
+    )) {
       Ok(node) => {
         let attr = self.node_to_file_attr(node);
         reply.attr(&CicadaFs::TTL, &attr);
@@ -634,6 +656,7 @@ impl fuser::Filesystem for CicadaFs {
       self.filesystem.clone(),
       parent,
       name,
+      true,
     )) {
       Ok(node) => node,
       Err(e) => {
@@ -647,6 +670,7 @@ impl fuser::Filesystem for CicadaFs {
     match cicada().write(DeleteNode {
       id: node.id,
       move_children: None,
+      interpolated: self.interpolated,
     }) {
       Ok(_) => reply.ok(),
       Err(e) => {
@@ -679,6 +703,7 @@ impl fuser::Filesystem for CicadaFs {
       self.filesystem.clone(),
       parent,
       name,
+      true,
     )) {
       Ok(node) => node,
       Err(e) => {
@@ -692,6 +717,7 @@ impl fuser::Filesystem for CicadaFs {
     match cicada().write(DeleteNode {
       id: node.id,
       move_children: None,
+      interpolated: self.interpolated,
     }) {
       Ok(_) => reply.ok(),
       Err(e) => {
@@ -734,6 +760,7 @@ impl fuser::Filesystem for CicadaFs {
       self.filesystem.clone(),
       parent,
       name,
+      true,
     )) {
       Ok(node) => node,
       Err(e) => {
@@ -759,6 +786,7 @@ impl fuser::Filesystem for CicadaFs {
       parent: new_parent,
       name: new_name,
       perm: None,
+      interpolated: self.interpolated,
     }) {
       Ok(_) => reply.ok(),
       Err(e) => {

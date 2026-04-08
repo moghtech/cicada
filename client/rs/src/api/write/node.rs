@@ -67,6 +67,9 @@ pub struct CreateNode {
   /// Otherwise uses the current filesystem default,
   /// followed by the current global default.
   pub encryption_key: Option<EncryptionKeyId>,
+  /// Whether to interpolate secrets into returned file contents
+  #[serde(default)]
+  pub interpolated: bool,
 }
 
 /// Response for [CreateNode].
@@ -114,6 +117,9 @@ pub struct UpdateNode {
   /// - File: 0o644
   #[serde(skip_serializing_if = "Option::is_none")]
   pub perm: Option<u16>,
+  /// Whether to interpolate secrets into returned file contents
+  #[serde(default)]
+  pub interpolated: bool,
 }
 
 /// Response for [UpdateNode].
@@ -152,6 +158,9 @@ pub struct UpdateNodeData {
   pub data: String,
   /// Optionally update the encryption key used as master in the envelope encryption.
   pub encryption_key: Option<EncryptionKeyId>,
+  /// Whether to interpolate secrets into returned file contents
+  #[serde(default)]
+  pub interpolated: bool,
 }
 
 /// Response for [UpdateNodeData].
@@ -188,6 +197,9 @@ pub struct UpdateNodeEncryptionKey {
   pub id: NodeId,
   /// Update the encryption key used as master in the envelope encryption.
   pub encryption_key: EncryptionKeyId,
+  /// Whether to interpolate secrets into returned file contents
+  #[serde(default)]
+  pub interpolated: bool,
 }
 
 /// Response for [UpdateNodeEncryptionKey].
@@ -222,6 +234,9 @@ pub fn rotate_node_envelope_key() {}
 pub struct RotateNodeEnvelopeKey {
   /// The node id
   pub id: NodeId,
+  /// Whether to interpolate secrets into returned file contents
+  #[serde(default)]
+  pub interpolated: bool,
 }
 
 /// Response for [RotateNodeEnvelopeKey].
@@ -263,6 +278,9 @@ pub struct DeleteNode {
   /// Move the children of this node to another parent.
   /// Otherwise, all children will be recursively deleted.
   pub move_children: Option<U64>,
+  /// Whether to interpolate secrets into returned file contents
+  #[serde(default)]
+  pub interpolated: bool,
 }
 
 /// Response for [DeleteNode].
@@ -299,6 +317,9 @@ pub fn batch_delete_nodes() {}
 pub struct BatchDeleteNodes {
   /// The onboarding_key ID
   pub ids: Vec<NodeId>,
+  /// Whether to interpolate secrets into returned file contents
+  #[serde(default)]
+  pub interpolated: bool,
 }
 
 /// Response for [BatchDeleteNodes].

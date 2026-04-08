@@ -26,6 +26,23 @@ ORDER BY kind DESC, name COLLATE ASC;",
   .map_err(Into::into)
 }
 
+pub async fn list_secrets_matching(
+  names: Vec<String>,
+) -> mogh_error::Result<Vec<SecretRecord>> {
+  DB.query(
+    "
+SELECT * FROM Secret
+WHERE name IN $names
+ORDER BY kind DESC, name COLLATE ASC;",
+  )
+  .bind(("names", names))
+  .await
+  .context("Failed to query database for secrets")?
+  .take(0)
+  .context("Failed to get secret query result")
+  .map_err(Into::into)
+}
+
 pub async fn get_secret(
   secret_id: &str,
 ) -> mogh_error::Result<SecretRecord> {

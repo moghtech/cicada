@@ -20,7 +20,7 @@ impl Resolve<ReadArgs> for GetNode {
     _: &ReadArgs,
   ) -> Result<Self::Response, Self::Error> {
     let node = query::node::get_node(&self.id.0).await?;
-    decrypt_node(node).await
+    decrypt_node(node, self.interpolated).await
   }
 }
 
@@ -29,7 +29,8 @@ impl Resolve<ReadArgs> for FindNode {
     self,
     _: &ReadArgs,
   ) -> Result<Self::Response, Self::Error> {
+    let interpolated = self.interpolated;
     let node = query::node::find_node(self).await?;
-    decrypt_node(node).await
+    decrypt_node(node, interpolated).await
   }
 }

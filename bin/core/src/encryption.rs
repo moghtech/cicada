@@ -185,11 +185,18 @@ pub async fn rotate_envelope_key<A: AssociatedData>(
 
 pub async fn decrypt_node(
   node: NodeRecord,
+  interpolated: bool,
 ) -> mogh_error::Result<NodeEntity> {
   let (data, missing_key) = if let Some(data) = node.data {
     let key = data.encryption_key.clone();
     if let Some(data) = decrypt_data(data, &node.id.0).await? {
-      (Some(data), None)
+      if interpolated {
+        let data =
+          crate::interpolate::interpolate_secrets(data).await?;
+        (Some(data), None)
+      } else {
+        (Some(data), None)
+      }
     } else {
       (None, Some(key))
     }
@@ -213,11 +220,12 @@ pub async fn decrypt_node(
 
 pub async fn decrypt_nodes(
   nodes: Vec<NodeRecord>,
+  interpolated: bool,
 ) -> Vec<NodeEntity> {
   // TODO: improve error handling
   nodes
     .into_iter()
-    .map(decrypt_node)
+    .map(|node| decrypt_node(node, interpolated))
     .collect::<FuturesOrdered<_>>()
     .collect::<Vec<_>>()
     .await

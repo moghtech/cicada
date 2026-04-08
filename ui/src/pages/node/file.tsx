@@ -10,14 +10,16 @@ import { notifications } from "@mantine/notifications";
 import { NodePageDescription, NodePageTitle } from "./title";
 import InitializeEncryptionKey from "@/components/initialize-encryption-key";
 import { languageFromPath, MonacoEditor, Page } from "mogh_ui";
-import { useEffect, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 
 const FilePage = ({
   filesystem,
   node,
+  toggleInterpolation,
 }: {
   filesystem: Types.FilesystemRecord | undefined;
   node: Types.NodeEntity | undefined;
+  toggleInterpolation: ReactNode;
 }) => {
   const inv = useInvalidate();
   const nav = useNavigate();
@@ -94,7 +96,6 @@ const FilePage = ({
             disabled={false}
           />
           <TextInput
-            label="Permissions"
             placeholder="0o644"
             value={perm}
             onChange={(e) => setPerm(e.target.value)}
@@ -104,6 +105,7 @@ const FilePage = ({
               }
             }}
           />
+          {toggleInterpolation}
         </>
       }
     >
