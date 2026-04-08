@@ -383,6 +383,7 @@ impl fuser::Filesystem for CicadaFs {
       name: name.to_string(),
       perm: Some(perm),
       kind: Some(NodeKind::File),
+      interpolation: None,
       data: Some(String::new()),
       encryption_key: None,
       interpolated: self.interpolated,
@@ -432,6 +433,7 @@ impl fuser::Filesystem for CicadaFs {
       name: name.to_string(),
       perm: Some(perm),
       kind: Some(NodeKind::Folder),
+      interpolation: None,
       data: None,
       encryption_key: None,
       interpolated: self.interpolated,
@@ -574,6 +576,7 @@ impl fuser::Filesystem for CicadaFs {
         parent: None,
         name: None,
         perm,
+        interpolation: None,
         interpolated: None,
       }) {
         error!(
@@ -786,6 +789,7 @@ impl fuser::Filesystem for CicadaFs {
       parent: new_parent,
       name: new_name,
       perm: None,
+      interpolation: None,
       interpolated: None,
     }) {
       Ok(_) => reply.ok(),

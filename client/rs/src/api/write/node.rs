@@ -6,7 +6,7 @@ use typeshare::typeshare;
 use crate::{
   api::write::CicadaWriteRequest,
   entities::{
-    U64,
+    InterpolationMode, U64,
     encryption_key::EncryptionKeyId,
     filesystem::FilesystemId,
     node::{NodeEntity, NodeId, NodeKind},
@@ -60,6 +60,13 @@ pub struct CreateNode {
   /// Default: **Folder**
   #[cfg_attr(feature = "utoipa", schema(default = "Folder"))]
   pub kind: Option<NodeKind>,
+  /// The interpolation mode (only for files)
+  /// - `"Inherit"` (inherit from filesystem option) (default)
+  /// - `"Brackets"` (`[[SECRET]]`)
+  /// - `"CurlyBrackets"` (`{{SECRET}}`)
+  /// - `"EnvVar"` (`{{SECRET}}`)
+  /// - `"Disabled"` (Interpolation disabled for this file)
+  pub interpolation: Option<InterpolationMode>,
   /// Data associated with the node.
   /// For files, this contains the file contents.
   pub data: Option<String>,
@@ -117,6 +124,14 @@ pub struct UpdateNode {
   /// - File: 0o644
   #[serde(skip_serializing_if = "Option::is_none")]
   pub perm: Option<u16>,
+  /// The interpolation mode (only for files)
+  /// - `"Inherit"` (inherit from filesystem option) (default)
+  /// - `"Brackets"` (`[[SECRET]]`)
+  /// - `"CurlyBrackets"` (`{{SECRET}}`)
+  /// - `"EnvVar"` (`{{SECRET}}`)
+  /// - `"Disabled"` (Interpolation disabled for this file)
+  #[serde(skip_serializing_if = "Option::is_none")]
+  pub interpolation: Option<InterpolationMode>,
   /// Whether to interpolate secrets into returned file contents
   #[serde(skip_serializing_if = "Option::is_none")]
   pub interpolated: Option<bool>,

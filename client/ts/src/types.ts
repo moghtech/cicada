@@ -42,6 +42,35 @@ export enum NodeKind {
 	File = "File",
 }
 
+/** Set the interpolation mode for files */
+export enum InterpolationMode {
+	/**
+	 * - Example: `[[SECRET_NAME]]`
+	 * - Escaped: `[[[SECRET_NAME]]]` (tripled)
+	 */
+	Brackets = "Brackets",
+	/**
+	 * - Example: `{{SECRET_NAME}}`
+	 * - Escaped: `{{{SECRET_NAME}}}` (tripled)
+	 */
+	CurlyBrackets = "CurlyBrackets",
+	/**
+	 * - Example: `${SECRET_NAME}`
+	 * - Escaped: `$${SECRET_NAME}`
+	 * 
+	 * Note. Does NOT support $SECRET_NAME
+	 */
+	EnvVar = "EnvVar",
+	/**
+	 * Inherit the mode from the filesystem. This is the default for files.
+	 * 
+	 * Note. This is only valid mode for files, not filesystems themselves.
+	 */
+	Inherit = "Inherit",
+	/** Interpolation is disabled. */
+	Disabled = "Disabled",
+}
+
 export type EncryptionKeyId = string;
 
 /** Nodes over the API, with unencrypted data */
@@ -70,6 +99,8 @@ export interface NodeEntity {
 	 * - File,
 	 */
 	kind?: NodeKind;
+	/** The interpolation mode */
+	interpolation: InterpolationMode;
 	/**
 	 * Data associated with the node.
 	 * For files, this contains the file contents.
@@ -209,6 +240,8 @@ export interface FilesystemRecord {
 	name: string;
 	/** The filesystem default encryption key. */
 	encryption_key?: EncryptionKeyId;
+	/** The default interpolation mode for the filesystem */
+	interpolation?: InterpolationMode;
 	/** Created at as ISO8601 timestamp. */
 	created_at: Iso8601Timestamp;
 	/** Updated at as ISO8601 timestamp. */
@@ -335,6 +368,8 @@ export interface NodeListItem {
 	 * - File,
 	 */
 	kind: NodeKind;
+	/** The interpolation mode */
+	interpolation: InterpolationMode;
 	/** Created at as ISO8601 timestamp. */
 	created_at: Iso8601Timestamp;
 	/** Updated at as ISO8601 timestamp. */
@@ -457,6 +492,14 @@ export interface CreateFilesystem {
 	/** The name of the filesystem */
 	name: string;
 	/**
+	 * The default interpolation mode
+	 * - `"Brackets"` (`[[SECRET]]`)
+	 * - `"CurlyBrackets"` (`{{SECRET}}`)
+	 * - `"EnvVar"` (`{{SECRET}}`)
+	 * - `"Disabled"`
+	 */
+	interpolation?: InterpolationMode;
+	/**
 	 * Choose a specific encryption key.
 	 * Otherwise uses the current global default.
 	 */
@@ -490,6 +533,15 @@ export interface CreateNode {
 	 * Default: **Folder**
 	 */
 	kind?: NodeKind;
+	/**
+	 * The interpolation mode (only for files)
+	 * - `"Inherit"` (inherit from filesystem option) (default)
+	 * - `"Brackets"` (`[[SECRET]]`)
+	 * - `"CurlyBrackets"` (`{{SECRET}}`)
+	 * - `"EnvVar"` (`{{SECRET}}`)
+	 * - `"Disabled"` (Interpolation disabled for this file)
+	 */
+	interpolation?: InterpolationMode;
 	/**
 	 * Data associated with the node.
 	 * For files, this contains the file contents.
@@ -820,6 +872,8 @@ export interface NodeRecord {
 	 * - File,
 	 */
 	kind?: NodeKind;
+	/** The interpolation mode */
+	interpolation: InterpolationMode;
 	/**
 	 * Data associated with the node.
 	 * For files, this contains the file contents.
@@ -908,6 +962,14 @@ export interface UpdateFilesystem {
 	/** The name of the filesystem */
 	name?: string;
 	/**
+	 * The default interpolation mode
+	 * - `"Brackets"` (`[[SECRET]]`)
+	 * - `"CurlyBrackets"` (`{{SECRET}}`)
+	 * - `"EnvVar"` (`{{SECRET}}`)
+	 * - `"Disabled"`
+	 */
+	interpolation?: InterpolationMode;
+	/**
 	 * Update default encryption key for filesystem.
 	 * Note. This does not affect already created nodes.
 	 */
@@ -930,6 +992,15 @@ export interface UpdateNode {
 	 * - File: 0o644
 	 */
 	perm?: number;
+	/**
+	 * The interpolation mode (only for files)
+	 * - `"Inherit"` (inherit from filesystem option) (default)
+	 * - `"Brackets"` (`[[SECRET]]`)
+	 * - `"CurlyBrackets"` (`{{SECRET}}`)
+	 * - `"EnvVar"` (`{{SECRET}}`)
+	 * - `"Disabled"` (Interpolation disabled for this file)
+	 */
+	interpolation?: InterpolationMode;
 	/** Whether to interpolate secrets into returned file contents */
 	interpolated?: boolean;
 }
@@ -1058,6 +1129,10 @@ export interface UserRecord {
 	updated_at: Iso8601Timestamp;
 }
 
+/**
+ * The types of clients which can
+ * authenticate with the Cicada API.
+ */
 export enum ClientType {
 	User = "User",
 	Device = "Device",

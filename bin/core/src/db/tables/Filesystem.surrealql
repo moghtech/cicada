@@ -14,6 +14,12 @@ DEFINE FIELD OVERWRITE encryption_key
   ON TABLE Filesystem
   TYPE option<record<EncryptionKey>>;
 
+-- interpolation
+DEFINE FIELD OVERWRITE interpolation
+  ON TABLE Filesystem
+  TYPE "Brackets" | "CurlyBrackets" | "EnvVar" | "Disabled"
+  DEFAULT "Brackets";
+
 -- Standard timestamp fields 'created_at', 'updated_at'
 fn::define_timestamp_fields("Filesystem");
 

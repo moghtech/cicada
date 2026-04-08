@@ -24,6 +24,7 @@ impl Resolve<WriteArgs> for CreateNode {
       name: self.name,
       perm: self.perm,
       kind: self.kind,
+      interpolation: self.interpolation,
     })
     .await?;
     let node = if let Some(data) = self.data {
@@ -123,6 +124,7 @@ impl Resolve<WriteArgs> for UpdateNodeEncryptionKey {
         name: node.name,
         perm: node.perm,
         kind: node.kind,
+        interpolation: node.interpolation,
         data: None,
         missing_key: None,
         created_at: node.created_at,
@@ -157,6 +159,7 @@ impl Resolve<WriteArgs> for RotateNodeEnvelopeKey {
         name: node.name,
         perm: node.perm,
         kind: node.kind,
+        interpolation: node.interpolation,
         data: None,
         missing_key: None,
         created_at: node.created_at,

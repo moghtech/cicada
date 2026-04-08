@@ -17,15 +17,15 @@ pub async fn list_all_filesystems()
 }
 
 pub async fn get_filesystem(
-  id: String,
+  id_or_name: String,
 ) -> mogh_error::Result<FilesystemRecord> {
   DB.query(
     "
 SELECT * FROM Filesystem
 WHERE id = $id OR name = $name",
   )
-  .bind(("id", FilesystemId(id.clone())))
-  .bind(("name", id))
+  .bind(("id", FilesystemId(id_or_name.clone())))
+  .bind(("name", id_or_name))
   .await
   .context("Failed to query database")?
   .take::<Option<FilesystemRecord>>(0)

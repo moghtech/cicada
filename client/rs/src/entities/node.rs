@@ -3,9 +3,13 @@ use surrealdb_types::SurrealValue;
 use typeshare::typeshare;
 
 use crate::entities::{
-  EncryptedData, Iso8601Timestamp, U64,
+  EncryptedData, InterpolationMode, Iso8601Timestamp, U64,
   encryption_key::EncryptionKeyId, filesystem::FilesystemId,
 };
+
+fn default_interpolation() -> InterpolationMode {
+  InterpolationMode::Inherit
+}
 
 #[typeshare]
 #[derive(Debug, Clone, Serialize, Deserialize, SurrealValue)]
@@ -32,6 +36,9 @@ pub struct NodeListItem {
   /// - Folder,
   /// - File,
   pub kind: NodeKind,
+  /// The interpolation mode
+  #[serde(default = "default_interpolation")]
+  pub interpolation: InterpolationMode,
   /// Created at as ISO8601 timestamp.
   #[cfg_attr(feature = "utoipa", schema(value_type = String))]
   pub created_at: Iso8601Timestamp,
@@ -67,6 +74,9 @@ pub struct NodeEntity {
   /// - File,
   #[serde(default)]
   pub kind: NodeKind,
+  /// The interpolation mode
+  #[serde(default = "default_interpolation")]
+  pub interpolation: InterpolationMode,
   /// Data associated with the node.
   /// For files, this contains the file contents.
   #[serde(skip_serializing_if = "Option::is_none")]
@@ -111,6 +121,9 @@ pub struct NodeRecord {
   /// - File,
   #[serde(default)]
   pub kind: NodeKind,
+  /// The interpolation mode
+  #[serde(default = "default_interpolation")]
+  pub interpolation: InterpolationMode,
   /// Data associated with the node.
   /// For files, this contains the file contents.
   #[serde(skip_serializing_if = "Option::is_none")]

@@ -191,11 +191,18 @@ pub async fn decrypt_node(
     let key = data.encryption_key.clone();
     if let Some(data) = decrypt_data(data, &node.id.0).await? {
       if interpolated {
-        let data = crate::interpolate::interpolate_secrets(
-          data,
-          InterpolationMode::EnvVar,
-        )
-        .await?;
+        let mode =
+          if let InterpolationMode::Inherit = node.interpolation {
+            let filesystem = query::filesystem::get_filesystem(
+              node.filesystem.0.clone(),
+            )
+            .await?;
+            filesystem.interpolation
+          } else {
+            node.interpolation
+          };
+        let data =
+          crate::interpolate::interpolate_secrets(data, mode).await?;
         (Some(data), None)
       } else {
         (Some(data), None)
@@ -214,6 +221,7 @@ pub async fn decrypt_node(
     name: node.name,
     perm: node.perm,
     kind: node.kind,
+    interpolation: node.interpolation,
     created_at: node.created_at,
     updated_at: node.updated_at,
     data,

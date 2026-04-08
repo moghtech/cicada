@@ -10,6 +10,7 @@ import { Types } from "cicada_client";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { NodePageDescription, NodePageTitle } from "./title";
+import InterpolationModeSelector from "@/components/interpolation-mode-selector";
 
 const FolderPage = ({
   filesystem,
@@ -25,10 +26,18 @@ const FolderPage = ({
     {
       onSuccess: () => {
         inv(["ListFilesystems"], ["ListNodes"]);
+        notifications.show({ message: "Deleted filesystem.", color: "green" });
         nav("/");
       },
     },
   );
+  const { mutate: updateFilesystem } = useWrite("UpdateFilesystem", {
+    onSuccess: () => {
+      inv(["ListFilesystems"]);
+      notifications.show({ message: "Updated filesystem.", color: "green" });
+    },
+  });
+
   const children =
     useRead("ListNodes", {
       filesystem: filesystem?.id,
@@ -75,13 +84,22 @@ const FolderPage = ({
             />
           ))}
           {!selectedIds.length && node === undefined && filesystem && (
-            <ConfirmDelete
-              entityType="Filesystem"
-              name={filesystem.name}
-              onConfirm={() => deleteFs({ id: filesystem.id })}
-              loading={deleteFsPending}
-              disabled={false}
-            />
+            <>
+              <ConfirmDelete
+                entityType="Filesystem"
+                name={filesystem.name}
+                onConfirm={() => deleteFs({ id: filesystem.id })}
+                loading={deleteFsPending}
+                disabled={false}
+              />
+              <InterpolationModeSelector
+                value={filesystem.interpolation}
+                onChange={(interpolation) =>
+                  updateFilesystem({ id: filesystem.id, interpolation })
+                }
+                excludeInherit
+              />
+            </>
           )}
           {!selectedIds.length && node && (
             <ConfirmDelete

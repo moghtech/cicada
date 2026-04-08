@@ -107,7 +107,10 @@ pub enum ClientType {
   Display,
   EnumString,
   AsRefStr,
+  SurrealValue,
 )]
+#[surreal(crate = "surrealdb_types")]
+#[surreal(untagged)]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 pub enum InterpolationMode {
   #[default]
@@ -122,6 +125,10 @@ pub enum InterpolationMode {
   ///
   /// Note. Does NOT support $SECRET_NAME
   EnvVar,
+  /// Inherit the mode from the filesystem. This is the default for files.
+  ///
+  /// Note. This is only valid mode for files, not filesystems themselves.
+  Inherit,
   /// Interpolation is disabled.
   Disabled,
 }

@@ -39,6 +39,12 @@ DEFINE FIELD OVERWRITE kind
   DEFAULT "Folder"
   READONLY;
 
+-- interpolation
+DEFINE FIELD OVERWRITE interpolation
+  ON TABLE Node
+  TYPE "Inherit" | "Brackets" | "CurlyBrackets" | "EnvVar" | "Disabled"
+  DEFAULT "Inherit";
+
 -- data
 fn::define_encrypted_data_field("Node", "data");
 

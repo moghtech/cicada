@@ -2,7 +2,7 @@ use axum::http::StatusCode;
 use cicada_client::{
   api::{read::node::FindNode, write::node::UpdateNode},
   entities::{
-    EncryptedData,
+    EncryptedData, InterpolationMode,
     filesystem::FilesystemId,
     node::{NodeId, NodeKind, NodeListItem, NodeRecord},
   },
@@ -85,12 +85,8 @@ pub struct CreateNodeQuery {
   pub parent: Option<u64>,
   pub name: String,
   pub kind: Option<NodeKind>,
-  /// The file permission integer.
-  /// Usually represented as octet like 0o644.
-  /// If not provided, will use defaults:
-  /// - Folder: 0o755
-  /// - File: 0o644
   pub perm: Option<u16>,
+  pub interpolation: Option<InterpolationMode>,
 }
 
 pub async fn create_node(

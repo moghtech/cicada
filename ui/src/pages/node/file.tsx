@@ -11,6 +11,7 @@ import { NodePageDescription, NodePageTitle } from "./title";
 import InitializeEncryptionKey from "@/components/initialize-encryption-key";
 import { languageFromPath, MonacoEditor, Page } from "mogh_ui";
 import { ReactNode, useEffect, useState } from "react";
+import InterpolationModeSelector from "@/components/interpolation-mode-selector";
 
 const FilePage = ({
   filesystem,
@@ -104,6 +105,15 @@ const FilePage = ({
             }}
             disabled={!node}
           />
+          {node && (
+            <InterpolationModeSelector
+              value={node?.interpolation}
+              onChange={(interpolation) =>
+                updateNode({ id: node.id, interpolation })
+              }
+              inherit={filesystem?.interpolation}
+            />
+          )}
           {toggleInterpolation}
         </>
       }

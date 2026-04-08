@@ -6,6 +6,7 @@ use typeshare::typeshare;
 use crate::{
   api::write::CicadaWriteRequest,
   entities::{
+    InterpolationMode,
     encryption_key::EncryptionKeyId,
     filesystem::{FilesystemId, FilesystemRecord},
   },
@@ -39,6 +40,12 @@ pub fn create_filesystem() {}
 pub struct CreateFilesystem {
   /// The name of the filesystem
   pub name: String,
+  /// The default interpolation mode
+  /// - `"Brackets"` (`[[SECRET]]`)
+  /// - `"CurlyBrackets"` (`{{SECRET}}`)
+  /// - `"EnvVar"` (`{{SECRET}}`)
+  /// - `"Disabled"`
+  pub interpolation: Option<InterpolationMode>,
   /// Choose a specific encryption key.
   /// Otherwise uses the current global default.
   pub encryption_key: Option<EncryptionKeyId>,
@@ -79,8 +86,16 @@ pub struct UpdateFilesystem {
   /// The name of the filesystem
   #[serde(skip_serializing_if = "Option::is_none")]
   pub name: Option<String>,
+  /// The default interpolation mode
+  /// - `"Brackets"` (`[[SECRET]]`)
+  /// - `"CurlyBrackets"` (`{{SECRET}}`)
+  /// - `"EnvVar"` (`{{SECRET}}`)
+  /// - `"Disabled"`
+  #[serde(skip_serializing_if = "Option::is_none")]
+  pub interpolation: Option<InterpolationMode>,
   /// Update default encryption key for filesystem.
   /// Note. This does not affect already created nodes.
+  #[serde(skip_serializing_if = "Option::is_none")]
   pub encryption_key: Option<EncryptionKeyId>,
 }
 
