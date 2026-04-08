@@ -19,6 +19,9 @@ pub struct OnboardingKeyRecord {
   /// Whether onboarding key is enabled.
   /// Disabled onboarding keys cannot onboard devices.
   pub enabled: bool,
+  /// Expiry timestamp, or null for no expiry.
+  #[cfg_attr(feature = "utoipa", schema(value_type = String))]
+  pub expires: Option<Iso8601Timestamp>,
   /// Created at as ISO8601 timestamp.
   #[cfg_attr(feature = "utoipa", schema(value_type = String))]
   pub created_at: Iso8601Timestamp,

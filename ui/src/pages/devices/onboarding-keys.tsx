@@ -73,9 +73,13 @@ const OnboardingKeysPage = () => {
           },
           {
             header: ({ column }) => (
-              <SortableHeader column={column} title="Id" />
+              <SortableHeader column={column} title="Expires" />
             ),
-            accessorKey: "id",
+            accessorKey: "expires",
+            cell: ({ row }) =>
+              row.original.expires
+                ? new Date(row.original.expires).toLocaleString()
+                : "Never expires",
           },
           {
             header: ({ column }) => (

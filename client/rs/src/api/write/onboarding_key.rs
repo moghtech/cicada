@@ -5,7 +5,7 @@ use typeshare::typeshare;
 
 use crate::{
   api::write::CicadaWriteRequest,
-  entities::onboarding_key::{OnboardingKeyId, OnboardingKeyRecord},
+  entities::{U64, onboarding_key::{OnboardingKeyId, OnboardingKeyRecord}},
 };
 
 //
@@ -43,6 +43,10 @@ pub struct CreateOnboardingKey {
   /// Whether device is enabled. Default: true
   #[serde(default = "default_enabled")]
   pub enabled: bool,
+  /// Expiry timestamp in unix milliseconds.
+  /// Passing 0 or ommiting means no expiry.
+  #[serde(default)]
+  pub expires: U64,
 }
 
 fn default_enabled() -> bool {

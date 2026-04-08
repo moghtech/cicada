@@ -1,7 +1,10 @@
 use axum::http::StatusCode;
 use cicada_client::{
   api::write::onboarding_key::UpdateOnboardingKey,
-  entities::onboarding_key::{OnboardingKeyId, OnboardingKeyRecord},
+  entities::{
+    Iso8601Timestamp,
+    onboarding_key::{OnboardingKeyId, OnboardingKeyRecord},
+  },
 };
 use mogh_error::AddStatusCode as _;
 use mogh_error::anyhow::Context as _;
@@ -51,6 +54,7 @@ pub struct CreateOnboardingKeyQuery {
   pub name: String,
   pub public_key: String,
   pub enabled: bool,
+  pub expires: Option<Iso8601Timestamp>,
 }
 
 pub async fn create_onboarding_key(

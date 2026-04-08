@@ -107,6 +107,8 @@ export interface OnboardingKeyRecord {
 	 * Disabled onboarding keys cannot onboard devices.
 	 */
 	enabled: boolean;
+	/** Expiry timestamp, or null for no expiry. */
+	expires?: Iso8601Timestamp;
 	/** Created at as ISO8601 timestamp. */
 	created_at: Iso8601Timestamp;
 	/** Updated at as ISO8601 timestamp. */
@@ -511,6 +513,11 @@ export interface CreateOnboardingKey {
 	private_key?: string;
 	/** Whether device is enabled. Default: true */
 	enabled: boolean;
+	/**
+	 * Expiry timestamp in unix milliseconds.
+	 * Passing 0 or ommiting means no expiry.
+	 */
+	expires?: U64;
 }
 
 /** Response for [CreateOnboardingKey]. */

@@ -1,4 +1,6 @@
-use cicada_client::api::write::onboarding_key::*;
+use cicada_client::{
+  api::write::onboarding_key::*, entities::Iso8601Timestamp,
+};
 use mogh_auth_server::rand::random_string;
 use mogh_pki::EncodedKeyPair;
 use mogh_resolver::Resolve;
@@ -28,11 +30,18 @@ impl Resolve<WriteArgs> for CreateOnboardingKey {
     .public
     .into_inner();
 
+    let expires = if self.expires == 0 {
+      None
+    } else {
+      Iso8601Timestamp::from_timestamp(self.expires as i64 / 1_000, 0)
+    };
+
     let created = query::onboarding_key::create_onboarding_key(
       CreateOnboardingKeyQuery {
         name: self.name,
         enabled: self.enabled,
         public_key,
+        expires,
       },
     )
     .await?;

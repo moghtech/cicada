@@ -20,6 +20,11 @@ DEFINE FIELD OVERWRITE enabled
   TYPE bool
   DEFAULT false;
 
+-- expires
+DEFINE FIELD OVERWRITE expires
+  ON TABLE OnboardingKey
+  TYPE option<datetime>;
+
 -- Standard timestamp fields 'created_at', 'updated_at'
 fn::define_timestamp_fields("OnboardingKey");
 

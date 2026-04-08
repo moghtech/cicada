@@ -1,6 +1,6 @@
 use axum::http::{HeaderMap, StatusCode};
 use cicada_client::entities::{
-  ClientType, device::DeviceRecord,
+  ClientType, Iso8601Timestamp, device::DeviceRecord,
   onboarding_key::OnboardingKeyRecord, user::UserEntity,
 };
 use mogh_auth_server::RequestAuthentication;
@@ -137,14 +137,24 @@ pub async fn get_client_from_auth(
             query::onboarding_key::find_onboarding_key_with_public_key(public_key)
               .await?
               .context("Invalid client credentials")?;
-          if onboarding_key.enabled {
-            Ok(Client::OnboardingKey(onboarding_key))
-          } else {
-            Err(
+
+          if !onboarding_key.enabled {
+            return Err(
               anyhow!("Invalid client credentials")
                 .status_code(StatusCode::UNAUTHORIZED),
-            )
+            );
           }
+
+          if let Some(expires) = onboarding_key.expires
+            && expires < Iso8601Timestamp::now()
+          {
+            return Err(
+              anyhow!("Invalid client credentials")
+                .status_code(StatusCode::UNAUTHORIZED),
+            );
+          }
+
+          Ok(Client::OnboardingKey(onboarding_key))
         }
       }
     }
