@@ -1,4 +1,3 @@
-import CreateFilesystem from "@/create/filesystem";
 import { useRead } from "@/lib/hooks";
 import { ICONS } from "@/lib/icons";
 import {
@@ -8,7 +7,6 @@ import {
   Center,
   Divider,
   Group,
-  Loader,
   ScrollArea,
   Stack,
   Text,
@@ -16,14 +14,15 @@ import {
   TreeNodeData,
 } from "@mantine/core";
 import { ChevronRight, Link2, PointerOff } from "lucide-react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
-export const Sidebar = ({ close }: { close: () => void }) => {
+export default function Sidebar({ close }: { close: () => void }) {
   const devicesPage =
     location.pathname.startsWith("/devices") ||
     location.pathname.startsWith("/onboarding-keys");
   const encryptionPage = location.pathname.startsWith("/encryption-keys");
   const secretPage = location.pathname.startsWith("/secrets");
+  const filesystemPage = location.pathname.startsWith("/filesystems");
   const { filesystem: selected_filesystem, inode: _selected_inode } =
     useParams() as {
       filesystem?: string;
@@ -73,8 +72,16 @@ export const Sidebar = ({ close }: { close: () => void }) => {
           >
             Secrets
           </Button>
+          <Button
+            variant={filesystemPage ? "default" : "subtle"}
+            onClick={() => nav("/filesystems")}
+            leftSection={<ICONS.Filesystem size="1rem" />}
+            justify="flex-start"
+            fullWidth
+          >
+            Filesystems
+          </Button>
 
-          <Filesystems filesystem={selected_filesystem} close={close} />
           <Divider
             label={
               <Group gap="sm" opacity={0.7} wrap="nowrap">
@@ -112,57 +119,12 @@ export const Sidebar = ({ close }: { close: () => void }) => {
       </Stack>
     </Stack>
   );
-};
-
-const Filesystems = ({
-  filesystem,
-  close,
-}: {
-  filesystem: string | undefined;
-  close: () => void;
-}) => {
-  const { data: filesystems } = useRead("ListFilesystems", {});
-
-  if (!filesystems) {
-    return (
-      <Center h="100%">
-        <Loader size="lg" />
-      </Center>
-    );
-  }
-
-  return (
-    <>
-      <Divider
-        label={
-          <Group gap="sm" opacity={0.7} wrap="nowrap">
-            <ICONS.Filesystem size="1rem" />
-            <Text>Filesystems</Text>
-          </Group>
-        }
-      />
-      {filesystems.map((fs) => (
-        <Button
-          key={fs.id}
-          variant={fs.id === filesystem ? "default" : "subtle"}
-          justify="start"
-          component={Link}
-          to={`/filesystems/${fs.id}`}
-          onClick={close}
-          leftSection={<ICONS.Filesystem size="1rem" />}
-        >
-          {fs.name}
-        </Button>
-      ))}
-      {!filesystems.length && <CreateFilesystem />}
-    </>
-  );
-};
+}
 
 /* This value must not  */
 const CHILD_VALUE_IDENTIFIER = "__CHILD__";
 
-const NodeTree = ({
+function NodeTree({
   filesystem,
   parent,
   selected,
@@ -172,7 +134,7 @@ const NodeTree = ({
   parent: number;
   selected: number | undefined;
   nav: (to: string) => void;
-}) => {
+}) {
   const nodes = useRead("ListNodes", { filesystem, parent }).data ?? [];
 
   const data: TreeNodeData[] = nodes.map((node) => ({
@@ -258,4 +220,4 @@ const NodeTree = ({
       }}
     />
   );
-};
+}

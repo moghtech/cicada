@@ -14,7 +14,7 @@ const OnboardingKeysPage = () => {
   const { data } = useRead("ListOnboardingKeys", {});
   const byId = useMemo(
     () => data && Object.fromEntries(data.map((ok) => [ok.id, ok.name])),
-    [data]
+    [data],
   );
   const [selected, setSelected] = useState<RowSelectionState>({});
   const selectedIds = useMemo(() => Object.keys(selected), [selected]);
@@ -33,7 +33,7 @@ const OnboardingKeysPage = () => {
         <CreateOnboardingKey />
         <ConfirmDelete
           name=""
-          entityType="Onboarding Keys"
+          entityType={"Onboarding Key" + (selectedIds.length === 1 ? "" : "s")}
           onConfirm={async () => {
             if (selectedIds.length) {
               await batchDelete({ ids: selectedIds });

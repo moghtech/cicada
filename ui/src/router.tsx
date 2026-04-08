@@ -50,6 +50,7 @@ export const Router = () => {
         <Route element={<RequireAuth />}>
           <Route path="/" element={<App />}>
             <Route path="" element={<Filesystems />} />
+            <Route path="filesystems" element={<Filesystems />} />
             <Route path="filesystems/:filesystem" element={<Node />} />
             <Route path="filesystems/:filesystem/:inode" element={<Node />} />
             <Route path="profile" element={<Profile />} />

@@ -13,7 +13,7 @@ const DevicesPage = () => {
   const { data } = useRead("ListDevices", {});
   const byId = useMemo(
     () => data && Object.fromEntries(data.map((ok) => [ok.id, ok.name])),
-    [data]
+    [data],
   );
   const [selected, setSelected] = useState<RowSelectionState>({});
   const selectedIds = useMemo(() => Object.keys(selected), [selected]);
@@ -31,7 +31,7 @@ const DevicesPage = () => {
       <Group>
         <ConfirmDelete
           name=""
-          entityType="Devices"
+          entityType={"Device" + (selectedIds.length === 1 ? "" : "s")}
           info={
             <>
               <Text fw="bold" fz="lg">

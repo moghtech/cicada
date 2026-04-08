@@ -3,13 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { ThemeToggle } from "mogh_ui";
 import UserDropdown from "./user-dropdown";
 
-export const Topbar = ({
+export default function Topbar({
   opened,
   toggle,
 }: {
   opened: boolean;
   toggle: () => void;
-}) => {
+}) {
   const nav = useNavigate();
   return (
     <AppShell.Header
@@ -45,4 +45,4 @@ export const Topbar = ({
       </Flex>
     </AppShell.Header>
   );
-};
+}

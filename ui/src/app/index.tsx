@@ -1,10 +1,10 @@
 import { AppShell, Box } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { Outlet } from "react-router-dom";
-import { Topbar } from "./topbar";
-import { Sidebar } from "./sidebar";
 import { Suspense } from "react";
 import { LoadingScreen } from "mogh_ui";
+import Topbar from "./topbar";
+import Sidebar from "./sidebar";
 
 export const TOPBAR_HEIGHT = 62;
 
