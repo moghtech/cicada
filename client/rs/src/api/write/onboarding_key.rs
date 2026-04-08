@@ -36,11 +36,10 @@ pub fn create_onboarding_key() {}
 pub struct CreateOnboardingKey {
   /// The name of the onboarding_key
   pub name: String,
-  /// Optionally provide a pre-existing Spki encoded public key
-  /// generated using another method. Otherwise a new keypair will be
-  /// generated and the private key returned. The private key will not be
-  /// stored otherwise.
-  pub public_key: Option<String>,
+  /// Optionally specify an existing private key, otherwise
+  /// generate fresh key. This key is not stored directly,
+  /// only the public key.
+  pub private_key: Option<String>,
   /// Whether device is enabled. Default: true
   #[serde(default = "default_enabled")]
   pub enabled: bool,
@@ -56,8 +55,8 @@ fn default_enabled() -> bool {
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 pub struct CreateOnboardingKeyResponse {
   /// Pkcs8 encoded private key.
-  /// Only present if user *does not* pass pre existing public key to [CreateOnboardingKey].
-  pub private_key: Option<String>,
+  /// If user passes pre existing private key, it will still return it.
+  pub private_key: String,
   /// The created onboarding key record
   pub created: OnboardingKeyRecord,
 }

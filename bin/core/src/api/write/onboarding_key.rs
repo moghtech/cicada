@@ -1,31 +1,42 @@
 use cicada_client::api::write::onboarding_key::*;
+use mogh_auth_server::rand::random_string;
 use mogh_pki::EncodedKeyPair;
 use mogh_resolver::Resolve;
 
-use crate::{api::write::WriteArgs, db::query};
+use crate::{
+  api::write::WriteArgs,
+  db::query::{self, onboarding_key::CreateOnboardingKeyQuery},
+};
 
 impl Resolve<WriteArgs> for CreateOnboardingKey {
   async fn resolve(
     self,
     _: &WriteArgs,
   ) -> Result<Self::Response, Self::Error> {
-    let (private_key, public_key) = if let Some(public_key) =
-      self.public_key
-      && !public_key.is_empty()
+    let private_key = if let Some(private_key) = self.private_key
+      && !private_key.trim().is_empty()
     {
-      (None, public_key)
+      private_key
     } else {
-      let keys = EncodedKeyPair::generate(mogh_pki::PkiKind::OneWay)?;
-      (Some(keys.private.into_inner()), keys.public.into_inner())
+      format!("O_{}_O", random_string(28))
     };
+
+    let public_key = EncodedKeyPair::from_private_key(
+      mogh_pki::PkiKind::OneWay,
+      &private_key,
+    )?
+    .public
+    .into_inner();
+
     let created = query::onboarding_key::create_onboarding_key(
-      CreateOnboardingKey {
+      CreateOnboardingKeyQuery {
         name: self.name,
-        public_key: Some(public_key),
         enabled: self.enabled,
+        public_key,
       },
     )
     .await?;
+
     Ok(CreateOnboardingKeyResponse {
       private_key,
       created,

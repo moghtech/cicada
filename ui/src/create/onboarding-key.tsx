@@ -14,6 +14,7 @@ export default function CreateOnboardingKey() {
     <Popover
       opened={opened}
       position="bottom-start"
+      offset={16}
       width="400"
       onChange={toggle}
       trapFocus
@@ -50,14 +51,14 @@ function CreateOnboardingKeyForm({ close }: { close: () => void }) {
     mode: "uncontrolled",
     initialValues: {
       name: "",
-      public_key: "",
+      private_key: "",
     },
     validate: {
       name: (name) => (name.length ? null : "Name cannot be empty"),
-      public_key: (public_key) =>
-        !public_key.length || public_key.length === 60
+      private_key: (private_key) =>
+        !private_key.length || private_key.length === 32
           ? null
-          : "Public key should be 60 characters",
+          : "Private key should be 32 characters",
     },
   });
 
@@ -65,7 +66,7 @@ function CreateOnboardingKeyForm({ close }: { close: () => void }) {
     return (
       <Flex direction="column" gap="1rem">
         <Text>
-          Save the onboarding private key. It cannot be retrieved again later.
+          Save the onboarding key. It cannot be retrieved again later.
         </Text>
         <Flex gap="md" align="center" w="100%">
           <TextInput
@@ -89,6 +90,7 @@ function CreateOnboardingKeyForm({ close }: { close: () => void }) {
     <form
       onSubmit={form.onSubmit((form) => mutate({ ...form, enabled: true }))}
       style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
+      onClick={(e) => e.stopPropagation()}
     >
       <TextInput
         {...form.getInputProps("name")}
@@ -98,10 +100,10 @@ function CreateOnboardingKeyForm({ close }: { close: () => void }) {
         key={form.key("name")}
       />
       <TextInput
-        {...form.getInputProps("public_key")}
-        label="Pre-existing Public Key (Optional)"
-        placeholder="Enter public key"
-        key={form.key("public_key")}
+        {...form.getInputProps("private_key")}
+        label="Pre-existing Key (Optional)"
+        placeholder="Enter key"
+        key={form.key("private_key")}
       />
       <Button
         leftSection={<Plus size="1rem" />}

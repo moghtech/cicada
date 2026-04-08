@@ -18,7 +18,7 @@ import { EnableSwitch, Page } from "mogh_ui";
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-const OnboardingKeyPage = () => {
+export default function OnboardingKeyPage() {
   const { onboardingKey: _onboardingKey } = useParams() as {
     onboardingKey: string;
   };
@@ -50,17 +50,15 @@ const OnboardingKeyPage = () => {
       refetchOnboardingKey={refetchOnboardingKey}
     />
   );
-};
+}
 
-export default OnboardingKeyPage;
-
-const OnboardingKeyInner = ({
+function OnboardingKeyInner({
   onboardingKey,
   refetchOnboardingKey,
 }: {
   onboardingKey: Types.OnboardingKeyRecord;
   refetchOnboardingKey: () => void;
-}) => {
+}) {
   const nav = useNavigate();
   const inv = useInvalidate();
   const { mutate: updateOnboardingKey } = useWrite("UpdateOnboardingKey", {
@@ -142,4 +140,4 @@ const OnboardingKeyInner = ({
       </Fieldset>
     </Page>
   );
-};
+}

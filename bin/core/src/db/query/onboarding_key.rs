@@ -1,12 +1,11 @@
 use axum::http::StatusCode;
 use cicada_client::{
-  api::write::onboarding_key::{
-    CreateOnboardingKey, UpdateOnboardingKey,
-  },
+  api::write::onboarding_key::UpdateOnboardingKey,
   entities::onboarding_key::{OnboardingKeyId, OnboardingKeyRecord},
 };
 use mogh_error::AddStatusCode as _;
 use mogh_error::anyhow::Context as _;
+use surrealdb_types::SurrealValue;
 
 use crate::db::DB;
 
@@ -47,11 +46,18 @@ pub async fn find_onboarding_key_with_public_key(
   Ok(onboarding_key)
 }
 
+#[derive(SurrealValue)]
+pub struct CreateOnboardingKeyQuery {
+  pub name: String,
+  pub public_key: String,
+  pub enabled: bool,
+}
+
 pub async fn create_onboarding_key(
-  body: CreateOnboardingKey,
+  query: CreateOnboardingKeyQuery,
 ) -> mogh_error::Result<OnboardingKeyRecord> {
   DB.create("OnboardingKey")
-    .content(body)
+    .content(query)
     .await
     .context("Failed to create OnboardingKey on database")?
     .context(
