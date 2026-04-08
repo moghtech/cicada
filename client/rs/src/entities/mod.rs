@@ -67,6 +67,8 @@ pub struct EncryptedData {
   pub data_nonce: String,
 }
 
+/// The types of clients which can
+/// authenticate with the Cicada API.
 #[typeshare]
 #[derive(
   Debug,
@@ -88,6 +90,40 @@ pub enum ClientType {
   User,
   Device,
   OnboardingKey,
+}
+
+/// Set the interpolation mode for files
+#[typeshare]
+#[derive(
+  Debug,
+  Clone,
+  Copy,
+  PartialEq,
+  Eq,
+  Hash,
+  Default,
+  Serialize,
+  Deserialize,
+  Display,
+  EnumString,
+  AsRefStr,
+)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
+pub enum InterpolationMode {
+  #[default]
+  /// - Example: `[[SECRET_NAME]]`
+  /// - Escaped: `[[[SECRET_NAME]]]` (tripled)
+  Brackets,
+  /// - Example: `{{SECRET_NAME}}`
+  /// - Escaped: `{{{SECRET_NAME}}}` (tripled)
+  CurlyBrackets,
+  /// - Example: `${SECRET_NAME}`
+  /// - Escaped: `$${SECRET_NAME}`
+  ///
+  /// Note. Does NOT support $SECRET_NAME
+  EnvVar,
+  /// Interpolation is disabled.
+  Disabled,
 }
 
 #[typeshare]

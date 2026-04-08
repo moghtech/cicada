@@ -1,7 +1,7 @@
 use std::sync::OnceLock;
 
 use cicada_client::entities::{
-  EncryptedData,
+  EncryptedData, InterpolationMode,
   encryption_key::{EncryptionKeyId, EncryptionKeyKind},
   node::{NodeEntity, NodeRecord},
   secret::{SecretEntity, SecretRecord},
@@ -191,8 +191,11 @@ pub async fn decrypt_node(
     let key = data.encryption_key.clone();
     if let Some(data) = decrypt_data(data, &node.id.0).await? {
       if interpolated {
-        let data =
-          crate::interpolate::interpolate_secrets(data).await?;
+        let data = crate::interpolate::interpolate_secrets(
+          data,
+          InterpolationMode::EnvVar,
+        )
+        .await?;
         (Some(data), None)
       } else {
         (Some(data), None)

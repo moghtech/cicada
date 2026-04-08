@@ -1,3 +1,4 @@
+use cicada_client::entities::InterpolationMode;
 use futures_util::{TryStreamExt, stream::FuturesUnordered};
 use mogh_error::anyhow;
 
@@ -8,15 +9,24 @@ use crate::{
 
 pub async fn interpolate_secrets(
   contents: String,
+  mode: InterpolationMode,
 ) -> mogh_error::Result<String> {
-  let var_regex = regex::Regex::new(r"\$(\$)?\{([^}]+)\}")
-    // This is guaranteed valid regex
-    .unwrap();
+  let var_regex = match mode {
+    InterpolationMode::Brackets => todo!(),
+    InterpolationMode::CurlyBrackets => todo!(),
+    InterpolationMode::EnvVar => {
+      regex::Regex::new(r"\$(\$)?\{([^}]+)\}")
+        // This is guaranteed valid regex
+        .unwrap()
+    }
+    // Early return for disabled
+    InterpolationMode::Disabled => return Ok(contents),
+  };
 
   let secret_names = var_regex
     .captures_iter(&contents)
     .filter_map(|caps| {
-      // Skip escaped $${...} matches
+      // Skip escaped matches
       if caps.get(1).is_some() {
         return None;
       }
@@ -57,7 +67,13 @@ pub async fn interpolate_secrets(
       // Escaped $${...} -> literal ${...}
       if caps.get(1).is_some() {
         trace!("Unescaping variable {}", &caps[2]);
-        return format!("${{{}}}", &caps[2]);
+        let unescaped = match mode {
+          InterpolationMode::Brackets => todo!(),
+          InterpolationMode::CurlyBrackets => todo!(),
+          InterpolationMode::EnvVar => format!("${{{}}}", &caps[2]),
+          InterpolationMode::Disabled => todo!(),
+        };
+        return unescaped;
       }
 
       let (secret_name, missing_behavior) =
