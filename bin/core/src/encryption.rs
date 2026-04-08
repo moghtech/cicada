@@ -26,8 +26,9 @@ impl EncryptionKeys {
     if let Some(master_key) = self.0.get(id) {
       // Early exit without db query if already known
       // such query wouldn't be able to get the key.
-      let value =
-        master_key.value().context("Missing encryption key at id")?;
+      let value = master_key
+        .value()
+        .context("Encryption key not initialized")?;
       return Ok(value);
     }
     let encryption_key =
@@ -39,9 +40,7 @@ impl EncryptionKeys {
         // Insert None on the map if key is known to be in memory.
         // It needs to be initialized via API call after every app startup.
         self.0.insert(id.to_string(), None);
-        Err(anyhow!(
-          "Missing in memory encryption key. Initialize it via API call."
-        ).into())
+        Err(anyhow!("Encryption key not initialized").into())
       }
       EncryptionKeyKind::Disk => {
         let key = encryption_key
@@ -187,7 +186,9 @@ pub async fn decrypt_node(
   node: NodeRecord,
   interpolated: bool,
 ) -> mogh_error::Result<NodeEntity> {
-  let (data, missing_key) = if let Some(data) = node.data {
+  let (data, encryption_key, missing_key) = if let Some(data) =
+    node.data
+  {
     let key = data.encryption_key.clone();
     if let Some(data) = decrypt_data(data, &node.id.0).await? {
       if interpolated {
@@ -203,15 +204,15 @@ pub async fn decrypt_node(
           };
         let data =
           crate::interpolate::interpolate_secrets(data, mode).await?;
-        (Some(data), None)
+        (Some(data), Some(key), false)
       } else {
-        (Some(data), None)
+        (Some(data), Some(key), false)
       }
     } else {
-      (None, Some(key))
+      (None, Some(key), true)
     }
   } else {
-    (None, None)
+    (None, None, false)
   };
   Ok(NodeEntity {
     id: node.id,
@@ -225,6 +226,7 @@ pub async fn decrypt_node(
     created_at: node.created_at,
     updated_at: node.updated_at,
     data,
+    encryption_key,
     missing_key,
   })
 }

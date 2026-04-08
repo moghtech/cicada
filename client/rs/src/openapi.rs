@@ -34,6 +34,7 @@ mod write {
     read::get_onboarding_key,
     // FILESYSTEM
     read::list_filesystems,
+    read::get_filesystem,
     // NODE
     read::list_nodes,
     read::get_node,
@@ -61,6 +62,7 @@ mod write {
     // FILESYSTEM
     write::create_filesystem,
     write::update_filesystem,
+    write::update_filesystem_encryption_key,
     write::delete_filesystem,
     // NODE
     write::create_node,

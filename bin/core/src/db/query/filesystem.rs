@@ -1,6 +1,8 @@
 use axum::http::StatusCode;
 use cicada_client::{
-  api::write::filesystem::{CreateFilesystem, UpdateFilesystem},
+  api::write::filesystem::{
+    CreateFilesystem, UpdateFilesystem, UpdateFilesystemEncryptionKey,
+  },
   entities::filesystem::{FilesystemId, FilesystemRecord},
 };
 use mogh_error::AddStatusCode as _;
@@ -56,6 +58,19 @@ pub async fn update_filesystem(
     .context("Failed to update Filesystem on database")?
     .context(
       "Failed to update Filesystem on database: No update result",
+    )
+    .status_code(StatusCode::NOT_FOUND)
+}
+
+pub async fn update_filesystem_encryption_key(
+  body: UpdateFilesystemEncryptionKey,
+) -> mogh_error::Result<FilesystemRecord> {
+  DB.update(body.id.as_record_id())
+    .merge(body)
+    .await
+    .context("Failed to update Filesystem encryption key on database")?
+    .context(
+      "Failed to update Filesystem encryption key on database: No update result",
     )
     .status_code(StatusCode::NOT_FOUND)
 }

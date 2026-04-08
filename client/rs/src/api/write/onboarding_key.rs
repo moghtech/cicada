@@ -5,7 +5,10 @@ use typeshare::typeshare;
 
 use crate::{
   api::write::CicadaWriteRequest,
-  entities::{U64, onboarding_key::{OnboardingKeyId, OnboardingKeyRecord}},
+  entities::{
+    U64,
+    onboarding_key::{OnboardingKeyId, OnboardingKeyRecord},
+  },
 };
 
 //

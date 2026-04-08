@@ -11,6 +11,8 @@ import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { NodePageDescription, NodePageTitle } from "./title";
 import InterpolationModeSelector from "@/components/interpolation-mode-selector";
+import EncryptionKeySelector from "@/components/encryption-key-selector";
+import ResourceLink from "@/components/resource-link";
 
 const FolderPage = ({
   filesystem,
@@ -37,6 +39,18 @@ const FolderPage = ({
       notifications.show({ message: "Updated filesystem.", color: "green" });
     },
   });
+  const { mutate: updateFilesystemEncryptionKey } = useWrite(
+    "UpdateFilesystemEncryptionKey",
+    {
+      onSuccess: () => {
+        inv(["ListFilesystems"]);
+        notifications.show({
+          message: "Updated filesystem encryption key.",
+          color: "green",
+        });
+      },
+    },
+  );
 
   const children =
     useRead("ListNodes", {
@@ -91,6 +105,18 @@ const FolderPage = ({
                 onConfirm={() => deleteFs({ id: filesystem.id })}
                 loading={deleteFsPending}
                 disabled={false}
+              />
+              <EncryptionKeySelector
+                selected={filesystem.encryption_key}
+                onSelect={(encryption_key) =>
+                  updateFilesystemEncryptionKey({
+                    id: filesystem.id,
+                    encryption_key,
+                  })
+                }
+                targetProps={{
+                  w: { base: "100%", xs: 260 },
+                }}
               />
               <InterpolationModeSelector
                 value={filesystem.interpolation}
@@ -177,15 +203,26 @@ const FolderPage = ({
           },
           {
             header: ({ column }) => (
-              <SortableHeader column={column} title="Id" />
-            ),
-            accessorKey: "id",
-          },
-          {
-            header: ({ column }) => (
               <SortableHeader column={column} title="Kind" />
             ),
             accessorKey: "kind",
+          },
+          {
+            header: ({ column }) => (
+              <SortableHeader column={column} title="Encryption Key" />
+            ),
+            accessorKey: "encryption_key",
+            cell: ({ row }) =>
+              row.original.kind === Types.NodeKind.Folder ? (
+                ""
+              ) : row.original.encryption_key ? (
+                <ResourceLink
+                  type="EncryptionKey"
+                  id={row.original.encryption_key}
+                />
+              ) : (
+                ""
+              ),
           },
           {
             header: ({ column }) => (

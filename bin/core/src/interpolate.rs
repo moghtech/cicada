@@ -67,7 +67,7 @@ pub async fn interpolate_secrets(
   let secrets = list_secrets_matching(secret_names)
     .await?
     .into_iter()
-    .map(|s| decrypt_secret(s))
+    .map(decrypt_secret)
     .collect::<FuturesUnordered<_>>()
     .try_collect::<Vec<_>>()
     .await?;
@@ -93,7 +93,7 @@ pub async fn interpolate_secrets(
       let (secret_name, missing_behavior) =
         capture.split_once(':')
         .map(|(name, behavior)| (name.trim(), behavior.trim()))
-        .unwrap_or((&capture, ""));
+        .unwrap_or((capture, ""));
 
       trace!(
         name = secret_name,
@@ -117,16 +117,16 @@ pub async fn interpolate_secrets(
       );
 
       // Handle missing behavior
-      if missing_behavior.starts_with('-') {
+      if let Some(missing_behavior) = missing_behavior.strip_prefix('-') {
         trace!(
           name = secret_name,
           "Using 'default' missing behavior"
         );
         // Provide the rest of this value as default
-        return missing_behavior[1..].trim().to_string();
+        return missing_behavior.trim().to_string();
       }
 
-      if missing_behavior.starts_with('?') {
+      if let Some(missing_behavior) = missing_behavior.strip_prefix('?') {
         trace!(
           name = secret_name,
           "Using 'error message' missing behavior"

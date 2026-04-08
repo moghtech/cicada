@@ -126,7 +126,8 @@ impl Resolve<WriteArgs> for UpdateNodeEncryptionKey {
         kind: node.kind,
         interpolation: node.interpolation,
         data: None,
-        missing_key: None,
+        encryption_key: None,
+        missing_key: false,
         created_at: node.created_at,
         updated_at: node.updated_at,
       });
@@ -161,7 +162,8 @@ impl Resolve<WriteArgs> for RotateNodeEnvelopeKey {
         kind: node.kind,
         interpolation: node.interpolation,
         data: None,
-        missing_key: None,
+        encryption_key: None,
+        missing_key: false,
         created_at: node.created_at,
         updated_at: node.updated_at,
       });

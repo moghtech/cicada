@@ -19,7 +19,7 @@ pub async fn list_nodes(
 ) -> mogh_error::Result<Vec<NodeListItem>> {
   DB.query(
     "
-SELECT * OMIT data FROM Node 
+SELECT *, data.encryption_key as encryption_key OMIT data FROM Node 
 WHERE ($filesystem IS NONE OR filesystem = $filesystem)
 AND ($parent IS NONE OR parent = $parent)
 ORDER BY kind DESC, name COLLATE ASC;",
@@ -46,7 +46,7 @@ pub async fn get_node(
 pub async fn get_node_list_item(
   node_id: String,
 ) -> mogh_error::Result<NodeListItem> {
-  DB.query(r#"SELECT * OMIT data FROM type::record("Node", $id)"#)
+  DB.query(r#"SELECT *, data.encryption_key as encryption_key OMIT data FROM type::record("Node", $id)"#)
     .bind(("id", node_id))
     .await
     .context("Failed to query database for node")?

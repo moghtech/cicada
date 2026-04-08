@@ -106,12 +106,10 @@ export interface NodeEntity {
 	 * For files, this contains the file contents.
 	 */
 	data?: string;
-	/**
-	 * If the data could not be decrypted
-	 * due to missing encryption key, give the missing ID
-	 * for the user to know to initialize.
-	 */
-	missing_key?: EncryptionKeyId;
+	/** The encryption key used with data */
+	encryption_key?: EncryptionKeyId;
+	/** Whether encryption key is not initialized */
+	missing_key: boolean;
 	/** Created at as ISO8601 timestamp. */
 	created_at: Iso8601Timestamp;
 	/** Updated at as ISO8601 timestamp. */
@@ -241,7 +239,7 @@ export interface FilesystemRecord {
 	/** The filesystem default encryption key. */
 	encryption_key?: EncryptionKeyId;
 	/** The default interpolation mode for the filesystem */
-	interpolation?: InterpolationMode;
+	interpolation: InterpolationMode;
 	/** Created at as ISO8601 timestamp. */
 	created_at: Iso8601Timestamp;
 	/** Updated at as ISO8601 timestamp. */
@@ -370,6 +368,8 @@ export interface NodeListItem {
 	kind: NodeKind;
 	/** The interpolation mode */
 	interpolation: InterpolationMode;
+	/** The encryption key used with data */
+	encryption_key?: EncryptionKeyId;
 	/** Created at as ISO8601 timestamp. */
 	created_at: Iso8601Timestamp;
 	/** Updated at as ISO8601 timestamp. */
@@ -407,6 +407,9 @@ export type UpdateDeviceResponse = DeviceRecord;
 
 /** Response for [UpdateEncryptionKey]. */
 export type UpdateEncryptionKeyResponse = EncryptionKeyRecord;
+
+/** Response for [UpdateFilesystemEncryptionKey]. */
+export type UpdateFilesystemEncryptionKeyResponse = FilesystemRecord;
 
 /** Response for [UpdateFilesystem]. */
 export type UpdateFilesystemResponse = FilesystemRecord;
@@ -969,11 +972,14 @@ export interface UpdateFilesystem {
 	 * - `"Disabled"`
 	 */
 	interpolation?: InterpolationMode;
-	/**
-	 * Update default encryption key for filesystem.
-	 * Note. This does not affect already created nodes.
-	 */
-	encryption_key?: EncryptionKeyId;
+}
+
+/** Update a filesystem default encryption key. Response: [UpdateFilesystemEncryptionKeyResponse]. */
+export interface UpdateFilesystemEncryptionKey {
+	/** The filesystem ID */
+	id: FilesystemId;
+	/** The new default encryption key */
+	encryption_key: EncryptionKeyId;
 }
 
 /** Update a filesystem node. Response: [UpdateNodeResponse]. */
@@ -1223,6 +1229,7 @@ export type WriteRequest =
 	| { type: "BatchDeleteOnboardingKeys", params: BatchDeleteOnboardingKeys }
 	| { type: "CreateFilesystem", params: CreateFilesystem }
 	| { type: "UpdateFilesystem", params: UpdateFilesystem }
+	| { type: "UpdateFilesystemEncryptionKey", params: UpdateFilesystemEncryptionKey }
 	| { type: "DeleteFilesystem", params: DeleteFilesystem }
 	| { type: "CreateNode", params: CreateNode }
 	| { type: "UpdateNode", params: UpdateNode }

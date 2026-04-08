@@ -80,11 +80,7 @@ impl CicadaFs {
       filesystem: id,
       root,
       interpolated,
-      allowed_uids: allow_uids
-        .into_iter()
-        .cloned()
-        .chain([uid])
-        .collect(),
+      allowed_uids: allow_uids.iter().cloned().chain([uid]).collect(),
     };
 
     fuser::mount2(fs, mountpoint, &config)
@@ -570,21 +566,21 @@ impl fuser::Filesystem for CicadaFs {
 
     // Handle permission change
     let perm = mode.map(|m| (m & 0o7777) as u16);
-    if perm.is_some() {
-      if let Err(e) = cicada().write(UpdateNode {
+    if perm.is_some()
+      && let Err(e) = cicada().write(UpdateNode {
         id: node.id.clone(),
         parent: None,
         name: None,
         perm,
         interpolation: None,
         interpolated: None,
-      }) {
-        error!(
-          "SETATTR FAILED: Could not update permissions | inode: {ino} | {e:#}"
-        );
-        reply.error(Errno::EIO);
-        return;
-      }
+      })
+    {
+      error!(
+        "SETATTR FAILED: Could not update permissions | inode: {ino} | {e:#}"
+      );
+      reply.error(Errno::EIO);
+      return;
     }
 
     // Handle truncate
@@ -775,7 +771,7 @@ impl fuser::Filesystem for CicadaFs {
       }
     };
     let new_parent = if newparent != parent {
-      Some(newparent.into())
+      Some(newparent)
     } else {
       None
     };

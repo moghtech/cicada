@@ -25,6 +25,17 @@ impl Resolve<WriteArgs> for UpdateFilesystem {
 
 //
 
+impl Resolve<WriteArgs> for UpdateFilesystemEncryptionKey {
+  async fn resolve(
+    self,
+    _: &WriteArgs,
+  ) -> Result<Self::Response, Self::Error> {
+    query::filesystem::update_filesystem_encryption_key(self).await
+  }
+}
+
+//
+
 impl Resolve<WriteArgs> for DeleteFilesystem {
   async fn resolve(
     self,

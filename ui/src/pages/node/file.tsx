@@ -12,6 +12,7 @@ import InitializeEncryptionKey from "@/components/initialize-encryption-key";
 import { languageFromPath, MonacoEditor, Page } from "mogh_ui";
 import { ReactNode, useEffect, useState } from "react";
 import InterpolationModeSelector from "@/components/interpolation-mode-selector";
+import EncryptionKeySelector from "@/components/encryption-key-selector";
 
 const FilePage = ({
   filesystem,
@@ -37,13 +38,25 @@ const FilePage = ({
     key: `node-${node?.id}-edit-v1`,
     defaultValue: { data: undefined },
   });
-  const missing_key = useRead("ListEncryptionKeys", {}).data?.find(
-    (key) => key.id === node?.missing_key,
+  const missingKey = useRead("ListEncryptionKeys", {}).data?.find(
+    (key) => node?.missing_key && key.id === node?.encryption_key,
   );
   const { mutateAsync: updateNode } = useWrite("UpdateNode", {
     onSuccess: () => {
       inv(["ListNodes"], ["FindNode"]);
       notifications.show({ message: "Saved changes to node.", color: "green" });
+    },
+  });
+  const {
+    mutate: updateNodeEncryptionKey,
+    isPending: updateEncryptionKeyPending,
+  } = useWrite("UpdateNodeEncryptionKey", {
+    onSuccess: () => {
+      inv(["FindNode"]);
+      notifications.show({
+        message: "Saved changes to node encryption key.",
+        color: "green",
+      });
     },
   });
   const { mutateAsync: updateNodeData } = useWrite("UpdateNodeData", {
@@ -94,6 +107,18 @@ const FilePage = ({
             loading={deleteNodePending}
             disabled={!node}
           />
+          {node?.id && (
+            <EncryptionKeySelector
+              selected={node?.encryption_key}
+              onSelect={(encryption_key) =>
+                updateNodeEncryptionKey({ id: node.id, encryption_key })
+              }
+              targetProps={{
+                w: { base: "100%", xs: 260 },
+                loading: updateEncryptionKeyPending,
+              }}
+            />
+          )}
           <TextInput
             placeholder="0o644"
             value={perm}
@@ -135,12 +160,12 @@ const FilePage = ({
         <>
           <Text fz="h2">
             Failed to read data: missing encryption key{" "}
-            {missing_key && <b>{missing_key.name}</b>}
+            {missingKey && <b>{missingKey.name}</b>}
           </Text>
-          {missing_key?.kind === Types.EncryptionKeyKind.Memory && (
+          {missingKey?.kind === Types.EncryptionKeyKind.Memory && (
             <Group>
               <InitializeEncryptionKey
-                key_id={missing_key.id}
+                key_id={missingKey.id}
                 onInit={() => inv(["FindNode"])}
               />
             </Group>

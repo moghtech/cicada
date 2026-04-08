@@ -3,6 +3,7 @@ import CreateFilesystem from "@/create/filesystem";
 import { useRead } from "@/lib/hooks";
 import { ICONS } from "@/lib/icons";
 import { useNavigate } from "react-router-dom";
+import ResourceLink from "@/components/resource-link";
 
 const FilesystemsPage = () => {
   const { data } = useRead("ListFilesystems", {});
@@ -26,9 +27,18 @@ const FilesystemsPage = () => {
           },
           {
             header: ({ column }) => (
-              <SortableHeader column={column} title="Id" />
+              <SortableHeader column={column} title="Encryption Key" />
             ),
-            accessorKey: "id",
+            accessorKey: "encryption_key",
+            cell: ({ row }) =>
+              row.original.encryption_key ? (
+                <ResourceLink
+                  type="EncryptionKey"
+                  id={row.original.encryption_key}
+                />
+              ) : (
+                ""
+              ),
           },
           {
             header: ({ column }) => (
