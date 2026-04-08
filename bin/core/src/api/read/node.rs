@@ -1,4 +1,6 @@
-use cicada_client::api::read::node::{FindNode, GetNode, ListNodes};
+use cicada_client::api::read::node::{
+  FindNode, FindNodeWithPath, GetNode, ListNodes,
+};
 use mogh_resolver::Resolve;
 
 use crate::{
@@ -31,6 +33,17 @@ impl Resolve<ReadArgs> for FindNode {
   ) -> Result<Self::Response, Self::Error> {
     let interpolated = self.interpolated;
     let node = query::node::find_node(self).await?;
+    decrypt_node(node, interpolated).await
+  }
+}
+
+impl Resolve<ReadArgs> for FindNodeWithPath {
+  async fn resolve(
+    self,
+    _: &ReadArgs,
+  ) -> Result<Self::Response, Self::Error> {
+    let interpolated = self.interpolated;
+    let node = query::node::find_node_with_path(self).await?;
     decrypt_node(node, interpolated).await
   }
 }

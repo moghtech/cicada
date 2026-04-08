@@ -22,6 +22,8 @@ use crate::{cicada, options::FilesystemMountOptions};
 
 pub struct CicadaFs {
   filesystem: FilesystemId,
+  // Mount non root folder / file
+  root_ino: INodeNo,
   root: FileAttr,
   /// Whether working with filesystem pre or post secret interpolation.
   interpolated: bool,
@@ -37,6 +39,7 @@ impl CicadaFs {
     FilesystemMountOptions {
       name,
       id,
+      node,
       mountpoint,
       rw,
       interpolated,
@@ -78,6 +81,7 @@ impl CicadaFs {
 
     let fs = CicadaFs {
       filesystem: id,
+      root_ino: INodeNo(1),
       root,
       interpolated,
       allowed_uids: allow_uids.iter().cloned().chain([uid]).collect(),

@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use mogh_resolver::Resolve;
 use serde::{Deserialize, Serialize};
 use typeshare::typeshare;
@@ -158,3 +160,41 @@ impl FindNode {
 /// Response for [FindNode].
 #[typeshare]
 pub type FindNodeResponse = NodeEntity;
+
+//
+
+#[cfg(feature = "utoipa")]
+#[utoipa::path(
+  post,
+  path = "/read/FindNodeWithPath",
+  description = "Get a folder or file by id",
+  request_body(content = FindNodeWithPath),
+  responses(
+    (status = 200, description = "The filesystem node", body = FindNodeWithPathResponse),
+    (status = 404, description = "Failed to find node with given id", body = mogh_error::Serror),
+    (status = 500, description = "Request failed", body = mogh_error::Serror),
+  ),
+)]
+pub fn find_node_with_path() {}
+
+/// Find a node using the path. Response: [NodeEntity].
+#[typeshare]
+#[derive(Debug, Clone, Serialize, Deserialize, Resolve)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
+#[empty_traits(CicadaReadRequest)]
+#[response(FindNodeWithPathResponse)]
+#[error(mogh_error::Error)]
+pub struct FindNodeWithPath {
+  /// Filesystem id
+  pub filesystem: FilesystemId,
+  /// The path to the node. `/path/to/node`
+  #[cfg_attr(feature = "utoipa", schema(value_type = String))]
+  pub path: PathBuf,
+  /// Whether to interpolate secrets into file contents
+  #[serde(default)]
+  pub interpolated: bool,
+}
+
+/// Response for [FindNodeWithPath].
+#[typeshare]
+pub type FindNodeWithPathResponse = NodeEntity;

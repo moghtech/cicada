@@ -1,6 +1,9 @@
 use axum::http::StatusCode;
 use cicada_client::{
-  api::{read::node::FindNode, write::node::UpdateNode},
+  api::{
+    read::node::{FindNode, FindNodeWithPath},
+    write::node::UpdateNode,
+  },
   entities::{
     EncryptedData, InterpolationMode,
     filesystem::FilesystemId,
@@ -77,6 +80,12 @@ AND ($name IS NONE OR name = $name)",
   .context("Failed to get query result")?
   .context("Failed to find Node with given parameters.")
   .status_code(StatusCode::NOT_FOUND)
+}
+
+pub async fn find_node_with_path(
+  body: FindNodeWithPath,
+) -> mogh_error::Result<NodeRecord> {
+  todo!()
 }
 
 #[derive(SurrealValue)]

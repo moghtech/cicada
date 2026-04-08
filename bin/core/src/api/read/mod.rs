@@ -57,6 +57,7 @@ enum ReadRequest {
   ListNodes(ListNodes),
   GetNode(GetNode),
   FindNode(FindNode),
+  FindNodeWithPath(FindNodeWithPath),
 
   // ==== SECRET ====
   ListSecrets(ListSecrets),

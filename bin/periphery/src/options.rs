@@ -11,6 +11,7 @@ use crate::config::periphery_config;
 pub struct FilesystemMountOptions {
   pub name: String,
   pub id: FilesystemId,
+  pub node: Option<String>,
   pub mountpoint: PathBuf,
   pub rw: bool,
   pub interpolated: bool,
@@ -41,6 +42,7 @@ impl FilesystemMountOptions {
       return Ok(FilesystemMountOptions {
         name: filesystem.name.clone(),
         id: filesystem.id.clone(),
+        node: None,
         mountpoint: periphery_config()
           .default_mount_root
           .join(filesystem_spec),
@@ -98,6 +100,11 @@ impl FilesystemMountOptions {
     Ok(FilesystemMountOptions {
       name: filesystem.name.clone(),
       id: filesystem.id.clone(),
+      node: kv_map
+        .get("node")
+        .or(kv_map.get("folder"))
+        .or(kv_map.get("file"))
+        .map(|s| s.to_string()),
       mountpoint: periphery_config()
         .default_mount_root
         .join(mountpoint),

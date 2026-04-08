@@ -20,6 +20,7 @@ export type ReadResponses = {
   ListNodes: Types.ListNodesResponse;
   GetNode: Types.GetNodeResponse;
   FindNode: Types.FindNodeResponse;
+  FindNodeWithPath: Types.FindNodeWithPathResponse;
 
   // ==== SECRET ====
   ListSecrets: Types.ListSecretsResponse;

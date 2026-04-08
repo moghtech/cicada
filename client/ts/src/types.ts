@@ -275,6 +275,9 @@ export type ExternalLoginId = string;
 /** Response for [FindNode]. */
 export type FindNodeResponse = NodeEntity;
 
+/** Response for [FindNodeWithPath]. */
+export type FindNodeWithPathResponse = NodeEntity;
+
 /** Response for [FindSecret]. */
 export type FindSecretResponse = SecretEntity;
 
@@ -732,6 +735,16 @@ export interface FindNode {
 	interpolated?: boolean;
 }
 
+/** Find a node using the path. Response: [NodeEntity]. */
+export interface FindNodeWithPath {
+	/** Filesystem id */
+	filesystem: FilesystemId;
+	/** The path to the node. `/path/to/node` */
+	path: string;
+	/** Whether to interpolate secrets into file contents */
+	interpolated?: boolean;
+}
+
 /** Find a secret by name. Response: [SecretEntity]. */
 export interface FindSecret {
 	/** secret name */
@@ -1157,6 +1170,7 @@ export type ReadRequest =
 	| { type: "ListNodes", params: ListNodes }
 	| { type: "GetNode", params: GetNode }
 	| { type: "FindNode", params: FindNode }
+	| { type: "FindNodeWithPath", params: FindNodeWithPath }
 	| { type: "ListSecrets", params: ListSecrets }
 	| { type: "GetSecret", params: GetSecret }
 	| { type: "FindSecret", params: FindSecret }
