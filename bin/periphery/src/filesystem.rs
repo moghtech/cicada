@@ -574,7 +574,7 @@ impl fuser::Filesystem for CicadaFs {
         parent: None,
         name: None,
         perm,
-        interpolated: self.interpolated,
+        interpolated: None,
       }) {
         error!(
           "SETATTR FAILED: Could not update permissions | inode: {ino} | {e:#}"
@@ -786,7 +786,7 @@ impl fuser::Filesystem for CicadaFs {
       parent: new_parent,
       name: new_name,
       perm: None,
-      interpolated: self.interpolated,
+      interpolated: None,
     }) {
       Ok(_) => reply.ok(),
       Err(e) => {

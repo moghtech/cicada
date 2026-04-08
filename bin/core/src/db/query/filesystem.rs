@@ -22,7 +22,7 @@ pub async fn get_filesystem(
   DB.query(
     "
 SELECT * FROM Filesystem
-WHERE id = $id OR name = &name",
+WHERE id = $id OR name = $name",
   )
   .bind(("id", FilesystemId(id.clone())))
   .bind(("name", id))

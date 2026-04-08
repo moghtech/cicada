@@ -118,8 +118,8 @@ pub struct UpdateNode {
   #[serde(skip_serializing_if = "Option::is_none")]
   pub perm: Option<u16>,
   /// Whether to interpolate secrets into returned file contents
-  #[serde(default)]
-  pub interpolated: bool,
+  #[serde(skip_serializing_if = "Option::is_none")]
+  pub interpolated: Option<bool>,
 }
 
 /// Response for [UpdateNode].

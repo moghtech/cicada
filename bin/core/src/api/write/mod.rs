@@ -116,6 +116,7 @@ async fn handler(
   else if matches!(
     &request,
     WriteRequest::CreateNode(_)
+      | WriteRequest::UpdateNode(_)
       | WriteRequest::UpdateNodeData(_)
       | WriteRequest::DeleteNode(_)
   ) {

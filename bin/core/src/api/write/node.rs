@@ -29,6 +29,12 @@ impl Resolve<WriteArgs> for CreateNode {
     let node = if let Some(data) = self.data {
       let encryption_key_id = if let Some(id) = self.encryption_key {
         id
+      } else if let Some(id) =
+        query::filesystem::get_filesystem(node.filesystem.0)
+          .await?
+          .encryption_key
+      {
+        id
       } else {
         query::encryption_key::list_all_encryption_keys()
           .await?
@@ -54,10 +60,12 @@ impl Resolve<WriteArgs> for CreateNode {
 
 impl Resolve<WriteArgs> for UpdateNode {
   async fn resolve(
-    self,
+    mut self,
     _: &WriteArgs,
   ) -> Result<Self::Response, Self::Error> {
-    let interpolated = self.interpolated;
+    let interpolated = self.interpolated.unwrap_or_default();
+    // This isn't a field on database, set to None to stop serialization.
+    self.interpolated = None;
     let node = query::node::update_node(self).await?;
     decrypt_node(node, interpolated).await
   }
