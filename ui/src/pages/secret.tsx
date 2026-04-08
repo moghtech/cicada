@@ -33,7 +33,10 @@ export default function SecretPage() {
   );
   const { mutateAsync: updateSecretData } = useWrite("UpdateSecretData", {
     onSuccess: () => {
-      notifications.show({ message: "Saved changes to secret." });
+      notifications.show({
+        message: "Saved changes to secret.",
+        color: "green",
+      });
       inv(["GetSecret", { id: _secret }]);
       setEdit({ data: undefined });
     },

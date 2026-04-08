@@ -40,13 +40,13 @@ const FilePage = ({
   const { mutateAsync: updateNode } = useWrite("UpdateNode", {
     onSuccess: () => {
       inv(["ListNodes"], ["FindNode"]);
-      notifications.show({ message: "Saved changes to node." });
+      notifications.show({ message: "Saved changes to node.", color: "green" });
     },
   });
   const { mutateAsync: updateNodeData } = useWrite("UpdateNodeData", {
     onSuccess: () => {
       inv(["FindNode"]);
-      notifications.show({ message: "Saved changes to file." });
+      notifications.show({ message: "Saved changes to file.", color: "green" });
       setEdit({ data: undefined });
     },
   });
