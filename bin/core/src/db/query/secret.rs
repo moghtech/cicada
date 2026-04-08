@@ -29,6 +29,9 @@ ORDER BY kind DESC, name COLLATE ASC;",
 pub async fn list_secrets_matching(
   names: Vec<String>,
 ) -> mogh_error::Result<Vec<SecretRecord>> {
+  if names.is_empty() {
+    return Ok(Vec::new());
+  }
   DB.query(
     "
 SELECT * FROM Secret

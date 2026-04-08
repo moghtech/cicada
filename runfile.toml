@@ -2,13 +2,13 @@
 
 [dev-core]
 alias = "dc"
-description = "runs core --release"
-cmd = "CICADA_CONFIG_PATH=.dev/core.config.toml cargo run -p cicada_core --release"
+description = "runs core"
+cmd = "CICADA_CONFIG_PATH=.dev/core.config.toml cargo run -p cicada_core"
 
 [dev-periphery]
 alias = "dp"
-description = "runs periphery --release"
-cmd = "CICADA_CONFIG_PATH=.dev/periphery.config.toml cargo run -p cicada_periphery --release"
+description = "runs periphery"
+cmd = "CICADA_CONFIG_PATH=.dev/periphery.config.toml cargo run -p cicada_periphery"
 
 [dev-periphery-container]
 alias = "dpc"

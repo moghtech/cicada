@@ -1,5 +1,5 @@
 import { useInvalidate, useRead, useWrite } from "@/lib/hooks";
-import { Button, Center, Group, Text, TextInput } from "@mantine/core";
+import { Button, Group, Stack, Text, TextInput } from "@mantine/core";
 import { useNavigate } from "react-router-dom";
 import { History } from "lucide-react";
 import { useLocalStorage } from "@mantine/hooks";
@@ -15,10 +15,12 @@ import { ReactNode, useEffect, useState } from "react";
 const FilePage = ({
   filesystem,
   node,
+  nodeError,
   toggleInterpolation,
 }: {
   filesystem: Types.FilesystemRecord | undefined;
   node: Types.NodeEntity | undefined;
+  nodeError: { result?: unknown } | undefined;
   toggleInterpolation: ReactNode;
 }) => {
   const inv = useInvalidate();
@@ -60,14 +62,6 @@ const FilePage = ({
     },
   );
 
-  if (!node) {
-    return (
-      <Center>
-        <Text size="lg">404: No file found</Text>
-      </Center>
-    );
-  }
-
   return (
     <Page
       customTitle={<NodePageTitle node={node} />}
@@ -76,40 +70,58 @@ const FilePage = ({
         <>
           <Button
             leftSection={<History size="1rem" />}
-            disabled={!data}
+            disabled={!node || !data}
             onClick={() => setEdit({ data: undefined })}
           >
             Reset
           </Button>
           <ConfirmSave
-            name={node.name}
-            disabled={!data}
-            original={node.data ?? ""}
+            name={node?.name ?? ""}
+            disabled={!node || !data}
+            original={node?.data ?? ""}
             modified={data ?? ""}
-            onConfirm={() => updateNodeData({ id: node.id, data: data ?? "" })}
+            onConfirm={async () =>
+              node && (await updateNodeData({ id: node.id, data: data ?? "" }))
+            }
           />
           <ConfirmDelete
             entityType="File"
-            name={node.name}
-            onConfirm={() => deleteNode({ id: node.id, move_children: 1 })}
+            name={node?.name ?? ""}
+            onConfirm={async () =>
+              node && deleteNode({ id: node.id, move_children: 1 })
+            }
             loading={deleteNodePending}
-            disabled={false}
+            disabled={!node}
           />
           <TextInput
             placeholder="0o644"
             value={perm}
             onChange={(e) => setPerm(e.target.value)}
             onKeyDown={(e) => {
-              if (perm && e.key === "Enter") {
+              if (node && perm && e.key === "Enter") {
                 updateNode({ id: node.id, perm: Number(perm) });
               }
             }}
+            disabled={!node}
           />
           {toggleInterpolation}
         </>
       }
     >
-      {node.missing_key ? (
+      {nodeError ? (
+        <Stack>
+          <Text fz="h2">Failed to read data:</Text>
+          <MonacoEditor
+            value={JSON.stringify(
+              nodeError.result ? nodeError.result : nodeError,
+              undefined,
+              2,
+            )}
+            language="json"
+            readOnly
+          />
+        </Stack>
+      ) : node?.missing_key ? (
         <>
           <Text fz="h2">
             Failed to read data: missing encryption key{" "}
@@ -125,11 +137,13 @@ const FilePage = ({
           )}
         </>
       ) : (
-        <MonacoEditor
-          language={languageFromPath(node.name)}
-          value={data ?? node.data ?? ""}
-          onValueChange={(data) => setEdit({ data })}
-        />
+        node && (
+          <MonacoEditor
+            language={languageFromPath(node.name)}
+            value={data ?? node.data ?? ""}
+            onValueChange={(data) => setEdit({ data })}
+          />
+        )
       )}
     </Page>
   );

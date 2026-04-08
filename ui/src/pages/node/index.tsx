@@ -18,7 +18,7 @@ const NodePage = () => {
 
   const [interpolated, { toggle }] = useDisclosure();
 
-  const { data: node } = useRead(
+  const { data: node, error: nodeError } = useRead(
     "FindNode",
     { filesystem: _filesystem, inode, interpolated },
     { enabled: inode > 1 },
@@ -26,6 +26,7 @@ const NodePage = () => {
   const filesystem = useRead("ListFilesystems", {}).data?.find(
     (fs) => fs.id === _filesystem,
   );
+
   if (inode === 1 || node?.kind === "Folder") {
     return (
       <Folder
@@ -33,11 +34,12 @@ const NodePage = () => {
         node={node?.inode === inode ? node : undefined}
       />
     );
-  } else if (node?.kind === "File") {
+  } else if (node?.kind === "File" || nodeError) {
     return (
       <File
         filesystem={filesystem}
         node={node}
+        nodeError={nodeError as { result?: unknown }}
         toggleInterpolation={
           <EnableSwitch
             label="Interpolation"
