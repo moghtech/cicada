@@ -54,10 +54,13 @@ pub struct SecretEntity {
 #[surreal(crate = "surrealdb_types")]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 pub struct SecretRecord {
-  /// The unique secret id
+  /// The unique secret id.
   pub id: SecretId,
-  /// The name of the secret
+  /// The name of the secret.
   pub name: String,
+  /// Optional description for the secret.
+  #[serde(default)]
+  pub description: String,
   /// Data associated with the secret.
   #[serde(skip_serializing_if = "Option::is_none")]
   pub data: Option<EncryptedData>,

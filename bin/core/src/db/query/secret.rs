@@ -73,6 +73,7 @@ WHERE name = $name",
 #[derive(SurrealValue)]
 pub struct CreateSecretQuery {
   pub name: String,
+  pub description: String,
 }
 
 pub async fn create_secret(
@@ -127,7 +128,7 @@ pub async fn delete_secret(
 pub async fn batch_delete_secrets(
   ids: Vec<SecretId>,
 ) -> mogh_error::Result<Vec<SecretRecord>> {
-  DB.query("DELETE Secret WHERE $ids.any(id) RETURN BEFORE;")
+  DB.query("DELETE Secret WHERE id IN $ids RETURN BEFORE;")
     .bind(("ids", ids))
     .await
     .context("Failed to delete secrets")?

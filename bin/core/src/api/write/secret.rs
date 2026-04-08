@@ -20,6 +20,7 @@ impl Resolve<WriteArgs> for CreateSecret {
   ) -> Result<Self::Response, Self::Error> {
     let secret = query::secret::create_secret(CreateSecretQuery {
       name: self.name,
+      description: self.description,
     })
     .await?;
     let secret = if let Some(data) = self.data {

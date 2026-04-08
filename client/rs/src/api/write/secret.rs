@@ -39,6 +39,9 @@ pub fn create_secret() {}
 pub struct CreateSecret {
   /// The name of the secret
   pub name: String,
+  /// An optional description for the secret
+  #[serde(default)]
+  pub description: String,
   /// The secret data to store encrypted.
   pub data: Option<String>,
   /// Choose a specific encryption key.
@@ -81,6 +84,9 @@ pub struct UpdateSecret {
   /// The name of the secret
   #[serde(skip_serializing_if = "Option::is_none")]
   pub name: Option<String>,
+  /// A description for the secret
+  #[serde(skip_serializing_if = "Option::is_none")]
+  pub description: Option<String>,
 }
 
 /// Response for [UpdateSecret].

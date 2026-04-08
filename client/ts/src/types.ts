@@ -539,6 +539,8 @@ export interface CreateOnboardingKeyResponse {
 export interface CreateSecret {
 	/** The name of the secret */
 	name: string;
+	/** An optional description for the secret */
+	description?: string;
 	/** The secret data to store encrypted. */
 	data?: string;
 	/**
@@ -845,10 +847,12 @@ export interface RotateSecretEnvelopeKey {
 
 /** Secrets stored on the database, with encrypted data */
 export interface SecretRecord {
-	/** The unique secret id */
+	/** The unique secret id. */
 	id: SecretId;
-	/** The name of the secret */
+	/** The name of the secret. */
 	name: string;
+	/** Optional description for the secret. */
+	description?: string;
 	/** Data associated with the secret. */
 	data?: EncryptedData;
 	/** Created at as ISO8601 timestamp. */
@@ -970,6 +974,8 @@ export interface UpdateSecret {
 	id: SecretId;
 	/** The name of the secret */
 	name?: string;
+	/** A description for the secret */
+	description?: string;
 }
 
 /** Update a secret's encrypted data. Response: [UpdateSecretDataResponse]. */

@@ -172,12 +172,13 @@ pub async fn batch_delete_nodes(
   // collecting any deleted records.
   let mut deleted = Vec::new();
   let nodes = DB
-    .query("SELECT * OMIT data FROM Node WHERE $ids.any(id);")
+    .query("SELECT * OMIT data FROM Node WHERE id IN $ids;")
     .bind(("ids", ids.clone()))
     .await
     .context("Failed to select nodes")?
     .take::<Vec<NodeListItem>>(0)
     .context("Invalid node query response")?;
+
   batch_delete_nodes_rec(nodes, &mut deleted).await?;
   Ok(deleted)
 }
@@ -208,7 +209,7 @@ pub fn batch_delete_nodes_rec(
     if !folder_inodes.is_empty() {
       // Get the children of top layer by querying for nodes with deleted node as parent.
       let children = DB
-      .query("SELECT * OMIT data FROM Node WHERE $folder_inodes.any([filesystem, parent]);")
+      .query("SELECT * OMIT data FROM Node WHERE $folder_inodes.any(|$var| $var == [filesystem, parent]);")
       .bind(("folder_inodes", folder_inodes))
       .await
       .context("Failed to select children nodes")?
@@ -224,7 +225,7 @@ pub fn batch_delete_nodes_rec(
     let ids =
       nodes.into_iter().map(|node| node.id).collect::<Vec<_>>();
     let more = DB
-      .query("DELETE Node WHERE $ids.any(id) RETURN BEFORE;")
+      .query("DELETE Node WHERE id IN $ids RETURN BEFORE;")
       .bind(("ids", ids))
       .await
       .context("Failed to delete nodes")?
