@@ -5,7 +5,12 @@ use typeshare::typeshare;
 
 use crate::{
   api::write::CicadaWriteRequest,
-  entities::policy::{PolicyId, PolicyRecord},
+  entities::{
+    device::DeviceId,
+    filesystem::FilesystemId,
+    policy::{PolicyId, PolicyRecord},
+    user::UserId,
+  },
 };
 
 //
@@ -36,6 +41,18 @@ pub fn create_policy() {}
 pub struct CreatePolicy {
   /// The name of the policy
   pub name: String,
+  /// The users to which this policy applies
+  pub users: Option<Vec<UserId>>,
+  /// The devices to which this policy applies
+  pub devices: Option<Vec<DeviceId>>,
+  /// The groups to which this policy applies.
+  pub groups: Option<Vec<String>>,
+  /// Filesystems the users / devices / groups can access.
+  pub filesystems: Option<Vec<FilesystemId>>,
+  /// Give the groups write access to configured filesystems.
+  /// Otherwise access is read only.
+  #[serde(default)]
+  pub filesystem_write: bool,
 }
 
 /// Response for [CreatePolicy].
@@ -71,8 +88,24 @@ pub struct UpdatePolicy {
   /// The policy ID
   pub id: PolicyId,
   /// The name of the policy
-  #[surreal(skip_content_if = "Option::is_none")]
+  #[serde(skip_serializing_if = "Option::is_none")]
   pub name: Option<String>,
+  /// The users to which this policy applies
+  #[serde(skip_serializing_if = "Option::is_none")]
+  pub users: Option<Vec<UserId>>,
+  /// The devices to which this policy applies
+  #[serde(skip_serializing_if = "Option::is_none")]
+  pub devices: Option<Vec<DeviceId>>,
+  /// The groups to which this policy applies.
+  #[serde(skip_serializing_if = "Option::is_none")]
+  pub groups: Option<Vec<String>>,
+  /// Filesystems the users / devices / groups can access.
+  #[serde(skip_serializing_if = "Option::is_none")]
+  pub filesystems: Option<Vec<FilesystemId>>,
+  /// Give the groups write access to configured filesystems.
+  /// Otherwise access is read only.
+  #[serde(skip_serializing_if = "Option::is_none")]
+  pub filesystem_write: Option<bool>,
 }
 
 /// Response for [UpdatePolicy].

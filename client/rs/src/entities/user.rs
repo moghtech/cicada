@@ -44,7 +44,7 @@ pub struct UserEntity {
   /// User has full API access as an administrator.
   #[surreal(default)]
   pub admin: bool,
-  /// User can elevate other users to admin
+  /// User can elevate or demote other users admin and super_admin properties.
   #[surreal(default)]
   pub super_admin: bool,
   // ===============

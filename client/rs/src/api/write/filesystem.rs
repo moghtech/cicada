@@ -84,14 +84,14 @@ pub struct UpdateFilesystem {
   /// The filesystem ID
   pub id: FilesystemId,
   /// The name of the filesystem
-  #[surreal(skip_content_if = "Option::is_none")]
+  #[serde(skip_serializing_if = "Option::is_none")]
   pub name: Option<String>,
   /// The default interpolation mode
   /// - `"Brackets"` (`[[SECRET]]`)
   /// - `"CurlyBrackets"` (`{{SECRET}}`)
   /// - `"EnvVar"` (`{{SECRET}}`)
   /// - `"Disabled"`
-  #[surreal(skip_content_if = "Option::is_none")]
+  #[serde(skip_serializing_if = "Option::is_none")]
   pub interpolation: Option<InterpolationMode>,
 }
 
