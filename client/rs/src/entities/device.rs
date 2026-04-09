@@ -21,7 +21,6 @@ pub struct DeviceRecord {
   pub enabled: bool,
   /// The groups to which this device belongs.
   #[surreal(default)]
-  #[serde(default)]
   pub groups: Vec<String>,
   /// Created at as ISO8601 timestamp.
   #[cfg_attr(feature = "utoipa", schema(value_type = String))]

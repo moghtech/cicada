@@ -89,7 +89,6 @@ function CreateNodeForm({
           filesystem: _filesystem,
           kind,
           parent,
-          data: kind === Types.NodeKind.File ? "" : undefined,
         }),
       )}
       style={{ display: "flex", flexDirection: "column", gap: "1rem" }}

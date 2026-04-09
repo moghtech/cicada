@@ -59,7 +59,7 @@ pub struct SecretRecord {
   /// The name of the secret.
   pub name: String,
   /// Optional description for the secret.
-  #[serde(default)]
+  #[surreal(default)]
   pub description: String,
   /// Data associated with the secret.
   #[serde(skip_serializing_if = "Option::is_none")]

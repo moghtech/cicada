@@ -40,15 +40,12 @@ pub struct UserEntity {
   // ===============
   /// The groups to which this user belongs.
   #[surreal(default)]
-  #[serde(default)]
   pub groups: Vec<String>,
   /// User has full API access as an administrator.
   #[surreal(default)]
-  #[serde(default)]
   pub admin: bool,
   /// User can elevate other users to admin
   #[surreal(default)]
-  #[serde(default)]
   pub super_admin: bool,
   // ===============
   // = TIMESTAMPS =
@@ -94,15 +91,12 @@ pub struct UserRecord {
   // ===============
   /// The groups to which this user belongs.
   #[surreal(default)]
-  #[serde(default)]
   pub groups: Vec<String>,
   /// User has full API access as an administrator.
   #[surreal(default)]
-  #[serde(default)]
   pub admin: bool,
   /// User can elevate other users to admin
   #[surreal(default)]
-  #[serde(default)]
   pub super_admin: bool,
   // ===============
   // = TIMESTAMPS =

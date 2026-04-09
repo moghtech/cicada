@@ -1,5 +1,5 @@
 use cicada_client::{
-  api::write::node::*, entities::node::NodeEntity,
+  api::write::node::*, entities::node::{NodeEntity, NodeKind},
 };
 use mogh_error::anyhow::Context as _;
 use mogh_resolver::Resolve;
@@ -27,7 +27,8 @@ impl Resolve<WriteArgs> for CreateNode {
       interpolation: self.interpolation,
     })
     .await?;
-    let node = if let Some(data) = self.data {
+    let node = if let NodeKind::File = node.kind {
+      let data = self.data.unwrap_or_default();
       let encryption_key_id = if let Some(id) = self.encryption_key {
         id
       } else if let Some(id) =

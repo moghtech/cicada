@@ -37,7 +37,6 @@ pub struct NodeListItem {
   /// - File,
   pub kind: NodeKind,
   /// The interpolation mode
-  #[serde(default = "default_interpolation")]
   #[surreal(default = "default_interpolation")]
   pub interpolation: InterpolationMode,
   /// The encryption key used with data
@@ -76,10 +75,8 @@ pub struct NodeEntity {
   /// The kind of node.
   /// - Folder,
   /// - File,
-  #[serde(default)]
   pub kind: NodeKind,
   /// The interpolation mode
-  #[serde(default = "default_interpolation")]
   pub interpolation: InterpolationMode,
   /// Data associated with the node.
   /// For files, this contains the file contents.
@@ -126,7 +123,6 @@ pub struct NodeRecord {
   #[serde(default)]
   pub kind: NodeKind,
   /// The interpolation mode
-  #[serde(default = "default_interpolation")]
   #[surreal(default = "default_interpolation")]
   pub interpolation: InterpolationMode,
   /// Data associated with the node.
