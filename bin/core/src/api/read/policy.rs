@@ -1,4 +1,4 @@
-use cicada_client::api::read::policy::{GetPolicy, ListPolicies};
+use cicada_client::api::read::{GetPolicy, ListPolicies};
 use mogh_resolver::Resolve;
 
 use crate::{
@@ -9,8 +9,9 @@ use crate::{
 impl Resolve<ReadArgs> for ListPolicies {
   async fn resolve(
     self,
-    _: &ReadArgs,
+    ReadArgs { client }: &ReadArgs,
   ) -> Result<Self::Response, Self::Error> {
+    client.admin_only()?;
     list_all_policies().await
   }
 }
@@ -18,8 +19,9 @@ impl Resolve<ReadArgs> for ListPolicies {
 impl Resolve<ReadArgs> for GetPolicy {
   async fn resolve(
     self,
-    _: &ReadArgs,
+    ReadArgs { client }: &ReadArgs,
   ) -> Result<Self::Response, Self::Error> {
+    client.admin_only()?;
     query::policy::get_policy(self.id).await
   }
 }

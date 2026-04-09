@@ -1,6 +1,6 @@
 use axum::http::StatusCode;
 use cicada_client::{
-  api::write::policy::{CreatePolicy, UpdatePolicy},
+  api::write::{CreatePolicy, UpdatePolicy},
   entities::policy::{PolicyId, PolicyRecord},
 };
 use mogh_error::anyhow::Context as _;

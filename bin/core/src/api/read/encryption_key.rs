@@ -1,5 +1,5 @@
 use cicada_client::{
-  api::read::encryption_key::*,
+  api::read::*,
   entities::encryption_key::{
     EncryptionKeyEntity, EncryptionKeyKind, EncryptionKeyRecord,
   },

@@ -1,5 +1,10 @@
 use cicada_client::{
-  api::write::secret::*, entities::secret::SecretEntity,
+  api::write::{
+    BatchDeleteSecrets, CreateSecret, DeleteSecret,
+    RotateSecretEnvelopeKey, UpdateSecret, UpdateSecretData,
+    UpdateSecretEncryptionKey,
+  },
+  entities::secret::SecretEntity,
 };
 use mogh_error::anyhow::Context as _;
 use mogh_resolver::Resolve;

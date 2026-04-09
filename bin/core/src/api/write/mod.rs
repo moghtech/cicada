@@ -1,8 +1,5 @@
 use axum::{Extension, Router, extract::Path, routing::post};
-use cicada_client::api::write::{
-  device::*, encryption_key::*, filesystem::*, node::*,
-  onboarding_key::*, policy::*, secret::*,
-};
+use cicada_client::api::write::*;
 use mogh_auth_server::middleware::authenticate_request;
 use mogh_error::anyhow::Context as _;
 use mogh_error::{Json, Response};
@@ -111,30 +108,6 @@ async fn handler(
   Extension(client): Extension<Client>,
   Json(request): Json<WriteRequest>,
 ) -> mogh_error::Result<axum::response::Response> {
-  // Only these methods can be called by onboarding key
-  if matches!(
-    &request,
-    WriteRequest::CreateDevice(_) | WriteRequest::UpdateDevice(_)
-  ) {
-    // No check required here
-  }
-  // These methods can be called by user or device.
-  // Block onboarding keys.
-  else if matches!(
-    &request,
-    WriteRequest::CreateNode(_)
-      | WriteRequest::UpdateNode(_)
-      | WriteRequest::UpdateNodeData(_)
-      | WriteRequest::DeleteNode(_)
-  ) {
-    client.not_onboarding_key()?;
-  }
-  // The rest of the methods are user-only.
-  // Blocks devices and onboarding keys.
-  else {
-    client.only_users()?;
-  }
-
   let res = tokio::spawn(task(request, client))
     .await
     .context("failure in spawned task");

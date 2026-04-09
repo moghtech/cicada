@@ -1,6 +1,6 @@
 use axum::http::StatusCode;
 use cicada_client::{
-  api::write::encryption_key::UpdateEncryptionKey,
+  api::write::UpdateEncryptionKey,
   entities::encryption_key::{
     EncryptionKeyKind, EncryptionKeyRecord,
   },

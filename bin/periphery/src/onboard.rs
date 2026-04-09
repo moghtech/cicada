@@ -1,7 +1,7 @@
 use anyhow::{Context as _, anyhow};
 use cicada_client::{
   CicadaClient,
-  api::{read::GetVersion, write::device::CreateDevice},
+  api::{read::GetVersion, write::CreateDevice},
   entities::ClientType,
 };
 use mogh_pki::Pkcs8PrivateKey;
@@ -35,7 +35,8 @@ pub async fn ensure_onboarded() -> anyhow::Result<()> {
         CreateDevice {
           name: config.device_name.clone(),
           enabled: true,
-          public_key: periphery_keys().load().public.clone().into_inner()
+          public_key: periphery_keys().load().public.clone().into_inner(),
+          groups: Vec::new()
         }
       ).context("Failed to create device")?;
 

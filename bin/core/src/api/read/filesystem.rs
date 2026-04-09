@@ -1,6 +1,4 @@
-use cicada_client::api::read::filesystem::{
-  GetFilesystem, ListFilesystems,
-};
+use cicada_client::api::read::{GetFilesystem, ListFilesystems};
 use mogh_resolver::Resolve;
 
 use crate::{

@@ -1,8 +1,8 @@
 use axum::http::StatusCode;
 use cicada_client::{
   api::{
-    read::node::{FindNode, FindNodeWithPath},
-    write::node::UpdateNode,
+    read::{FindNode, FindNodeWithPath},
+    write::UpdateNode,
   },
   entities::{
     EncryptedData, InterpolationMode,
@@ -117,10 +117,10 @@ pub async fn find_node_with_path(
 
 #[derive(SurrealValue)]
 pub struct CreateNodeQuery {
-  pub filesystem: Option<FilesystemId>,
-  pub parent: Option<u64>,
+  pub filesystem: FilesystemId,
+  pub parent: u64,
   pub name: String,
-  pub kind: Option<NodeKind>,
+  pub kind: NodeKind,
   pub perm: Option<u16>,
   pub interpolation: Option<InterpolationMode>,
 }

@@ -25,9 +25,9 @@ pub struct PolicyRecord {
   pub groups: Vec<String>,
   /// Filesystems the users / devices / groups can access.
   pub filesystems: Vec<FilesystemId>,
-  /// Give the groups write access to configured filesystems and nodes.
+  /// Give the groups write access to configured filesystems.
   /// Otherwise access is read only.
-  pub write: bool,
+  pub filesystem_write: bool,
   /// Created at as ISO8601 timestamp.
   #[cfg_attr(feature = "utoipa", schema(value_type = String))]
   pub created_at: Iso8601Timestamp,

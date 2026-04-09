@@ -1,6 +1,10 @@
 use axum::http::StatusCode;
 use cicada_client::{
-  api::write::encryption_key::*,
+  api::write::{
+    CreateEncryptionKey, InitializeEncryptionKey,
+    InitializeEncryptionKeyResponse, UninitializeEncryptionKey,
+    UninitializeEncryptionKeyResponse, UpdateEncryptionKey,
+  },
   entities::encryption_key::EncryptionKeyKind,
 };
 use mogh_encryption::{BASE64URL, xchacha20poly1305};
@@ -17,8 +21,10 @@ use crate::{
 impl Resolve<WriteArgs> for CreateEncryptionKey {
   async fn resolve(
     mut self,
-    _: &WriteArgs,
+    WriteArgs { client }: &WriteArgs,
   ) -> Result<Self::Response, Self::Error> {
+    client.admin_only()?;
+
     // Parse or generate key
     let (key, encoded_key) = if let Some(key) =
       self.key.map(|k| k.trim().to_string())
@@ -69,8 +75,9 @@ impl Resolve<WriteArgs> for CreateEncryptionKey {
 impl Resolve<WriteArgs> for UpdateEncryptionKey {
   async fn resolve(
     self,
-    _: &WriteArgs,
+    WriteArgs { client }: &WriteArgs,
   ) -> Result<Self::Response, Self::Error> {
+    client.admin_only()?;
     query::encryption_key::update_encryption_key(self).await
   }
 }
@@ -80,8 +87,10 @@ impl Resolve<WriteArgs> for UpdateEncryptionKey {
 impl Resolve<WriteArgs> for InitializeEncryptionKey {
   async fn resolve(
     self,
-    _: &WriteArgs,
+    WriteArgs { client }: &WriteArgs,
   ) -> Result<Self::Response, Self::Error> {
+    client.admin_only()?;
+
     let encryption_key =
       query::encryption_key::get_encryption_key(&self.id.0).await?;
 
@@ -127,8 +136,9 @@ impl Resolve<WriteArgs> for InitializeEncryptionKey {
 impl Resolve<WriteArgs> for UninitializeEncryptionKey {
   async fn resolve(
     self,
-    _: &WriteArgs,
+    WriteArgs { client }: &WriteArgs,
   ) -> Result<Self::Response, Self::Error> {
+    client.admin_only()?;
     Ok(UninitializeEncryptionKeyResponse {
       removed: encryption_keys().remove(&self.id.0),
     })

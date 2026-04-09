@@ -6,10 +6,8 @@ use std::{
 use anyhow::Context as _;
 use cicada_client::{
   api::{
-    read::node::{FindNode, FindNodeWithPath, ListNodes},
-    write::node::{
-      CreateNode, DeleteNode, UpdateNode, UpdateNodeData,
-    },
+    read::{FindNode, FindNodeWithPath, ListNodes},
+    write::{CreateNode, DeleteNode, UpdateNode, UpdateNodeData},
   },
   entities::{
     filesystem::FilesystemId,
@@ -401,11 +399,11 @@ impl fuser::Filesystem for CicadaFs {
     };
     let perm = (mode & 0o7777) as u16;
     match cicada().write(CreateNode {
-      filesystem: self.filesystem.clone().into(),
-      parent: parent.into(),
+      filesystem: self.filesystem.clone(),
+      parent,
       name: name.to_string(),
       perm: Some(perm),
-      kind: Some(NodeKind::File),
+      kind: NodeKind::File,
       interpolation: None,
       data: Some(String::new()),
       encryption_key: None,
@@ -452,11 +450,11 @@ impl fuser::Filesystem for CicadaFs {
     };
     let perm = (mode & 0o7777) as u16;
     match cicada().write(CreateNode {
-      filesystem: self.filesystem.clone().into(),
-      parent: parent.into(),
+      filesystem: self.filesystem.clone(),
+      parent,
       name: name.to_string(),
       perm: Some(perm),
-      kind: Some(NodeKind::Folder),
+      kind: NodeKind::Folder,
       interpolation: None,
       data: None,
       encryption_key: None,

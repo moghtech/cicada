@@ -1,7 +1,7 @@
 use std::{path::PathBuf, sync::OnceLock};
 
 use cicada_client::{
-  api::read::filesystem::ListFilesystems,
+  api::read::ListFilesystems,
   entities::config::{
     logger::{LogConfig, LogLevel},
     periphery::{Env, PeripheryConfig},

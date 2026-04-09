@@ -33,14 +33,22 @@ impl Client {
     }
   }
 
-  pub fn only_users(&self) -> mogh_error::Result<()> {
-    if matches!(self, Client::User(_)) {
-      Ok(())
+  pub fn is_admin_user(&self) -> bool {
+    if let Client::User(user) = self {
+      user.admin
     } else {
+      false
+    }
+  }
+
+  pub fn not_device(&self) -> mogh_error::Result<()> {
+    if matches!(self, Client::Device(_)) {
       Err(
-        anyhow!("This method is only for user type clients")
+        anyhow!("This method is not for device type clients")
           .status_code(StatusCode::UNAUTHORIZED),
       )
+    } else {
+      Ok(())
     }
   }
 
@@ -61,6 +69,36 @@ impl Client {
     } else {
       Err(
         anyhow!("This method is only for user type clients")
+          .status_code(StatusCode::UNAUTHORIZED),
+      )
+    }
+  }
+
+  /// When client is user, they must be admin.
+  /// Other client types are still allowed.
+  pub fn only_admin_users(&self) -> mogh_error::Result<()> {
+    if let Client::User(user) = self
+      && !user.admin
+    {
+      Err(
+        anyhow!("This method is only for admin users")
+          .status_code(StatusCode::UNAUTHORIZED),
+      )
+    } else {
+      return Ok(());
+    }
+  }
+
+  /// This ONLY allows user admin clients.
+  /// Other client types are NOT allowed.
+  pub fn admin_only(&self) -> mogh_error::Result<()> {
+    if let Client::User(user) = self
+      && user.admin
+    {
+      Ok(())
+    } else {
+      Err(
+        anyhow!("This method is admin-only")
           .status_code(StatusCode::UNAUTHORIZED),
       )
     }

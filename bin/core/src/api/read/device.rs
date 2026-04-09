@@ -1,4 +1,4 @@
-use cicada_client::api::read::device::{GetDevice, ListDevices};
+use cicada_client::api::read::{GetDevice, ListDevices};
 use mogh_resolver::Resolve;
 
 use crate::{api::read::ReadArgs, db::query};

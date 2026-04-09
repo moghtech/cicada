@@ -1,6 +1,6 @@
 use axum::http::StatusCode;
 use cicada_client::{
-  api::write::onboarding_key::UpdateOnboardingKey,
+  api::write::UpdateOnboardingKey,
   entities::{
     Iso8601Timestamp,
     onboarding_key::{OnboardingKeyId, OnboardingKeyRecord},

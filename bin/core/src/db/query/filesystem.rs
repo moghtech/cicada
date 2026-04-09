@@ -1,6 +1,6 @@
 use axum::http::StatusCode;
 use cicada_client::{
-  api::write::filesystem::{
+  api::write::{
     CreateFilesystem, UpdateFilesystem, UpdateFilesystemEncryptionKey,
   },
   entities::filesystem::{FilesystemId, FilesystemRecord},

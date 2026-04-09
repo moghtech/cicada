@@ -40,11 +40,12 @@ pub fn create_node() {}
 #[error(mogh_error::Error)]
 pub struct CreateNode {
   /// The filesystem ID
-  pub filesystem: Option<FilesystemId>,
+  pub filesystem: FilesystemId,
   /// parent inode number.
   /// Default: 1 (the root node).
   #[cfg_attr(feature = "utoipa", schema(minimum = 1, default = 1))]
-  pub parent: Option<U64>,
+  #[serde(default = "default_parent")]
+  pub parent: U64,
   /// The name of the node
   pub name: String,
   /// The file permission integer.
@@ -59,7 +60,8 @@ pub struct CreateNode {
   ///
   /// Default: **Folder**
   #[cfg_attr(feature = "utoipa", schema(default = "Folder"))]
-  pub kind: Option<NodeKind>,
+  #[serde(default)]
+  pub kind: NodeKind,
   /// The interpolation mode (only for files)
   /// - `"Inherit"` (inherit from filesystem option) (default)
   /// - `"Brackets"` (`[[SECRET]]`)
@@ -77,6 +79,10 @@ pub struct CreateNode {
   /// Whether to interpolate secrets into returned file contents
   #[serde(default)]
   pub interpolated: bool,
+}
+
+fn default_parent() -> u64 {
+  1
 }
 
 /// Response for [CreateNode].

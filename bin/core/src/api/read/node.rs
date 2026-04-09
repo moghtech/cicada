@@ -1,4 +1,4 @@
-use cicada_client::api::read::node::{
+use cicada_client::api::read::{
   FindNode, FindNodeWithPath, GetNode, ListNodes,
 };
 use mogh_resolver::Resolve;

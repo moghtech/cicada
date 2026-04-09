@@ -1,8 +1,5 @@
 use axum::{Extension, Router, extract::Path, routing::post};
-use cicada_client::api::read::{
-  device::*, encryption_key::*, filesystem::*, node::*,
-  onboarding_key::*, policy::*, secret::*, *,
-};
+use cicada_client::api::read::*;
 use mogh_auth_server::middleware::authenticate_request;
 use mogh_error::{Json, Response};
 use mogh_resolver::Resolve;

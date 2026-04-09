@@ -1,6 +1,11 @@
 use cicada_client::{
-  api::write::node::*, entities::node::{NodeEntity, NodeKind},
+  api::write::{
+    BatchDeleteNodes, CreateNode, DeleteNode, RotateNodeEnvelopeKey,
+    UpdateNode, UpdateNodeData, UpdateNodeEncryptionKey,
+  },
+  entities::node::{NodeEntity, NodeKind},
 };
+use futures_util::{StreamExt, stream::FuturesUnordered};
 use mogh_error::anyhow::Context as _;
 use mogh_resolver::Resolve;
 
@@ -11,13 +16,20 @@ use crate::{
     decrypt_node, decrypt_nodes, encrypt_data, rotate_encryption_key,
     rotate_envelope_key,
   },
+  permission::ensure_client_filesystem_permission,
 };
 
 impl Resolve<WriteArgs> for CreateNode {
   async fn resolve(
     self,
-    _: &WriteArgs,
+    WriteArgs { client }: &WriteArgs,
   ) -> Result<Self::Response, Self::Error> {
+    ensure_client_filesystem_permission(
+      client,
+      self.filesystem.clone(),
+      true,
+    )
+    .await?;
     let node = query::node::create_node(CreateNodeQuery {
       filesystem: self.filesystem,
       parent: self.parent,
@@ -63,8 +75,16 @@ impl Resolve<WriteArgs> for CreateNode {
 impl Resolve<WriteArgs> for UpdateNode {
   async fn resolve(
     mut self,
-    _: &WriteArgs,
+    WriteArgs { client }: &WriteArgs,
   ) -> Result<Self::Response, Self::Error> {
+    let node =
+      query::node::get_node_list_item(self.id.0.clone()).await?;
+    ensure_client_filesystem_permission(
+      client,
+      node.filesystem,
+      true,
+    )
+    .await?;
     let interpolated = self.interpolated.unwrap_or_default();
     // This isn't a field on database, set to None to stop serialization.
     self.interpolated = None;
@@ -78,15 +98,19 @@ impl Resolve<WriteArgs> for UpdateNode {
 impl Resolve<WriteArgs> for UpdateNodeData {
   async fn resolve(
     self,
-    _: &WriteArgs,
+    WriteArgs { client }: &WriteArgs,
   ) -> Result<Self::Response, Self::Error> {
+    let node =
+      query::node::get_node_list_item(self.id.0.clone()).await?;
+    ensure_client_filesystem_permission(
+      client,
+      node.filesystem,
+      true,
+    )
+    .await?;
     let encryption_key = if let Some(id) = self.encryption_key {
       id
-    } else if let Some(id) = query::node::get_node(&self.id.0)
-      .await?
-      .data
-      .map(|data| data.encryption_key)
-    {
+    } else if let Some(id) = node.encryption_key {
       id
     } else {
       query::encryption_key::list_all_encryption_keys()
@@ -112,9 +136,15 @@ impl Resolve<WriteArgs> for UpdateNodeData {
 impl Resolve<WriteArgs> for UpdateNodeEncryptionKey {
   async fn resolve(
     self,
-    _: &WriteArgs,
+    WriteArgs { client }: &WriteArgs,
   ) -> Result<Self::Response, Self::Error> {
     let node = query::node::get_node(&self.id.0).await?;
+    ensure_client_filesystem_permission(
+      client,
+      node.filesystem.clone(),
+      true,
+    )
+    .await?;
     // No-op if node has no data.
     let Some(data) = node.data else {
       return Ok(NodeEntity {
@@ -148,9 +178,15 @@ impl Resolve<WriteArgs> for UpdateNodeEncryptionKey {
 impl Resolve<WriteArgs> for RotateNodeEnvelopeKey {
   async fn resolve(
     self,
-    _: &WriteArgs,
+    WriteArgs { client }: &WriteArgs,
   ) -> Result<Self::Response, Self::Error> {
     let node = query::node::get_node(&self.id.0).await?;
+    ensure_client_filesystem_permission(
+      client,
+      node.filesystem.clone(),
+      true,
+    )
+    .await?;
     // No-op if node has no data.
     let Some(data) = node.data else {
       return Ok(NodeEntity {
@@ -182,8 +218,16 @@ impl Resolve<WriteArgs> for RotateNodeEnvelopeKey {
 impl Resolve<WriteArgs> for DeleteNode {
   async fn resolve(
     self,
-    _: &WriteArgs,
+    WriteArgs { client }: &WriteArgs,
   ) -> Result<Self::Response, Self::Error> {
+    let node =
+      query::node::get_node_list_item(self.id.0.clone()).await?;
+    ensure_client_filesystem_permission(
+      client,
+      node.filesystem,
+      true,
+    )
+    .await?;
     let deleted =
       query::node::delete_node(self.id.0, self.move_children).await?;
     Ok(decrypt_nodes(deleted, self.interpolated).await)
@@ -195,9 +239,38 @@ impl Resolve<WriteArgs> for DeleteNode {
 impl Resolve<WriteArgs> for BatchDeleteNodes {
   async fn resolve(
     self,
-    _: &WriteArgs,
+    WriteArgs { client }: &WriteArgs,
   ) -> Result<Self::Response, Self::Error> {
-    let deleted = query::node::batch_delete_nodes(self.ids).await?;
+    let ids = if client.is_admin_user() {
+      self.ids
+    } else {
+      // filter out any ids client doesn't
+      // have necessary access to
+      self
+        .ids
+        .into_iter()
+        .map(|id| async {
+          let node =
+            query::node::get_node_list_item(id.0.clone()).await?;
+          ensure_client_filesystem_permission(
+            client,
+            node.filesystem,
+            true,
+          )
+          .await?;
+          Result::<_, mogh_error::Error>::Ok(id)
+        })
+        .collect::<FuturesUnordered<_>>()
+        .collect::<Vec<_>>()
+        .await
+        .into_iter()
+        .flatten()
+        .collect::<Vec<_>>()
+    };
+    if ids.is_empty() {
+      return Ok(Vec::new());
+    }
+    let deleted = query::node::batch_delete_nodes(ids).await?;
     Ok(decrypt_nodes(deleted, self.interpolated).await)
   }
 }

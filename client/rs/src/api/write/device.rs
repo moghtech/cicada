@@ -41,6 +41,9 @@ pub struct CreateDevice {
   /// Whether device is enabled. Default: true
   #[serde(default = "default_enabled")]
   pub enabled: bool,
+  /// The groups this device is a member of
+  #[serde(default)]
+  pub groups: Vec<String>,
 }
 
 fn default_enabled() -> bool {

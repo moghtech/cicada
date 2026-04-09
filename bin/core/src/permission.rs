@@ -59,7 +59,7 @@ pub async fn ensure_client_filesystem_permission(
     let fs_access =
       policy.filesystems.iter().any(|fs| fs.0 == filesystem.0);
     if write_required {
-      fs_access && policy.write
+      fs_access && policy.filesystem_write
     } else {
       fs_access
     }

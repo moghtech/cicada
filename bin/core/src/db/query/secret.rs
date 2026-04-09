@@ -1,6 +1,6 @@
 use axum::http::StatusCode;
 use cicada_client::{
-  api::{read::secret::FindSecret, write::secret::UpdateSecret},
+  api::{read::FindSecret, write::UpdateSecret},
   entities::{
     EncryptedData,
     secret::{SecretId, SecretListItem, SecretRecord},

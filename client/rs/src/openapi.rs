@@ -2,17 +2,11 @@ use mogh_auth_client::openapi::MoghAuthApi;
 use utoipa::OpenApi;
 
 mod read {
-  pub use crate::api::read::{
-    device::*, encryption_key::*, filesystem::*, node::*,
-    onboarding_key::*, policy::*, secret::*, *,
-  };
+  pub use crate::api::read::*;
 }
 
 mod write {
-  pub use crate::api::write::{
-    device::*, encryption_key::*, filesystem::*, node::*,
-    onboarding_key::*, policy::*, secret::*,
-  };
+  pub use crate::api::write::*;
 }
 
 #[derive(OpenApi)]

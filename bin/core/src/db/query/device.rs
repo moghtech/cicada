@@ -1,6 +1,6 @@
 use axum::http::StatusCode;
 use cicada_client::{
-  api::write::device::{CreateDevice, UpdateDevice},
+  api::write::{CreateDevice, UpdateDevice},
   entities::device::{DeviceId, DeviceRecord},
 };
 use mogh_error::AddStatusCode as _;
