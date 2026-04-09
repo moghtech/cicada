@@ -38,6 +38,7 @@ pub struct NodeListItem {
   pub kind: NodeKind,
   /// The interpolation mode
   #[serde(default = "default_interpolation")]
+  #[surreal(default = "default_interpolation")]
   pub interpolation: InterpolationMode,
   /// The encryption key used with data
   #[serde(skip_serializing_if = "Option::is_none")]
