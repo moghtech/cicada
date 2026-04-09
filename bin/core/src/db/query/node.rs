@@ -85,7 +85,50 @@ AND ($name IS NONE OR name = $name)",
 pub async fn find_node_with_path(
   body: FindNodeWithPath,
 ) -> mogh_error::Result<NodeRecord> {
-  todo!()
+  let components = body
+    .path
+    .components()
+    .filter_map(|c| match c {
+      std::path::Component::Normal(s) => {
+        s.to_str().map(|s| s.to_string())
+      }
+      _ => None,
+    })
+    .collect::<Vec<_>>();
+
+  if components.is_empty() {
+    return Err(
+      mogh_error::Error::from(mogh_error::anyhow::anyhow!(
+        "Path has no components"
+      ))
+      .status_code(StatusCode::BAD_REQUEST),
+    );
+  }
+
+  DB.query(
+    "
+LET $node = SELECT * FROM Node
+  WHERE filesystem = $filesystem
+  AND parent = 1
+  AND name = $components[0]
+  LIMIT 1;
+FOR $i IN 1..$components.len() {
+  LET $node = SELECT * FROM Node
+    WHERE filesystem = $filesystem
+    AND parent = $node[0].inode
+    AND name = $components[$i]
+    LIMIT 1;
+};
+RETURN $node[0];",
+  )
+  .bind(("filesystem", body.filesystem))
+  .bind(("components", components))
+  .await
+  .context("Failed to query database")?
+  .take::<Option<NodeRecord>>(2)
+  .context("Failed to get query result")?
+  .context("Node not found at given path")
+  .status_code(StatusCode::NOT_FOUND)
 }
 
 #[derive(SurrealValue)]
