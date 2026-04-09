@@ -1,7 +1,7 @@
 use axum::{Extension, Router, extract::Path, routing::post};
 use cicada_client::api::write::{
   device::*, encryption_key::*, filesystem::*, node::*,
-  onboarding_key::*, secret::*,
+  onboarding_key::*, policy::*, secret::*,
 };
 use mogh_auth_server::middleware::authenticate_request;
 use mogh_error::anyhow::Context as _;
@@ -21,6 +21,7 @@ pub mod encryption_key;
 pub mod filesystem;
 pub mod node;
 pub mod onboarding_key;
+pub mod policy;
 pub mod secret;
 
 pub struct WriteArgs {
@@ -78,6 +79,11 @@ pub enum WriteRequest {
   UpdateEncryptionKey(UpdateEncryptionKey),
   InitializeEncryptionKey(InitializeEncryptionKey),
   UninitializeEncryptionKey(UninitializeEncryptionKey),
+
+  // ==== POLICY ====
+  CreatePolicy(CreatePolicy),
+  UpdatePolicy(UpdatePolicy),
+  DeletePolicy(DeletePolicy),
 }
 
 pub fn router() -> Router {

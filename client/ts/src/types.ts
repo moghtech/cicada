@@ -239,7 +239,7 @@ export interface FilesystemRecord {
 	/** The filesystem default encryption key. */
 	encryption_key?: EncryptionKeyId;
 	/** The default interpolation mode for the filesystem */
-	interpolation: InterpolationMode;
+	interpolation?: InterpolationMode;
 	/** Created at as ISO8601 timestamp. */
 	created_at: Iso8601Timestamp;
 	/** Updated at as ISO8601 timestamp. */
@@ -251,6 +251,22 @@ export type CreateFilesystemResponse = FilesystemRecord;
 
 /** Response for [CreateNode]. */
 export type CreateNodeResponse = NodeEntity;
+
+export type PolicyId = string;
+
+export interface PolicyRecord {
+	/** The unique policy id */
+	id: PolicyId;
+	/** The name of the policy. Must be unique. */
+	name: string;
+	/** Created at as ISO8601 timestamp. */
+	created_at: Iso8601Timestamp;
+	/** Updated at as ISO8601 timestamp. */
+	updated_at: Iso8601Timestamp;
+}
+
+/** Response for [CreatePolicy]. */
+export type CreatePolicyResponse = PolicyRecord;
 
 /** Response for [CreateSecret]. */
 export type CreateSecretResponse = SecretEntity;
@@ -266,6 +282,9 @@ export type DeleteNodeResponse = NodeEntity[];
 
 /** Response for [DeleteOnboardingKey]. */
 export type DeleteOnboardingKeyResponse = OnboardingKeyRecord;
+
+/** Response for [DeletePolicy]. */
+export type DeletePolicyResponse = PolicyRecord;
 
 /** Response for [DeleteSecret]. */
 export type DeleteSecretResponse = SecretEntity;
@@ -322,6 +341,9 @@ export type GetNodeResponse = NodeEntity;
 
 /** Response for [GetOnboardingKey]. */
 export type GetOnboardingKeyResponse = OnboardingKeyRecord;
+
+/** Response for [GetPolicy]. */
+export type GetPolicyResponse = PolicyRecord;
 
 /** Response for [GetSecret]. */
 export type GetSecretResponse = SecretEntity;
@@ -385,6 +407,9 @@ export type ListNodesResponse = NodeListItem[];
 /** Response for [ListOnboardingKeys]. */
 export type ListOnboardingKeysResponse = OnboardingKeyRecord[];
 
+/** Response for [ListPolicies]. */
+export type ListPoliciesResponse = PolicyRecord[];
+
 export interface SecretListItem {
 	/** The unique secret id */
 	id: SecretId;
@@ -428,6 +453,9 @@ export type UpdateNodeResponse = NodeEntity;
 
 /** Response for [UpdateOnboardingKey]. */
 export type UpdateOnboardingKeyResponse = OnboardingKeyRecord;
+
+/** Response for [UpdatePolicy]. */
+export type UpdatePolicyResponse = PolicyRecord;
 
 /** Response for [UpdateSecretData]. */
 export type UpdateSecretDataResponse = SecretEntity;
@@ -593,6 +621,12 @@ export interface CreateOnboardingKeyResponse {
 	created: OnboardingKeyRecord;
 }
 
+/** Create a policy. Response: [CreatePolicyResponse]. */
+export interface CreatePolicy {
+	/** The name of the policy */
+	name: string;
+}
+
 /** Create secret. Response: [CreateSecretResponse]. */
 export interface CreateSecret {
 	/** The name of the secret */
@@ -646,6 +680,16 @@ export interface DeleteNode {
 export interface DeleteOnboardingKey {
 	/** The onboarding_key ID */
 	id: OnboardingKeyId;
+}
+
+/**
+ * Delete a policy. Response: [DeletePolicyResponse].
+ * 
+ * WARNING. This will also delete all nodes on the policy.
+ */
+export interface DeletePolicy {
+	/** The policy ID */
+	id: PolicyId;
 }
 
 /** Delete a secret. Response: [DeleteSecretResponse]. */
@@ -783,6 +827,12 @@ export interface GetOnboardingKey {
 	id: OnboardingKeyId;
 }
 
+/** Get a specific policy by id or name. Response: [GetPolicyResponse]. */
+export interface GetPolicy {
+	/** Policy id or name */
+	id: string;
+}
+
 /** Get a secret. Response: [SecretEntity]. */
 export interface GetSecret {
 	/** The secret id */
@@ -852,6 +902,10 @@ export interface ListNodes {
 
 /** List onboarding keys. Response: [ListOnboardingKeysResponse]. */
 export interface ListOnboardingKeys {
+}
+
+/** List policies. Response: [ListPoliciesResponse]. */
+export interface ListPolicies {
 }
 
 /** List secrets. Response: [ListSecretsResponse]. */
@@ -1058,6 +1112,14 @@ export interface UpdateOnboardingKey {
 	enabled?: boolean;
 }
 
+/** Update a policy. Response: [UpdatePolicyResponse]. */
+export interface UpdatePolicy {
+	/** The policy ID */
+	id: PolicyId;
+	/** The name of the policy */
+	name?: string;
+}
+
 /** Update a secret. Response: [UpdateSecretResponse]. */
 export interface UpdateSecret {
 	/** The secret id */
@@ -1175,7 +1237,9 @@ export type ReadRequest =
 	| { type: "GetSecret", params: GetSecret }
 	| { type: "FindSecret", params: FindSecret }
 	| { type: "ListEncryptionKeys", params: ListEncryptionKeys }
-	| { type: "GetEncryptionKey", params: GetEncryptionKey };
+	| { type: "GetEncryptionKey", params: GetEncryptionKey }
+	| { type: "ListPolicies", params: ListPolicies }
+	| { type: "GetPolicy", params: GetPolicy };
 
 export enum Timelength {
 	/** `1-sec` */
@@ -1262,5 +1326,8 @@ export type WriteRequest =
 	| { type: "CreateEncryptionKey", params: CreateEncryptionKey }
 	| { type: "UpdateEncryptionKey", params: UpdateEncryptionKey }
 	| { type: "InitializeEncryptionKey", params: InitializeEncryptionKey }
-	| { type: "UninitializeEncryptionKey", params: UninitializeEncryptionKey };
+	| { type: "UninitializeEncryptionKey", params: UninitializeEncryptionKey }
+	| { type: "CreatePolicy", params: CreatePolicy }
+	| { type: "UpdatePolicy", params: UpdatePolicy }
+	| { type: "DeletePolicy", params: DeletePolicy };
 

@@ -1,0 +1,117 @@
+use mogh_resolver::Resolve;
+use serde::{Deserialize, Serialize};
+use surrealdb_types::SurrealValue;
+use typeshare::typeshare;
+
+use crate::{
+  api::write::CicadaWriteRequest,
+  entities::policy::{PolicyId, PolicyRecord},
+};
+
+//
+
+#[cfg(feature = "utoipa")]
+#[utoipa::path(
+  post,
+  path = "/write/CreatePolicy",
+  description = "Create a new policy",
+  request_body(content = CreatePolicy),
+  responses(
+    (status = 200, description = "The created policy", body = CreatePolicyResponse),
+    (status = 500, description = "Request failed", body = mogh_error::Serror)
+  ),
+)]
+pub fn create_policy() {}
+
+/// Create a policy. Response: [CreatePolicyResponse].
+#[typeshare]
+#[derive(
+  Debug, Clone, Serialize, Deserialize, SurrealValue, Resolve,
+)]
+#[surreal(crate = "surrealdb_types")]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
+#[empty_traits(CicadaWriteRequest)]
+#[response(CreatePolicyResponse)]
+#[error(mogh_error::Error)]
+pub struct CreatePolicy {
+  /// The name of the policy
+  pub name: String,
+}
+
+/// Response for [CreatePolicy].
+#[typeshare]
+pub type CreatePolicyResponse = PolicyRecord;
+
+//
+
+#[cfg(feature = "utoipa")]
+#[utoipa::path(
+  post,
+  path = "/write/UpdatePolicy",
+  description = "Update a policy",
+  request_body(content = UpdatePolicy),
+  responses(
+    (status = 200, description = "The updated policy", body = UpdatePolicyResponse),
+    (status = 500, description = "Request failed", body = mogh_error::Serror)
+  ),
+)]
+pub fn update_policy() {}
+
+/// Update a policy. Response: [UpdatePolicyResponse].
+#[typeshare]
+#[derive(
+  Debug, Clone, Serialize, Deserialize, SurrealValue, Resolve,
+)]
+#[surreal(crate = "surrealdb_types")]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
+#[empty_traits(CicadaWriteRequest)]
+#[response(UpdatePolicyResponse)]
+#[error(mogh_error::Error)]
+pub struct UpdatePolicy {
+  /// The policy ID
+  pub id: PolicyId,
+  /// The name of the policy
+  #[surreal(skip_content_if = "Option::is_none")]
+  pub name: Option<String>,
+}
+
+/// Response for [UpdatePolicy].
+#[typeshare]
+pub type UpdatePolicyResponse = PolicyRecord;
+
+//
+
+#[cfg(feature = "utoipa")]
+#[utoipa::path(
+  post,
+  path = "/write/DeletePolicy",
+  description = "Delete a policy",
+  request_body(content = DeletePolicy),
+  responses(
+    (status = 200, description = "The deleted policy", body = DeletePolicyResponse),
+    (status = 404, description = "Policy not found", body = mogh_error::Serror),
+    (status = 500, description = "Request failed", body = mogh_error::Serror)
+  ),
+)]
+pub fn delete_policy() {}
+
+/// Delete a policy. Response: [DeletePolicyResponse].
+///
+/// WARNING. This will also delete all nodes on the policy.
+#[typeshare]
+#[derive(
+  Debug, Clone, Serialize, Deserialize, SurrealValue, Resolve,
+)]
+#[surreal(crate = "surrealdb_types")]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
+#[empty_traits(CicadaWriteRequest)]
+#[response(DeletePolicyResponse)]
+#[error(mogh_error::Error)]
+pub struct DeletePolicy {
+  /// The policy ID
+  pub id: PolicyId,
+}
+
+/// Response for [DeletePolicy].
+#[typeshare]
+pub type DeletePolicyResponse = PolicyRecord;

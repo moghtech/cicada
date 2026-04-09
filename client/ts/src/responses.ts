@@ -30,6 +30,10 @@ export type ReadResponses = {
   // ==== ENCRYPTION KEY ====
   ListEncryptionKeys: Types.ListEncryptionKeysResponse;
   GetEncryptionKey: Types.GetEncryptionKeyResponse;
+
+  // ==== POLICY ====
+  ListPolicies: Types.ListPoliciesResponse;
+  GetPolicy: Types.GetPolicyResponse;
 };
 
 export type WriteResponses = {
@@ -74,4 +78,9 @@ export type WriteResponses = {
   UpdateEncryptionKey: Types.UpdateEncryptionKeyResponse;
   InitializeEncryptionKey: Types.InitializeEncryptionKeyResponse;
   UninitializeEncryptionKey: Types.UninitializeEncryptionKeyResponse;
+
+  // ==== FILESYSTEM ====
+  CreatePolicy: Types.CreatePolicyResponse;
+  UpdatePolicy: Types.UpdatePolicyResponse;
+  DeletePolicy: Types.DeletePolicyResponse;
 };

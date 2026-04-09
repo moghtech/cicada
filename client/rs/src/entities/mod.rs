@@ -23,6 +23,8 @@ pub mod filesystem;
 pub mod node;
 /// Onboard device access.
 pub mod onboarding_key;
+/// Give users and devices access to files
+pub mod policy;
 /// Store encrypted secret information
 /// which can be interpolated into files.
 pub mod secret;
@@ -277,7 +279,7 @@ macro_rules! surreal_id {
       }
     }
 
-    impl SurrealValue for $typ {
+    impl surrealdb_types::SurrealValue for $typ {
       fn kind_of() -> surrealdb_types::Kind {
         surrealdb_types::Kind::Record(vec![])
       }

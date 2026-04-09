@@ -1,0 +1,23 @@
+-- ========
+--  Policy
+-- ========
+
+DEFINE TABLE IF NOT EXISTS Policy SCHEMAFULL;
+
+-- name
+DEFINE FIELD OVERWRITE name
+  ON TABLE Policy
+  TYPE string;
+
+-- Standard timestamp fields 'created_at', 'updated_at'
+fn::define_timestamp_fields("Policy");
+
+-------------
+-- Indexes --
+-------------
+
+-- name | unique
+DEFINE INDEX OVERWRITE Name
+  ON TABLE Policy
+  FIELDS name
+  UNIQUE;

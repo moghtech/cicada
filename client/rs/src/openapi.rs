@@ -4,14 +4,14 @@ use utoipa::OpenApi;
 mod read {
   pub use crate::api::read::{
     device::*, encryption_key::*, filesystem::*, node::*,
-    onboarding_key::*, secret::*, *,
+    onboarding_key::*, policy::*, secret::*, *,
   };
 }
 
 mod write {
   pub use crate::api::write::{
     device::*, encryption_key::*, filesystem::*, node::*,
-    onboarding_key::*, secret::*,
+    onboarding_key::*, policy::*, secret::*,
   };
 }
 
@@ -46,6 +46,9 @@ mod write {
     // ENCRYPTION KEY
     read::list_encryption_keys,
     read::get_encryption_key,
+    // POLICY
+    read::list_policies,
+    read::get_policy,
     // =======
     //  WRITE
     // =======
@@ -84,6 +87,10 @@ mod write {
     write::create_encryption_key,
     write::update_encryption_key,
     write::initialize_encryption_key,
+    // POLICY
+    write::create_policy,
+    write::update_policy,
+    write::delete_policy,
   ),
 )]
 pub struct CicadaApi;
