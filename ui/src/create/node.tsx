@@ -9,7 +9,7 @@ import { FilePlus, FolderPlus } from "lucide-react";
 import { useShiftKeyListener } from "mogh_ui";
 
 interface CreateNodeProps {
-  filesystem: string | undefined;
+  filesystem: string;
   kind: Types.NodeKind;
   parent: number;
 }

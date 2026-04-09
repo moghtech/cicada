@@ -53,10 +53,14 @@ const FolderPage = ({
   );
 
   const children =
-    useRead("ListNodes", {
-      filesystem: filesystem?.id,
-      parent: node?.inode ?? 1,
-    }).data ?? [];
+    useRead(
+      "ListNodes",
+      {
+        filesystem: filesystem?.id!,
+        parent: node?.inode ?? 1,
+      },
+      { enabled: !!filesystem?.id },
+    ).data ?? [];
   const byId = useMemo(
     () =>
       children && Object.fromEntries(children.map((node) => [node.id, node])),
@@ -89,14 +93,15 @@ const FolderPage = ({
       customDescription={<NodePageDescription filesystem={filesystem} />}
       actions={
         <>
-          {Object.values(Types.NodeKind).map((kind) => (
-            <CreateNode
-              key={kind}
-              filesystem={filesystem?.id}
-              kind={kind}
-              parent={node?.inode ?? 1}
-            />
-          ))}
+          {filesystem &&
+            Object.values(Types.NodeKind).map((kind) => (
+              <CreateNode
+                key={kind}
+                filesystem={filesystem.id}
+                kind={kind}
+                parent={node?.inode ?? 1}
+              />
+            ))}
           {!selectedIds.length && node === undefined && filesystem && (
             <>
               <ConfirmDelete

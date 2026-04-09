@@ -21,6 +21,8 @@ export interface DeviceRecord {
 	 * Disabled devices cannot access any files.
 	 */
 	enabled: boolean;
+	/** The groups to which this device belongs. */
+	groups: string[];
 	/** Created at as ISO8601 timestamp. */
 	created_at: Iso8601Timestamp;
 	/** Updated at as ISO8601 timestamp. */
@@ -98,7 +100,7 @@ export interface NodeEntity {
 	 * - Folder,
 	 * - File,
 	 */
-	kind?: NodeKind;
+	kind: NodeKind;
 	/** The interpolation mode */
 	interpolation: InterpolationMode;
 	/**
@@ -239,7 +241,7 @@ export interface FilesystemRecord {
 	/** The filesystem default encryption key. */
 	encryption_key?: EncryptionKeyId;
 	/** The default interpolation mode for the filesystem */
-	interpolation?: InterpolationMode;
+	interpolation: InterpolationMode;
 	/** Created at as ISO8601 timestamp. */
 	created_at: Iso8601Timestamp;
 	/** Updated at as ISO8601 timestamp. */
@@ -254,11 +256,27 @@ export type CreateNodeResponse = NodeEntity;
 
 export type PolicyId = string;
 
+export type UserId = string;
+
+/** Give groups access to filesystems and nodes */
 export interface PolicyRecord {
 	/** The unique policy id */
 	id: PolicyId;
 	/** The name of the policy. Must be unique. */
 	name: string;
+	/** The users to which this policy applies */
+	users: UserId[];
+	/** The devices to which this policy applies */
+	devices: DeviceId[];
+	/** The groups to which this policy applies. */
+	groups: string[];
+	/** Filesystems the users / devices / groups can access. */
+	filesystems: FilesystemId[];
+	/**
+	 * Give the groups write access to configured filesystems.
+	 * Otherwise access is read only.
+	 */
+	filesystem_write: boolean;
 	/** Created at as ISO8601 timestamp. */
 	created_at: Iso8601Timestamp;
 	/** Updated at as ISO8601 timestamp. */
@@ -270,6 +288,50 @@ export type CreatePolicyResponse = PolicyRecord;
 
 /** Response for [CreateSecret]. */
 export type CreateSecretResponse = SecretEntity;
+
+export type JsonValue = any;
+
+/** Users on the database */
+export interface UserRecord {
+	/** The unique user id */
+	id: UserId;
+	/** The name of the user, ie username */
+	username: string;
+	/** Link for user avatar, or empty string. */
+	avatar: string;
+	/**
+	 * Whether user is enabled.
+	 * Disabled users cannot log in and have no API access.
+	 */
+	enabled: boolean;
+	/**
+	 * Hashed user password.
+	 * Empty if local login is not set.
+	 */
+	password: string;
+	/** User passkey config for 2fa */
+	passkey?: JsonValue;
+	/**
+	 * User totp secret.
+	 * TODO: encryption
+	 */
+	totp_secret: string;
+	/** Allow external logins to skip 2fa. */
+	external_skip_2fa: boolean;
+	/** The groups to which this user belongs. */
+	groups: string[];
+	/** User has full API access as an administrator. */
+	admin: boolean;
+	/** User can elevate other users to admin */
+	super_admin: boolean;
+	/** Created at as ISO8601 timestamp. */
+	created_at: Iso8601Timestamp;
+	/** Updated at as ISO8601 timestamp. */
+	updated_at: Iso8601Timestamp;
+}
+
+/** Response for [CreateUser]. */
+export type CreateUserResponse = UserRecord;
 
 /** Response for [DeleteDevice]. */
 export type DeleteDeviceResponse = DeviceRecord;
@@ -288,6 +350,9 @@ export type DeletePolicyResponse = PolicyRecord;
 
 /** Response for [DeleteSecret]. */
 export type DeleteSecretResponse = SecretEntity;
+
+/** Response for [DeleteUser]. */
+export type DeleteUserResponse = UserRecord;
 
 export type ExternalLoginId = string;
 
@@ -354,8 +419,6 @@ export interface NoData {
 
 /** Response for [InitializeEncryptionKey]. */
 export type InitializeEncryptionKeyResponse = NoData;
-
-export type JsonValue = any;
 
 /** Response for [ListDevices]. */
 export type ListDevicesResponse = DeviceRecord[];
@@ -466,7 +529,8 @@ export type UpdateSecretEncryptionKeyResponse = SecretEntity;
 /** Response for [UpdateSecret]. */
 export type UpdateSecretResponse = SecretEntity;
 
-export type UserId = string;
+/** Response for [UpdateUser]. */
+export type UpdateUserResponse = UserRecord;
 
 /** Batch delete devices. Response: [BatchDeleteDevicesResponse]. */
 export interface BatchDeleteDevices {
@@ -506,6 +570,8 @@ export interface CreateDevice {
 	public_key: string;
 	/** Whether device is enabled. Default: true */
 	enabled: boolean;
+	/** The groups this device is a member of */
+	groups?: string[];
 }
 
 /** Create an encryption key. Response: [CreateEncryptionKeyResponse]. */
@@ -543,12 +609,12 @@ export interface CreateFilesystem {
 /** Create filesystem node. Response: [CreateNodeResponse]. */
 export interface CreateNode {
 	/** The filesystem ID */
-	filesystem?: FilesystemId;
+	filesystem: FilesystemId;
 	/**
 	 * parent inode number.
 	 * Default: 1 (the root node).
 	 */
-	parent?: U64;
+	parent: U64;
 	/** The name of the node */
 	name: string;
 	/**
@@ -625,6 +691,19 @@ export interface CreateOnboardingKeyResponse {
 export interface CreatePolicy {
 	/** The name of the policy */
 	name: string;
+	/** The users to which this policy applies */
+	users?: UserId[];
+	/** The devices to which this policy applies */
+	devices?: DeviceId[];
+	/** The groups to which this policy applies. */
+	groups?: string[];
+	/** Filesystems the users / devices / groups can access. */
+	filesystems?: FilesystemId[];
+	/**
+	 * Give the groups write access to configured filesystems.
+	 * Otherwise access is read only.
+	 */
+	filesystem_write?: boolean;
 }
 
 /** Create secret. Response: [CreateSecretResponse]. */
@@ -640,6 +719,22 @@ export interface CreateSecret {
 	 * Otherwise chooses the current global default.
 	 */
 	encryption_key?: EncryptionKeyId;
+}
+
+/** Create a local user with username and password. Response: [CreateUserResponse]. */
+export interface CreateUser {
+	/** The username of the user */
+	username: string;
+	/** The password of the user */
+	password: string;
+	/** Whether user is enabled. Default: true */
+	enabled: boolean;
+	/** The groups to assign to user */
+	groups?: string[];
+	/** User has full API access as an administrator. */
+	admin: boolean;
+	/** User can elevate or demote other users admin and super_admin properties. */
+	super_admin: boolean;
 }
 
 /** Delete a device. Response: [DeleteDeviceResponse]. */
@@ -696,6 +791,12 @@ export interface DeletePolicy {
 export interface DeleteSecret {
 	/** The secret id */
 	id: SecretId;
+}
+
+/** Delete a user. Response: [DeleteUserResponse]. */
+export interface DeleteUser {
+	/** The user ID */
+	id: UserId;
 }
 
 /**
@@ -895,9 +996,9 @@ export interface ListFilesystems {
 /** List filesystem nodes. Response: [ListNodesResponse]. */
 export interface ListNodes {
 	/** Filesystem id */
-	filesystem?: FilesystemId;
-	/** parent inode number. */
-	parent?: U64;
+	filesystem: FilesystemId;
+	/** parent inode number. Default: `1` (the root node) */
+	parent: U64;
 }
 
 /** List onboarding keys. Response: [ListOnboardingKeysResponse]. */
@@ -976,7 +1077,7 @@ export interface SecretRecord {
 	/** The name of the secret. */
 	name: string;
 	/** Optional description for the secret. */
-	description?: string;
+	description: string;
 	/** Data associated with the secret. */
 	data?: EncryptedData;
 	/** Created at as ISO8601 timestamp. */
@@ -1118,6 +1219,19 @@ export interface UpdatePolicy {
 	id: PolicyId;
 	/** The name of the policy */
 	name?: string;
+	/** The users to which this policy applies */
+	users?: UserId[];
+	/** The devices to which this policy applies */
+	devices?: DeviceId[];
+	/** The groups to which this policy applies. */
+	groups?: string[];
+	/** Filesystems the users / devices / groups can access. */
+	filesystems?: FilesystemId[];
+	/**
+	 * Give the groups write access to configured filesystems.
+	 * Otherwise access is read only.
+	 */
+	filesystem_write?: boolean;
 }
 
 /** Update a secret. Response: [UpdateSecretResponse]. */
@@ -1148,6 +1262,16 @@ export interface UpdateSecretEncryptionKey {
 	encryption_key: EncryptionKeyId;
 }
 
+/** Update a user. Response: [UpdateUserResponse]. */
+export interface UpdateUser {
+	/** The user ID */
+	id: UserId;
+	/** The username of the user */
+	username?: string;
+	/** Whether user is enabled */
+	enabled?: boolean;
+}
+
 /** Users queryable from the API */
 export interface UserEntity {
 	/** The unique user id */
@@ -1171,39 +1295,12 @@ export interface UserEntity {
 	totp: boolean;
 	/** Allow external logins to skip 2fa. */
 	external_skip_2fa: boolean;
-	/** Created at as ISO8601 timestamp. */
-	created_at: Iso8601Timestamp;
-	/** Updated at as ISO8601 timestamp. */
-	updated_at: Iso8601Timestamp;
-}
-
-/** Users on the database */
-export interface UserRecord {
-	/** The unique user id */
-	id: UserId;
-	/** The name of the user, ie username */
-	username: string;
-	/** Link for user avatar, or empty string. */
-	avatar: string;
-	/**
-	 * Whether user is enabled.
-	 * Disabled users cannot log in and have no API access.
-	 */
-	enabled: boolean;
-	/**
-	 * Hashed user password.
-	 * Empty if local login is not set.
-	 */
-	password: string;
-	/** User passkey config for 2fa */
-	passkey?: JsonValue;
-	/**
-	 * User totp secret.
-	 * TODO: encryption
-	 */
-	totp_secret: string;
-	/** Allow external logins to skip 2fa. */
-	external_skip_2fa: boolean;
+	/** The groups to which this user belongs. */
+	groups: string[];
+	/** User has full API access as an administrator. */
+	admin: boolean;
+	/** User can elevate or demote other users admin and super_admin properties. */
+	super_admin: boolean;
 	/** Created at as ISO8601 timestamp. */
 	created_at: Iso8601Timestamp;
 	/** Updated at as ISO8601 timestamp. */
