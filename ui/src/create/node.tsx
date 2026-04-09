@@ -17,7 +17,10 @@ interface CreateNodeProps {
 export default function CreateNode(props: CreateNodeProps) {
   const [opened, { open, close, toggle }] = useDisclosure(false);
   useShiftKeyListener("N", () => props.kind === Types.NodeKind.File && open());
-  useShiftKeyListener("F", () => props.kind === Types.NodeKind.Folder && open());
+  useShiftKeyListener(
+    "F",
+    () => props.kind === Types.NodeKind.Folder && open(),
+  );
   return (
     <Popover
       opened={opened}
@@ -81,7 +84,13 @@ function CreateNodeForm({
   return (
     <form
       onSubmit={form.onSubmit((form) =>
-        mutate({ ...form, filesystem: _filesystem, kind, parent }),
+        mutate({
+          ...form,
+          filesystem: _filesystem,
+          kind,
+          parent,
+          data: kind === Types.NodeKind.File ? "" : undefined,
+        }),
       )}
       style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
       autoFocus
