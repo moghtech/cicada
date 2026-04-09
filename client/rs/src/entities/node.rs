@@ -126,6 +126,7 @@ pub struct NodeRecord {
   pub kind: NodeKind,
   /// The interpolation mode
   #[serde(default = "default_interpolation")]
+  #[surreal(default = "default_interpolation")]
   pub interpolation: InterpolationMode,
   /// Data associated with the node.
   /// For files, this contains the file contents.

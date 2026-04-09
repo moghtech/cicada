@@ -19,6 +19,8 @@ pub struct FilesystemRecord {
   /// The filesystem default encryption key.
   pub encryption_key: Option<EncryptionKeyId>,
   /// The default interpolation mode for the filesystem
+  #[serde(default)]
+  #[surreal(default)]
   pub interpolation: InterpolationMode,
   /// Created at as ISO8601 timestamp.
   #[cfg_attr(feature = "utoipa", schema(value_type = String))]
