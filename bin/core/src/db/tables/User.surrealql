@@ -44,6 +44,18 @@ DEFINE FIELD OVERWRITE external_skip_2fa
   TYPE bool
   DEFAULT true;
 
+-- admin
+DEFINE FIELD OVERWRITE admin
+  ON TABLE User
+  TYPE bool
+  DEFAULT false;
+
+-- super_admin
+DEFINE FIELD OVERWRITE super_admin
+  ON TABLE User
+  TYPE bool
+  DEFAULT false;
+
 -- Standard timestamp fields 'created_at', 'updated_at'
 fn::define_timestamp_fields("User");
 

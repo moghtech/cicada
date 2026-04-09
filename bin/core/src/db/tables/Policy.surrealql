@@ -9,6 +9,30 @@ DEFINE FIELD OVERWRITE name
   ON TABLE Policy
   TYPE string;
 
+-- groups
+DEFINE FIELD OVERWRITE groups
+  ON TABLE Policy
+  TYPE array<string>
+  DEFAULT [];
+
+-- filesystems
+DEFINE FIELD OVERWRITE filesystems
+  ON TABLE Policy
+  TYPE array<record<Filesystem>>
+  DEFAULT [];
+
+-- nodes
+DEFINE FIELD OVERWRITE nodes
+  ON TABLE Policy
+  TYPE array<record<Node>>
+  DEFAULT [];
+
+-- write
+DEFINE FIELD OVERWRITE write
+  ON TABLE Policy
+  TYPE bool
+  DEFAULT false;
+
 -- Standard timestamp fields 'created_at', 'updated_at'
 fn::define_timestamp_fields("Policy");
 

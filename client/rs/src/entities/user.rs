@@ -36,6 +36,17 @@ pub struct UserEntity {
   /// Allow external logins to skip 2fa.
   pub external_skip_2fa: bool,
   // ===============
+  // = PERMISSIONS =
+  // ===============
+  /// User has full API access as an administrator.
+  #[surreal(default)]
+  #[serde(default)]
+  pub admin: bool,
+  /// User can elevate other users to admin
+  #[surreal(default)]
+  #[serde(default)]
+  pub super_admin: bool,
+  // ===============
   // = TIMESTAMPS =
   // ===============
   /// Created at as ISO8601 timestamp.
@@ -74,6 +85,17 @@ pub struct UserRecord {
   pub totp_secret: String,
   /// Allow external logins to skip 2fa.
   pub external_skip_2fa: bool,
+  // ===============
+  // = PERMISSIONS =
+  // ===============
+  /// User has full API access as an administrator.
+  #[surreal(default)]
+  #[serde(default)]
+  pub admin: bool,
+  /// User can elevate other users to admin
+  #[surreal(default)]
+  #[serde(default)]
+  pub super_admin: bool,
   // ===============
   // = TIMESTAMPS =
   // ===============

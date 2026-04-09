@@ -39,6 +39,8 @@ pub async fn get_user_entity(
     passkey: user.passkey.is_some(),
     totp: !user.totp_secret.is_empty(),
     external_skip_2fa: user.external_skip_2fa,
+    admin: user.admin,
+    super_admin: user.super_admin,
     created_at: user.created_at,
     updated_at: user.updated_at,
   })
