@@ -16,15 +16,14 @@ use surrealdb_types::SurrealValue;
 
 use crate::db::DB;
 
-pub async fn list_nodes(
-  filesystem: Option<FilesystemId>,
-  parent: Option<u64>,
+pub async fn list_child_nodes(
+  filesystem: FilesystemId,
+  parent: u64,
 ) -> mogh_error::Result<Vec<NodeListItem>> {
   DB.query(
     "
 SELECT *, data.encryption_key as encryption_key OMIT data FROM Node 
-WHERE ($filesystem IS NONE OR filesystem = $filesystem)
-AND ($parent IS NONE OR parent = $parent)
+WHERE filesystem = $filesystem AND parent = $parent
 ORDER BY kind DESC, name COLLATE ASC;",
   )
   .bind(("filesystem", filesystem))

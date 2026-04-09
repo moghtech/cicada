@@ -30,7 +30,9 @@ pub struct FilesystemRecord {
 }
 
 #[typeshare(serialized_as = "string")]
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(
+  Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize,
+)]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 pub struct FilesystemId(pub String);
 

@@ -5,23 +5,34 @@ use mogh_resolver::Resolve;
 
 use crate::{
   api::read::ReadArgs,
-  db::query::{self, filesystem::list_all_filesystems},
+  db::query,
+  permission::{
+    ensure_client_filesystem_permission, list_filesystems_for_client,
+  },
 };
 
 impl Resolve<ReadArgs> for ListFilesystems {
   async fn resolve(
     self,
-    _: &ReadArgs,
+    ReadArgs { client }: &ReadArgs,
   ) -> Result<Self::Response, Self::Error> {
-    list_all_filesystems().await
+    list_filesystems_for_client(client).await
   }
 }
 
 impl Resolve<ReadArgs> for GetFilesystem {
   async fn resolve(
     self,
-    _: &ReadArgs,
+    ReadArgs { client }: &ReadArgs,
   ) -> Result<Self::Response, Self::Error> {
-    query::filesystem::get_filesystem(self.id).await
+    let filesystem =
+      query::filesystem::get_filesystem(self.id).await?;
+    ensure_client_filesystem_permission(
+      client,
+      filesystem.id.clone(),
+      false,
+    )
+    .await?;
+    Ok(filesystem)
   }
 }

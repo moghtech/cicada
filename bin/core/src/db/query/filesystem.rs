@@ -23,7 +23,7 @@ pub async fn get_filesystem(
 ) -> mogh_error::Result<FilesystemRecord> {
   DB.query(
     "
-SELECT * FROM Filesystem
+SELECT * FROM ONLY Filesystem
 WHERE id = $id OR name = $name",
   )
   .bind(("id", FilesystemId(id_or_name.clone())))
@@ -32,7 +32,7 @@ WHERE id = $id OR name = $name",
   .context("Failed to query database")?
   .take::<Option<FilesystemRecord>>(0)
   .context("Failed to get query result")?
-  .context("Failed to find Secret with given parameters.")
+  .context("Failed to find filesystem with given parameters.")
   .status_code(StatusCode::NOT_FOUND)
 }
 

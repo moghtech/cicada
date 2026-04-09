@@ -19,7 +19,7 @@ use crate::{
 #[utoipa::path(
   post,
   path = "/read/ListNodes",
-  description = "List available folders and files for a filesystem.",
+  description = "List folders and files on a filesystem.",
   request_body(content = ListNodes),
   responses(
     (status = 200, description = "List of filesystem nodes", body = ListNodesResponse),
@@ -37,10 +37,15 @@ pub fn list_nodes() {}
 #[error(mogh_error::Error)]
 pub struct ListNodes {
   /// Filesystem id
-  pub filesystem: Option<FilesystemId>,
-  /// parent inode number.
+  pub filesystem: FilesystemId,
+  /// parent inode number. Default: `1` (the root node)
   #[cfg_attr(feature = "utoipa", schema(minimum = 1))]
-  pub parent: Option<U64>,
+  #[serde(default = "default_parent")]
+  pub parent: U64,
+}
+
+fn default_parent() -> u64 {
+  1
 }
 
 /// Response for [ListNodes].

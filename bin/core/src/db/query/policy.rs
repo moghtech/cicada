@@ -3,16 +3,48 @@ use cicada_client::{
   api::write::policy::{CreatePolicy, UpdatePolicy},
   entities::policy::{PolicyId, PolicyRecord},
 };
-use mogh_error::AddStatusCode as _;
 use mogh_error::anyhow::Context as _;
+use mogh_error::{AddStatusCode as _, AddStatusCodeError as _};
 
-use crate::db::DB;
+use crate::{auth::middleware::Client, db::DB};
 
 pub async fn list_all_policies()
 -> mogh_error::Result<Vec<PolicyRecord>> {
   DB.select("Policy")
     .await
     .context("Failed to query for Policies")
+    .map_err(Into::into)
+}
+
+pub async fn list_policies_for_client(
+  client: &Client,
+) -> mogh_error::Result<Vec<PolicyRecord>> {
+  let (id_field, id, groups) = match client {
+    Client::User(user) => {
+      ("users", user.id.as_record_id(), &user.groups)
+    }
+    Client::Device(device) => {
+      ("devices", device.id.as_record_id(), &device.groups)
+    }
+    Client::OnboardingKey(_) => {
+      return Err(
+        mogh_error::anyhow::anyhow!(
+          "OnboardingKey clients do not have policies"
+        )
+        .status_code(StatusCode::FORBIDDEN),
+      );
+    }
+  };
+  DB
+    .query(format!(
+      "SELECT * FROM Policy WHERE {id_field} CONTAINS $id OR groups CONTAINSANY $groups"
+    ))
+    .bind(("id", id))
+    .bind(("groups", groups.clone()))
+    .await
+    .context("Failed to query policies")?
+    .take::<Vec<PolicyRecord>>(0)
+    .context("Failed to get policy query result")
     .map_err(Into::into)
 }
 

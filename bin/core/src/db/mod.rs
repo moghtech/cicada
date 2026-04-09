@@ -64,6 +64,9 @@ pub async fn init() -> mogh_error::Result<()> {
   DB.query(include_str!("tables/Secret.surrealql"))
     .await
     .context("Failed to initialize Secret table")?;
+  DB.query(include_str!("tables/Policy.surrealql"))
+    .await
+    .context("Failed to initialize Policy table")?;
 
   Ok(())
 }

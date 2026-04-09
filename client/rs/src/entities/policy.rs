@@ -3,7 +3,8 @@ use surrealdb_types::SurrealValue;
 use typeshare::typeshare;
 
 use crate::entities::{
-  Iso8601Timestamp, filesystem::FilesystemId, node::NodeId,
+  Iso8601Timestamp, device::DeviceId, filesystem::FilesystemId,
+  user::UserId,
 };
 
 /// Give groups access to filesystems and nodes
@@ -16,13 +17,14 @@ pub struct PolicyRecord {
   pub id: PolicyId,
   /// The name of the policy. Must be unique.
   pub name: String,
+  /// The users to which this policy applies
+  pub users: Vec<UserId>,
+  /// The devices to which this policy applies
+  pub devices: Vec<DeviceId>,
   /// The groups to which this policy applies.
   pub groups: Vec<String>,
-  /// Full filesystems the groups can access.
+  /// Filesystems the users / devices / groups can access.
   pub filesystems: Vec<FilesystemId>,
-  /// Specific nodes the groups can access.
-  /// If the node is a folder, this gives access to all children.
-  pub nodes: Vec<NodeId>,
   /// Give the groups write access to configured filesystems and nodes.
   /// Otherwise access is read only.
   pub write: bool,
