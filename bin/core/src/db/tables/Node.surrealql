@@ -85,3 +85,29 @@ DEFINE FUNCTION OVERWRITE fn::node_next_inode($filesystem: record<Filesystem>) {
     $max + 1
   };
 };
+
+-- Find node using path components
+DEFINE FUNCTION OVERWRITE fn::node_by_path_components(
+  $filesystem: record<Filesystem>,
+  $components: array<string>,
+) {
+  RETURN fn::node_by_path_components_rec($filesystem, $components, 1, 0);
+};
+
+-- Find node using path components (recursive inner)
+DEFINE FUNCTION OVERWRITE fn::node_by_path_components_rec(
+  $filesystem: record<Filesystem>,
+  $components: array<string>,
+  $parent: int,
+  $i: int
+) {
+  LET $node = SELECT * FROM ONLY Node
+    WHERE filesystem = $filesystem
+    AND parent = $parent
+    AND name = $components[$i]
+    LIMIT 1;
+  IF $node == NONE || $i == $components.len() - 1 {
+    RETURN $node;
+  };
+  RETURN fn::node_by_path_components_rec($filesystem, $components, $node.inode, $i + 1);
+};

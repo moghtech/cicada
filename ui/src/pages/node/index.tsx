@@ -23,6 +23,7 @@ const NodePage = () => {
     { filesystem: _filesystem, inode, interpolated },
     { enabled: inode > 1 },
   );
+
   const filesystem = useRead("ListFilesystems", {}).data?.find(
     (fs) => fs.id === _filesystem,
   );

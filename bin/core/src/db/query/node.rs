@@ -105,30 +105,15 @@ pub async fn find_node_with_path(
     );
   }
 
-  DB.query(
-    "
-LET $node = SELECT * FROM Node
-  WHERE filesystem = $filesystem
-  AND parent = 1
-  AND name = $components[0]
-  LIMIT 1;
-FOR $i IN 1..$components.len() {
-  LET $node = SELECT * FROM Node
-    WHERE filesystem = $filesystem
-    AND parent = $node[0].inode
-    AND name = $components[$i]
-    LIMIT 1;
-};
-RETURN $node[0];",
-  )
-  .bind(("filesystem", body.filesystem))
-  .bind(("components", components))
-  .await
-  .context("Failed to query database")?
-  .take::<Option<NodeRecord>>(2)
-  .context("Failed to get query result")?
-  .context("Node not found at given path")
-  .status_code(StatusCode::NOT_FOUND)
+  DB.query("fn::node_by_path_components($filesystem, $components);")
+    .bind(("filesystem", body.filesystem))
+    .bind(("components", components))
+    .await
+    .context("Failed to query database")?
+    .take::<Option<NodeRecord>>(0)
+    .context("Failed to get query result")?
+    .context("No node found at given path")
+    .status_code(StatusCode::NOT_FOUND)
 }
 
 #[derive(SurrealValue)]

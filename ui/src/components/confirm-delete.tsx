@@ -55,8 +55,6 @@ const ConfirmDelete = ({
         </Flex>
       </Modal>
       <Button
-        variant="filled"
-        color="red"
         disabled={disabled}
         onClick={open}
         leftSection={<Trash2 size="1rem" />}
