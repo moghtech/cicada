@@ -6,11 +6,14 @@ use crate::{
 };
 
 pub async fn filesystems() -> anyhow::Result<()> {
-  let mut handles = FuturesUnordered::new();
+  let mut handles =
+    FuturesUnordered::<tokio::task::JoinHandle<()>>::new();
 
   let config = periphery_config();
 
-  for options in filesystem_mount_options() {
+  for options in
+    tokio::task::spawn_blocking(filesystem_mount_options).await?
+  {
     if !options.mountpoint.exists() {
       let _ = std::fs::create_dir_all(&options.mountpoint);
     }

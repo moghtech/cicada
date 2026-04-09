@@ -6,7 +6,7 @@ use std::{
 use anyhow::Context as _;
 use cicada_client::{
   api::{
-    read::node::{FindNode, ListNodes},
+    read::node::{FindNode, FindNodeWithPath, ListNodes},
     write::node::{
       CreateNode, DeleteNode, UpdateNode, UpdateNodeData,
     },
@@ -20,10 +20,46 @@ use fuser::*;
 
 use crate::{cicada, options::FilesystemMountOptions};
 
+fn node_to_file_attr(
+  node: NodeEntity,
+  uid: u32,
+  gid: u32,
+) -> FileAttr {
+  let size = node
+    .data
+    .as_ref()
+    .map(|data| data.len() as u64)
+    .unwrap_or_default();
+  let (kind, perm) = match node.kind {
+    NodeKind::Folder => {
+      (FileType::Directory, node.perm.unwrap_or(0o755))
+    }
+    NodeKind::File => {
+      (FileType::RegularFile, node.perm.unwrap_or(0o644))
+    }
+  };
+  FileAttr {
+    ino: INodeNo(node.inode),
+    size,
+    blocks: size.div_ceil(CicadaFs::BLOCK_SIZE),
+    atime: UNIX_EPOCH,
+    mtime: UNIX_EPOCH,
+    ctime: UNIX_EPOCH,
+    crtime: UNIX_EPOCH,
+    kind,
+    perm,
+    nlink: 1,
+    uid,
+    gid,
+    rdev: 0,
+    blksize: CicadaFs::BLOCK_SIZE as u32,
+    flags: 0,
+  }
+}
+
 pub struct CicadaFs {
   filesystem: FilesystemId,
-  // Mount non root folder / file
-  root_ino: INodeNo,
+  /// For when specific path not provided
   root: FileAttr,
   /// Whether working with filesystem pre or post secret interpolation.
   interpolated: bool,
@@ -39,7 +75,7 @@ impl CicadaFs {
     FilesystemMountOptions {
       name,
       id,
-      node,
+      path,
       mountpoint,
       rw,
       interpolated,
@@ -53,22 +89,33 @@ impl CicadaFs {
 
     info!("Mounting {mountpoint:?} as {uid}:{gid}");
 
-    let root = FileAttr {
-      ino: INodeNo::ROOT,
-      size: 0,
-      blocks: 0,
-      atime: UNIX_EPOCH,
-      mtime: UNIX_EPOCH,
-      ctime: UNIX_EPOCH,
-      crtime: UNIX_EPOCH,
-      kind: FileType::Directory,
-      perm: 0o755,
-      nlink: 2,
-      uid,
-      gid,
-      rdev: 0,
-      blksize: CicadaFs::BLOCK_SIZE as u32,
-      flags: 0,
+    let root = if let Some(path) = path
+      && path.components().count() > 0
+    {
+      let node = cicada().read(FindNodeWithPath {
+        filesystem: id.clone(),
+        path,
+        interpolated,
+      })?;
+      node_to_file_attr(node, uid, gid)
+    } else {
+      FileAttr {
+        ino: INodeNo::ROOT,
+        size: 0,
+        blocks: 0,
+        atime: UNIX_EPOCH,
+        mtime: UNIX_EPOCH,
+        ctime: UNIX_EPOCH,
+        crtime: UNIX_EPOCH,
+        kind: FileType::Directory,
+        perm: 0o755,
+        nlink: 2,
+        uid,
+        gid,
+        rdev: 0,
+        blksize: CicadaFs::BLOCK_SIZE as u32,
+        flags: 0,
+      }
     };
 
     let mut config = fuser::Config::default();
@@ -81,7 +128,6 @@ impl CicadaFs {
 
     let fs = CicadaFs {
       filesystem: id,
-      root_ino: INodeNo(1),
       root,
       interpolated,
       allowed_uids: allow_uids.iter().cloned().chain([uid]).collect(),
@@ -98,36 +144,7 @@ impl CicadaFs {
   }
 
   fn node_to_file_attr(&self, node: NodeEntity) -> FileAttr {
-    let size = node
-      .data
-      .as_ref()
-      .map(|data| data.len() as u64)
-      .unwrap_or_default();
-    let (kind, perm) = match node.kind {
-      NodeKind::Folder => {
-        (FileType::Directory, node.perm.unwrap_or(0o755))
-      }
-      NodeKind::File => {
-        (FileType::RegularFile, node.perm.unwrap_or(0o644))
-      }
-    };
-    FileAttr {
-      ino: INodeNo(node.inode),
-      size,
-      blocks: size.div_ceil(CicadaFs::BLOCK_SIZE),
-      atime: UNIX_EPOCH,
-      mtime: UNIX_EPOCH,
-      ctime: UNIX_EPOCH,
-      crtime: UNIX_EPOCH,
-      kind,
-      perm,
-      nlink: 1,
-      uid: self.root.uid,
-      gid: self.root.gid,
-      rdev: 0,
-      blksize: CicadaFs::BLOCK_SIZE as u32,
-      flags: 0,
-    }
+    node_to_file_attr(node, self.root.uid, self.root.gid)
   }
 }
 
@@ -165,6 +182,7 @@ impl fuser::Filesystem for CicadaFs {
       reply.error(Errno::EACCES);
       return;
     }
+    let ino = if ino == 1 { self.root.ino.0 } else { ino };
     let nodes = match cicada().read(ListNodes {
       filesystem: self.filesystem.clone().into(),
       parent: ino.into(),
@@ -216,6 +234,7 @@ impl fuser::Filesystem for CicadaFs {
       reply.error(Errno::EACCES);
       return;
     }
+    let parent = if parent == 1 { self.root.ino.0 } else { parent };
     let Some(name) = name.to_str() else {
       debug!("LOOKUP FAILED: Name {name:?} is not valid UTF-8");
       reply.error(Errno::ENOENT);
@@ -251,6 +270,7 @@ impl fuser::Filesystem for CicadaFs {
       reply.error(Errno::EACCES);
       return;
     }
+    let ino = if ino == 1 { self.root.ino.0 } else { ino };
     // handle root case
     if ino == 1 {
       reply.attr(&CicadaFs::TTL, &self.root);
@@ -289,6 +309,7 @@ impl fuser::Filesystem for CicadaFs {
       reply.error(Errno::EACCES);
       return;
     }
+    let ino = if ino == 1 { self.root.ino.0 } else { ino };
     // Root inode has no data
     if ino == 1 {
       reply.error(Errno::ENOENT);
@@ -331,6 +352,7 @@ impl fuser::Filesystem for CicadaFs {
       reply.error(Errno::EACCES);
       return;
     }
+    let ino = if ino == 1 { self.root.ino.0 } else { ino };
     // Root inode
     if ino == 1 {
       reply.opened(FileHandle(0), FopenFlags::empty());
@@ -371,6 +393,7 @@ impl fuser::Filesystem for CicadaFs {
       reply.error(Errno::EACCES);
       return;
     }
+    let parent = if parent == 1 { self.root.ino.0 } else { parent };
     let Some(name) = name.to_str() else {
       debug!("CREATE FAILED: Name {name:?} is not valid UTF-8");
       reply.error(Errno::EINVAL);
@@ -421,6 +444,7 @@ impl fuser::Filesystem for CicadaFs {
       reply.error(Errno::EACCES);
       return;
     }
+    let parent = if parent == 1 { self.root.ino.0 } else { parent };
     let Some(name) = name.to_str() else {
       debug!("MKDIR FAILED: Name {name:?} is not valid UTF-8");
       reply.error(Errno::EINVAL);
@@ -468,6 +492,7 @@ impl fuser::Filesystem for CicadaFs {
       reply.error(Errno::EACCES);
       return;
     }
+    let ino = if ino == 1 { self.root.ino.0 } else { ino };
     let node = match cicada().read(FindNode::with_inode(
       self.filesystem.clone(),
       ino,
@@ -548,6 +573,7 @@ impl fuser::Filesystem for CicadaFs {
       reply.error(Errno::EACCES);
       return;
     }
+    let ino = if ino == 1 { self.root.ino.0 } else { ino };
     if ino == 1 {
       reply.attr(&CicadaFs::TTL, &self.root);
       return;
@@ -650,6 +676,7 @@ impl fuser::Filesystem for CicadaFs {
       reply.error(Errno::EACCES);
       return;
     }
+    let parent = if parent == 1 { self.root.ino.0 } else { parent };
     let Some(name) = name.to_str() else {
       debug!("UNLINK FAILED: Name {name:?} is not valid UTF-8");
       reply.error(Errno::EINVAL);
@@ -697,6 +724,7 @@ impl fuser::Filesystem for CicadaFs {
       reply.error(Errno::EACCES);
       return;
     }
+    let parent = if parent == 1 { self.root.ino.0 } else { parent };
     let Some(name) = name.to_str() else {
       debug!("RMDIR FAILED: Name {name:?} is not valid UTF-8");
       reply.error(Errno::EINVAL);
@@ -747,6 +775,7 @@ impl fuser::Filesystem for CicadaFs {
       reply.error(Errno::EACCES);
       return;
     }
+    let parent = if parent == 1 { self.root.ino.0 } else { parent };
     let Some(name) = name.to_str() else {
       debug!("RENAME FAILED: Name {name:?} is not valid UTF-8");
       reply.error(Errno::EINVAL);
