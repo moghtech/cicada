@@ -38,6 +38,7 @@ pub async fn get_user_entity(
     external_logins,
     passkey: user.passkey.is_some(),
     totp: !user.totp_secret.is_empty(),
+    groups: user.groups,
     external_skip_2fa: user.external_skip_2fa,
     admin: user.admin,
     super_admin: user.super_admin,

@@ -11,6 +11,7 @@ mod config;
 mod db;
 mod encryption;
 mod interpolate;
+mod permission;
 
 async fn app() -> mogh_error::Result<()> {
   let startup_span = info_span!("CoreStartup");

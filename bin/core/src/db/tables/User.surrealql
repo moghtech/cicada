@@ -44,6 +44,12 @@ DEFINE FIELD OVERWRITE external_skip_2fa
   TYPE bool
   DEFAULT true;
 
+-- groups
+DEFINE FIELD OVERWRITE groups
+  ON TABLE User
+  TYPE array<string>
+  DEFAULT [];
+
 -- admin
 DEFINE FIELD OVERWRITE admin
   ON TABLE User

@@ -38,6 +38,10 @@ pub struct UserEntity {
   // ===============
   // = PERMISSIONS =
   // ===============
+  /// The groups to which this user belongs.
+  #[surreal(default)]
+  #[serde(default)]
+  pub groups: Vec<String>,
   /// User has full API access as an administrator.
   #[surreal(default)]
   #[serde(default)]
@@ -88,6 +92,10 @@ pub struct UserRecord {
   // ===============
   // = PERMISSIONS =
   // ===============
+  /// The groups to which this user belongs.
+  #[surreal(default)]
+  #[serde(default)]
+  pub groups: Vec<String>,
   /// User has full API access as an administrator.
   #[surreal(default)]
   #[serde(default)]
