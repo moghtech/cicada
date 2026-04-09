@@ -100,6 +100,7 @@ function CreateNodeForm({
           selected={form.getValues().encryption_key}
           onSelect={(id) => form.setFieldValue("encryption_key", id)}
           withinPortal={false}
+          autoSelectFirst
         />
       )}
       <Button

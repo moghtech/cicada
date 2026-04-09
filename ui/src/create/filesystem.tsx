@@ -68,6 +68,7 @@ function CreateFilesystemForm({ close }: { close: () => void }) {
         selected={form.getValues().encryption_key}
         onSelect={(id) => form.setFieldValue("encryption_key", id)}
         withinPortal={false}
+        autoSelectFirst
       />
       <Button
         leftSection={<Plus size="1rem" />}

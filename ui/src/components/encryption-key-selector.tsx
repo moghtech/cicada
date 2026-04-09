@@ -19,6 +19,7 @@ export interface EncryptionKeySelectorProps extends ComboboxProps {
   defaultKey?: string;
   selected: string | undefined;
   onSelect?: (id: string) => void;
+  autoSelectFirst?: boolean;
   disabled?: boolean;
   placeholder?: string;
   targetProps?: ButtonProps;
@@ -30,6 +31,7 @@ export default function EncryptionKeySelector({
   defaultKey,
   selected,
   onSelect,
+  autoSelectFirst,
   disabled,
   placeholder,
   position = "bottom-start",
@@ -42,7 +44,8 @@ export default function EncryptionKeySelector({
 
   const firstEncryptionKey = defaultKey ?? encryptionKeys?.[0]?.id;
   useEffect(() => {
-    !clearable &&
+    autoSelectFirst &&
+      !clearable &&
       firstEncryptionKey &&
       !selected &&
       onSelect?.(firstEncryptionKey);
