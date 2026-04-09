@@ -842,7 +842,7 @@ dependencies = [
 
 [[package]]
 name = "cicada_client"
-version = "0.5.0-dev-2"
+version = "0.5.0-dev-3"
 dependencies = [
  "async_timing_util",
  "http 1.4.0",
@@ -864,7 +864,7 @@ dependencies = [
 
 [[package]]
 name = "cicada_core"
-version = "0.5.0-dev-2"
+version = "0.5.0-dev-3"
 dependencies = [
  "async_timing_util",
  "axum 0.8.8",
@@ -902,7 +902,7 @@ dependencies = [
 
 [[package]]
 name = "cicada_periphery"
-version = "0.5.0-dev-2"
+version = "0.5.0-dev-3"
 dependencies = [
  "anyhow",
  "cicada_client",
