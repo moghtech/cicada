@@ -81,10 +81,12 @@ mod write {
     write::create_encryption_key,
     write::update_encryption_key,
     write::initialize_encryption_key,
+    write::uninitialize_encryption_key,
     // POLICY
     write::create_policy,
     write::update_policy,
     write::delete_policy,
+    write::batch_delete_policies,
   ),
 )]
 pub struct CicadaApi;

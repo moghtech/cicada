@@ -1,5 +1,5 @@
 use cicada_client::api::write::{
-  CreatePolicy, DeletePolicy, UpdatePolicy,
+  BatchDeletePolicies, CreatePolicy, DeletePolicy, UpdatePolicy,
 };
 use mogh_resolver::Resolve;
 
@@ -38,5 +38,17 @@ impl Resolve<WriteArgs> for DeletePolicy {
   ) -> Result<Self::Response, Self::Error> {
     client.admin_only()?;
     query::policy::delete_policy(self.id).await
+  }
+}
+
+//
+
+impl Resolve<WriteArgs> for BatchDeletePolicies {
+  async fn resolve(
+    self,
+    WriteArgs { client }: &WriteArgs,
+  ) -> Result<Self::Response, Self::Error> {
+    client.admin_only()?;
+    query::policy::batch_delete_policies(self.ids).await
   }
 }

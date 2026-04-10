@@ -17,7 +17,9 @@ import { ChevronRight, Link2, PointerOff } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 
 export default function Sidebar({ close }: { close: () => void }) {
-  const devicesPage =
+  const accessPage =
+    location.pathname.startsWith("/access") ||
+    location.pathname.startsWith("/users") ||
     location.pathname.startsWith("/devices") ||
     location.pathname.startsWith("/onboarding-keys");
   const encryptionPage = location.pathname.startsWith("/encryption-keys");
@@ -46,13 +48,13 @@ export default function Sidebar({ close }: { close: () => void }) {
       <ScrollArea>
         <Stack gap="0.15rem" mr="md">
           <Button
-            variant={devicesPage ? "default" : "subtle"}
-            onClick={() => nav("/devices")}
-            leftSection={<ICONS.Device size="1rem" />}
+            variant={accessPage ? "default" : "subtle"}
+            onClick={() => nav("/access")}
+            leftSection={<ICONS.Access size="1rem" />}
             justify="flex-start"
             fullWidth
           >
-            Devices
+            Access
           </Button>
           <Button
             variant={encryptionPage ? "default" : "subtle"}

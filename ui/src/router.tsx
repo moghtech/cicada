@@ -16,7 +16,7 @@ import { useAuthState } from "mogh_ui";
 // Lazy import pages
 const Login = lazy(() => import("@/pages/login"));
 const Profile = lazy(() => import("@/pages/profile"));
-const Devices = lazy(() => import("@/pages/devices"));
+const Access = lazy(() => import("@/pages/access"));
 const Device = lazy(() => import("@/pages/device"));
 const OnboardingKey = lazy(() => import("@/pages/onboarding-key"));
 const Filesystems = lazy(() => import("@/pages/filesystems"));
@@ -54,7 +54,7 @@ export const Router = () => {
             <Route path="filesystems/:filesystem" element={<Node />} />
             <Route path="filesystems/:filesystem/:inode" element={<Node />} />
             <Route path="profile" element={<Profile />} />
-            <Route path="devices" element={<Devices />} />
+            <Route path="access" element={<Access />} />
             <Route path="devices/:device" element={<Device />} />
             <Route
               path="onboarding-keys/:onboardingKey"

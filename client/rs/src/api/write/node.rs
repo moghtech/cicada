@@ -66,7 +66,7 @@ pub struct CreateNode {
   /// - `"Inherit"` (inherit from filesystem option) (default)
   /// - `"Brackets"` (`[[SECRET]]`)
   /// - `"CurlyBrackets"` (`{{SECRET}}`)
-  /// - `"EnvVar"` (`{{SECRET}}`)
+  /// - `"EnvVar"` (`${SECRET}`)
   /// - `"Disabled"` (Interpolation disabled for this file)
   pub interpolation: Option<InterpolationMode>,
   /// Data associated with the node.
@@ -134,7 +134,7 @@ pub struct UpdateNode {
   /// - `"Inherit"` (inherit from filesystem option) (default)
   /// - `"Brackets"` (`[[SECRET]]`)
   /// - `"CurlyBrackets"` (`{{SECRET}}`)
-  /// - `"EnvVar"` (`{{SECRET}}`)
+  /// - `"EnvVar"` (`${SECRET}`)
   /// - `"Disabled"` (Interpolation disabled for this file)
   #[serde(skip_serializing_if = "Option::is_none")]
   pub interpolation: Option<InterpolationMode>,

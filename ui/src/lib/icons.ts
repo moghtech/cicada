@@ -15,12 +15,16 @@ import {
   CircleMinus,
   X,
   Save,
+  Lock,
+  ChevronsLeftRightEllipsis,
 } from "lucide-react";
 
 export const ICONS = {
+  Access: Lock,
   User,
   Device: Server,
   OnboardingKey: KeyRound,
+  Policy: ChevronsLeftRightEllipsis,
   Filesystem: HardDrive,
   Folder: FolderOpen,
   File,

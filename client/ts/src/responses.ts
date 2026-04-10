@@ -83,4 +83,5 @@ export type WriteResponses = {
   CreatePolicy: Types.CreatePolicyResponse;
   UpdatePolicy: Types.UpdatePolicyResponse;
   DeletePolicy: Types.DeletePolicyResponse;
+  BatchDeletePolicies: Types.BatchDeletePoliciesResponse;
 };

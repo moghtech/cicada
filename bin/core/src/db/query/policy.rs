@@ -102,3 +102,15 @@ pub async fn delete_policy(
     .context("No Policy matching given ID")
     .status_code(StatusCode::NOT_FOUND)
 }
+
+pub async fn batch_delete_policies(
+  ids: Vec<PolicyId>,
+) -> mogh_error::Result<Vec<PolicyRecord>> {
+  DB.query("DELETE Policy WHERE id IN $ids RETURN BEFORE;")
+    .bind(("ids", ids))
+    .await
+    .context("Failed to delete policies")?
+    .take(0)
+    .context("Invalid delete policies query response")
+    .map_err(Into::into)
+}

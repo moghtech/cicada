@@ -43,7 +43,7 @@ pub struct CreateFilesystem {
   /// The default interpolation mode
   /// - `"Brackets"` (`[[SECRET]]`)
   /// - `"CurlyBrackets"` (`{{SECRET}}`)
-  /// - `"EnvVar"` (`{{SECRET}}`)
+  /// - `"EnvVar"` (`${SECRET}`)
   /// - `"Disabled"`
   pub interpolation: Option<InterpolationMode>,
   /// Choose a specific encryption key.
@@ -89,7 +89,7 @@ pub struct UpdateFilesystem {
   /// The default interpolation mode
   /// - `"Brackets"` (`[[SECRET]]`)
   /// - `"CurlyBrackets"` (`{{SECRET}}`)
-  /// - `"EnvVar"` (`{{SECRET}}`)
+  /// - `"EnvVar"` (`${SECRET}`)
   /// - `"Disabled"`
   #[serde(skip_serializing_if = "Option::is_none")]
   pub interpolation: Option<InterpolationMode>,

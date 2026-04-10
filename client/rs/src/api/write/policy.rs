@@ -148,3 +148,37 @@ pub struct DeletePolicy {
 /// Response for [DeletePolicy].
 #[typeshare]
 pub type DeletePolicyResponse = PolicyRecord;
+
+//
+
+#[cfg(feature = "utoipa")]
+#[utoipa::path(
+  post,
+  path = "/write/BatchDeletePolicies",
+  description = "Batch delete policies",
+  request_body(content = BatchDeletePolicies),
+  responses(
+    (status = 200, description = "The deleted policies", body = BatchDeletePoliciesResponse),
+    (status = 500, description = "Request failed", body = mogh_error::Serror)
+  ),
+)]
+pub fn batch_delete_policies() {}
+
+/// Batch delete policies. Response: [BatchDeletePoliciesResponse].
+#[typeshare]
+#[derive(
+  Debug, Clone, Serialize, Deserialize, SurrealValue, Resolve,
+)]
+#[surreal(crate = "surrealdb_types")]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
+#[empty_traits(CicadaWriteRequest)]
+#[response(BatchDeletePoliciesResponse)]
+#[error(mogh_error::Error)]
+pub struct BatchDeletePolicies {
+  /// The policy IDs
+  pub ids: Vec<PolicyId>,
+}
+
+/// Response for [BatchDeletePolicies].
+#[typeshare]
+pub type BatchDeletePoliciesResponse = Vec<PolicyRecord>;

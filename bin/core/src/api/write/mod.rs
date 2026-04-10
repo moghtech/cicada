@@ -81,6 +81,7 @@ pub enum WriteRequest {
   CreatePolicy(CreatePolicy),
   UpdatePolicy(UpdatePolicy),
   DeletePolicy(DeletePolicy),
+  BatchDeletePolicies(BatchDeletePolicies),
 }
 
 pub fn router() -> Router {

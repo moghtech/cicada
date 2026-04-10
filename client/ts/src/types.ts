@@ -149,6 +149,38 @@ export interface OnboardingKeyRecord {
 /** Response for [BatchDeleteOnboardingKeys]. */
 export type BatchDeleteOnboardingKeysResponse = OnboardingKeyRecord[];
 
+export type PolicyId = string;
+
+export type UserId = string;
+
+/** Give groups access to filesystems and nodes */
+export interface PolicyRecord {
+	/** The unique policy id */
+	id: PolicyId;
+	/** The name of the policy. Must be unique. */
+	name: string;
+	/** The users to which this policy applies */
+	users: UserId[];
+	/** The devices to which this policy applies */
+	devices: DeviceId[];
+	/** The groups to which this policy applies. */
+	groups: string[];
+	/** Filesystems the users / devices / groups can access. */
+	filesystems: FilesystemId[];
+	/**
+	 * Give the groups write access to configured filesystems.
+	 * Otherwise access is read only.
+	 */
+	filesystem_write: boolean;
+	/** Created at as ISO8601 timestamp. */
+	created_at: Iso8601Timestamp;
+	/** Updated at as ISO8601 timestamp. */
+	updated_at: Iso8601Timestamp;
+}
+
+/** Response for [BatchDeletePolicies]. */
+export type BatchDeletePoliciesResponse = PolicyRecord[];
+
 export type SecretId = string;
 
 /** Secrets over the API, with unencrypted data */
@@ -253,35 +285,6 @@ export type CreateFilesystemResponse = FilesystemRecord;
 
 /** Response for [CreateNode]. */
 export type CreateNodeResponse = NodeEntity;
-
-export type PolicyId = string;
-
-export type UserId = string;
-
-/** Give groups access to filesystems and nodes */
-export interface PolicyRecord {
-	/** The unique policy id */
-	id: PolicyId;
-	/** The name of the policy. Must be unique. */
-	name: string;
-	/** The users to which this policy applies */
-	users: UserId[];
-	/** The devices to which this policy applies */
-	devices: DeviceId[];
-	/** The groups to which this policy applies. */
-	groups: string[];
-	/** Filesystems the users / devices / groups can access. */
-	filesystems: FilesystemId[];
-	/**
-	 * Give the groups write access to configured filesystems.
-	 * Otherwise access is read only.
-	 */
-	filesystem_write: boolean;
-	/** Created at as ISO8601 timestamp. */
-	created_at: Iso8601Timestamp;
-	/** Updated at as ISO8601 timestamp. */
-	updated_at: Iso8601Timestamp;
-}
 
 /** Response for [CreatePolicy]. */
 export type CreatePolicyResponse = PolicyRecord;
@@ -413,6 +416,77 @@ export type GetPolicyResponse = PolicyRecord;
 /** Response for [GetSecret]. */
 export type GetSecretResponse = SecretEntity;
 
+/** The available kinds external of user logins. */
+export enum ExternalLoginKind {
+	Oidc = "Oidc",
+	Github = "Github",
+	Google = "Google",
+}
+
+/** Stores external user logins */
+export interface ExternalLoginRecord {
+	/** The unique user login id */
+	id: ExternalLoginId;
+	/** The user which this method logs in */
+	user: UserId;
+	/**
+	 * The type of login.
+	 * - **Oidc**
+	 * - **Github**
+	 * - **Google**
+	 */
+	kind: ExternalLoginKind;
+	/**
+	 * The login method external id.
+	 * - **Oidc**: The OIDC user subject identifier
+	 * - **Github**: The Github user id
+	 * - **Google**: The Google user id
+	 */
+	external_id: string;
+	/** Created at as ISO8601 timestamp. */
+	created_at: Iso8601Timestamp;
+	/** Updated at as ISO8601 timestamp. */
+	updated_at: Iso8601Timestamp;
+}
+
+/** Users queryable from the API */
+export interface UserEntity {
+	/** The unique user id */
+	id: UserId;
+	/** The name of the user, ie username */
+	username: string;
+	/** Link for user avatar, or empty string. */
+	avatar: string;
+	/**
+	 * Whether user is enabled.
+	 * Disabled users cannot log in and have no API access.
+	 */
+	enabled: boolean;
+	/** Whether user has password set. */
+	password: boolean;
+	/** The external login methods the user has set. */
+	external_logins: ExternalLoginRecord[];
+	/** Whether user is enrolled in passkey 2fa */
+	passkey: boolean;
+	/** Whether user is enrolled in TOTP 2fa */
+	totp: boolean;
+	/** Allow external logins to skip 2fa. */
+	external_skip_2fa: boolean;
+	/** The groups to which this user belongs. */
+	groups: string[];
+	/** User has full API access as an administrator. */
+	admin: boolean;
+	/** User can elevate or demote other users admin and super_admin properties. */
+	super_admin: boolean;
+	/** Created at as ISO8601 timestamp. */
+	created_at: Iso8601Timestamp;
+	/** Updated at as ISO8601 timestamp. */
+	updated_at: Iso8601Timestamp;
+}
+
+/** Response for [GetUser]. */
+export type GetUserResponse = UserEntity;
+
 /** Represents an empty json object: `{}` */
 export interface NoData {
 }
@@ -487,6 +561,9 @@ export interface SecretListItem {
 /** Response for [ListSecrets]. */
 export type ListSecretsResponse = SecretListItem[];
 
+/** Response for [ListUsers]. */
+export type ListUsersResponse = UserEntity[];
+
 /** Response for [RotateNodeEnvelopeKey]. */
 export type RotateNodeEnvelopeKeyResponse = NodeEntity;
 
@@ -556,6 +633,12 @@ export interface BatchDeleteOnboardingKeys {
 	ids: OnboardingKeyId[];
 }
 
+/** Batch delete policies. Response: [BatchDeletePoliciesResponse]. */
+export interface BatchDeletePolicies {
+	/** The policy IDs */
+	ids: PolicyId[];
+}
+
 /** Batch delete secrets. Response: [BatchDeleteSecretsResponse]. */
 export interface BatchDeleteSecrets {
 	/** The onboarding_key ID */
@@ -595,7 +678,7 @@ export interface CreateFilesystem {
 	 * The default interpolation mode
 	 * - `"Brackets"` (`[[SECRET]]`)
 	 * - `"CurlyBrackets"` (`{{SECRET}}`)
-	 * - `"EnvVar"` (`{{SECRET}}`)
+	 * - `"EnvVar"` (`${SECRET}`)
 	 * - `"Disabled"`
 	 */
 	interpolation?: InterpolationMode;
@@ -638,7 +721,7 @@ export interface CreateNode {
 	 * - `"Inherit"` (inherit from filesystem option) (default)
 	 * - `"Brackets"` (`[[SECRET]]`)
 	 * - `"CurlyBrackets"` (`{{SECRET}}`)
-	 * - `"EnvVar"` (`{{SECRET}}`)
+	 * - `"EnvVar"` (`${SECRET}`)
 	 * - `"Disabled"` (Interpolation disabled for this file)
 	 */
 	interpolation?: InterpolationMode;
@@ -824,39 +907,6 @@ export interface EncryptedData {
 	data_nonce: string;
 }
 
-/** The available kinds external of user logins. */
-export enum ExternalLoginKind {
-	Oidc = "Oidc",
-	Github = "Github",
-	Google = "Google",
-}
-
-/** Stores external user logins */
-export interface ExternalLoginRecord {
-	/** The unique user login id */
-	id: ExternalLoginId;
-	/** The user which this method logs in */
-	user: UserId;
-	/**
-	 * The type of login.
-	 * - **Oidc**
-	 * - **Github**
-	 * - **Google**
-	 */
-	kind: ExternalLoginKind;
-	/**
-	 * The login method external id.
-	 * - **Oidc**: The OIDC user subject identifier
-	 * - **Github**: The Github user id
-	 * - **Google**: The Google user id
-	 */
-	external_id: string;
-	/** Created at as ISO8601 timestamp. */
-	created_at: Iso8601Timestamp;
-	/** Updated at as ISO8601 timestamp. */
-	updated_at: Iso8601Timestamp;
-}
-
 /**
  * Find a node. Response: [NodeEntity].
  * 
@@ -940,6 +990,12 @@ export interface GetSecret {
 	id: SecretId;
 }
 
+/** Get a specific user by id or name. Response: [GetUserResponse]. */
+export interface GetUser {
+	/** User id or name */
+	id: string;
+}
+
 /**
  * Gets the username of a specific user.
  * Response: [GetUsernameResponse].
@@ -1015,6 +1071,10 @@ export interface ListSecrets {
 	filesystem?: FilesystemId;
 	/** parent isecret number. */
 	parent?: U64;
+}
+
+/** List users. Response: [ListUsersResponse]. */
+export interface ListUsers {
 }
 
 /** Nodes stored on the database, with encrypted data */
@@ -1136,7 +1196,7 @@ export interface UpdateFilesystem {
 	 * The default interpolation mode
 	 * - `"Brackets"` (`[[SECRET]]`)
 	 * - `"CurlyBrackets"` (`{{SECRET}}`)
-	 * - `"EnvVar"` (`{{SECRET}}`)
+	 * - `"EnvVar"` (`${SECRET}`)
 	 * - `"Disabled"`
 	 */
 	interpolation?: InterpolationMode;
@@ -1171,7 +1231,7 @@ export interface UpdateNode {
 	 * - `"Inherit"` (inherit from filesystem option) (default)
 	 * - `"Brackets"` (`[[SECRET]]`)
 	 * - `"CurlyBrackets"` (`{{SECRET}}`)
-	 * - `"EnvVar"` (`{{SECRET}}`)
+	 * - `"EnvVar"` (`${SECRET}`)
 	 * - `"Disabled"` (Interpolation disabled for this file)
 	 */
 	interpolation?: InterpolationMode;
@@ -1270,41 +1330,6 @@ export interface UpdateUser {
 	username?: string;
 	/** Whether user is enabled */
 	enabled?: boolean;
-}
-
-/** Users queryable from the API */
-export interface UserEntity {
-	/** The unique user id */
-	id: UserId;
-	/** The name of the user, ie username */
-	username: string;
-	/** Link for user avatar, or empty string. */
-	avatar: string;
-	/**
-	 * Whether user is enabled.
-	 * Disabled users cannot log in and have no API access.
-	 */
-	enabled: boolean;
-	/** Whether user has password set. */
-	password: boolean;
-	/** The external login methods the user has set. */
-	external_logins: ExternalLoginRecord[];
-	/** Whether user is enrolled in passkey 2fa */
-	passkey: boolean;
-	/** Whether user is enrolled in TOTP 2fa */
-	totp: boolean;
-	/** Allow external logins to skip 2fa. */
-	external_skip_2fa: boolean;
-	/** The groups to which this user belongs. */
-	groups: string[];
-	/** User has full API access as an administrator. */
-	admin: boolean;
-	/** User can elevate or demote other users admin and super_admin properties. */
-	super_admin: boolean;
-	/** Created at as ISO8601 timestamp. */
-	created_at: Iso8601Timestamp;
-	/** Updated at as ISO8601 timestamp. */
-	updated_at: Iso8601Timestamp;
 }
 
 /**
@@ -1426,5 +1451,6 @@ export type WriteRequest =
 	| { type: "UninitializeEncryptionKey", params: UninitializeEncryptionKey }
 	| { type: "CreatePolicy", params: CreatePolicy }
 	| { type: "UpdatePolicy", params: UpdatePolicy }
-	| { type: "DeletePolicy", params: DeletePolicy };
+	| { type: "DeletePolicy", params: DeletePolicy }
+	| { type: "BatchDeletePolicies", params: BatchDeletePolicies };
 
