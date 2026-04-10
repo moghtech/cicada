@@ -42,7 +42,7 @@ pub struct CreateSecret {
   /// An optional description for the secret
   #[serde(default)]
   pub description: String,
-  /// The secret data to store encrypted.
+  /// The secret data.
   pub data: Option<String>,
   /// Choose a specific encryption key.
   /// Otherwise chooses the current global default.

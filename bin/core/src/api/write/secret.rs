@@ -28,26 +28,24 @@ impl Resolve<WriteArgs> for CreateSecret {
       description: self.description,
     })
     .await?;
-    let secret = if let Some(data) = self.data {
-      let encryption_key_id = if let Some(id) = self.encryption_key {
-        id
-      } else {
-        query::encryption_key::list_all_encryption_keys()
-          .await?
-          .pop()
-          .context("No encryption keys")?
-          .id
-      };
-      let data = encrypt_data(
-        encryption_key_id.0,
-        data.as_bytes(),
-        &secret.id.0,
-      )
-      .await?;
-      query::secret::update_secret_data(secret.id, Some(data)).await?
+    let encryption_key_id = if let Some(id) = self.encryption_key {
+      id
     } else {
-      secret
+      query::encryption_key::list_all_encryption_keys()
+        .await?
+        .pop()
+        .context("No encryption keys")?
+        .id
     };
+    let data = encrypt_data(
+      encryption_key_id.0,
+      self.data.unwrap_or_default().as_bytes(),
+      &secret.id.0,
+    )
+    .await?;
+    let secret =
+      query::secret::update_secret_data(secret.id, Some(data))
+        .await?;
     decrypt_secret(secret).await
   }
 }
