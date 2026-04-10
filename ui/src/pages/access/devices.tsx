@@ -1,16 +1,21 @@
 import ConfirmDelete from "@/components/confirm-delete";
-import { DataTable, filterBySplit, SearchInput, SortableHeader } from "mogh_ui";
+import {
+  DataTable,
+  EnableSwitch,
+  filterBySplit,
+  SearchInput,
+  SortableHeader,
+} from "mogh_ui";
 import { useInvalidate, useRead, useWrite } from "@/lib/hooks";
 import { Group, List, Text } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { RowSelectionState } from "@tanstack/react-table";
 import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import GroupMultiSelector from "@/components/group-multi-selector";
+import ResourceLink from "@/components/resource-link";
 
 export default function DevicesPage() {
   const inv = useInvalidate();
-  const nav = useNavigate();
   const { data } = useRead("ListDevices", {});
   const byId = useMemo(
     () =>
@@ -64,7 +69,6 @@ export default function DevicesPage() {
       <DataTable
         tableKey="devices-table-v1"
         data={devices}
-        onRowClick={(device) => nav("/devices/" + device.id)}
         selectOptions={{
           selectKey: (row) => row.id,
           state: [selected, setSelected],
@@ -75,6 +79,23 @@ export default function DevicesPage() {
               <SortableHeader column={column} title="Name" />
             ),
             accessorKey: "name",
+            cell: ({ row }) => (
+              <ResourceLink type="Device" id={row.original.id} />
+            ),
+          },
+          {
+            header: ({ column }) => (
+              <SortableHeader column={column} title="Enabled" />
+            ),
+            accessorKey: "enabled",
+            cell: ({ row }) => (
+              <EnableSwitch
+                checked={row.original.enabled}
+                onCheckedChange={(enabled) =>
+                  updateDevice({ id: row.original.id, enabled })
+                }
+              />
+            ),
           },
           {
             header: "Groups",

@@ -259,7 +259,7 @@ impl AuthImpl for CicadaAuthImpl {
     Box::pin(async {
       update_user_fields(
         user_id,
-        UpdateUser {
+        UpdateUserFields {
           name: Some(username),
           ..Default::default()
         },
@@ -277,7 +277,7 @@ impl AuthImpl for CicadaAuthImpl {
     Box::pin(async {
       update_user_fields(
         user_id,
-        UpdateUser {
+        UpdateUserFields {
           password: Some(password),
           ..Default::default()
         },
@@ -481,7 +481,7 @@ impl AuthImpl for CicadaAuthImpl {
       let kind = match provider {
         LoginProvider::Local => {
           // Handle password updates using field updater
-          let update = UpdateUser {
+          let update = UpdateUserFields {
             password: Some(String::new()),
             ..Default::default()
           };
@@ -525,7 +525,7 @@ impl AuthImpl for CicadaAuthImpl {
     Box::pin(async {
       update_user_fields(
         user_id,
-        UpdateUser {
+        UpdateUserFields {
           totp_secret: Some(totp_secret),
           ..Default::default()
         },
@@ -542,7 +542,7 @@ impl AuthImpl for CicadaAuthImpl {
     Box::pin(async {
       update_user_fields(
         user_id,
-        UpdateUser {
+        UpdateUserFields {
           totp_secret: Some(String::new()),
           ..Default::default()
         },
@@ -563,7 +563,7 @@ impl AuthImpl for CicadaAuthImpl {
     Box::pin(async move {
       update_user_fields(
         user_id,
-        UpdateUser {
+        UpdateUserFields {
           external_skip_2fa: Some(external_skip_2fa),
           ..Default::default()
         },

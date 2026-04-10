@@ -1,18 +1,28 @@
 use cicada_client::api::write::{
   BatchDeleteUsers, CreateUser, DeleteUser, UpdateUser,
 };
+use mogh_auth_server::AuthImpl;
 use mogh_error::{AddStatusCodeError, StatusCode, anyhow::anyhow};
 use mogh_resolver::Resolve;
 
-use crate::{api::write::WriteArgs, db::query};
+use crate::{api::write::WriteArgs, auth::CicadaAuthImpl, db::query};
 
 impl Resolve<WriteArgs> for CreateUser {
   async fn resolve(
-    self,
+    mut self,
     WriteArgs { client }: &WriteArgs,
   ) -> Result<Self::Response, Self::Error> {
     client.admin_only()?;
-    todo!()
+
+    CicadaAuthImpl.validate_username(&self.username)?;
+    CicadaAuthImpl.validate_password(&self.password)?;
+
+    self.password = bcrypt::hash(
+      self.password.as_bytes(),
+      CicadaAuthImpl.local_auth_bcrypt_cost(),
+    )?;
+
+    query::user::create_user(self).await
   }
 }
 
@@ -20,11 +30,17 @@ impl Resolve<WriteArgs> for CreateUser {
 
 impl Resolve<WriteArgs> for UpdateUser {
   async fn resolve(
-    self,
+    mut self,
     WriteArgs { client }: &WriteArgs,
   ) -> Result<Self::Response, Self::Error> {
     client.admin_only()?;
-    todo!()
+    // Make sure user can't un-enable or un-admin themselves
+    if self.id == client.as_user()?.id {
+      self.enabled = None;
+      self.admin = None;
+      self.super_admin = None;
+    }
+    query::user::update_user(self).await
   }
 }
 

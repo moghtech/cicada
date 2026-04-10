@@ -37,6 +37,7 @@ colored.workspace = true
 dashmap.workspace = true
 dotenvy.workspace = true
 tracing.workspace = true
+bcrypt.workspace = true
 rustls.workspace = true
 utoipa.workspace = true
 serde.workspace = true

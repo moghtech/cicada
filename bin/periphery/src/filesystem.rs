@@ -189,8 +189,8 @@ impl fuser::Filesystem for CicadaFs {
     }
     let ino = if ino == 1 { self.root.ino.0 } else { ino };
     let nodes = match cicada().read(ListNodes {
-      filesystem: self.filesystem.clone().into(),
-      parent: ino.into(),
+      filesystem: self.filesystem.clone(),
+      parent: ino,
     }) {
       Ok(node) => node,
       Err(e) => {

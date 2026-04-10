@@ -21,7 +21,7 @@ function link(type: ResourceType, id: string) {
     case "Filesystem":
       return "/filesystems/" + id;
     case "Device":
-      return "/device/" + id;
+      return "/devices/" + id;
   }
 }
 

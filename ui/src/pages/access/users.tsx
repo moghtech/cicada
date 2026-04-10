@@ -1,4 +1,10 @@
-import { DataTable, filterBySplit, SearchInput, SortableHeader } from "mogh_ui";
+import {
+  DataTable,
+  EnableSwitch,
+  filterBySplit,
+  SearchInput,
+  SortableHeader,
+} from "mogh_ui";
 import { useInvalidate, useRead, useWrite } from "@/lib/hooks";
 import { RowSelectionState } from "@tanstack/react-table";
 import { useMemo, useState } from "react";
@@ -74,6 +80,34 @@ export default function UsersPage() {
               <SortableHeader column={column} title="Username" />
             ),
             accessorKey: "username",
+          },
+          {
+            header: ({ column }) => (
+              <SortableHeader column={column} title="Enabled" />
+            ),
+            accessorKey: "enabled",
+            cell: ({ row }) => (
+              <EnableSwitch
+                checked={row.original.enabled}
+                onCheckedChange={(enabled) =>
+                  updateUser({ id: row.original.id, enabled })
+                }
+              />
+            ),
+          },
+          {
+            header: ({ column }) => (
+              <SortableHeader column={column} title="Admin" />
+            ),
+            accessorKey: "admin",
+            cell: ({ row }) => (
+              <EnableSwitch
+                checked={row.original.admin}
+                onCheckedChange={(admin) =>
+                  updateUser({ id: row.original.id, admin })
+                }
+              />
+            ),
           },
           {
             header: "Groups",

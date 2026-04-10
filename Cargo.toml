@@ -60,6 +60,7 @@ envy = "0.4.2"
 
 # CRYPTO / AUTH
 rustls = { version = "0.23.37", features = ["aws-lc-rs"] }
+bcrypt = "0.19.0"
 
 # ERROR
 anyhow = "1.0.102"

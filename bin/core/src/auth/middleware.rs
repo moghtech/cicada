@@ -96,7 +96,7 @@ impl Client {
           .status_code(StatusCode::UNAUTHORIZED),
       )
     } else {
-      return Ok(());
+      Ok(())
     }
   }
 

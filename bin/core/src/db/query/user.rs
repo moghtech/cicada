@@ -1,6 +1,9 @@
-use cicada_client::entities::{
-  external_login::{ExternalLoginKind, ExternalLoginRecord},
-  user::{UserEntity, UserId, UserListItem, UserRecord},
+use cicada_client::{
+  api::write::{CreateUser, UpdateUser},
+  entities::{
+    external_login::{ExternalLoginKind, ExternalLoginRecord},
+    user::{UserEntity, UserId, UserListItem, UserRecord},
+  },
 };
 use mogh_auth_client::passkey::Passkey;
 use mogh_error::{AddStatusCode, StatusCode, anyhow::Context as _};
@@ -185,7 +188,7 @@ pub async fn unlink_external_login(
 }
 
 #[derive(Default, SurrealValue)]
-pub struct UpdateUser {
+pub struct UpdateUserFields {
   pub name: Option<String>,
   pub enabled: Option<bool>,
   pub password: Option<String>,
@@ -195,7 +198,7 @@ pub struct UpdateUser {
 
 pub async fn update_user_fields(
   id: String,
-  body: UpdateUser,
+  body: UpdateUserFields,
 ) -> mogh_error::Result<UserRecord> {
   DB.query("UPDATE $id MERGE fn::object_strip_none($body);")
     .bind(("id", UserId(id)))
@@ -223,6 +226,31 @@ pub async fn update_user_passkey(
     .await
     .context("Failed to query database")?
     .context("No user update result")
+    .status_code(StatusCode::NOT_FOUND)
+}
+
+pub async fn create_user(
+  body: CreateUser,
+) -> mogh_error::Result<UserRecord> {
+  DB.create("User")
+    .content(body)
+    .await
+    .context("Failed to create User on database")?
+    .context("Failed to create User on database: No creation result")
+    .map_err(Into::into)
+}
+
+pub async fn update_user(
+  body: UpdateUser,
+) -> mogh_error::Result<UserRecord> {
+  DB.query("UPDATE $id MERGE fn::object_strip_none($body);")
+    .bind(("id", body.id.clone()))
+    .bind(("body", body))
+    .await
+    .context("Failed to query database")?
+    .take::<Option<UserRecord>>(0)
+    .context("Failed to get query result")?
+    .context("Failed to find user with given parameters.")
     .status_code(StatusCode::NOT_FOUND)
 }
 

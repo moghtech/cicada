@@ -3,7 +3,8 @@ use surrealdb_types::SurrealValue;
 use typeshare::typeshare;
 
 use crate::entities::{
-  device::DeviceId, onboarding_key::OnboardingKeyId, policy::PolicyId, user::UserId
+  device::DeviceId, onboarding_key::OnboardingKeyId,
+  policy::PolicyId, user::UserId,
 };
 
 /// Group entity produced by database query
