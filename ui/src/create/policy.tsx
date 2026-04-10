@@ -66,6 +66,7 @@ function CreatePolicyForm({ close }: { close: () => void }) {
       groups: [] as string[],
       filesystems: [] as string[],
       filesystem_write: false,
+      enabled: true,
     },
     validate: {
       name: (name) => (name.length ? null : "Name cannot be empty"),
