@@ -74,6 +74,17 @@ impl Client {
     }
   }
 
+  pub fn as_user(&self) -> mogh_error::Result<&UserEntity> {
+    if let Client::User(user) = self {
+      Ok(user)
+    } else {
+      Err(
+        anyhow!("This method is only for user type clients")
+          .status_code(StatusCode::UNAUTHORIZED),
+      )
+    }
+  }
+
   /// When client is user, they must be admin.
   /// Other client types are still allowed.
   pub fn only_admin_users(&self) -> mogh_error::Result<()> {

@@ -1,16 +1,41 @@
-import { DataTable, SortableHeader } from "mogh_ui";
-import { useRead } from "@/lib/hooks";
+import { DataTable, filterBySplit, SearchInput, SortableHeader } from "mogh_ui";
+import { useInvalidate, useRead, useWrite } from "@/lib/hooks";
 import { RowSelectionState } from "@tanstack/react-table";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import GroupMultiSelector from "@/components/group-multi-selector";
+import { Group, List, Text } from "@mantine/core";
+import ConfirmDelete from "@/components/confirm-delete";
+import { notifications } from "@mantine/notifications";
 
 export default function UsersPage() {
   const nav = useNavigate();
+  const inv = useInvalidate();
   const { data } = useRead("ListUsers", {});
+  const byId = useMemo(
+    () =>
+      data && Object.fromEntries(data.map((user) => [user.id, user.username])),
+    [data],
+  );
   const [selected, setSelected] = useState<RowSelectionState>({});
+  const selectedIds = useMemo(() => Object.keys(selected), [selected]);
+  const { mutateAsync: batchDelete } = useWrite("BatchDeleteUsers", {
+    onSuccess: (deleted) => {
+      notifications.show({
+        message: `Deleted ${deleted.length} user${deleted.length === 1 ? "" : "s"}.`,
+      });
+      inv(["ListUsers"]);
+      setSelected({});
+    },
+  });
+  const { mutate: updateUser } = useWrite("UpdateUser", {
+    onSuccess: () => inv(["ListUsers"]),
+  });
+  const [search, setSearch] = useState("");
+  const users = filterBySplit(data, search, (user) => user.username);
   return (
     <>
-      {/* <Group>
+      <Group>
         <ConfirmDelete
           name=""
           entityType={"User" + (selectedIds.length === 1 ? "" : "s")}
@@ -33,10 +58,11 @@ export default function UsersPage() {
           }}
           disabled={!selectedIds.length}
         />
-      </Group> */}
+        <SearchInput value={search} onSearch={setSearch} />
+      </Group>
       <DataTable
         tableKey="users-table-v1"
-        data={data ?? []}
+        data={users}
         onRowClick={(device) => nav("/users/" + device.id)}
         selectOptions={{
           selectKey: (row) => row.id,
@@ -50,10 +76,17 @@ export default function UsersPage() {
             accessorKey: "username",
           },
           {
-            header: ({ column }) => (
-              <SortableHeader column={column} title="Groups" />
-            ),
+            header: "Groups",
             accessorKey: "groups",
+            cell: ({ row }) => (
+              <GroupMultiSelector
+                value={row.original.groups}
+                onChange={(groups) =>
+                  updateUser({ id: row.original.id, groups })
+                }
+                onClick={(e) => e.stopPropagation()}
+              />
+            ),
           },
           {
             header: ({ column }) => (

@@ -88,6 +88,8 @@ pub struct UpdateDevice {
   pub public_key: Option<String>,
   /// Whether the device is enabled / has access.
   pub enabled: Option<bool>,
+  /// The groups this device is a member of
+  pub groups: Option<Vec<String>>,
 }
 
 /// Response for [UpdateDevice].

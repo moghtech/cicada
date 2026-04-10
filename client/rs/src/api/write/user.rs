@@ -45,10 +45,10 @@ pub struct CreateUser {
   #[serde(default)]
   pub groups: Vec<String>,
   /// User has full API access as an administrator.
-  #[surreal(default)]
+  #[serde(default)]
   pub admin: bool,
   /// User can elevate or demote other users admin and super_admin properties.
-  #[surreal(default)]
+  #[serde(default)]
   pub super_admin: bool,
 }
 
@@ -89,11 +89,15 @@ pub struct UpdateUser {
   /// The user ID
   pub id: UserId,
   /// The username of the user
-  #[serde(skip_serializing_if = "Option::is_none")]
   pub username: Option<String>,
   /// Whether user is enabled
-  #[serde(skip_serializing_if = "Option::is_none")]
   pub enabled: Option<bool>,
+  /// The groups to assign to user
+  pub groups: Option<Vec<String>>,
+  /// User has full API access as an administrator.
+  pub admin: Option<bool>,
+  /// User can elevate or demote other users admin and super_admin properties.
+  pub super_admin: Option<bool>,
 }
 
 /// Response for [UpdateUser].
@@ -134,3 +138,37 @@ pub struct DeleteUser {
 /// Response for [DeleteUser].
 #[typeshare]
 pub type DeleteUserResponse = UserRecord;
+
+//
+
+#[cfg(feature = "utoipa")]
+#[utoipa::path(
+  post,
+  path = "/write/BatchDeleteUsers",
+  description = "Batch delete many users.",
+  request_body(content = BatchDeleteUsers),
+  responses(
+    (status = 200, description = "The deleted users", body = BatchDeleteUsersResponse),
+    (status = 500, description = "Request failed", body = mogh_error::Serror)
+  ),
+)]
+pub fn batch_delete_users() {}
+
+/// Batch delete users. Response: [BatchDeleteUsersResponse].
+#[typeshare]
+#[derive(
+  Debug, Clone, Serialize, Deserialize, SurrealValue, Resolve,
+)]
+#[surreal(crate = "surrealdb_types")]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
+#[empty_traits(CicadaWriteRequest)]
+#[response(BatchDeleteUsersResponse)]
+#[error(mogh_error::Error)]
+pub struct BatchDeleteUsers {
+  /// The onboarding_key ID
+  pub ids: Vec<UserId>,
+}
+
+/// Response for [BatchDeleteUsers].
+#[typeshare]
+pub type BatchDeleteUsersResponse = Vec<UserRecord>;

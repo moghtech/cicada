@@ -162,7 +162,7 @@ impl UserRecord {
 }
 
 #[typeshare(serialized_as = "string")]
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 pub struct UserId(pub String);
 

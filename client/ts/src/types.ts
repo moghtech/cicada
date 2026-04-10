@@ -213,6 +213,50 @@ export interface SecretEntity {
 /** Response for [BatchDeleteSecrets]. */
 export type BatchDeleteSecretsResponse = SecretEntity[];
 
+export type JsonValue = any;
+
+/** Users on the database */
+export interface UserRecord {
+	/** The unique user id */
+	id: UserId;
+	/** The name of the user, ie username */
+	username: string;
+	/** Link for user avatar, or empty string. */
+	avatar: string;
+	/**
+	 * Whether user is enabled.
+	 * Disabled users cannot log in and have no API access.
+	 */
+	enabled: boolean;
+	/**
+	 * Hashed user password.
+	 * Empty if local login is not set.
+	 */
+	password: string;
+	/** User passkey config for 2fa */
+	passkey?: JsonValue;
+	/**
+	 * User totp secret.
+	 * TODO: encryption
+	 */
+	totp_secret: string;
+	/** Allow external logins to skip 2fa. */
+	external_skip_2fa: boolean;
+	/** The groups to which this user belongs. */
+	groups: string[];
+	/** User has full API access as an administrator. */
+	admin: boolean;
+	/** User can elevate other users to admin */
+	super_admin: boolean;
+	/** Created at as ISO8601 timestamp. */
+	created_at: Iso8601Timestamp;
+	/** Updated at as ISO8601 timestamp. */
+	updated_at: Iso8601Timestamp;
+}
+
+/** Response for [BatchDeleteUsers]. */
+export type BatchDeleteUsersResponse = UserRecord[];
+
 /** Response for [CreateDevice]. */
 export type CreateDeviceResponse = DeviceRecord;
 
@@ -298,47 +342,6 @@ export type CreatePolicyResponse = PolicyRecord;
 
 /** Response for [CreateSecret]. */
 export type CreateSecretResponse = SecretEntity;
-
-export type JsonValue = any;
-
-/** Users on the database */
-export interface UserRecord {
-	/** The unique user id */
-	id: UserId;
-	/** The name of the user, ie username */
-	username: string;
-	/** Link for user avatar, or empty string. */
-	avatar: string;
-	/**
-	 * Whether user is enabled.
-	 * Disabled users cannot log in and have no API access.
-	 */
-	enabled: boolean;
-	/**
-	 * Hashed user password.
-	 * Empty if local login is not set.
-	 */
-	password: string;
-	/** User passkey config for 2fa */
-	passkey?: JsonValue;
-	/**
-	 * User totp secret.
-	 * TODO: encryption
-	 */
-	totp_secret: string;
-	/** Allow external logins to skip 2fa. */
-	external_skip_2fa: boolean;
-	/** The groups to which this user belongs. */
-	groups: string[];
-	/** User has full API access as an administrator. */
-	admin: boolean;
-	/** User can elevate other users to admin */
-	super_admin: boolean;
-	/** Created at as ISO8601 timestamp. */
-	created_at: Iso8601Timestamp;
-	/** Updated at as ISO8601 timestamp. */
-	updated_at: Iso8601Timestamp;
-}
 
 /** Response for [CreateUser]. */
 export type CreateUserResponse = UserRecord;
@@ -698,6 +701,12 @@ export interface BatchDeleteSecrets {
 	ids: SecretId[];
 }
 
+/** Batch delete users. Response: [BatchDeleteUsersResponse]. */
+export interface BatchDeleteUsers {
+	/** The onboarding_key ID */
+	ids: UserId[];
+}
+
 /** Create a device. Response: [CreateDeviceResponse]. */
 export interface CreateDevice {
 	/** The name of the device */
@@ -848,7 +857,7 @@ export interface CreateSecret {
 	name: string;
 	/** An optional description for the secret */
 	description?: string;
-	/** The secret data to store encrypted. */
+	/** The secret data. */
 	data?: string;
 	/**
 	 * Choose a specific encryption key.
@@ -868,9 +877,9 @@ export interface CreateUser {
 	/** The groups to assign to user */
 	groups?: string[];
 	/** User has full API access as an administrator. */
-	admin: boolean;
+	admin?: boolean;
 	/** User can elevate or demote other users admin and super_admin properties. */
-	super_admin: boolean;
+	super_admin?: boolean;
 }
 
 /** Delete a device. Response: [DeleteDeviceResponse]. */
@@ -1233,6 +1242,8 @@ export interface UpdateDevice {
 	public_key?: string;
 	/** Whether the device is enabled / has access. */
 	enabled?: boolean;
+	/** The groups this device is a member of */
+	groups?: string[];
 }
 
 /** Update an encryption key. Response: [UpdateEncryptionKeyResponse]. */
@@ -1387,6 +1398,12 @@ export interface UpdateUser {
 	username?: string;
 	/** Whether user is enabled */
 	enabled?: boolean;
+	/** The groups to assign to user */
+	groups?: string[];
+	/** User has full API access as an administrator. */
+	admin?: boolean;
+	/** User can elevate or demote other users admin and super_admin properties. */
+	super_admin?: boolean;
 }
 
 /**
@@ -1478,6 +1495,10 @@ export enum Timelength {
 }
 
 export type WriteRequest = 
+	| { type: "CreateUser", params: CreateUser }
+	| { type: "UpdateUser", params: UpdateUser }
+	| { type: "DeleteUser", params: DeleteUser }
+	| { type: "BatchDeleteUsers", params: BatchDeleteUsers }
 	| { type: "CreateDevice", params: CreateDevice }
 	| { type: "UpdateDevice", params: UpdateDevice }
 	| { type: "DeleteDevice", params: DeleteDevice }

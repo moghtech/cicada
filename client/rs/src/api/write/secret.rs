@@ -240,7 +240,7 @@ pub type DeleteSecretResponse = SecretEntity;
 #[utoipa::path(
   post,
   path = "/write/BatchDeleteSecrets",
-  description = "Batch delete many secrets recursively.",
+  description = "Batch delete many secrets.",
   request_body(content = BatchDeleteSecrets),
   responses(
     (status = 200, description = "The deleted secrets", body = BatchDeleteSecretsResponse),

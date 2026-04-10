@@ -20,6 +20,7 @@ pub mod node;
 pub mod onboarding_key;
 pub mod policy;
 pub mod secret;
+pub mod user;
 
 pub struct WriteArgs {
   client: Client,
@@ -35,6 +36,12 @@ pub struct WriteArgs {
 #[error(mogh_error::Error)]
 #[serde(tag = "type", content = "params")]
 pub enum WriteRequest {
+  // ==== USER ====
+  CreateUser(CreateUser),
+  UpdateUser(UpdateUser),
+  DeleteUser(DeleteUser),
+  BatchDeleteUsers(BatchDeleteUsers),
+
   // ==== DEVICE ====
   CreateDevice(CreateDevice),
   UpdateDevice(UpdateDevice),

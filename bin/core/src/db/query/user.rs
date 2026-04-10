@@ -225,3 +225,24 @@ pub async fn update_user_passkey(
     .context("No user update result")
     .status_code(StatusCode::NOT_FOUND)
 }
+
+pub async fn delete_user(
+  id: UserId,
+) -> mogh_error::Result<UserRecord> {
+  DB.delete(id.as_record_id())
+    .await?
+    .context("No User matching given ID")
+    .status_code(StatusCode::NOT_FOUND)
+}
+
+pub async fn batch_delete_users(
+  ids: Vec<UserId>,
+) -> mogh_error::Result<Vec<UserRecord>> {
+  DB.query("DELETE User WHERE id IN $ids RETURN BEFORE;")
+    .bind(("ids", ids))
+    .await
+    .context("Failed to delete users")?
+    .take(0)
+    .context("Invalid delete users query response")
+    .map_err(Into::into)
+}

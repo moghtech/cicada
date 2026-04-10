@@ -43,6 +43,12 @@ export type ReadResponses = {
 };
 
 export type WriteResponses = {
+  // ==== USER ====
+  CreateUser: Types.CreateUserResponse;
+  UpdateUser: Types.UpdateUserResponse;
+  DeleteUser: Types.DeleteUserResponse;
+  BatchDeleteUsers: Types.BatchDeleteUsersResponse;
+
   // ==== DEVICE ====
   CreateDevice: Types.CreateDeviceResponse;
   UpdateDevice: Types.UpdateDeviceResponse;
