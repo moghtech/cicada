@@ -10,6 +10,8 @@ export default function UserMultiSelector(props: UserMultiSelectorProps) {
     <MultiSelect
       placeholder="Select users"
       data={users?.map((u) => ({ value: u.id, label: u.username })) ?? []}
+      styles={{ inputField: { width: 120 } }}
+      miw="max-content"
       searchable
       clearable
       {...props}
