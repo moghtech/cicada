@@ -4,6 +4,7 @@ import {
   filterBySplit,
   SearchInput,
   SortableHeader,
+  useLoginOptions,
 } from "mogh_ui";
 import { useInvalidate, useRead, useUser, useWrite } from "@/lib/hooks";
 import { RowSelectionState } from "@tanstack/react-table";
@@ -12,9 +13,11 @@ import GroupMultiSelector from "@/components/group-multi-selector";
 import { Group, List, Text } from "@mantine/core";
 import ConfirmDelete from "@/components/confirm-delete";
 import { notifications } from "@mantine/notifications";
+import CreateUser from "@/create/user";
 
 export default function UsersPage() {
   const client = useUser().data;
+  const loginOptions = useLoginOptions().data;
   const inv = useInvalidate();
   const { data } = useRead("ListUsers", {});
   const byId = useMemo(
@@ -41,6 +44,7 @@ export default function UsersPage() {
   return (
     <>
       <Group>
+        {loginOptions?.local && <CreateUser />}
         <ConfirmDelete
           name=""
           entityType={"User" + (selectedIds.length === 1 ? "" : "s")}
