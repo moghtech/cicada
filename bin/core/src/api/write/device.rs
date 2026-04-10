@@ -3,16 +3,23 @@ use cicada_client::api::write::{
 };
 use mogh_resolver::Resolve;
 
-use crate::{api::write::WriteArgs, db::query};
+use crate::{
+  api::write::WriteArgs, auth::middleware::Client, db::query,
+};
 
 impl Resolve<WriteArgs> for CreateDevice {
   async fn resolve(
-    self,
+    mut self,
     WriteArgs { client }: &WriteArgs,
   ) -> Result<Self::Response, Self::Error> {
     // Only allow onboarding keys and admin level users
     client.not_device()?;
     client.only_admin_users()?;
+    // If called by onboarding key, make sure
+    // it gets exactly these groups.
+    if let Client::OnboardingKey(key) = client {
+      self.groups = key.groups.clone();
+    }
     query::device::create_device(self).await
   }
 }

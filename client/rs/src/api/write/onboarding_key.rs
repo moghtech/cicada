@@ -97,14 +97,14 @@ pub struct UpdateOnboardingKey {
   /// The onboarding_key ID
   pub id: OnboardingKeyId,
   /// The name of the onboarding key
-  #[serde(skip_serializing_if = "Option::is_none")]
   pub name: Option<String>,
   /// The onboarding key public key
-  #[serde(skip_serializing_if = "Option::is_none")]
   pub public_key: Option<String>,
   /// Whether the onboarding key is enabled / can onboard.
-  #[serde(skip_serializing_if = "Option::is_none")]
   pub enabled: Option<bool>,
+  /// Devices which onboard using this key will automatically
+  /// get these groups.
+  pub groups: Option<Vec<String>>,
 }
 
 /// Response for [UpdateOnboardingKey].

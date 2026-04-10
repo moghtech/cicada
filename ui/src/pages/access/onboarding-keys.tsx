@@ -6,11 +6,11 @@ import { Group, List, Text } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { RowSelectionState } from "@tanstack/react-table";
 import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import GroupMultiSelector from "@/components/group-multi-selector";
+import ResourceLink from "@/components/resource-link";
 
 export default function OnboardingKeysPage() {
   const inv = useInvalidate();
-  const nav = useNavigate();
   const { data } = useRead("ListOnboardingKeys", {});
   const byId = useMemo(
     () => data && Object.fromEntries(data.map((ok) => [ok.id, ok.name])),
@@ -18,6 +18,9 @@ export default function OnboardingKeysPage() {
   );
   const [selected, setSelected] = useState<RowSelectionState>({});
   const selectedIds = useMemo(() => Object.keys(selected), [selected]);
+  const { mutate: updateOnboardingKey } = useWrite("UpdateOnboardingKey", {
+    onSuccess: () => inv(["ListOnboardingKeys"]),
+  });
   const { mutateAsync: batchDelete } = useWrite("BatchDeleteOnboardingKeys", {
     onSuccess: (deleted) => {
       notifications.show({
@@ -57,9 +60,6 @@ export default function OnboardingKeysPage() {
       <DataTable
         tableKey="onboarding-keys-table-v1"
         data={data ?? []}
-        onRowClick={(onboarding_key) =>
-          nav("/onboarding-keys/" + onboarding_key.id)
-        }
         selectOptions={{
           selectKey: (row) => row.id,
           state: [selected, setSelected],
@@ -70,6 +70,22 @@ export default function OnboardingKeysPage() {
               <SortableHeader column={column} title="Name" />
             ),
             accessorKey: "name",
+            cell: ({ row }) => (
+              <ResourceLink type="OnboardingKey" id={row.original.id} />
+            ),
+          },
+          {
+            header: "Groups",
+            accessorKey: "groups",
+            cell: ({ row }) => (
+              <GroupMultiSelector
+                value={row.original.groups}
+                onChange={(groups) =>
+                  updateOnboardingKey({ id: row.original.id, groups })
+                }
+                onClick={(e) => e.stopPropagation()}
+              />
+            ),
           },
           {
             header: ({ column }) => (

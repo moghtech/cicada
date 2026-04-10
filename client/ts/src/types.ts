@@ -1343,6 +1343,11 @@ export interface UpdateOnboardingKey {
 	public_key?: string;
 	/** Whether the onboarding key is enabled / can onboard. */
 	enabled?: boolean;
+	/**
+	 * Devices which onboard using this key will automatically
+	 * get these groups.
+	 */
+	groups?: string[];
 }
 
 /** Update a policy. Response: [UpdatePolicyResponse]. */
