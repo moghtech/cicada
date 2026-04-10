@@ -14,12 +14,11 @@ fn unmount_with_retries(mountpoint: &Path) {
   let mut attempt = 1;
   loop {
     info!("Unmounting {mountpoint:?} (attempt {attempt})");
-    match unmount(mountpoint) {
+    match unmount(mountpoint, false) {
       Ok(status) if status.success() => return,
       Ok(status) => {
-        error!(
-          "fusermount3 exited with {status} for {mountpoint:?}, waiting 2s for retry..."
-        );
+        error!("fusermount3 exited with {status} for {mountpoint:?}");
+        info!("waiting 2s for retry...");
         std::thread::sleep(Duration::from_secs(2));
         attempt += 1;
       }
@@ -33,11 +32,16 @@ fn unmount_with_retries(mountpoint: &Path) {
 
 pub fn unmount(
   mountpoint: &Path,
+  suppress_output: bool,
 ) -> std::io::Result<std::process::ExitStatus> {
-  let mut child = std::process::Command::new("fusermount3")
-    .arg("-u")
-    .arg(mountpoint)
-    .spawn()?;
+  let mut child = std::process::Command::new("fusermount3");
+  child.arg("-u").arg(mountpoint);
+  if suppress_output {
+    child
+      .stdout(std::process::Stdio::null())
+      .stderr(std::process::Stdio::null());
+  };
+  let mut child = child.spawn()?;
   let timeout = Duration::from_secs(2);
   let start = std::time::Instant::now();
   loop {

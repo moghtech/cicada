@@ -136,7 +136,7 @@ impl CicadaFs {
     // Without this, the situation would cause the mount to fail.
     // Failed output is ignored, it is expected to fail because
     // usually the mount won't exist.
-    crate::unmount::unmount(&mountpoint).ok();
+    crate::unmount::unmount(&mountpoint, true).ok();
 
     fuser::mount2(fs, mountpoint, &config)
       .context("Failed to mount CicadaFs")
