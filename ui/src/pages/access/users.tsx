@@ -51,9 +51,9 @@ export default function UsersPage() {
           },
           {
             header: ({ column }) => (
-              <SortableHeader column={column} title="Id" />
+              <SortableHeader column={column} title="Groups" />
             ),
-            accessorKey: "id",
+            accessorKey: "groups",
           },
           {
             header: ({ column }) => (

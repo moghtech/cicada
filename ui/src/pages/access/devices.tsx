@@ -69,9 +69,9 @@ export default function DevicesPage() {
           },
           {
             header: ({ column }) => (
-              <SortableHeader column={column} title="Id" />
+              <SortableHeader column={column} title="Groups" />
             ),
-            accessorKey: "id",
+            accessorKey: "groups",
           },
           {
             header: ({ column }) => (

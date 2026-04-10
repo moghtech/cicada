@@ -7,6 +7,7 @@ import {
   Stack,
   Stepper,
   TagsInput,
+  Text,
   TextInput,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
@@ -71,9 +72,6 @@ function CreatePolicyForm({ close }: { close: () => void }) {
     },
   });
 
-  const canNext =
-    step === 0 ? form.isValid("name") && form.values.name.length > 0 : true;
-
   return (
     <Stack
       miw={{ xs: 500 }}
@@ -81,7 +79,7 @@ function CreatePolicyForm({ close }: { close: () => void }) {
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            if (step < 2 && canNext) {
+            if (step < 2) {
               setStep((s) => s + 1);
             } else {
               form.onSubmit((form) => mutate(form))(e);
@@ -91,22 +89,13 @@ function CreatePolicyForm({ close }: { close: () => void }) {
         />
       )}
     >
-      <Stepper active={step} size="sm">
-        <Stepper.Step label="Name">
-          <TextInput
-            {...form.getInputProps("name")}
-            autoFocus
-            label="Name"
-            placeholder="Enter name"
-            key={form.key("name")}
-            mt="md"
-          />
-        </Stepper.Step>
-
-        <Stepper.Step label="Access">
+      <Stepper active={step} color="orange" size="sm">
+        <Stepper.Step label="Step 1" description="Clients">
+          <Text size="lg" c="dimmed">
+            Select clients which gain access by this policy.
+          </Text>
           <TagsInput
             {...form.getInputProps("groups")}
-            autoFocus
             label="Groups"
             placeholder="Select or create groups"
             data={groups?.map((g) => g.name) ?? []}
@@ -142,10 +131,12 @@ function CreatePolicyForm({ close }: { close: () => void }) {
           />
         </Stepper.Step>
 
-        <Stepper.Step label="Filesystems">
+        <Stepper.Step label="Step 2" description="Filesystems">
+          <Text size="lg" c="dimmed">
+            Select filesystems which clients can access.
+          </Text>
           <MultiSelect
             {...form.getInputProps("filesystems")}
-            autoFocus
             label="Filesystems"
             placeholder="Select filesystems"
             data={
@@ -177,11 +168,22 @@ function CreatePolicyForm({ close }: { close: () => void }) {
             />
           </Group>
         </Stepper.Step>
+
+        <Stepper.Step label="Step 3" description="Policy name">
+          <TextInput
+            {...form.getInputProps("name")}
+            autoFocus
+            label="Policy name"
+            placeholder="Enter name"
+            key={form.key("name")}
+            mt="md"
+          />
+        </Stepper.Step>
       </Stepper>
 
       <Group justify="space-between" mt="md">
         <Button
-          variant="default"
+          variant="outline"
           leftSection={<ArrowLeft size="1rem" />}
           onClick={() => setStep((s) => s - 1)}
           disabled={step === 0}
@@ -194,7 +196,7 @@ function CreatePolicyForm({ close }: { close: () => void }) {
           }
           type="submit"
           loading={isPending}
-          disabled={step < 2 ? !canNext : !form.isValid()}
+          disabled={step === 2 ? !form.isValid() : false}
         >
           {step < 2 ? "Next" : "Create"}
         </Button>
