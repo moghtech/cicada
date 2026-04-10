@@ -15,6 +15,12 @@ pub struct SecretListItem {
   pub id: SecretId,
   /// The name of the secret
   pub name: String,
+  /// An optional description for the secret
+  #[surreal(default)]
+  pub description: String,
+  /// The master encryption key for this secret.
+  #[serde(skip_serializing_if = "Option::is_none")]
+  pub encryption_key: Option<EncryptionKeyId>,
   /// Created at as ISO8601 timestamp.
   #[cfg_attr(feature = "utoipa", schema(value_type = String))]
   pub created_at: Iso8601Timestamp,
@@ -33,13 +39,16 @@ pub struct SecretEntity {
   pub id: SecretId,
   /// The name of the secret
   pub name: String,
+  /// An optional description for the secret
+  #[surreal(default)]
+  pub description: String,
+  /// Data associated with the secret.
+  #[serde(skip_serializing_if = "Option::is_none")]
+  pub data: Option<String>,
   /// The master encryption key for this secret, if set.
   /// If this is not null while data is, it means
   /// the encryption key is not initialized.
   pub encryption_key: Option<EncryptionKeyId>,
-  /// Data associated with the secret.
-  #[serde(skip_serializing_if = "Option::is_none")]
-  pub data: Option<String>,
   /// Created at as ISO8601 timestamp.
   #[cfg_attr(feature = "utoipa", schema(value_type = String))]
   pub created_at: Iso8601Timestamp,

@@ -17,6 +17,7 @@ import {
   Save,
   Lock,
   ChevronsLeftRightEllipsis,
+  Edit,
 } from "lucide-react";
 
 export const ICONS = {
@@ -37,5 +38,6 @@ export const ICONS = {
   Remove: CircleMinus,
   Clear: X,
   Save,
+  Edit,
   Unknown: CircleQuestionMark,
 };

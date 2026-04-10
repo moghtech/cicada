@@ -194,14 +194,16 @@ export interface SecretEntity {
 	id: SecretId;
 	/** The name of the secret */
 	name: string;
+	/** An optional description for the secret */
+	description: string;
+	/** Data associated with the secret. */
+	data?: string;
 	/**
 	 * The master encryption key for this secret, if set.
 	 * If this is not null while data is, it means
 	 * the encryption key is not initialized.
 	 */
 	encryption_key?: EncryptionKeyId;
-	/** Data associated with the secret. */
-	data?: string;
 	/** Created at as ISO8601 timestamp. */
 	created_at: Iso8601Timestamp;
 	/** Updated at as ISO8601 timestamp. */
@@ -574,6 +576,10 @@ export interface SecretListItem {
 	id: SecretId;
 	/** The name of the secret */
 	name: string;
+	/** An optional description for the secret */
+	description: string;
+	/** The master encryption key for this secret. */
+	encryption_key?: EncryptionKeyId;
 	/** Created at as ISO8601 timestamp. */
 	created_at: Iso8601Timestamp;
 	/** Updated at as ISO8601 timestamp. */

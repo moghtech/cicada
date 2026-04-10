@@ -22,7 +22,7 @@ pub async fn list_child_nodes(
 ) -> mogh_error::Result<Vec<NodeListItem>> {
   DB.query(
     "
-SELECT *, data.encryption_key as encryption_key OMIT data FROM Node 
+SELECT *, data.encryption_key AS encryption_key OMIT data FROM Node 
 WHERE filesystem = $filesystem AND parent = $parent
 ORDER BY kind DESC, name COLLATE ASC;",
   )

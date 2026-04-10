@@ -111,6 +111,7 @@ impl Resolve<WriteArgs> for UpdateSecretEncryptionKey {
       return Ok(SecretEntity {
         id: secret.id,
         name: secret.name,
+        description: secret.description,
         encryption_key: None,
         data: None,
         created_at: secret.created_at,
@@ -143,6 +144,7 @@ impl Resolve<WriteArgs> for RotateSecretEnvelopeKey {
       return Ok(SecretEntity {
         id: secret.id,
         name: secret.name,
+        description: secret.description,
         encryption_key: None,
         data: None,
         created_at: secret.created_at,

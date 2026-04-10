@@ -269,6 +269,7 @@ pub async fn decrypt_secret(
   Ok(SecretEntity {
     id: secret.id,
     name: secret.name,
+    description: secret.description,
     created_at: secret.created_at,
     updated_at: secret.updated_at,
     encryption_key,

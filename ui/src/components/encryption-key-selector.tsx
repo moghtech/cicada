@@ -81,8 +81,10 @@ export default function EncryptionKeySelector({
       store={combobox}
       width="target"
       onOptionSubmit={(id, props) => {
-        onSelect?.(id);
-        onOptionSubmit?.(id, props);
+        if (id !== selected) {
+          onSelect?.(id);
+          onOptionSubmit?.(id, props);
+        }
         combobox.closeDropdown();
       }}
       position={position}

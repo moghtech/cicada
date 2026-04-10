@@ -27,6 +27,7 @@ function link(type: ResourceType, id: string) {
 
 export default function ResourceLink({ type, id }: ResourceLinkProps) {
   const resource = useRead(`List${type}s`, {}).data?.find((r) => r.id === id);
+  const encryptionKeys = useRead("ListEncryptionKeys", {}).data;
   const Icon = ICONS[type];
   const intention =
     type === "EncryptionKey"
@@ -34,12 +35,12 @@ export default function ResourceLink({ type, id }: ResourceLinkProps) {
         ? "Good"
         : "Critical"
       : type === "Secret"
-        ? (resource as Types.SecretEntity)?.encryption_key &&
-          (resource as Types.SecretEntity)?.data === null
+        ? (resource as Types.SecretListItem)?.encryption_key &&
+          !encryptionKeys?.find(
+            (e) => e.id === (resource as Types.SecretListItem)?.encryption_key,
+          )?.initialized
           ? "Critical"
-          : !(resource as Types.SecretEntity)?.data
-            ? "Neutral"
-            : "Good"
+          : "Good"
         : ["Filesystem", "User", "Device"].includes(type)
           ? "Good"
           : "None";

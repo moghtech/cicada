@@ -16,7 +16,7 @@ pub async fn list_secrets() -> mogh_error::Result<Vec<SecretListItem>>
 {
   DB.query(
     "
-SELECT * OMIT data FROM Secret
+SELECT *, data.encryption_key AS encryption_key OMIT data FROM Secret
 ORDER BY kind DESC, name COLLATE ASC;",
   )
   .await

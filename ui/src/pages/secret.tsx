@@ -1,5 +1,5 @@
 import { useInvalidate, useRead, useWrite } from "@/lib/hooks";
-import { Button, Center, Group, Loader, Text } from "@mantine/core";
+import { Button, Group, Text } from "@mantine/core";
 import { useNavigate, useParams } from "react-router-dom";
 import { History } from "lucide-react";
 import { useLocalStorage } from "@mantine/hooks";
@@ -8,8 +8,9 @@ import ConfirmDelete from "@/components/confirm-delete";
 import { Types } from "cicada_client";
 import { notifications } from "@mantine/notifications";
 import InitializeEncryptionKey from "@/components/initialize-encryption-key";
-import { languageFromPath, MonacoEditor, Page } from "mogh_ui";
+import { languageFromPath, MonacoEditor, Page, PageGuard } from "mogh_ui";
 import { ICONS } from "@/lib/icons";
+import EncryptionKeySelector from "@/components/encryption-key-selector";
 
 export default function SecretPage() {
   const { secret: _secret } = useParams() as {
@@ -41,6 +42,18 @@ export default function SecretPage() {
       setEdit({ data: undefined });
     },
   });
+  const {
+    mutate: updateSecretEncryptionKey,
+    isPending: updateEncryptionKeyPending,
+  } = useWrite("UpdateSecretEncryptionKey", {
+    onSuccess: () => {
+      inv(["ListSecrets"], ["GetSecret", { id: _secret }]);
+      notifications.show({
+        message: "Saved changes to secret encryption key.",
+        color: "green",
+      });
+    },
+  });
   const { mutateAsync: deleteSecret, isPending: deleteSecretPending } =
     useWrite("DeleteSecret", {
       onSuccess: () => {
@@ -50,76 +63,77 @@ export default function SecretPage() {
       },
     });
 
-  if (isPending || isRefetching) {
-    return (
-      <Center>
-        <Loader />
-      </Center>
-    );
-  }
-
-  if (!secret) {
-    return (
-      <Center>
-        <Text size="lg">404: No file found</Text>
-      </Center>
-    );
-  }
-
   return (
-    <Page
-      title={secret.name}
-      icon={ICONS.Secret}
-      actions={
-        <>
-          <Button
-            leftSection={<History size="1rem" />}
-            disabled={!data}
-            onClick={() => setEdit({ data: undefined })}
-          >
-            Reset
-          </Button>
-          <ConfirmSave
-            name={secret.name}
-            disabled={!data}
-            original={secret.data ?? ""}
-            modified={data ?? ""}
-            onConfirm={() =>
-              updateSecretData({ id: secret.id, data: data ?? "" })
-            }
-          />
-          <ConfirmDelete
-            entityType="Secret"
-            name={secret.name}
-            onConfirm={() => deleteSecret({ id: secret.id })}
-            loading={deleteSecretPending}
-            disabled={false}
-          />
-        </>
-      }
+    <PageGuard
+      isPending={isPending || isRefetching}
+      error={!secret ? "404: No file found" : undefined}
     >
-      {missing_key ? (
-        <>
-          <Text fz="h2">
-            Failed to read data: missing encryption key{" "}
-            <b>{missing_key.name}</b>
-          </Text>
-          {missing_key?.kind === Types.EncryptionKeyKind.Memory && (
-            <Group>
-              <InitializeEncryptionKey
-                key_id={missing_key.id}
-                onInit={() => inv(["GetSecret", { id: _secret }])}
+      {secret && (
+        <Page
+          title={secret.name}
+          icon={ICONS.Secret}
+          actions={
+            <>
+              <Button
+                leftSection={<History size="1rem" />}
+                disabled={!data}
+                onClick={() => setEdit({ data: undefined })}
+              >
+                Reset
+              </Button>
+              <ConfirmSave
+                name={secret.name}
+                disabled={!data}
+                original={secret.data ?? ""}
+                modified={data ?? ""}
+                onConfirm={() =>
+                  updateSecretData({ id: secret.id, data: data ?? "" })
+                }
               />
-            </Group>
+              <ConfirmDelete
+                entityType="Secret"
+                name={secret.name}
+                onConfirm={() => deleteSecret({ id: secret.id })}
+                loading={deleteSecretPending}
+                disabled={false}
+              />
+              <EncryptionKeySelector
+                selected={secret.encryption_key}
+                onSelect={(encryption_key) =>
+                  updateSecretEncryptionKey({ id: secret.id, encryption_key })
+                }
+                targetProps={{
+                  w: { base: "100%", xs: 260 },
+                  loading: updateEncryptionKeyPending,
+                }}
+              />
+            </>
+          }
+        >
+          {missing_key ? (
+            <>
+              <Text fz="h2">
+                Failed to read data: missing encryption key{" "}
+                <b>{missing_key.name}</b>
+              </Text>
+              {missing_key?.kind === Types.EncryptionKeyKind.Memory && (
+                <Group>
+                  <InitializeEncryptionKey
+                    key_id={missing_key.id}
+                    onInit={() => inv(["GetSecret", { id: _secret }])}
+                  />
+                </Group>
+              )}
+            </>
+          ) : (
+            <MonacoEditor
+              language={languageFromPath(secret.name)}
+              value={data ?? secret.data ?? ""}
+              onValueChange={(data) => setEdit({ data })}
+            />
           )}
-        </>
-      ) : (
-        <MonacoEditor
-          language={languageFromPath(secret.name)}
-          value={data ?? secret.data ?? ""}
-          onValueChange={(data) => setEdit({ data })}
-        />
+        </Page>
       )}
-    </Page>
+    </PageGuard>
   );
 }
