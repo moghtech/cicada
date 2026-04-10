@@ -71,6 +71,24 @@ export default function PoliciesPage() {
           },
           {
             header: ({ column }) => (
+              <SortableHeader column={column} title="Groups" />
+            ),
+            accessorKey: "groups",
+          },
+          {
+            header: ({ column }) => (
+              <SortableHeader column={column} title="Filesystems" />
+            ),
+            accessorKey: "filesystems",
+          },
+          {
+            header: ({ column }) => (
+              <SortableHeader column={column} title="Write" />
+            ),
+            accessorKey: "filesystem_write",
+          },
+          {
+            header: ({ column }) => (
               <SortableHeader column={column} title="Created At" />
             ),
             accessorKey: "created_at",

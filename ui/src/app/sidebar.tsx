@@ -21,7 +21,8 @@ export default function Sidebar({ close }: { close: () => void }) {
     location.pathname.startsWith("/access") ||
     location.pathname.startsWith("/users") ||
     location.pathname.startsWith("/devices") ||
-    location.pathname.startsWith("/onboarding-keys");
+    location.pathname.startsWith("/onboarding-keys") ||
+    location.pathname.startsWith("/policies");
   const encryptionPage = location.pathname.startsWith("/encryption-keys");
   const secretPage = location.pathname.startsWith("/secrets");
   const filesystemPage = location.pathname.startsWith("/filesystems");

@@ -1,5 +1,6 @@
 import { TabbedPage } from "mogh_ui";
 import { ICONS } from "@/lib/icons";
+import UsersPage from "./users";
 import DevicesPage from "./devices";
 import OnboardingKeysPage from "./onboarding-keys";
 import PoliciesPage from "./policies";
@@ -11,7 +12,7 @@ export default function AccessTabs() {
     <TabbedPage<Tab>
       storageKey="devices-tab-v1"
       tabs={[
-        { tab: "Users", icon: ICONS.User, content: DevicesPage },
+        { tab: "Users", icon: ICONS.User, content: UsersPage },
         { tab: "Devices", icon: ICONS.Device, content: DevicesPage },
         {
           tab: "Onboarding",
