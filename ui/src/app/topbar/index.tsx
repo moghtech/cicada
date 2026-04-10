@@ -2,6 +2,8 @@ import { AppShell, Burger, Button, Flex, Group, Text } from "@mantine/core";
 import { useNavigate } from "react-router-dom";
 import { ThemeToggle } from "mogh_ui";
 import UserDropdown from "./user-dropdown";
+import { useRead } from "@/lib/hooks";
+import TopbarLink from "./link";
 
 export default function Topbar({
   opened,
@@ -11,6 +13,8 @@ export default function Topbar({
   toggle: () => void;
 }) {
   const nav = useNavigate();
+  const version = useRead("GetVersion", {}, { refetchInterval: 30_000 }).data
+    ?.version;
   return (
     <AppShell.Header
       renderRoot={(props) => (
@@ -40,6 +44,11 @@ export default function Topbar({
         </Button>
       </Flex>
       <Flex align="center" gap="0.3rem">
+        {version && (
+          <TopbarLink to="https://github.com/moghtech/cicada/releases">
+            v{version}
+          </TopbarLink>
+        )}
         <ThemeToggle />
         <UserDropdown />
       </Flex>
