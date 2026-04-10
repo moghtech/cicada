@@ -52,13 +52,14 @@ pub async fn create_filesystem(
 pub async fn update_filesystem(
   body: UpdateFilesystem,
 ) -> mogh_error::Result<FilesystemRecord> {
-  DB.update(body.id.as_record_id())
-    .merge(serde_json::to_value(body)?)
+  DB.query("UPDATE $id MERGE fn::object_strip_none($body);")
+    .bind(("id", body.id.clone()))
+    .bind(("body", body))
     .await
-    .context("Failed to update Filesystem on database")?
-    .context(
-      "Failed to update Filesystem on database: No update result",
-    )
+    .context("Failed to query database")?
+    .take::<Option<FilesystemRecord>>(0)
+    .context("Failed to get query result")?
+    .context("Failed to find filesystem with given parameters.")
     .status_code(StatusCode::NOT_FOUND)
 }
 

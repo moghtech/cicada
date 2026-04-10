@@ -73,13 +73,14 @@ pub async fn create_onboarding_key(
 pub async fn update_onboarding_key(
   body: UpdateOnboardingKey,
 ) -> mogh_error::Result<OnboardingKeyRecord> {
-  DB.update(body.id.as_record_id())
-    .merge(serde_json::to_value(body)?)
+  DB.query("UPDATE $id MERGE fn::object_strip_none($body);")
+    .bind(("id", body.id.clone()))
+    .bind(("body", body))
     .await
-    .context("Failed to update OnboardingKey on database")?
-    .context(
-      "Failed to update OnboardingKey on database: No update result",
-    )
+    .context("Failed to query database")?
+    .take::<Option<OnboardingKeyRecord>>(0)
+    .context("Failed to get query result")?
+    .context("Failed to find onboarding key with given parameters.")
     .status_code(StatusCode::NOT_FOUND)
 }
 

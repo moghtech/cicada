@@ -139,11 +139,14 @@ pub async fn create_node(
 pub async fn update_node(
   body: UpdateNode,
 ) -> mogh_error::Result<NodeRecord> {
-  DB.update(body.id.as_record_id())
-    .merge(serde_json::to_value(body)?)
+  DB.query("UPDATE $id MERGE fn::object_strip_none($body);")
+    .bind(("id", body.id.clone()))
+    .bind(("body", body))
     .await
-    .context("Failed to update Node on database")?
-    .context("Failed to update Node on database: No update result")
+    .context("Failed to query database")?
+    .take::<Option<NodeRecord>>(0)
+    .context("Failed to get query result")?
+    .context("Failed to find node with given parameters.")
     .status_code(StatusCode::NOT_FOUND)
 }
 

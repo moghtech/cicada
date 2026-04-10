@@ -56,12 +56,15 @@ pub async fn create_device(
 pub async fn update_device(
   body: UpdateDevice,
 ) -> mogh_error::Result<DeviceRecord> {
-  DB.update(body.id.as_record_id())
-    .merge(serde_json::to_value(body)?)
+  DB.query("UPDATE $id MERGE fn::object_strip_none($body);")
+    .bind(("id", body.id.clone()))
+    .bind(("body", body))
     .await
-    .context("Failed to update Device on database")?
-    .context("Failed to update Device on database: No update result")
-    .map_err(Into::into)
+    .context("Failed to query database")?
+    .take::<Option<DeviceRecord>>(0)
+    .context("Failed to get query result")?
+    .context("Failed to find device with given parameters.")
+    .status_code(StatusCode::NOT_FOUND)
 }
 
 pub async fn delete_device(

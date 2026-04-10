@@ -95,11 +95,14 @@ pub async fn create_secret(
 pub async fn update_secret(
   body: UpdateSecret,
 ) -> mogh_error::Result<SecretRecord> {
-  DB.update(body.id.as_record_id())
-    .merge(serde_json::to_value(body)?)
+  DB.query("UPDATE $id MERGE fn::object_strip_none($body);")
+    .bind(("id", body.id.clone()))
+    .bind(("body", body))
     .await
-    .context("Failed to update Secret on database")?
-    .context("Failed to update Secret on database: No update result")
+    .context("Failed to query database")?
+    .take::<Option<SecretRecord>>(0)
+    .context("Failed to get query result")?
+    .context("Failed to find secret with given parameters.")
     .status_code(StatusCode::NOT_FOUND)
 }
 

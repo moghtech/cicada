@@ -64,12 +64,13 @@ pub async fn create_encryption_key(
 pub async fn update_encryption_key(
   body: UpdateEncryptionKey,
 ) -> mogh_error::Result<EncryptionKeyRecord> {
-  DB.update(body.id.as_record_id())
-    .merge(serde_json::to_value(body)?)
+  DB.query("UPDATE $id MERGE fn::object_strip_none($body);")
+    .bind(("id", body.id.clone()))
+    .bind(("body", body))
     .await
-    .context("Failed to update EncryptionKey on database")?
-    .context(
-      "Failed to update EncryptionKey on database: No update result",
-    )
-    .map_err(Into::into)
+    .context("Failed to query database")?
+    .take::<Option<EncryptionKeyRecord>>(0)
+    .context("Failed to get query result")?
+    .context("Failed to find encryption key with given parameters.")
+    .status_code(StatusCode::NOT_FOUND)
 }

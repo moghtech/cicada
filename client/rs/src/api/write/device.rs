@@ -83,13 +83,10 @@ pub struct UpdateDevice {
   /// The device ID
   pub id: DeviceId,
   /// The name of the device
-  #[serde(skip_serializing_if = "Option::is_none")]
   pub name: Option<String>,
   /// The public key of the device
-  #[serde(skip_serializing_if = "Option::is_none")]
   pub public_key: Option<String>,
   /// Whether the device is enabled / has access.
-  #[serde(skip_serializing_if = "Option::is_none")]
   pub enabled: Option<bool>,
 }
 

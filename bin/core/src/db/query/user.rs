@@ -4,8 +4,7 @@ use cicada_client::entities::{
 };
 use mogh_auth_client::passkey::Passkey;
 use mogh_error::{AddStatusCode, StatusCode, anyhow::Context as _};
-use serde::Serialize;
-use surrealdb_types::object;
+use surrealdb_types::{SurrealValue, object};
 
 use crate::db::DB;
 
@@ -134,10 +133,10 @@ pub async fn sign_up_external_user(
   let user = DB
     .query(
       "
-    BEGIN TRANSACTION;
-    let $user = CREATE ONLY User SET username = $username, avatar = $avatar, enabled = $enabled; $user;
-    CREATE ExternalLogin SET user = $user.id, kind = $kind, external_id = $external_id RETURN NONE;
-    COMMIT TRANSACTION;",
+      BEGIN TRANSACTION;
+      let $user = CREATE ONLY User SET username = $username, avatar = $avatar, enabled = $enabled; $user;
+      CREATE ExternalLogin SET user = $user.id, kind = $kind, external_id = $external_id RETURN NONE;
+      COMMIT TRANSACTION;",
     )
     .bind(("username", username))
     .bind(("avatar", avatar))
@@ -185,37 +184,30 @@ pub async fn unlink_external_login(
     .status_code(StatusCode::NOT_FOUND)
 }
 
-#[derive(Debug, Clone, Default, Serialize)]
+#[derive(Default, SurrealValue)]
 pub struct UpdateUser {
-  #[serde(skip_serializing_if = "Option::is_none")]
   pub name: Option<String>,
-  #[serde(skip_serializing_if = "Option::is_none")]
   pub enabled: Option<bool>,
-  #[serde(skip_serializing_if = "Option::is_none")]
   pub password: Option<String>,
-  #[serde(skip_serializing_if = "Option::is_none")]
   pub totp_secret: Option<String>,
-  #[serde(skip_serializing_if = "Option::is_none")]
   pub external_skip_2fa: Option<bool>,
 }
 
-/// Uses merge strategy for non optional field types.
-/// If the field is None, it will not be updated.
 pub async fn update_user_fields(
   id: String,
-  update: UpdateUser,
+  body: UpdateUser,
 ) -> mogh_error::Result<UserRecord> {
-  DB.update(("User", id))
-    .merge(serde_json::to_value(update)?)
+  DB.query("UPDATE $id MERGE fn::object_strip_none($body);")
+    .bind(("id", UserId(id)))
+    .bind(("body", body))
     .await
     .context("Failed to query database")?
-    .context("No user update result")
+    .take::<Option<UserRecord>>(0)
+    .context("Failed to get query result")?
+    .context("Failed to find user with given parameters.")
     .status_code(StatusCode::NOT_FOUND)
 }
 
-/// Because passkey is Option type,
-/// need it's own 'content' type update
-/// which can set it to NONE.
 pub async fn update_user_passkey(
   id: String,
   passkey: Option<Passkey>,
