@@ -17,6 +17,8 @@ pub struct PolicyRecord {
   pub id: PolicyId,
   /// The name of the policy. Must be unique.
   pub name: String,
+  /// Whether the policy is enabled.
+  pub enabled: bool,
   /// The users to which this policy applies
   pub users: Vec<UserId>,
   /// The devices to which this policy applies

@@ -102,6 +102,20 @@ export default function PoliciesPage() {
             },
           },
           {
+            header: ({ column }) => (
+              <SortableHeader column={column} title="Enabled" />
+            ),
+            accessorKey: "enabled",
+            cell: ({ row }) => (
+              <EnableSwitch
+                checked={row.original.enabled}
+                onCheckedChange={(enabled) =>
+                  updatePolicy({ id: row.original.id, enabled })
+                }
+              />
+            ),
+          },
+          {
             header: "Groups",
             accessorKey: "groups",
             cell: ({ row }) => (
@@ -155,7 +169,7 @@ export default function PoliciesPage() {
           },
           {
             header: ({ column }) => (
-              <SortableHeader column={column} title="Write" />
+              <SortableHeader column={column} title="Write Access" />
             ),
             accessorKey: "filesystem_write",
             cell: ({ row }) => (
@@ -174,6 +188,14 @@ export default function PoliciesPage() {
             accessorKey: "created_at",
             cell: ({ row }) =>
               new Date(row.original.created_at).toLocaleString(),
+          },
+          {
+            header: ({ column }) => (
+              <SortableHeader column={column} title="Updated At" />
+            ),
+            accessorKey: "updated_at",
+            cell: ({ row }) =>
+              new Date(row.original.updated_at).toLocaleString(),
           },
         ]}
       />

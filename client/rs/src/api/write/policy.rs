@@ -41,6 +41,9 @@ pub fn create_policy() {}
 pub struct CreatePolicy {
   /// The name of the policy
   pub name: String,
+  /// Whether the policy is enabled / active.
+  #[serde(default = "default_enabled")]
+  pub enabled: bool,
   /// The users to which this policy applies
   pub users: Option<Vec<UserId>>,
   /// The devices to which this policy applies
@@ -53,6 +56,10 @@ pub struct CreatePolicy {
   /// Otherwise access is read only.
   #[serde(default)]
   pub filesystem_write: bool,
+}
+
+fn default_enabled() -> bool {
+  true
 }
 
 /// Response for [CreatePolicy].
@@ -89,6 +96,8 @@ pub struct UpdatePolicy {
   pub id: PolicyId,
   /// The name of the policy
   pub name: Option<String>,
+  /// Whether the policy is enabled / active
+  pub enabled: Option<bool>,
   /// The users to which this policy applies
   pub users: Option<Vec<UserId>>,
   /// The devices to which this policy applies

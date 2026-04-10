@@ -5,17 +5,16 @@ import {
   SearchInput,
   SortableHeader,
 } from "mogh_ui";
-import { useInvalidate, useRead, useWrite } from "@/lib/hooks";
+import { useInvalidate, useRead, useUser, useWrite } from "@/lib/hooks";
 import { RowSelectionState } from "@tanstack/react-table";
 import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import GroupMultiSelector from "@/components/group-multi-selector";
 import { Group, List, Text } from "@mantine/core";
 import ConfirmDelete from "@/components/confirm-delete";
 import { notifications } from "@mantine/notifications";
 
 export default function UsersPage() {
-  const nav = useNavigate();
+  const client = useUser().data;
   const inv = useInvalidate();
   const { data } = useRead("ListUsers", {});
   const byId = useMemo(
@@ -69,7 +68,6 @@ export default function UsersPage() {
       <DataTable
         tableKey="users-table-v1"
         data={users}
-        onRowClick={(device) => nav("/users/" + device.id)}
         selectOptions={{
           selectKey: (row) => row.id,
           state: [selected, setSelected],
@@ -106,6 +104,21 @@ export default function UsersPage() {
                 onCheckedChange={(admin) =>
                   updateUser({ id: row.original.id, admin })
                 }
+              />
+            ),
+          },
+          {
+            header: ({ column }) => (
+              <SortableHeader column={column} title="Super Admin" />
+            ),
+            accessorKey: "super_admin",
+            cell: ({ row }) => (
+              <EnableSwitch
+                checked={row.original.super_admin}
+                onCheckedChange={(super_admin) =>
+                  updateUser({ id: row.original.id, super_admin })
+                }
+                disabled={!client?.super_admin}
               />
             ),
           },

@@ -37,7 +37,7 @@ pub async fn list_policies_for_client(
   };
   DB
     .query(format!(
-      "SELECT * FROM Policy WHERE {id_field} CONTAINS $id OR groups CONTAINSANY $groups"
+      "SELECT * FROM Policy WHERE enabled = true AND ({id_field} CONTAINS $id OR groups CONTAINSANY $groups)"
     ))
     .bind(("id", id))
     .bind(("groups", groups.clone()))

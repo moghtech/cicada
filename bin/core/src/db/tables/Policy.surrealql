@@ -9,6 +9,18 @@ DEFINE FIELD OVERWRITE name
   ON TABLE Policy
   TYPE string;
 
+-- enabled
+DEFINE FIELD OVERWRITE enabled
+  ON TABLE Policy
+  TYPE bool
+  DEFAULT true;
+
+-- groups
+DEFINE FIELD OVERWRITE groups
+  ON TABLE Policy
+  TYPE array<string>
+  DEFAULT [];
+
 -- users
 DEFINE FIELD OVERWRITE users
   ON TABLE Policy
@@ -19,12 +31,6 @@ DEFINE FIELD OVERWRITE users
 DEFINE FIELD OVERWRITE devices
   ON TABLE Policy
   TYPE array<record<Device>>
-  DEFAULT [];
-
--- groups
-DEFINE FIELD OVERWRITE groups
-  ON TABLE Policy
-  TYPE array<string>
   DEFAULT [];
 
 -- filesystems

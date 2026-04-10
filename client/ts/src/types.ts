@@ -164,6 +164,8 @@ export interface PolicyRecord {
 	id: PolicyId;
 	/** The name of the policy. Must be unique. */
 	name: string;
+	/** Whether the policy is enabled. */
+	enabled: boolean;
 	/** The users to which this policy applies */
 	users: UserId[];
 	/** The devices to which this policy applies */
@@ -836,6 +838,8 @@ export interface CreateOnboardingKeyResponse {
 export interface CreatePolicy {
 	/** The name of the policy */
 	name: string;
+	/** Whether the policy is enabled / active. */
+	enabled: boolean;
 	/** The users to which this policy applies */
 	users?: UserId[];
 	/** The devices to which this policy applies */
@@ -1347,6 +1351,8 @@ export interface UpdatePolicy {
 	id: PolicyId;
 	/** The name of the policy */
 	name?: string;
+	/** Whether the policy is enabled / active */
+	enabled?: boolean;
 	/** The users to which this policy applies */
 	users?: UserId[];
 	/** The devices to which this policy applies */
