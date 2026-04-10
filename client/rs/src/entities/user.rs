@@ -7,6 +7,44 @@ use crate::entities::{
   Iso8601Timestamp, JsonValue, external_login::ExternalLoginRecord,
 };
 
+/// Users list item queryable from the API
+#[typeshare]
+#[derive(Debug, Clone, Serialize, Deserialize, SurrealValue)]
+#[surreal(crate = "surrealdb_types")]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
+pub struct UserListItem {
+  /// The unique user id
+  pub id: UserId,
+  /// The name of the user, ie username
+  pub username: String,
+  /// Link for user avatar, or empty string.
+  pub avatar: String,
+  /// Whether user is enabled.
+  /// Disabled users cannot log in and have no API access.
+  pub enabled: bool,
+  // ===============
+  // = PERMISSIONS =
+  // ===============
+  /// The groups to which this user belongs.
+  #[surreal(default)]
+  pub groups: Vec<String>,
+  /// User has full API access as an administrator.
+  #[surreal(default)]
+  pub admin: bool,
+  /// User can elevate or demote other users admin and super_admin properties.
+  #[surreal(default)]
+  pub super_admin: bool,
+  // ===============
+  // = TIMESTAMPS =
+  // ===============
+  /// Created at as ISO8601 timestamp.
+  #[cfg_attr(feature = "utoipa", schema(value_type = String))]
+  pub created_at: Iso8601Timestamp,
+  /// Updated at as ISO8601 timestamp.
+  #[cfg_attr(feature = "utoipa", schema(value_type = String))]
+  pub updated_at: Iso8601Timestamp,
+}
+
 /// Users queryable from the API
 #[typeshare]
 #[derive(Debug, Clone, Serialize, Deserialize, SurrealValue)]

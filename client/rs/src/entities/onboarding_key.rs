@@ -19,6 +19,9 @@ pub struct OnboardingKeyRecord {
   /// Whether onboarding key is enabled.
   /// Disabled onboarding keys cannot onboard devices.
   pub enabled: bool,
+  /// Devices which onboard using this key will automatically
+  /// get these groups.
+  pub groups: Vec<String>,
   /// Expiry timestamp, or null for no expiry.
   #[cfg_attr(feature = "utoipa", schema(value_type = String))]
   pub expires: Option<Iso8601Timestamp>,

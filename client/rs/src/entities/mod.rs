@@ -18,6 +18,8 @@ pub mod encryption_key;
 pub mod external_login;
 /// Represents virtual filesystems which can be mounted to clients.
 pub mod filesystem;
+/// Assign groups to users and devices for access
+pub mod group;
 /// Nodes represent entries in a filesystem.
 /// They represent either Files or Folders.
 pub mod node;

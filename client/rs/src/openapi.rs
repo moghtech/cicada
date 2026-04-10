@@ -43,6 +43,8 @@ mod write {
     // POLICY
     read::list_policies,
     read::get_policy,
+    // GROUP
+    read::list_groups,
     // =======
     //  WRITE
     // =======

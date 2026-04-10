@@ -68,5 +68,12 @@ pub async fn init() -> mogh_error::Result<()> {
     .await
     .context("Failed to initialize Policy table")?;
 
+  // List groups depends on the tables
+  DB.query(include_str!("tables/functions/list_groups.surrealql"))
+    .await
+    .context(
+      "Failed to initialize define list_groups function.",
+    )?;
+
   Ok(())
 }

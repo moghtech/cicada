@@ -4,6 +4,12 @@ export type ReadResponses = {
   GetVersion: Types.GetVersionResponse;
   GetUsername: Types.GetUsernameResponse;
 
+  // ==== GROUP ====
+  ListGroups: Types.ListGroupsResponse;
+
+  // ==== USER ====
+  ListUsers: Types.ListUsersResponse;
+
   // ==== DEVICE ====
   ListDevices: Types.ListDevicesResponse;
   GetDevice: Types.GetDeviceResponse;
@@ -11,6 +17,10 @@ export type ReadResponses = {
   // ==== ONBOARDING KEY ====
   ListOnboardingKeys: Types.ListOnboardingKeysResponse;
   GetOnboardingKey: Types.GetOnboardingKeyResponse;
+
+  // ==== POLICY ====
+  ListPolicies: Types.ListPoliciesResponse;
+  GetPolicy: Types.GetPolicyResponse;
 
   // ==== FILESYSTEM ====
   ListFilesystems: Types.ListFilesystemsResponse;
@@ -30,10 +40,6 @@ export type ReadResponses = {
   // ==== ENCRYPTION KEY ====
   ListEncryptionKeys: Types.ListEncryptionKeysResponse;
   GetEncryptionKey: Types.GetEncryptionKeyResponse;
-
-  // ==== POLICY ====
-  ListPolicies: Types.ListPoliciesResponse;
-  GetPolicy: Types.GetPolicyResponse;
 };
 
 export type WriteResponses = {

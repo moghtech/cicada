@@ -138,6 +138,11 @@ export interface OnboardingKeyRecord {
 	 * Disabled onboarding keys cannot onboard devices.
 	 */
 	enabled: boolean;
+	/**
+	 * Devices which onboard using this key will automatically
+	 * get these groups.
+	 */
+	groups: string[];
 	/** Expiry timestamp, or null for no expiry. */
 	expires?: Iso8601Timestamp;
 	/** Created at as ISO8601 timestamp. */
@@ -503,6 +508,23 @@ export type ListEncryptionKeysResponse = EncryptionKeyEntity[];
 /** Response for [ListFilesystems]. */
 export type ListFilesystemsResponse = FilesystemRecord[];
 
+/** Group entity produced by database query */
+export interface GroupEntity {
+	/** The name of the group */
+	name: string;
+	/** The users assigned to the group */
+	users: UserId[];
+	/** The devices assigned to the group */
+	devices: DeviceId[];
+	/** The policies granted to the group */
+	policies: PolicyId[];
+	/** The onboarding keys with this group attached */
+	onboarding_keys: OnboardingKeyId[];
+}
+
+/** Response for [ListGroups]. */
+export type ListGroupsResponse = GroupEntity[];
+
 export interface NodeListItem {
 	/** The unique node id */
 	id: NodeId;
@@ -561,8 +583,33 @@ export interface SecretListItem {
 /** Response for [ListSecrets]. */
 export type ListSecretsResponse = SecretListItem[];
 
+/** Users list item queryable from the API */
+export interface UserListItem {
+	/** The unique user id */
+	id: UserId;
+	/** The name of the user, ie username */
+	username: string;
+	/** Link for user avatar, or empty string. */
+	avatar: string;
+	/**
+	 * Whether user is enabled.
+	 * Disabled users cannot log in and have no API access.
+	 */
+	enabled: boolean;
+	/** The groups to which this user belongs. */
+	groups: string[];
+	/** User has full API access as an administrator. */
+	admin: boolean;
+	/** User can elevate or demote other users admin and super_admin properties. */
+	super_admin: boolean;
+	/** Created at as ISO8601 timestamp. */
+	created_at: Iso8601Timestamp;
+	/** Updated at as ISO8601 timestamp. */
+	updated_at: Iso8601Timestamp;
+}
+
 /** Response for [ListUsers]. */
-export type ListUsersResponse = UserEntity[];
+export type ListUsersResponse = UserListItem[];
 
 /** Response for [RotateNodeEnvelopeKey]. */
 export type RotateNodeEnvelopeKeyResponse = NodeEntity;
@@ -1049,6 +1096,10 @@ export interface ListEncryptionKeys {
 export interface ListFilesystems {
 }
 
+/** List groups. Response: [ListGroupsResponse]. */
+export interface ListGroups {
+}
+
 /** List filesystem nodes. Response: [ListNodesResponse]. */
 export interface ListNodes {
 	/** Filesystem id */
@@ -1345,10 +1396,14 @@ export enum ClientType {
 export type ReadRequest = 
 	| { type: "GetVersion", params: GetVersion }
 	| { type: "GetUsername", params: GetUsername }
+	| { type: "ListGroups", params: ListGroups }
+	| { type: "ListUsers", params: ListUsers }
 	| { type: "ListDevices", params: ListDevices }
 	| { type: "GetDevice", params: GetDevice }
 	| { type: "ListOnboardingKeys", params: ListOnboardingKeys }
 	| { type: "GetOnboardingKey", params: GetOnboardingKey }
+	| { type: "ListPolicies", params: ListPolicies }
+	| { type: "GetPolicy", params: GetPolicy }
 	| { type: "ListFilesystems", params: ListFilesystems }
 	| { type: "GetFilesystem", params: GetFilesystem }
 	| { type: "ListNodes", params: ListNodes }
@@ -1359,9 +1414,7 @@ export type ReadRequest =
 	| { type: "GetSecret", params: GetSecret }
 	| { type: "FindSecret", params: FindSecret }
 	| { type: "ListEncryptionKeys", params: ListEncryptionKeys }
-	| { type: "GetEncryptionKey", params: GetEncryptionKey }
-	| { type: "ListPolicies", params: ListPolicies }
-	| { type: "GetPolicy", params: GetPolicy };
+	| { type: "GetEncryptionKey", params: GetEncryptionKey };
 
 export enum Timelength {
 	/** `1-sec` */

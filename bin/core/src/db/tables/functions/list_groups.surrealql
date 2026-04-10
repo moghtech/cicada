@@ -1,0 +1,19 @@
+-- List groups via query across resource types.
+DEFINE FUNCTION OVERWRITE fn::list_groups() {
+  LET $users = SELECT id, groups FROM User WHERE array::len(groups) > 0;
+  LET $devices = SELECT id, groups FROM Device WHERE array::len(groups) > 0;
+  LET $policies = SELECT id, groups FROM Policy WHERE array::len(groups) > 0;
+  LET $onboarding_keys = SELECT id, groups FROM OnboardingKey WHERE array::len(groups) > 0;
+
+  LET $names = array::distinct(array::flatten([
+    $users.groups, $devices.groups, $policies.groups, $onboarding_keys.groups,
+  ]).flatten());
+
+  RETURN SELECT
+    $this AS name,
+    (SELECT VALUE id FROM $users WHERE groups CONTAINS $parent) AS users,
+    (SELECT VALUE id FROM $devices WHERE groups CONTAINS $parent) AS devices,
+    (SELECT VALUE id FROM $policies WHERE groups CONTAINS $parent) AS policies,
+    (SELECT VALUE id FROM $onboarding_keys WHERE groups CONTAINS $parent) AS onboarding_keys
+  FROM $names;
+};

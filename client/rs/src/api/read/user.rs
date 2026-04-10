@@ -3,7 +3,8 @@ use serde::{Deserialize, Serialize};
 use typeshare::typeshare;
 
 use crate::{
-  api::read::CicadaReadRequest, entities::user::UserEntity,
+  api::read::CicadaReadRequest,
+  entities::user::{UserEntity, UserListItem},
 };
 
 //
@@ -32,7 +33,7 @@ pub struct ListUsers {}
 
 /// Response for [ListUsers].
 #[typeshare]
-pub type ListUsersResponse = Vec<UserEntity>;
+pub type ListUsersResponse = Vec<UserListItem>;
 
 //
 

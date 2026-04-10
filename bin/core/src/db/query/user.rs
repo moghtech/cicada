@@ -1,6 +1,6 @@
 use cicada_client::entities::{
   external_login::{ExternalLoginKind, ExternalLoginRecord},
-  user::{UserEntity, UserId, UserRecord},
+  user::{UserEntity, UserId, UserListItem, UserRecord},
 };
 use mogh_auth_client::passkey::Passkey;
 use mogh_error::{AddStatusCode, StatusCode, anyhow::Context as _};
@@ -8,6 +8,14 @@ use serde::Serialize;
 use surrealdb_types::object;
 
 use crate::db::DB;
+
+pub async fn list_all_users() -> mogh_error::Result<Vec<UserListItem>>
+{
+  DB.select("User")
+    .await
+    .context("Failed to query for Users")
+    .map_err(Into::into)
+}
 
 pub async fn get_user_entity(
   user_id: String,

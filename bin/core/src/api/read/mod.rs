@@ -17,10 +17,12 @@ use crate::{
 pub mod device;
 pub mod encryption_key;
 pub mod filesystem;
+pub mod group;
 pub mod node;
 pub mod onboarding_key;
 pub mod policy;
 pub mod secret;
+pub mod user;
 
 pub struct ReadArgs {
   client: Client,
@@ -39,6 +41,12 @@ enum ReadRequest {
   GetVersion(GetVersion),
   GetUsername(GetUsername),
 
+  // ==== GROUP ====
+  ListGroups(ListGroups),
+
+  // ==== USER ====
+  ListUsers(ListUsers),
+
   // ==== DEVICE ====
   ListDevices(ListDevices),
   GetDevice(GetDevice),
@@ -46,6 +54,10 @@ enum ReadRequest {
   // ==== ONBOARDING KEY ====
   ListOnboardingKeys(ListOnboardingKeys),
   GetOnboardingKey(GetOnboardingKey),
+
+  // ==== POLICY ====
+  ListPolicies(ListPolicies),
+  GetPolicy(GetPolicy),
 
   // ==== FILESYSTEM ====
   ListFilesystems(ListFilesystems),
@@ -65,10 +77,6 @@ enum ReadRequest {
   // ==== ENCRYPTION KEY ====
   ListEncryptionKeys(ListEncryptionKeys),
   GetEncryptionKey(GetEncryptionKey),
-
-  // ==== POLICY ====
-  ListPolicies(ListPolicies),
-  GetPolicy(GetPolicy),
 }
 
 pub fn router() -> Router {

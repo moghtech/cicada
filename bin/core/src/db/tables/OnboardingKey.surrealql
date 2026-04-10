@@ -20,6 +20,12 @@ DEFINE FIELD OVERWRITE enabled
   TYPE bool
   DEFAULT false;
 
+-- groups
+DEFINE FIELD OVERWRITE groups
+  ON TABLE OnboardingKey
+  TYPE array<string>
+  DEFAULT [];
+
 -- expires
 DEFINE FIELD OVERWRITE expires
   ON TABLE OnboardingKey
