@@ -10,7 +10,7 @@ export default function GroupMultiSelector(props: GroupMultiSelectorProps) {
     <TagsInput
       placeholder="Select or create groups"
       data={groups?.map((g) => g.name) ?? []}
-      styles={{ inputField: { width: 120 } }}
+      styles={{ inputField: { width: 150 } }}
       miw="max-content"
       clearable
       {...props}
