@@ -7,7 +7,7 @@ import { RowSelectionState } from "@tanstack/react-table";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const DevicesPage = () => {
+export default function DevicesPage() {
   const inv = useInvalidate();
   const nav = useNavigate();
   const { data } = useRead("ListDevices", {});
@@ -93,6 +93,4 @@ const DevicesPage = () => {
       />
     </>
   );
-};
-
-export default DevicesPage;
+}

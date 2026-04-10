@@ -8,7 +8,7 @@ import { RowSelectionState } from "@tanstack/react-table";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const OnboardingKeysPage = () => {
+export default function OnboardingKeysPage() {
   const inv = useInvalidate();
   const nav = useNavigate();
   const { data } = useRead("ListOnboardingKeys", {});
@@ -101,6 +101,4 @@ const OnboardingKeysPage = () => {
       />
     </>
   );
-};
-
-export default OnboardingKeysPage;
+}

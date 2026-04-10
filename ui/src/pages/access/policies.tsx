@@ -6,6 +6,7 @@ import { notifications } from "@mantine/notifications";
 import { RowSelectionState } from "@tanstack/react-table";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import CreatePolicy from "@/create/policy";
 
 export default function PoliciesPage() {
   const inv = useInvalidate();
@@ -29,6 +30,7 @@ export default function PoliciesPage() {
   return (
     <>
       <Group>
+        <CreatePolicy />
         <ConfirmDelete
           name=""
           entityType={selectedIds.length === 1 ? "Policy" : "Policies"}
