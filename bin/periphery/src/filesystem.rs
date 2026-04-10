@@ -131,6 +131,13 @@ impl CicadaFs {
       allowed_uids: allow_uids.iter().cloned().chain([uid]).collect(),
     };
 
+    // Before mount, make sure any existing mount is cleaned up.
+    // This may be possible if cicada periphery did not exit cleanly.
+    // Without this, the situation would cause the mount to fail.
+    // Failed output is ignored, it is expected to fail because
+    // usually the mount won't exist.
+    crate::unmount::unmount(&mountpoint).ok();
+
     fuser::mount2(fs, mountpoint, &config)
       .context("Failed to mount CicadaFs")
   }

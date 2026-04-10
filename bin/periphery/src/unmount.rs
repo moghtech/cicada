@@ -31,7 +31,7 @@ fn unmount_with_retries(mountpoint: &Path) {
   }
 }
 
-fn unmount(
+pub fn unmount(
   mountpoint: &Path,
 ) -> std::io::Result<std::process::ExitStatus> {
   let mut child = std::process::Command::new("fusermount3")
