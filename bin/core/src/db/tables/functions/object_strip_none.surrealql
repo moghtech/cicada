@@ -1,0 +1,5 @@
+DEFINE FUNCTION OVERWRITE fn::object_strip_none($obj: object) {
+  RETURN object::from_entries(
+    object::entries($obj).filter(|$e| $e[1] != NONE)
+  );
+}

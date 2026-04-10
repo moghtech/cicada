@@ -82,11 +82,14 @@ pub async fn create_policy(
 pub async fn update_policy(
   body: UpdatePolicy,
 ) -> mogh_error::Result<PolicyRecord> {
-  DB.update(body.id.as_record_id())
-    .merge(serde_json::to_value(body)?)
+  DB.query("UPDATE $id MERGE fn::object_strip_none($body);")
+    .bind(("id", body.id.clone()))
+    .bind(("body", body))
     .await
-    .context("Failed to update Policy on database")?
-    .context("Failed to update Policy on database: No update result")
+    .context("Failed to query database")?
+    .take::<Option<PolicyRecord>>(0)
+    .context("Failed to get query result")?
+    .context("Failed to find policy with given parameters.")
     .status_code(StatusCode::NOT_FOUND)
 }
 

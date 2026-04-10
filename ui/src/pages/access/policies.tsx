@@ -1,16 +1,24 @@
 import ConfirmDelete from "@/components/confirm-delete";
-import { DataTable, SortableHeader } from "mogh_ui";
+import DeviceMultiSelector from "@/components/device-multi-selector";
+import FilesystemMultiSelector from "@/components/filesystem-multi-selector";
+import GroupMultiSelector from "@/components/group-multi-selector";
+import UserMultiSelector from "@/components/user-multi-selector";
+import {
+  DataTable,
+  EnableSwitch,
+  filterBySplit,
+  SearchInput,
+  SortableHeader,
+} from "mogh_ui";
 import { useInvalidate, useRead, useWrite } from "@/lib/hooks";
-import { Group, List, Text } from "@mantine/core";
+import { Group, List, Text, TextInput } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { RowSelectionState } from "@tanstack/react-table";
-import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
 import CreatePolicy from "@/create/policy";
 
 export default function PoliciesPage() {
   const inv = useInvalidate();
-  const nav = useNavigate();
   const { data } = useRead("ListPolicies", {});
   const byId = useMemo(
     () => data && Object.fromEntries(data.map((ok) => [ok.id, ok.name])),
@@ -27,6 +35,11 @@ export default function PoliciesPage() {
       setSelected({});
     },
   });
+  const { mutate: updatePolicy } = useWrite("UpdatePolicy", {
+    onSuccess: () => inv(["ListPolicies"]),
+  });
+  const [search, setSearch] = useState("");
+  const policies = filterBySplit(data, search, (policy) => policy.name);
   return (
     <>
       <Group>
@@ -53,11 +66,11 @@ export default function PoliciesPage() {
             </>
           }
         />
+        <SearchInput value={search} onSearch={setSearch} />
       </Group>
       <DataTable
         tableKey="policies-table-v1"
-        data={data ?? []}
-        onRowClick={(policy) => nav("/policies/" + policy.id)}
+        data={policies}
         selectOptions={{
           selectKey: (row) => row.id,
           state: [selected, setSelected],
@@ -68,24 +81,91 @@ export default function PoliciesPage() {
               <SortableHeader column={column} title="Name" />
             ),
             accessorKey: "name",
+            cell: ({ row }) => {
+              const [name, setName] = useState(row.original.name);
+              useEffect(() => setName(row.original.name), [row.original.name]);
+              return (
+                <TextInput
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  onBlur={(e) =>
+                    updatePolicy({ id: row.original.id, name: e.target.value })
+                  }
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.currentTarget.blur();
+                    }
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                />
+              );
+            },
           },
           {
-            header: ({ column }) => (
-              <SortableHeader column={column} title="Groups" />
-            ),
+            header: "Groups",
             accessorKey: "groups",
+            cell: ({ row }) => (
+              <GroupMultiSelector
+                value={row.original.groups}
+                onChange={(groups) =>
+                  updatePolicy({ id: row.original.id, groups })
+                }
+                onClick={(e) => e.stopPropagation()}
+              />
+            ),
           },
           {
-            header: ({ column }) => (
-              <SortableHeader column={column} title="Filesystems" />
+            header: "Users",
+            accessorKey: "users",
+            cell: ({ row }) => (
+              <UserMultiSelector
+                value={row.original.users}
+                onChange={(users) =>
+                  updatePolicy({ id: row.original.id, users })
+                }
+                onClick={(e) => e.stopPropagation()}
+              />
             ),
+          },
+          {
+            header: "Devices",
+            accessorKey: "devices",
+            cell: ({ row }) => (
+              <DeviceMultiSelector
+                value={row.original.devices}
+                onChange={(devices) =>
+                  updatePolicy({ id: row.original.id, devices })
+                }
+                onClick={(e) => e.stopPropagation()}
+              />
+            ),
+          },
+          {
+            header: "Filesystems",
             accessorKey: "filesystems",
+            cell: ({ row }) => (
+              <FilesystemMultiSelector
+                value={row.original.filesystems}
+                onChange={(filesystems) =>
+                  updatePolicy({ id: row.original.id, filesystems })
+                }
+                onClick={(e) => e.stopPropagation()}
+              />
+            ),
           },
           {
             header: ({ column }) => (
               <SortableHeader column={column} title="Write" />
             ),
             accessorKey: "filesystem_write",
+            cell: ({ row }) => (
+              <EnableSwitch
+                checked={row.original.filesystem_write}
+                onCheckedChange={(filesystem_write) =>
+                  updatePolicy({ id: row.original.id, filesystem_write })
+                }
+              />
+            ),
           },
           {
             header: ({ column }) => (
@@ -94,14 +174,6 @@ export default function PoliciesPage() {
             accessorKey: "created_at",
             cell: ({ row }) =>
               new Date(row.original.created_at).toLocaleString(),
-          },
-          {
-            header: ({ column }) => (
-              <SortableHeader column={column} title="Updated At" />
-            ),
-            accessorKey: "updated_at",
-            cell: ({ row }) =>
-              new Date(row.original.updated_at).toLocaleString(),
           },
         ]}
       />

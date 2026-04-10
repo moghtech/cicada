@@ -5,7 +5,7 @@ import { Types } from "cicada_client";
 import { hexColorByIntention } from "mogh_ui";
 import { Link } from "react-router-dom";
 
-export type ResourceType = "EncryptionKey" | "Secret";
+export type ResourceType = "EncryptionKey" | "Secret" | "Filesystem" | "Device";
 
 export interface ResourceLinkProps {
   type: ResourceType;
@@ -18,6 +18,10 @@ function link(type: ResourceType, id: string) {
       return "/encryption-keys/" + id;
     case "Secret":
       return "/secrets/" + id;
+    case "Filesystem":
+      return "/filesystems/" + id;
+    case "Device":
+      return "/device/" + id;
   }
 }
 
@@ -36,7 +40,9 @@ export default function ResourceLink({ type, id }: ResourceLinkProps) {
           : !(resource as Types.SecretEntity)?.data
             ? "Neutral"
             : "Good"
-        : "None";
+        : ["Filesystem", "User", "Device"].includes(type)
+          ? "Good"
+          : "None";
   return (
     <Group
       renderRoot={(props) => <Link to={link(type, id)} {...props} />}

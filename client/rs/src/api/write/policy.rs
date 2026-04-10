@@ -88,23 +88,17 @@ pub struct UpdatePolicy {
   /// The policy ID
   pub id: PolicyId,
   /// The name of the policy
-  #[serde(skip_serializing_if = "Option::is_none")]
   pub name: Option<String>,
   /// The users to which this policy applies
-  #[serde(skip_serializing_if = "Option::is_none")]
   pub users: Option<Vec<UserId>>,
   /// The devices to which this policy applies
-  #[serde(skip_serializing_if = "Option::is_none")]
   pub devices: Option<Vec<DeviceId>>,
   /// The groups to which this policy applies.
-  #[serde(skip_serializing_if = "Option::is_none")]
   pub groups: Option<Vec<String>>,
   /// Filesystems the users / devices / groups can access.
-  #[serde(skip_serializing_if = "Option::is_none")]
   pub filesystems: Option<Vec<FilesystemId>>,
   /// Give the groups write access to configured filesystems.
   /// Otherwise access is read only.
-  #[serde(skip_serializing_if = "Option::is_none")]
   pub filesystem_write: Option<bool>,
 }
 

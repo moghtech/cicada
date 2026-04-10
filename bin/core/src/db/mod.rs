@@ -42,6 +42,13 @@ pub async fn init() -> mogh_error::Result<()> {
     .context(
       "Failed to initialize define encrypted_data_field function.",
     )?;
+  DB.query(include_str!(
+    "tables/functions/object_strip_none.surrealql"
+  ))
+  .await
+  .context(
+    "Failed to initialize define object_strip_none function.",
+  )?;
 
   DB.query(include_str!("tables/User.surrealql"))
     .await
@@ -71,9 +78,7 @@ pub async fn init() -> mogh_error::Result<()> {
   // List groups depends on the tables
   DB.query(include_str!("tables/functions/list_groups.surrealql"))
     .await
-    .context(
-      "Failed to initialize define list_groups function.",
-    )?;
+    .context("Failed to initialize define list_groups function.")?;
 
   Ok(())
 }

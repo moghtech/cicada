@@ -169,7 +169,10 @@ function CreatePolicyForm({ close }: { close: () => void }) {
           </Group>
         </Stepper.Step>
 
-        <Stepper.Step label="Step 3" description="Policy name">
+        <Stepper.Step label="Step 3" description="Name">
+          <Text size="lg" c="dimmed">
+            Name the policy.
+          </Text>
           <TextInput
             {...form.getInputProps("name")}
             autoFocus
