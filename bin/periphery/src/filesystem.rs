@@ -411,10 +411,9 @@ impl fuser::Filesystem for CicadaFs {
       name: name.to_string(),
       perm: Some(perm),
       kind: NodeKind::File,
-      interpolation: None,
       data: Some(String::new()),
-      encryption_key: None,
       interpolated: self.interpolated,
+      ..Default::default()
     }) {
       Ok(node) => {
         let attr = self.node_to_file_attr(node);
@@ -462,10 +461,8 @@ impl fuser::Filesystem for CicadaFs {
       name: name.to_string(),
       perm: Some(perm),
       kind: NodeKind::Folder,
-      interpolation: None,
-      data: None,
-      encryption_key: None,
       interpolated: self.interpolated,
+      ..Default::default()
     }) {
       Ok(node) => {
         let attr = self.node_to_file_attr(node);

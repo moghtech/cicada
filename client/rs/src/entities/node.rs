@@ -33,9 +33,10 @@ pub struct NodeListItem {
   /// - File,
   pub kind: NodeKind,
   /// Whether to checkpoint by default when updating node data.
-  /// If false, individual saves can manually still pass the checkpoint
+  /// - If null, inherits the filesystem default.
+  /// - If false, individual saves can manually still pass the checkpoint
   /// flag when updating node data.
-  pub checkpointing: bool,
+  pub checkpointing: Option<bool>,
   /// The interpolation mode
   pub interpolation: InterpolationMode,
   /// The encryption key used with data
@@ -75,9 +76,10 @@ pub struct NodeEntity {
   /// - File,
   pub kind: NodeKind,
   /// Whether to checkpoint by default when updating node data.
-  /// If false, individual saves can manually still pass the checkpoint
+  /// - If null, inherits the filesystem default.
+  /// - If false, individual saves can manually still pass the checkpoint
   /// flag when updating node data.
-  pub checkpointing: bool,
+  pub checkpointing: Option<bool>,
   /// The interpolation mode
   pub interpolation: InterpolationMode,
   /// Data associated with the node.
@@ -122,9 +124,10 @@ pub struct NodeRecord {
   /// - File,
   pub kind: NodeKind,
   /// Whether to checkpoint by default when updating node data.
-  /// If false, individual saves can manually still pass the checkpoint
+  /// - If null, inherits the filesystem default.
+  /// - If false, individual saves can manually still pass the checkpoint
   /// flag when updating node data.
-  pub checkpointing: bool,
+  pub checkpointing: Option<bool>,
   /// The interpolation mode
   pub interpolation: InterpolationMode,
   /// Data associated with the node.

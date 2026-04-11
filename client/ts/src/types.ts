@@ -128,10 +128,11 @@ export interface NodeEntity {
 	kind: NodeKind;
 	/**
 	 * Whether to checkpoint by default when updating node data.
-	 * If false, individual saves can manually still pass the checkpoint
+	 * - If null, inherits the filesystem default.
+	 * - If false, individual saves can manually still pass the checkpoint
 	 * flag when updating node data.
 	 */
-	checkpointing: boolean;
+	checkpointing?: boolean;
 	/** The interpolation mode */
 	interpolation: InterpolationMode;
 	/**
@@ -349,15 +350,31 @@ export interface EncryptionKeyRecord {
 /** Response for [CreateEncryptionKey]. */
 export type CreateEncryptionKeyResponse = EncryptionKeyRecord;
 
+/** Set the checkpointing mode for files */
+export enum CheckpointingMode {
+	/** Checkpointing is enabled. */
+	Enabled = "Enabled",
+	/**
+	 * Inherit the mode from the filesystem. This is the default for files.
+	 * 
+	 * Note. This is only valid mode for files, not filesystems themselves.
+	 */
+	Inherit = "Inherit",
+	/** Checkpointing is disabled. */
+	Disabled = "Disabled",
+}
+
 export interface FilesystemRecord {
 	/** The unique filesystem id */
 	id: FilesystemId;
 	/** The name of the filesystem. Must be unique. */
 	name: string;
-	/** The filesystem default encryption key. */
-	encryption_key?: EncryptionKeyId;
+	/** The default checkpointing mode for the filesystem */
+	checkpointing: CheckpointingMode;
 	/** The default interpolation mode for the filesystem */
 	interpolation: InterpolationMode;
+	/** The filesystem default encryption key. */
+	encryption_key?: EncryptionKeyId;
 	/** Created at as ISO8601 timestamp. */
 	created_at: Iso8601Timestamp;
 	/** Updated at as ISO8601 timestamp. */
@@ -617,10 +634,11 @@ export interface NodeListItem {
 	kind: NodeKind;
 	/**
 	 * Whether to checkpoint by default when updating node data.
-	 * If false, individual saves can manually still pass the checkpoint
+	 * - If null, inherits the filesystem default.
+	 * - If false, individual saves can manually still pass the checkpoint
 	 * flag when updating node data.
 	 */
-	checkpointing: boolean;
+	checkpointing?: boolean;
 	/** The interpolation mode */
 	interpolation: InterpolationMode;
 	/** The encryption key used with data */
@@ -706,9 +724,6 @@ export type UpdateDeviceResponse = DeviceRecord;
 
 /** Response for [UpdateEncryptionKey]. */
 export type UpdateEncryptionKeyResponse = EncryptionKeyRecord;
-
-/** Response for [UpdateFilesystemEncryptionKey]. */
-export type UpdateFilesystemEncryptionKeyResponse = FilesystemRecord;
 
 /** Response for [UpdateFilesystem]. */
 export type UpdateFilesystemResponse = FilesystemRecord;
@@ -861,6 +876,12 @@ export interface CreateFilesystem {
 	/** The name of the filesystem */
 	name: string;
 	/**
+	 * The default checkpointing mode
+	 * - `"Enabled"`
+	 * - `"Disabled"`
+	 */
+	checkpointing?: CheckpointingMode;
+	/**
 	 * The default interpolation mode
 	 * - `"Brackets"` (`[[SECRET]]`)
 	 * - `"CurlyBrackets"` (`{{SECRET}}`)
@@ -902,6 +923,13 @@ export interface CreateNode {
 	 * Default: **Folder**
 	 */
 	kind?: NodeKind;
+	/**
+	 * The file checkpointing mode
+	 * - `"Inherit"` (default)
+	 * - `"Enabled"`
+	 * - `"Disabled"`
+	 */
+	checkpointing?: CheckpointingMode;
 	/**
 	 * The interpolation mode (only for files)
 	 * - `"Inherit"` (inherit from filesystem option) (default)
@@ -1290,10 +1318,11 @@ export interface NodeRecord {
 	kind: NodeKind;
 	/**
 	 * Whether to checkpoint by default when updating node data.
-	 * If false, individual saves can manually still pass the checkpoint
+	 * - If null, inherits the filesystem default.
+	 * - If false, individual saves can manually still pass the checkpoint
 	 * flag when updating node data.
 	 */
-	checkpointing: boolean;
+	checkpointing?: boolean;
 	/** The interpolation mode */
 	interpolation: InterpolationMode;
 	/**
@@ -1414,6 +1443,12 @@ export interface UpdateFilesystem {
 	/** The name of the filesystem */
 	name?: string;
 	/**
+	 * The default checkpointing mode
+	 * - `"Enabled"`
+	 * - `"Disabled"`
+	 */
+	checkpointing?: CheckpointingMode;
+	/**
 	 * The default interpolation mode
 	 * - `"Brackets"` (`[[SECRET]]`)
 	 * - `"CurlyBrackets"` (`{{SECRET}}`)
@@ -1421,14 +1456,8 @@ export interface UpdateFilesystem {
 	 * - `"Disabled"`
 	 */
 	interpolation?: InterpolationMode;
-}
-
-/** Update a filesystem default encryption key. Response: [UpdateFilesystemEncryptionKeyResponse]. */
-export interface UpdateFilesystemEncryptionKey {
-	/** The filesystem ID */
-	id: FilesystemId;
-	/** The new default encryption key */
-	encryption_key: EncryptionKeyId;
+	/** The default encryption key */
+	encryption_key?: EncryptionKeyId;
 }
 
 /** Update a filesystem node. Response: [UpdateNodeResponse]. */
@@ -1448,11 +1477,12 @@ export interface UpdateNode {
 	 */
 	perm?: number;
 	/**
-	 * Whether to checkpoint by default when updating node data.
-	 * If false, individual saves can manually still pass the checkpoint
-	 * flag when updating node data.
+	 * The file checkpointing mode
+	 * - `"Inherit"` (default)
+	 * - `"Enabled"`
+	 * - `"Disabled"`
 	 */
-	checkpointing?: boolean;
+	checkpointing?: CheckpointingMode;
 	/**
 	 * The interpolation mode (only for files)
 	 * - `"Inherit"` (inherit from filesystem option) (default)
@@ -1682,7 +1712,6 @@ export type WriteRequest =
 	| { type: "BatchDeleteOnboardingKeys", params: BatchDeleteOnboardingKeys }
 	| { type: "CreateFilesystem", params: CreateFilesystem }
 	| { type: "UpdateFilesystem", params: UpdateFilesystem }
-	| { type: "UpdateFilesystemEncryptionKey", params: UpdateFilesystemEncryptionKey }
 	| { type: "DeleteFilesystem", params: DeleteFilesystem }
 	| { type: "CreateNode", params: CreateNode }
 	| { type: "UpdateNode", params: UpdateNode }

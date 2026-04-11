@@ -36,18 +36,6 @@ const FolderPage = ({
       notifications.show({ message: "Updated filesystem.", color: "green" });
     },
   });
-  const { mutate: updateFilesystemEncryptionKey } = useWrite(
-    "UpdateFilesystemEncryptionKey",
-    {
-      onSuccess: () => {
-        inv(["ListFilesystems"]);
-        notifications.show({
-          message: "Updated filesystem encryption key.",
-          color: "green",
-        });
-      },
-    },
-  );
 
   const children =
     useRead(
@@ -161,7 +149,7 @@ const FolderPage = ({
             <EncryptionKeySelector
               selected={filesystem.encryption_key}
               onSelect={(encryption_key) =>
-                updateFilesystemEncryptionKey({
+                updateFilesystem({
                   id: filesystem.id,
                   encryption_key,
                 })

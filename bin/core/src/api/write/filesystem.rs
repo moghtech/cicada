@@ -1,6 +1,5 @@
 use cicada_client::api::write::{
   CreateFilesystem, DeleteFilesystem, UpdateFilesystem,
-  UpdateFilesystemEncryptionKey,
 };
 use mogh_resolver::Resolve;
 
@@ -33,23 +32,6 @@ impl Resolve<WriteArgs> for UpdateFilesystem {
     )
     .await?;
     query::filesystem::update_filesystem(self).await
-  }
-}
-
-//
-
-impl Resolve<WriteArgs> for UpdateFilesystemEncryptionKey {
-  async fn resolve(
-    self,
-    WriteArgs { client }: &WriteArgs,
-  ) -> Result<Self::Response, Self::Error> {
-    ensure_client_filesystem_permission(
-      client,
-      self.id.clone(),
-      true,
-    )
-    .await?;
-    query::filesystem::update_filesystem_encryption_key(self).await
   }
 }
 

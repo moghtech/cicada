@@ -68,7 +68,6 @@ export type WriteResponses = {
   // ==== FILESYSTEM ====
   CreateFilesystem: Types.CreateFilesystemResponse;
   UpdateFilesystem: Types.UpdateFilesystemResponse;
-  UpdateFilesystemEncryptionKey: Types.UpdateFilesystemEncryptionKeyResponse;
   DeleteFilesystem: Types.DeleteFilesystemResponse;
 
   // ==== NODE ====

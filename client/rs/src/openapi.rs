@@ -64,7 +64,6 @@ mod write {
     // FILESYSTEM
     write::create_filesystem,
     write::update_filesystem,
-    write::update_filesystem_encryption_key,
     write::delete_filesystem,
     // NODE
     write::create_node,

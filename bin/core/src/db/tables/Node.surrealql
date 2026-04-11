@@ -42,8 +42,8 @@ DEFINE FIELD OVERWRITE kind
 -- checkpointing
 DEFINE FIELD OVERWRITE checkpointing
   ON TABLE Node
-  TYPE bool
-  DEFAULT false;
+  TYPE "Inherit" | "Enabled" | "Disabled"
+  DEFAULT "Inherit";
 
 -- interpolation
 DEFINE FIELD OVERWRITE interpolation
@@ -123,4 +123,4 @@ DEFINE FUNCTION OVERWRITE fn::node_by_path_components_rec(
 ----------------
 
 -- Ensure checkpointing field is not NONE
-UPDATE Node SET checkpointing = false WHERE checkpointing = NONE;
+UPDATE Node SET checkpointing = "Inherit" WHERE checkpointing = NONE;

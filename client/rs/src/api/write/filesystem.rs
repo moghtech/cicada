@@ -6,7 +6,7 @@ use typeshare::typeshare;
 use crate::{
   api::write::CicadaWriteRequest,
   entities::{
-    InterpolationMode,
+    CheckpointingMode, InterpolationMode,
     encryption_key::EncryptionKeyId,
     filesystem::{FilesystemId, FilesystemRecord},
   },
@@ -40,6 +40,10 @@ pub fn create_filesystem() {}
 pub struct CreateFilesystem {
   /// The name of the filesystem
   pub name: String,
+  /// The default checkpointing mode
+  /// - `"Enabled"`
+  /// - `"Disabled"`
+  pub checkpointing: Option<CheckpointingMode>,
   /// The default interpolation mode
   /// - `"Brackets"` (`[[SECRET]]`)
   /// - `"CurlyBrackets"` (`{{SECRET}}`)
@@ -85,53 +89,23 @@ pub struct UpdateFilesystem {
   pub id: FilesystemId,
   /// The name of the filesystem
   pub name: Option<String>,
+  /// The default checkpointing mode
+  /// - `"Enabled"`
+  /// - `"Disabled"`
+  pub checkpointing: Option<CheckpointingMode>,
   /// The default interpolation mode
   /// - `"Brackets"` (`[[SECRET]]`)
   /// - `"CurlyBrackets"` (`{{SECRET}}`)
   /// - `"EnvVar"` (`${SECRET}`)
   /// - `"Disabled"`
   pub interpolation: Option<InterpolationMode>,
+  /// The default encryption key
+  pub encryption_key: Option<EncryptionKeyId>,
 }
 
 /// Response for [UpdateFilesystem].
 #[typeshare]
 pub type UpdateFilesystemResponse = FilesystemRecord;
-
-//
-
-#[cfg(feature = "utoipa")]
-#[utoipa::path(
-  post,
-  path = "/write/UpdateFilesystemEncryptionKey",
-  description = "Update a filesystem default encryption key.",
-  request_body(content = UpdateFilesystemEncryptionKey),
-  responses(
-    (status = 200, description = "The updated filesystem", body = UpdateFilesystemEncryptionKeyResponse),
-    (status = 500, description = "Request failed", body = mogh_error::Serror)
-  ),
-)]
-pub fn update_filesystem_encryption_key() {}
-
-/// Update a filesystem default encryption key. Response: [UpdateFilesystemEncryptionKeyResponse].
-#[typeshare]
-#[derive(
-  Debug, Clone, Serialize, Deserialize, SurrealValue, Resolve,
-)]
-#[surreal(crate = "surrealdb_types")]
-#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
-#[empty_traits(CicadaWriteRequest)]
-#[response(UpdateFilesystemEncryptionKeyResponse)]
-#[error(mogh_error::Error)]
-pub struct UpdateFilesystemEncryptionKey {
-  /// The filesystem ID
-  pub id: FilesystemId,
-  /// The new default encryption key
-  pub encryption_key: EncryptionKeyId,
-}
-
-/// Response for [UpdateFilesystemEncryptionKey].
-#[typeshare]
-pub type UpdateFilesystemEncryptionKeyResponse = FilesystemRecord;
 
 //
 

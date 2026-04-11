@@ -98,6 +98,38 @@ pub enum ClientType {
   OnboardingKey,
 }
 
+/// Set the checkpointing mode for files
+#[typeshare]
+#[derive(
+  Debug,
+  Clone,
+  Copy,
+  PartialEq,
+  Eq,
+  Hash,
+  Default,
+  Serialize,
+  Deserialize,
+  Display,
+  EnumString,
+  AsRefStr,
+  SurrealValue,
+)]
+#[surreal(crate = "surrealdb_types")]
+#[surreal(untagged)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
+pub enum CheckpointingMode {
+  #[default]
+  /// Checkpointing is enabled.
+  Enabled,
+  /// Inherit the mode from the filesystem. This is the default for files.
+  ///
+  /// Note. This is only valid mode for files, not filesystems themselves.
+  Inherit,
+  /// Checkpointing is disabled.
+  Disabled,
+}
+
 /// Set the interpolation mode for files
 #[typeshare]
 #[derive(

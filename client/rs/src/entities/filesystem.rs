@@ -3,7 +3,7 @@ use surrealdb_types::SurrealValue;
 use typeshare::typeshare;
 
 use crate::entities::{
-  InterpolationMode, Iso8601Timestamp,
+  CheckpointingMode, InterpolationMode, Iso8601Timestamp,
   encryption_key::EncryptionKeyId,
 };
 
@@ -16,11 +16,12 @@ pub struct FilesystemRecord {
   pub id: FilesystemId,
   /// The name of the filesystem. Must be unique.
   pub name: String,
+  /// The default checkpointing mode for the filesystem
+  pub checkpointing: CheckpointingMode,
+  /// The default interpolation mode for the filesystem
+  pub interpolation: InterpolationMode,
   /// The filesystem default encryption key.
   pub encryption_key: Option<EncryptionKeyId>,
-  /// The default interpolation mode for the filesystem
-  #[surreal(default)]
-  pub interpolation: InterpolationMode,
   /// Created at as ISO8601 timestamp.
   #[cfg_attr(feature = "utoipa", schema(value_type = String))]
   pub created_at: Iso8601Timestamp,
@@ -31,7 +32,7 @@ pub struct FilesystemRecord {
 
 #[typeshare(serialized_as = "string")]
 #[derive(
-  Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize,
+  Debug, Clone, Default, PartialEq, Eq, Hash, Serialize, Deserialize,
 )]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 pub struct FilesystemId(pub String);

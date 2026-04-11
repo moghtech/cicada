@@ -58,7 +58,6 @@ pub enum WriteRequest {
   // ==== FILESYSTEM ====
   CreateFilesystem(CreateFilesystem),
   UpdateFilesystem(UpdateFilesystem),
-  UpdateFilesystemEncryptionKey(UpdateFilesystemEncryptionKey),
   DeleteFilesystem(DeleteFilesystem),
 
   // ==== NODE ====

@@ -6,7 +6,7 @@ use typeshare::typeshare;
 use crate::{
   api::write::CicadaWriteRequest,
   entities::{
-    InterpolationMode, U64,
+    CheckpointingMode, InterpolationMode, U64,
     encryption_key::EncryptionKeyId,
     filesystem::FilesystemId,
     node::{NodeEntity, NodeId, NodeKind},
@@ -31,7 +31,7 @@ pub fn create_node() {}
 /// Create filesystem node. Response: [CreateNodeResponse].
 #[typeshare]
 #[derive(
-  Debug, Clone, Serialize, Deserialize, SurrealValue, Resolve,
+  Debug, Clone, Default, Serialize, Deserialize, SurrealValue, Resolve,
 )]
 #[surreal(crate = "surrealdb_types")]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
@@ -62,6 +62,11 @@ pub struct CreateNode {
   #[cfg_attr(feature = "utoipa", schema(default = "Folder"))]
   #[serde(default)]
   pub kind: NodeKind,
+  /// The file checkpointing mode
+  /// - `"Inherit"` (default)
+  /// - `"Enabled"`
+  /// - `"Disabled"`
+  pub checkpointing: Option<CheckpointingMode>,
   /// The interpolation mode (only for files)
   /// - `"Inherit"` (inherit from filesystem option) (default)
   /// - `"Brackets"` (`[[SECRET]]`)
@@ -127,10 +132,11 @@ pub struct UpdateNode {
   /// - Folder: 0o755
   /// - File: 0o644
   pub perm: Option<u16>,
-  /// Whether to checkpoint by default when updating node data.
-  /// If false, individual saves can manually still pass the checkpoint
-  /// flag when updating node data.
-  pub checkpointing: Option<bool>,
+  /// The file checkpointing mode
+  /// - `"Inherit"` (default)
+  /// - `"Enabled"`
+  /// - `"Disabled"`
+  pub checkpointing: Option<CheckpointingMode>,
   /// The interpolation mode (only for files)
   /// - `"Inherit"` (inherit from filesystem option) (default)
   /// - `"Brackets"` (`[[SECRET]]`)
