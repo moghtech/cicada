@@ -3,15 +3,17 @@ use cicada_client::{
     BatchDeleteNodes, CreateNode, DeleteNode, RotateNodeEnvelopeKey,
     UpdateNode, UpdateNodeData, UpdateNodeEncryptionKey,
   },
-  entities::node::NodeKind,
+  entities::{CheckpointingMode, node::NodeKind},
 };
 use futures_util::{StreamExt, stream::FuturesUnordered};
-use mogh_error::anyhow::Context as _;
+use mogh_error::anyhow::{Context as _, anyhow};
 use mogh_resolver::Resolve;
 
 use crate::{
   api::write::WriteArgs,
-  db::query::{self, node::CreateNodeQuery},
+  db::query::{
+    self, checkpoint::CreateCheckpointQuery, node::CreateNodeQuery,
+  },
   encryption::{
     decrypt_node, decrypt_nodes, encrypt_data, rotate_encryption_key,
     rotate_envelope_key,
@@ -100,33 +102,89 @@ impl Resolve<WriteArgs> for UpdateNodeData {
     self,
     WriteArgs { client }: &WriteArgs,
   ) -> Result<Self::Response, Self::Error> {
-    let node =
-      query::node::get_node_list_item(self.id.0.clone()).await?;
+    let node = query::node::get_node(&self.id.0).await?;
     ensure_client_filesystem_permission(
       client,
-      node.filesystem,
+      node.filesystem.clone(),
       true,
     )
     .await?;
-    let encryption_key = if let Some(id) = self.encryption_key {
-      id
-    } else if let Some(id) = node.encryption_key {
+
+    let filesystem =
+      query::filesystem::get_filesystem(node.filesystem.0.clone())
+        .await?;
+
+    let checkpoint = match (
+      self.checkpoint,
+      node.checkpointing,
+      filesystem.checkpointing,
+    ) {
+      (Some(checkpoint), _, _) => checkpoint,
+      (None, CheckpointingMode::Enabled, _) => true,
+      (None, CheckpointingMode::Disabled, _) => false,
+      (
+        None,
+        CheckpointingMode::Inherit,
+        CheckpointingMode::Enabled,
+      ) => true,
+      (
+        None,
+        CheckpointingMode::Inherit,
+        CheckpointingMode::Disabled,
+      ) => false,
+      (
+        None,
+        CheckpointingMode::Inherit,
+        CheckpointingMode::Inherit,
+      ) => {
+        return Err(
+          anyhow!(
+            "Filesystem should not have checkpointing mode Inherit"
+          )
+          .into(),
+        );
+      }
+    };
+
+    // Clone just encryption key id rather than whole previous node data
+    let node_encryption_key =
+      node.data.as_ref().map(|d| d.encryption_key.clone());
+
+    if checkpoint {
+      query::checkpoint::create_checkpoint(CreateCheckpointQuery {
+        node: node.id,
+        name: None,
+        description: None,
+        data: node.data,
+      })
+      .await?;
+    }
+
+    let encryption_key = if let Some(id) = self
+      .encryption_key
+      .or_else(|| node_encryption_key)
+      .or_else(|| filesystem.encryption_key)
+    {
       id
     } else {
+      // Takes the first available encryption key
       query::encryption_key::list_all_encryption_keys()
         .await?
         .pop()
         .context("No encryption keys")?
         .id
     };
+
     let data = encrypt_data(
       encryption_key.0,
       self.data.as_bytes(),
       &self.id.0,
     )
     .await?;
+
     let node =
       query::node::update_node_data(self.id, data.into()).await?;
+
     decrypt_node(node, self.interpolated).await
   }
 }

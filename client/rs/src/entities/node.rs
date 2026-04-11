@@ -3,8 +3,9 @@ use surrealdb_types::SurrealValue;
 use typeshare::typeshare;
 
 use crate::entities::{
-  EncryptedData, InterpolationMode, Iso8601Timestamp, U64,
-  encryption_key::EncryptionKeyId, filesystem::FilesystemId,
+  CheckpointingMode, EncryptedData, InterpolationMode,
+  Iso8601Timestamp, U64, encryption_key::EncryptionKeyId,
+  filesystem::FilesystemId,
 };
 
 #[typeshare]
@@ -32,11 +33,11 @@ pub struct NodeListItem {
   /// - Folder,
   /// - File,
   pub kind: NodeKind,
-  /// Whether to checkpoint by default when updating node data.
-  /// - If null, inherits the filesystem default.
-  /// - If false, individual saves can manually still pass the checkpoint
-  /// flag when updating node data.
-  pub checkpointing: Option<bool>,
+  /// The file checkpointing mode
+  /// - `"Inherit"` (default)
+  /// - `"Enabled"`
+  /// - `"Disabled"`
+  pub checkpointing: CheckpointingMode,
   /// The interpolation mode
   pub interpolation: InterpolationMode,
   /// The encryption key used with data
@@ -75,11 +76,11 @@ pub struct NodeEntity {
   /// - Folder,
   /// - File,
   pub kind: NodeKind,
-  /// Whether to checkpoint by default when updating node data.
-  /// - If null, inherits the filesystem default.
-  /// - If false, individual saves can manually still pass the checkpoint
-  /// flag when updating node data.
-  pub checkpointing: Option<bool>,
+  /// The file checkpointing mode
+  /// - `"Inherit"` (default)
+  /// - `"Enabled"`
+  /// - `"Disabled"`
+  pub checkpointing: CheckpointingMode,
   /// The interpolation mode
   pub interpolation: InterpolationMode,
   /// Data associated with the node.
@@ -123,11 +124,11 @@ pub struct NodeRecord {
   /// - Folder,
   /// - File,
   pub kind: NodeKind,
-  /// Whether to checkpoint by default when updating node data.
-  /// - If null, inherits the filesystem default.
-  /// - If false, individual saves can manually still pass the checkpoint
-  /// flag when updating node data.
-  pub checkpointing: Option<bool>,
+  /// The file checkpointing mode
+  /// - `"Inherit"` (default)
+  /// - `"Enabled"`
+  /// - `"Disabled"`
+  pub checkpointing: CheckpointingMode,
   /// The interpolation mode
   pub interpolation: InterpolationMode,
   /// Data associated with the node.

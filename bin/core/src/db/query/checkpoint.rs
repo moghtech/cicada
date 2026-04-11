@@ -42,18 +42,26 @@ pub async fn get_checkpoint(
     .status_code(StatusCode::NOT_FOUND)
 }
 
-// pub async fn create_checkpoint(
-//   body: CreateCheckpoint,
-// ) -> mogh_error::Result<CheckpointRecord> {
-//   DB.create("Checkpoint")
-//     .content(body)
-//     .await
-//     .context("Failed to create Checkpoint on database")?
-//     .context(
-//       "Failed to create Checkpoint on database: No creation result",
-//     )
-//     .map_err(Into::into)
-// }
+#[derive(SurrealValue)]
+pub struct CreateCheckpointQuery {
+  pub node: NodeId,
+  pub name: Option<String>,
+  pub description: Option<String>,
+  pub data: Option<EncryptedData>,
+}
+
+pub async fn create_checkpoint(
+  body: CreateCheckpointQuery,
+) -> mogh_error::Result<CheckpointRecord> {
+  DB.create("Checkpoint")
+    .content(body)
+    .await
+    .context("Failed to create Checkpoint on database")?
+    .context(
+      "Failed to create Checkpoint on database: No creation result",
+    )
+    .map_err(Into::into)
+}
 
 pub async fn update_checkpoint(
   body: UpdateCheckpoint,
