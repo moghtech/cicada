@@ -1,13 +1,19 @@
 import { DataTable, Page, SortableHeader } from "mogh_ui";
 import CreateFilesystem from "@/create/filesystem";
-import { useRead } from "@/lib/hooks";
+import { useInvalidate, useRead, useWrite } from "@/lib/hooks";
 import { ICONS } from "@/lib/icons";
 import { useNavigate } from "react-router-dom";
 import ResourceLink from "@/components/resource-link";
+import { useEffect, useState } from "react";
+import { TextInput } from "@mantine/core";
 
 const FilesystemsPage = () => {
+  const inv = useInvalidate();
   const { data } = useRead("ListFilesystems", {});
   const nav = useNavigate();
+  const { mutate: updateFilesystem } = useWrite("UpdateFilesystem", {
+    onSuccess: () => inv(["ListFilesystems"]),
+  });
   return (
     <Page
       title="Filesystems"
@@ -24,6 +30,28 @@ const FilesystemsPage = () => {
               <SortableHeader column={column} title="Name" />
             ),
             accessorKey: "name",
+            cell: ({ row }) => {
+              const [name, setName] = useState(row.original.name);
+              useEffect(() => setName(row.original.name), [row.original.name]);
+              return (
+                <TextInput
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  onBlur={(e) =>
+                    updateFilesystem({
+                      id: row.original.id,
+                      name: e.target.value,
+                    })
+                  }
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.currentTarget.blur();
+                    }
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                />
+              );
+            },
           },
           {
             header: ({ column }) => (

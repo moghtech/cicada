@@ -1,4 +1,4 @@
-import { Button, Flex, Modal, Text } from "@mantine/core";
+import { ActionIcon, Button, Flex, Modal, Text } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { Trash2 } from "lucide-react";
 import { ReactNode } from "react";
@@ -11,6 +11,7 @@ const ConfirmDelete = ({
   onConfirm,
   loading,
   disabled,
+  iconOnly,
 }: {
   action?: string;
   entityType?: string;
@@ -19,6 +20,7 @@ const ConfirmDelete = ({
   onConfirm: () => Promise<unknown>;
   loading?: boolean;
   disabled?: boolean;
+  iconOnly?: boolean;
 }) => {
   const [opened, { open, close }] = useDisclosure(false);
   const formatted_et = entityType ? ` ${entityType}` : "";
@@ -54,14 +56,20 @@ const ConfirmDelete = ({
           </Button>
         </Flex>
       </Modal>
-      <Button
-        disabled={disabled}
-        onClick={open}
-        leftSection={<Trash2 size="1rem" />}
-      >
-        {action}
-        {formatted_et}
-      </Button>
+      {iconOnly ? (
+        <ActionIcon disabled={disabled} onClick={open} size="xl">
+          <Trash2 size="1.3rem" />
+        </ActionIcon>
+      ) : (
+        <Button
+          disabled={disabled}
+          onClick={open}
+          leftSection={<Trash2 size="1rem" />}
+        >
+          {action}
+          {formatted_et}
+        </Button>
+      )}
     </>
   );
 };

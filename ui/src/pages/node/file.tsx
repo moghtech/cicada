@@ -7,12 +7,17 @@ import ConfirmSave from "@/components/confirm-save";
 import ConfirmDelete from "@/components/confirm-delete";
 import { Types } from "cicada_client";
 import { notifications } from "@mantine/notifications";
-import { NodePageDescription, NodePageTitle } from "./title";
 import InitializeEncryptionKey from "@/components/initialize-encryption-key";
-import { languageFromPath, MonacoEditor, Page } from "mogh_ui";
+import {
+  EntityHeader,
+  EntityPage,
+  languageFromPath,
+  MonacoEditor,
+} from "mogh_ui";
 import { ReactNode, useEffect, useState } from "react";
 import InterpolationModeSelector from "@/components/interpolation-mode-selector";
 import EncryptionKeySelector from "@/components/encryption-key-selector";
+import { ICONS } from "@/lib/icons";
 
 const FilePage = ({
   filesystem,
@@ -77,72 +82,78 @@ const FilePage = ({
   );
 
   return (
-    <Page
-      customTitle={<NodePageTitle node={node} />}
-      customDescription={<NodePageDescription filesystem={filesystem} />}
-      actions={
-        <>
-          <Button
-            leftSection={<History size="1rem" />}
-            disabled={!node || !data}
-            onClick={() => setEdit({ data: undefined })}
-          >
-            Reset
-          </Button>
-          <ConfirmSave
-            name={node?.name ?? ""}
-            disabled={!node || !data}
-            original={node?.data ?? ""}
-            modified={data ?? ""}
-            onConfirm={async () =>
-              node && (await updateNodeData({ id: node.id, data: data ?? "" }))
-            }
-          />
+    <EntityPage>
+      <EntityHeader
+        name={node?.name}
+        state="File"
+        icon={ICONS.File}
+        intent={node?.missing_key ? "Critical" : "Good"}
+        onRename={async (name) =>
+          node && (await updateNode({ id: node?.id, name }))
+        }
+        action={
           <ConfirmDelete
-            entityType="File"
-            name={node?.name ?? ""}
-            onConfirm={async () =>
-              node && deleteNode({ id: node.id, move_children: 1 })
-            }
+            entityType={node ? "Folder" : "Filesystem"}
+            name={node ? node.name : (filesystem?.name ?? "")}
+            onConfirm={async () => node && deleteNode({ id: node.id })}
             loading={deleteNodePending}
-            disabled={!node}
+            disabled={false}
+            iconOnly
           />
-          {node?.id && (
-            <EncryptionKeySelector
-              selected={node?.encryption_key}
-              onSelect={(encryption_key) =>
-                updateNodeEncryptionKey({ id: node.id, encryption_key })
-              }
-              targetProps={{
-                w: { base: "100%", xs: 260 },
-                loading: updateEncryptionKeyPending,
-              }}
-            />
-          )}
-          <TextInput
-            placeholder="0o644"
-            value={perm}
-            onChange={(e) => setPerm(e.target.value)}
-            onKeyDown={(e) => {
-              if (node && perm && e.key === "Enter") {
-                updateNode({ id: node.id, perm: Number(perm) });
-              }
+        }
+      />
+      <Group>
+        <Button
+          leftSection={<History size="1rem" />}
+          disabled={!node || !data}
+          onClick={() => setEdit({ data: undefined })}
+        >
+          Reset
+        </Button>
+        <ConfirmSave
+          name={node?.name ?? ""}
+          disabled={!node || !data}
+          original={node?.data ?? ""}
+          modified={data ?? ""}
+          onConfirm={async () =>
+            node && (await updateNodeData({ id: node.id, data: data ?? "" }))
+          }
+        />
+        {node?.id && (
+          <EncryptionKeySelector
+            selected={node?.encryption_key}
+            onSelect={(encryption_key) =>
+              updateNodeEncryptionKey({ id: node.id, encryption_key })
+            }
+            targetProps={{
+              w: { base: "100%", xs: 260 },
+              loading: updateEncryptionKeyPending,
             }}
-            disabled={!node}
           />
-          {node && (
-            <InterpolationModeSelector
-              value={node?.interpolation}
-              onChange={(interpolation) =>
-                updateNode({ id: node.id, interpolation })
-              }
-              inherit={filesystem?.interpolation}
-            />
-          )}
-          {toggleInterpolation}
-        </>
-      }
-    >
+        )}
+        <TextInput
+          placeholder="0o644"
+          value={perm}
+          onChange={(e) => setPerm(e.target.value)}
+          onKeyDown={(e) => {
+            if (node && perm && e.key === "Enter") {
+              updateNode({ id: node.id, perm: Number(perm) });
+            }
+          }}
+          disabled={!node}
+        />
+        {node && (
+          <InterpolationModeSelector
+            value={node?.interpolation}
+            onChange={(interpolation) =>
+              updateNode({ id: node.id, interpolation })
+            }
+            inherit={filesystem?.interpolation}
+          />
+        )}
+        {toggleInterpolation}
+      </Group>
+
       {nodeError ? (
         <Stack>
           <Text fz="h2">Failed to read data:</Text>
@@ -180,7 +191,7 @@ const FilePage = ({
           />
         )
       )}
-    </Page>
+    </EntityPage>
   );
 };
 

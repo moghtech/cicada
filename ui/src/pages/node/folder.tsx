@@ -1,15 +1,14 @@
 import ConfirmDelete from "@/components/confirm-delete";
-import { DataTable, Page, SortableHeader } from "mogh_ui";
+import { DataTable, EntityHeader, EntityPage, SortableHeader } from "mogh_ui";
 import CreateNode from "@/create/node";
 import { useInvalidate, useRead, useWrite } from "@/lib/hooks";
 import { ICONS } from "@/lib/icons";
-import { Button, Flex, List, Text } from "@mantine/core";
+import { Button, Flex, Group, List, Text } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { RowSelectionState } from "@tanstack/react-table";
 import { Types } from "cicada_client";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { NodePageDescription, NodePageTitle } from "./title";
 import InterpolationModeSelector from "@/components/interpolation-mode-selector";
 import EncryptionKeySelector from "@/components/encryption-key-selector";
 import ResourceLink from "@/components/resource-link";
@@ -23,16 +22,14 @@ const FolderPage = ({
 }) => {
   const nav = useNavigate();
   const inv = useInvalidate();
-  const { mutateAsync: deleteFs, isPending: deleteFsPending } = useWrite(
-    "DeleteFilesystem",
-    {
+  const { mutateAsync: deleteFilesystem, isPending: deleteFilesystemPending } =
+    useWrite("DeleteFilesystem", {
       onSuccess: () => {
         inv(["ListFilesystems"], ["ListNodes"]);
         notifications.show({ message: "Deleted filesystem.", color: "green" });
         nav("/");
       },
-    },
-  );
+    });
   const { mutate: updateFilesystem } = useWrite("UpdateFilesystem", {
     onSuccess: () => {
       inv(["ListFilesystems"]);
@@ -66,6 +63,9 @@ const FolderPage = ({
       children && Object.fromEntries(children.map((node) => [node.id, node])),
     [children],
   );
+  const { mutateAsync: updateNode } = useWrite("UpdateNode", {
+    onSuccess: () => inv(["ListNodes"], ["FindNode"]),
+  });
   const { mutateAsync: deleteFolder, isPending: deleteFolderPending } =
     useWrite("DeleteNode", {
       onSuccess: () => {
@@ -88,95 +88,99 @@ const FolderPage = ({
   });
 
   return (
-    <Page
-      customTitle={<NodePageTitle node={node} />}
-      customDescription={<NodePageDescription filesystem={filesystem} />}
-      actions={
-        <>
-          {filesystem &&
-            Object.values(Types.NodeKind).map((kind) => (
-              <CreateNode
-                key={kind}
-                filesystem={filesystem.id}
-                kind={kind}
-                parent={node?.inode ?? 1}
-              />
-            ))}
-          {!selectedIds.length && node === undefined && filesystem && (
+    <EntityPage>
+      <EntityHeader
+        name={node?.name ?? filesystem?.name}
+        state={node ? "Folder" : "Filesystem"}
+        icon={ICONS.Folder}
+        intent="Good"
+        onRename={async (name) =>
+          node
+            ? await updateNode({ id: node?.id, name })
+            : filesystem &&
+              (await updateFilesystem({ id: filesystem?.id, name }))
+        }
+        action={
+          <ConfirmDelete
+            entityType={node ? "Folder" : "Filesystem"}
+            name={node ? node.name : (filesystem?.name ?? "")}
+            onConfirm={async () =>
+              node
+                ? deleteFolder({ id: node.id })
+                : filesystem && deleteFilesystem({ id: filesystem.id })
+            }
+            loading={node ? deleteFolderPending : deleteFilesystemPending}
+            disabled={false}
+            iconOnly
+          />
+        }
+      />
+      <Group>
+        {filesystem &&
+          Object.values(Types.NodeKind).map((kind) => (
+            <CreateNode
+              key={kind}
+              filesystem={filesystem.id}
+              kind={kind}
+              parent={node?.inode ?? 1}
+            />
+          ))}
+        <ConfirmDelete
+          name=""
+          entityType="Files"
+          onConfirm={async () => {
+            if (selectedIds.length) {
+              await batchDelete({ ids: selectedIds });
+            }
+          }}
+          disabled={!selectedIds.length}
+          info={
             <>
-              <ConfirmDelete
-                entityType="Filesystem"
-                name={filesystem.name}
-                onConfirm={() => deleteFs({ id: filesystem.id })}
-                loading={deleteFsPending}
-                disabled={false}
-              />
-              <EncryptionKeySelector
-                selected={filesystem.encryption_key}
-                onSelect={(encryption_key) =>
-                  updateFilesystemEncryptionKey({
-                    id: filesystem.id,
-                    encryption_key,
-                  })
-                }
-                targetProps={{
-                  w: { base: "100%", xs: 260 },
-                }}
-              />
-              <InterpolationModeSelector
-                value={filesystem.interpolation}
-                onChange={(interpolation) =>
-                  updateFilesystem({ id: filesystem.id, interpolation })
-                }
-                excludeInherit
-              />
+              <Text fw="bold" fz="lg">
+                To Delete:
+              </Text>
+              <List>
+                {selectedIds.map((id) => {
+                  const Icon = byId?.[id] && ICONS[byId?.[id].kind];
+                  return (
+                    <List.Item key={id}>
+                      <Flex align="center" gap="0.4rem">
+                        <Icon size="1rem" />
+                        <Text fw="bold">{byId?.[id]?.name}</Text>
+                        <Text opacity={0.6}>({byId?.[id].kind})</Text>
+                      </Flex>
+                    </List.Item>
+                  );
+                })}
+              </List>
             </>
-          )}
-          {!selectedIds.length && node && (
-            <ConfirmDelete
-              entityType="Folder"
-              name={node.name}
-              onConfirm={() => deleteFolder({ id: node.id })}
-              loading={deleteFolderPending}
-              disabled={false}
-            />
-          )}
-          {!!selectedIds.length && (
-            <ConfirmDelete
-              name=""
-              entityType="Files"
-              onConfirm={async () => {
-                if (selectedIds.length) {
-                  await batchDelete({ ids: selectedIds });
-                }
-              }}
-              disabled={!selectedIds.length}
-              info={
-                <>
-                  <Text fw="bold" fz="lg">
-                    To Delete:
-                  </Text>
-                  <List>
-                    {selectedIds.map((id) => {
-                      const Icon = byId?.[id] && ICONS[byId?.[id].kind];
-                      return (
-                        <List.Item key={id}>
-                          <Flex align="center" gap="0.4rem">
-                            <Icon size="1rem" />
-                            <Text fw="bold">{byId?.[id]?.name}</Text>
-                            <Text opacity={0.6}>({byId?.[id].kind})</Text>
-                          </Flex>
-                        </List.Item>
-                      );
-                    })}
-                  </List>
-                </>
+          }
+        />
+        {node === undefined && filesystem && (
+          <>
+            <EncryptionKeySelector
+              selected={filesystem.encryption_key}
+              onSelect={(encryption_key) =>
+                updateFilesystemEncryptionKey({
+                  id: filesystem.id,
+                  encryption_key,
+                })
               }
+              targetProps={{
+                w: { base: "100%", xs: 260 },
+              }}
             />
-          )}
-        </>
-      }
-    >
+            <InterpolationModeSelector
+              value={filesystem.interpolation}
+              onChange={(interpolation) =>
+                updateFilesystem({ id: filesystem.id, interpolation })
+              }
+              excludeInherit
+            />
+          </>
+        )}
+      </Group>
+
       <DataTable
         tableKey="filesystem-table-v1"
         data={children}
@@ -247,7 +251,7 @@ const FolderPage = ({
           },
         ]}
       />
-    </Page>
+    </EntityPage>
   );
 };
 
