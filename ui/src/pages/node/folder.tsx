@@ -92,7 +92,7 @@ const FolderPage = ({
       <EntityHeader
         name={node?.name ?? filesystem?.name}
         state={node ? "Folder" : "Filesystem"}
-        icon={ICONS.Folder}
+        icon={node ? ICONS.Folder : ICONS.Filesystem}
         intent="Good"
         onRename={async (name) =>
           node
