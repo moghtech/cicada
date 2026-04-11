@@ -183,7 +183,7 @@ pub async fn rotate_envelope_key<A: AssociatedData>(
 }
 
 pub async fn decrypt_node(
-  node: NodeRecord,
+  mut node: NodeRecord,
   interpolated: bool,
 ) -> mogh_error::Result<NodeEntity> {
   let (data, encryption_key, missing_key) = if let Some(data) =
@@ -214,21 +214,9 @@ pub async fn decrypt_node(
   } else {
     (None, None, false)
   };
-  Ok(NodeEntity {
-    id: node.id,
-    filesystem: node.filesystem,
-    inode: node.inode,
-    parent: node.parent,
-    name: node.name,
-    perm: node.perm,
-    kind: node.kind,
-    interpolation: node.interpolation,
-    created_at: node.created_at,
-    updated_at: node.updated_at,
-    data,
-    encryption_key,
-    missing_key,
-  })
+  // node.data has been moved, need to assign something back so compiler doesn't complain.
+  node.data = None;
+  Ok(node.into_entity(data, encryption_key, missing_key))
 }
 
 pub async fn decrypt_nodes(
@@ -254,7 +242,7 @@ pub async fn decrypt_nodes(
 }
 
 pub async fn decrypt_secret(
-  secret: SecretRecord,
+  mut secret: SecretRecord,
 ) -> mogh_error::Result<SecretEntity> {
   let (encryption_key, data) = if let Some(data) = secret.data {
     let key = data.encryption_key.clone();
@@ -266,15 +254,9 @@ pub async fn decrypt_secret(
   } else {
     (None, None)
   };
-  Ok(SecretEntity {
-    id: secret.id,
-    name: secret.name,
-    description: secret.description,
-    created_at: secret.created_at,
-    updated_at: secret.updated_at,
-    encryption_key,
-    data,
-  })
+  // secret.data has been moved, need to assign something back so compiler doesn't complain.
+  secret.data = None;
+  Ok(secret.into_entity(data, encryption_key))
 }
 
 pub async fn decrypt_secrets(

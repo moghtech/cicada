@@ -1,10 +1,7 @@
-use cicada_client::{
-  api::write::{
-    BatchDeleteSecrets, CreateSecret, DeleteSecret,
-    RotateSecretEnvelopeKey, UpdateSecret, UpdateSecretData,
-    UpdateSecretEncryptionKey,
-  },
-  entities::secret::SecretEntity,
+use cicada_client::api::write::{
+  BatchDeleteSecrets, CreateSecret, DeleteSecret,
+  RotateSecretEnvelopeKey, UpdateSecret, UpdateSecretData,
+  UpdateSecretEncryptionKey,
 };
 use mogh_error::anyhow::Context as _;
 use mogh_resolver::Resolve;
@@ -106,15 +103,7 @@ impl Resolve<WriteArgs> for UpdateSecretEncryptionKey {
     let secret = query::secret::get_secret(&self.id.0).await?;
     // No-op if secret has no data.
     let Some(data) = secret.data else {
-      return Ok(SecretEntity {
-        id: secret.id,
-        name: secret.name,
-        description: secret.description,
-        encryption_key: None,
-        data: None,
-        created_at: secret.created_at,
-        updated_at: secret.updated_at,
-      });
+      return Ok(secret.into_entity(None, None));
     };
     // Re encrypt the envelope keys with new master key
     let data = rotate_encryption_key(
@@ -139,15 +128,7 @@ impl Resolve<WriteArgs> for RotateSecretEnvelopeKey {
     let secret = query::secret::get_secret(&self.id.0).await?;
     // No-op if secret has no data.
     let Some(data) = secret.data else {
-      return Ok(SecretEntity {
-        id: secret.id,
-        name: secret.name,
-        description: secret.description,
-        encryption_key: None,
-        data: None,
-        created_at: secret.created_at,
-        updated_at: secret.updated_at,
-      });
+      return Ok(secret.into_entity(None, None));
     };
     // Re encrypt data with new envelope key
     let data = rotate_envelope_key(data, &secret.id.0).await?;

@@ -8,6 +8,8 @@ use typeshare::typeshare;
 
 use crate::entities::encryption_key::EncryptionKeyId;
 
+/// Restorable history of changes to files
+pub mod checkpoint;
 /// Configuration for Cicada
 pub mod config;
 /// A device mounting Cicada files

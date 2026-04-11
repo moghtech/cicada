@@ -101,6 +101,12 @@ export interface NodeEntity {
 	 * - File,
 	 */
 	kind: NodeKind;
+	/**
+	 * Whether to checkpoint by default when updating node data.
+	 * If false, individual saves can manually still pass the checkpoint
+	 * flag when updating node data.
+	 */
+	checkpointing: boolean;
 	/** The interpolation mode */
 	interpolation: InterpolationMode;
 	/**
@@ -258,6 +264,8 @@ export interface UserRecord {
 
 /** Response for [BatchDeleteUsers]. */
 export type BatchDeleteUsersResponse = UserRecord[];
+
+export type CheckpointId = string;
 
 /** Response for [CreateDevice]. */
 export type CreateDeviceResponse = DeviceRecord;
@@ -557,6 +565,12 @@ export interface NodeListItem {
 	 * - File,
 	 */
 	kind: NodeKind;
+	/**
+	 * Whether to checkpoint by default when updating node data.
+	 * If false, individual saves can manually still pass the checkpoint
+	 * flag when updating node data.
+	 */
+	checkpointing: boolean;
 	/** The interpolation mode */
 	interpolation: InterpolationMode;
 	/** The encryption key used with data */
@@ -707,6 +721,87 @@ export interface BatchDeleteSecrets {
 export interface BatchDeleteUsers {
 	/** The onboarding_key ID */
 	ids: UserId[];
+}
+
+/** Checkpoints over the API, with unencrypted data */
+export interface CheckpointEntity {
+	/** The unique checkpoint id */
+	id: CheckpointId;
+	/** The associated node */
+	node: NodeId;
+	/** The optional name of the checkpoint */
+	name: string;
+	/** The optional description for the checkpoint */
+	description: string;
+	/** Data associated with the checkpoint. */
+	data?: string;
+	/** The encryption key used with data */
+	encryption_key?: EncryptionKeyId;
+	/** Created at as ISO8601 timestamp. */
+	created_at: Iso8601Timestamp;
+	/** Updated at as ISO8601 timestamp. */
+	updated_at: Iso8601Timestamp;
+}
+
+/** Checkpoints queryable as a list */
+export interface CheckpointListItem {
+	/** The unique checkpoint id */
+	id: CheckpointId;
+	/** The associated node */
+	node: NodeId;
+	/** The optional name of the checkpoint */
+	name: string;
+	/** The optional description for the checkpoint */
+	description: string;
+	/** The encryption key used with data */
+	encryption_key?: EncryptionKeyId;
+	/** Created at as ISO8601 timestamp. */
+	created_at: Iso8601Timestamp;
+	/** Updated at as ISO8601 timestamp. */
+	updated_at: Iso8601Timestamp;
+}
+
+/**
+ * Stored as nested record fields for data the requires application level encryption.
+ * Implements envelope encryption, ensuring encryption master key rotation
+ * doesn't require re-encrypting the data itself.
+ */
+export interface EncryptedData {
+	encryption_key: EncryptionKeyId;
+	/**
+	 * The field key, encrypted with encryption key,
+	 * and base64 encoded.
+	 */
+	key: string;
+	key_nonce: string;
+	/**
+	 * Encrypted using the (decrypted) field key + data_nonce,
+	 * and base64 encoded.
+	 */
+	data: string;
+	/**
+	 * Unencrypted, base64 encoded random nonce used to
+	 * encrypt the 'data' with this [EncryptedData::key]
+	 */
+	data_nonce: string;
+}
+
+/** Checkpoints stored on the database, with encrypted data */
+export interface CheckpointRecord {
+	/** The unique checkpoint id */
+	id: CheckpointId;
+	/** The associated node */
+	node: NodeId;
+	/** The optional name of the checkpoint */
+	name: string;
+	/** The optional description for the checkpoint */
+	description: string;
+	/** Data associated with the checkpoint. */
+	data?: EncryptedData;
+	/** Created at as ISO8601 timestamp. */
+	created_at: Iso8601Timestamp;
+	/** Updated at as ISO8601 timestamp. */
+	updated_at: Iso8601Timestamp;
 }
 
 /** Create a device. Response: [CreateDeviceResponse]. */
@@ -949,31 +1044,6 @@ export interface DeleteUser {
 }
 
 /**
- * Stored as nested record fields for data the requires application level encryption.
- * Implements envelope encryption, ensuring encryption master key rotation
- * doesn't require re-encrypting the data itself.
- */
-export interface EncryptedData {
-	encryption_key: EncryptionKeyId;
-	/**
-	 * The field key, encrypted with encryption key,
-	 * and base64 encoded.
-	 */
-	key: string;
-	key_nonce: string;
-	/**
-	 * Encrypted using the (decrypted) field key + data_nonce,
-	 * and base64 encoded.
-	 */
-	data: string;
-	/**
-	 * Unencrypted, base64 encoded random nonce used to
-	 * encrypt the 'data' with this [EncryptedData::key]
-	 */
-	data_nonce: string;
-}
-
-/**
  * Find a node. Response: [NodeEntity].
  * 
  * Query using either:
@@ -1172,7 +1242,13 @@ export interface NodeRecord {
 	 * - Folder,
 	 * - File,
 	 */
-	kind?: NodeKind;
+	kind: NodeKind;
+	/**
+	 * Whether to checkpoint by default when updating node data.
+	 * If false, individual saves can manually still pass the checkpoint
+	 * flag when updating node data.
+	 */
+	checkpointing: boolean;
 	/** The interpolation mode */
 	interpolation: InterpolationMode;
 	/**
@@ -1299,6 +1375,12 @@ export interface UpdateNode {
 	 */
 	perm?: number;
 	/**
+	 * Whether to checkpoint by default when updating node data.
+	 * If false, individual saves can manually still pass the checkpoint
+	 * flag when updating node data.
+	 */
+	checkpointing?: boolean;
+	/**
 	 * The interpolation mode (only for files)
 	 * - `"Inherit"` (inherit from filesystem option) (default)
 	 * - `"Brackets"` (`[[SECRET]]`)
@@ -1319,6 +1401,11 @@ export interface UpdateNodeData {
 	data: string;
 	/** Optionally update the encryption key used as master in the envelope encryption. */
 	encryption_key?: EncryptionKeyId;
+	/**
+	 * Whether to store the previous file data as a restorable checkpoint.
+	 * This will always be done if checkpointing is enabled on the node.
+	 */
+	checkpoint?: boolean;
 	/** Whether to interpolate secrets into returned file contents */
 	interpolated?: boolean;
 }

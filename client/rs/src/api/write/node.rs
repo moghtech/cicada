@@ -107,7 +107,7 @@ pub fn update_node() {}
 /// Update a filesystem node. Response: [UpdateNodeResponse].
 #[typeshare]
 #[derive(
-  Debug, Clone, Serialize, Deserialize, SurrealValue, Resolve,
+  Debug, Clone, Default, Serialize, Deserialize, SurrealValue, Resolve,
 )]
 #[surreal(crate = "surrealdb_types")]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
@@ -118,28 +118,27 @@ pub struct UpdateNode {
   /// The node id
   pub id: NodeId,
   /// parent inode number.
-  #[serde(skip_serializing_if = "Option::is_none")]
   pub parent: Option<U64>,
   /// The name of the node
-  #[serde(skip_serializing_if = "Option::is_none")]
   pub name: Option<String>,
   /// The file permission integer.
   /// Usually represented as octet like 0o644.
   /// If not provided, will use defaults:
   /// - Folder: 0o755
   /// - File: 0o644
-  #[serde(skip_serializing_if = "Option::is_none")]
   pub perm: Option<u16>,
+  /// Whether to checkpoint by default when updating node data.
+  /// If false, individual saves can manually still pass the checkpoint
+  /// flag when updating node data.
+  pub checkpointing: Option<bool>,
   /// The interpolation mode (only for files)
   /// - `"Inherit"` (inherit from filesystem option) (default)
   /// - `"Brackets"` (`[[SECRET]]`)
   /// - `"CurlyBrackets"` (`{{SECRET}}`)
   /// - `"EnvVar"` (`${SECRET}`)
   /// - `"Disabled"` (Interpolation disabled for this file)
-  #[serde(skip_serializing_if = "Option::is_none")]
   pub interpolation: Option<InterpolationMode>,
   /// Whether to interpolate secrets into returned file contents
-  #[serde(skip_serializing_if = "Option::is_none")]
   pub interpolated: Option<bool>,
 }
 
@@ -165,7 +164,7 @@ pub fn update_node_data() {}
 /// Update a filesystem node's encrypted data. Response: [UpdateNodeDataResponse].
 #[typeshare]
 #[derive(
-  Debug, Clone, Serialize, Deserialize, SurrealValue, Resolve,
+  Debug, Clone, Default, Serialize, Deserialize, SurrealValue, Resolve,
 )]
 #[surreal(crate = "surrealdb_types")]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
@@ -179,6 +178,9 @@ pub struct UpdateNodeData {
   pub data: String,
   /// Optionally update the encryption key used as master in the envelope encryption.
   pub encryption_key: Option<EncryptionKeyId>,
+  /// Whether to store the previous file data as a restorable checkpoint.
+  /// This will always be done if checkpointing is enabled on the node.
+  pub checkpoint: Option<bool>,
   /// Whether to interpolate secrets into returned file contents
   #[serde(default)]
   pub interpolated: bool,

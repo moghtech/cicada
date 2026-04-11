@@ -7,10 +7,6 @@ use crate::entities::{
   encryption_key::EncryptionKeyId, filesystem::FilesystemId,
 };
 
-fn default_interpolation() -> InterpolationMode {
-  InterpolationMode::Inherit
-}
-
 #[typeshare]
 #[derive(Debug, Clone, Serialize, Deserialize, SurrealValue)]
 #[surreal(crate = "surrealdb_types")]
@@ -36,11 +32,13 @@ pub struct NodeListItem {
   /// - Folder,
   /// - File,
   pub kind: NodeKind,
+  /// Whether to checkpoint by default when updating node data.
+  /// If false, individual saves can manually still pass the checkpoint
+  /// flag when updating node data.
+  pub checkpointing: bool,
   /// The interpolation mode
-  #[surreal(default = "default_interpolation")]
   pub interpolation: InterpolationMode,
   /// The encryption key used with data
-  #[serde(skip_serializing_if = "Option::is_none")]
   pub encryption_key: Option<EncryptionKeyId>,
   /// Created at as ISO8601 timestamp.
   #[cfg_attr(feature = "utoipa", schema(value_type = String))]
@@ -76,14 +74,16 @@ pub struct NodeEntity {
   /// - Folder,
   /// - File,
   pub kind: NodeKind,
+  /// Whether to checkpoint by default when updating node data.
+  /// If false, individual saves can manually still pass the checkpoint
+  /// flag when updating node data.
+  pub checkpointing: bool,
   /// The interpolation mode
   pub interpolation: InterpolationMode,
   /// Data associated with the node.
   /// For files, this contains the file contents.
-  #[serde(skip_serializing_if = "Option::is_none")]
   pub data: Option<String>,
   /// The encryption key used with data
-  #[serde(skip_serializing_if = "Option::is_none")]
   pub encryption_key: Option<EncryptionKeyId>,
   /// Whether encryption key is not initialized
   pub missing_key: bool,
@@ -120,14 +120,15 @@ pub struct NodeRecord {
   /// The kind of node.
   /// - Folder,
   /// - File,
-  #[serde(default)]
   pub kind: NodeKind,
+  /// Whether to checkpoint by default when updating node data.
+  /// If false, individual saves can manually still pass the checkpoint
+  /// flag when updating node data.
+  pub checkpointing: bool,
   /// The interpolation mode
-  #[surreal(default = "default_interpolation")]
   pub interpolation: InterpolationMode,
   /// Data associated with the node.
   /// For files, this contains the file contents.
-  #[serde(skip_serializing_if = "Option::is_none")]
   pub data: Option<EncryptedData>,
   /// Created at as ISO8601 timestamp.
   #[cfg_attr(feature = "utoipa", schema(value_type = String))]
@@ -135,6 +136,32 @@ pub struct NodeRecord {
   /// Updated at as ISO8601 timestamp.
   #[cfg_attr(feature = "utoipa", schema(value_type = String))]
   pub updated_at: Iso8601Timestamp,
+}
+
+impl NodeRecord {
+  pub fn into_entity(
+    self,
+    data: Option<String>,
+    encryption_key: Option<EncryptionKeyId>,
+    missing_key: bool,
+  ) -> NodeEntity {
+    NodeEntity {
+      id: self.id,
+      filesystem: self.filesystem,
+      inode: self.inode,
+      parent: self.parent,
+      name: self.name,
+      perm: self.perm,
+      kind: self.kind,
+      checkpointing: self.checkpointing,
+      interpolation: self.interpolation,
+      created_at: self.created_at,
+      updated_at: self.updated_at,
+      data,
+      encryption_key,
+      missing_key,
+    }
+  }
 }
 
 /// Nodes can be either folders or files.
@@ -152,7 +179,7 @@ pub enum NodeKind {
 }
 
 #[typeshare(serialized_as = "string")]
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 pub struct NodeId(pub String);
 

@@ -1,0 +1,28 @@
+-- ============
+--  Checkpoint
+-- ============
+
+DEFINE TABLE IF NOT EXISTS Checkpoint SCHEMAFULL;
+
+-- node
+DEFINE FIELD OVERWRITE node
+  ON TABLE Checkpoint
+  TYPE record<Node>;
+
+-- name
+DEFINE FIELD OVERWRITE name
+  ON TABLE Checkpoint
+  TYPE string
+  DEFAULT "";
+
+-- description
+DEFINE FIELD OVERWRITE description
+  ON TABLE Checkpoint
+  TYPE string
+  DEFAULT "";
+
+-- data
+fn::define_encrypted_data_field("Checkpoint", "data");
+
+-- Standard timestamp fields 'created_at', 'updated_at'
+fn::define_timestamp_fields("Checkpoint");

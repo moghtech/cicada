@@ -3,7 +3,7 @@ use cicada_client::{
     BatchDeleteNodes, CreateNode, DeleteNode, RotateNodeEnvelopeKey,
     UpdateNode, UpdateNodeData, UpdateNodeEncryptionKey,
   },
-  entities::node::{NodeEntity, NodeKind},
+  entities::node::NodeKind,
 };
 use futures_util::{StreamExt, stream::FuturesUnordered};
 use mogh_error::anyhow::Context as _;
@@ -147,21 +147,7 @@ impl Resolve<WriteArgs> for UpdateNodeEncryptionKey {
     .await?;
     // No-op if node has no data.
     let Some(data) = node.data else {
-      return Ok(NodeEntity {
-        id: node.id,
-        filesystem: node.filesystem,
-        inode: node.inode,
-        parent: node.parent,
-        name: node.name,
-        perm: node.perm,
-        kind: node.kind,
-        interpolation: node.interpolation,
-        data: None,
-        encryption_key: None,
-        missing_key: false,
-        created_at: node.created_at,
-        updated_at: node.updated_at,
-      });
+      return Ok(node.into_entity(None, None, false));
     };
     // Re encrypt the envelope keys with new master key
     let data =
@@ -189,21 +175,7 @@ impl Resolve<WriteArgs> for RotateNodeEnvelopeKey {
     .await?;
     // No-op if node has no data.
     let Some(data) = node.data else {
-      return Ok(NodeEntity {
-        id: node.id,
-        filesystem: node.filesystem,
-        inode: node.inode,
-        parent: node.parent,
-        name: node.name,
-        perm: node.perm,
-        kind: node.kind,
-        interpolation: node.interpolation,
-        data: None,
-        encryption_key: None,
-        missing_key: false,
-        created_at: node.created_at,
-        updated_at: node.updated_at,
-      });
+      return Ok(node.into_entity(None, None, false));
     };
     // Re encrypt data with new envelope key
     let data = rotate_envelope_key(data, &node.id.0).await?;

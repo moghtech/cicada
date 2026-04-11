@@ -4,22 +4,24 @@ use typeshare::typeshare;
 
 use crate::entities::{
   EncryptedData, Iso8601Timestamp, encryption_key::EncryptionKeyId,
+  node::NodeId,
 };
 
+/// Checkpoints queryable as a list
 #[typeshare]
 #[derive(Debug, Clone, Serialize, Deserialize, SurrealValue)]
 #[surreal(crate = "surrealdb_types")]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
-pub struct SecretListItem {
-  /// The unique secret id
-  pub id: SecretId,
-  /// The name of the secret
+pub struct CheckpointListItem {
+  /// The unique checkpoint id
+  pub id: CheckpointId,
+  /// The associated node
+  pub node: NodeId,
+  /// The optional name of the checkpoint
   pub name: String,
-  /// An optional description for the secret
-  #[surreal(default)]
+  /// The optional description for the checkpoint
   pub description: String,
-  /// The master encryption key for this secret.
-  #[serde(skip_serializing_if = "Option::is_none")]
+  /// The encryption key used with data
   pub encryption_key: Option<EncryptionKeyId>,
   /// Created at as ISO8601 timestamp.
   #[cfg_attr(feature = "utoipa", schema(value_type = String))]
@@ -29,25 +31,23 @@ pub struct SecretListItem {
   pub updated_at: Iso8601Timestamp,
 }
 
-/// Secrets over the API, with unencrypted data
+/// Checkpoints over the API, with unencrypted data
 #[typeshare]
 #[derive(Debug, Clone, Serialize, Deserialize, SurrealValue)]
 #[surreal(crate = "surrealdb_types")]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
-pub struct SecretEntity {
-  /// The unique secret id
-  pub id: SecretId,
-  /// The name of the secret
+pub struct CheckpointEntity {
+  /// The unique checkpoint id
+  pub id: CheckpointId,
+  /// The associated node
+  pub node: NodeId,
+  /// The optional name of the checkpoint
   pub name: String,
-  /// An optional description for the secret
-  #[surreal(default)]
+  /// The optional description for the checkpoint
   pub description: String,
-  /// Data associated with the secret.
-  #[serde(skip_serializing_if = "Option::is_none")]
+  /// Data associated with the checkpoint.
   pub data: Option<String>,
-  /// The master encryption key for this secret, if set.
-  /// If this is not null while data is, it means
-  /// the encryption key is not initialized.
+  /// The encryption key used with data
   pub encryption_key: Option<EncryptionKeyId>,
   /// Created at as ISO8601 timestamp.
   #[cfg_attr(feature = "utoipa", schema(value_type = String))]
@@ -57,21 +57,21 @@ pub struct SecretEntity {
   pub updated_at: Iso8601Timestamp,
 }
 
-/// Secrets stored on the database, with encrypted data
+/// Checkpoints stored on the database, with encrypted data
 #[typeshare]
 #[derive(Debug, Clone, Serialize, Deserialize, SurrealValue)]
 #[surreal(crate = "surrealdb_types")]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
-pub struct SecretRecord {
-  /// The unique secret id.
-  pub id: SecretId,
-  /// The name of the secret.
+pub struct CheckpointRecord {
+  /// The unique checkpoint id
+  pub id: CheckpointId,
+  /// The associated node
+  pub node: NodeId,
+  /// The optional name of the checkpoint
   pub name: String,
-  /// Optional description for the secret.
-  #[surreal(default)]
+  /// The optional description for the checkpoint
   pub description: String,
-  /// Data associated with the secret.
-  #[serde(skip_serializing_if = "Option::is_none")]
+  /// Data associated with the checkpoint.
   pub data: Option<EncryptedData>,
   /// Created at as ISO8601 timestamp.
   #[cfg_attr(feature = "utoipa", schema(value_type = String))]
@@ -81,27 +81,9 @@ pub struct SecretRecord {
   pub updated_at: Iso8601Timestamp,
 }
 
-impl SecretRecord {
-  pub fn into_entity(
-    self,
-    data: Option<String>,
-    encryption_key: Option<EncryptionKeyId>,
-  ) -> SecretEntity {
-    SecretEntity {
-      id: self.id,
-      name: self.name,
-      description: self.description,
-      created_at: self.created_at,
-      updated_at: self.updated_at,
-      data,
-      encryption_key,
-    }
-  }
-}
-
 #[typeshare(serialized_as = "string")]
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
-pub struct SecretId(pub String);
+pub struct CheckpointId(pub String);
 
-crate::surreal_id!(SecretId, "Secret");
+crate::surreal_id!(CheckpointId, "Checkpoint");

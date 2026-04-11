@@ -39,6 +39,12 @@ DEFINE FIELD OVERWRITE kind
   DEFAULT "Folder"
   READONLY;
 
+-- checkpointing
+DEFINE FIELD OVERWRITE checkpointing
+  ON TABLE Node
+  TYPE bool
+  DEFAULT false;
+
 -- interpolation
 DEFINE FIELD OVERWRITE interpolation
   ON TABLE Node
@@ -111,3 +117,10 @@ DEFINE FUNCTION OVERWRITE fn::node_by_path_components_rec(
   };
   RETURN fn::node_by_path_components_rec($filesystem, $components, $node.inode, $i + 1);
 };
+
+----------------
+-- Migrations --
+----------------
+
+-- Ensure checkpointing field is not NONE
+UPDATE Node SET checkpointing = false WHERE checkpointing = NONE;

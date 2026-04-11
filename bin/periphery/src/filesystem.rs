@@ -542,8 +542,8 @@ impl fuser::Filesystem for CicadaFs {
     match cicada().write(UpdateNodeData {
       id: node.id,
       data: merged,
-      encryption_key: None,
       interpolated: self.interpolated,
+      ..Default::default()
     }) {
       Ok(_) => reply.written(new_data.len() as u32),
       Err(e) => {
@@ -604,11 +604,8 @@ impl fuser::Filesystem for CicadaFs {
     if perm.is_some()
       && let Err(e) = cicada().write(UpdateNode {
         id: node.id.clone(),
-        parent: None,
-        name: None,
         perm,
-        interpolation: None,
-        interpolated: None,
+        ..Default::default()
       })
     {
       error!(
@@ -635,8 +632,8 @@ impl fuser::Filesystem for CicadaFs {
       if let Err(e) = cicada().write(UpdateNodeData {
         id: node.id.clone(),
         data: truncated,
-        encryption_key: None,
         interpolated: self.interpolated,
+        ..Default::default()
       }) {
         error!(
           "SETATTR FAILED: Could not truncate node | inode: {ino} | {e:#}"
@@ -822,9 +819,7 @@ impl fuser::Filesystem for CicadaFs {
       id: node.id,
       parent: new_parent,
       name: new_name,
-      perm: None,
-      interpolation: None,
-      interpolated: None,
+      ..Default::default()
     }) {
       Ok(_) => reply.ok(),
       Err(e) => {
