@@ -33,6 +33,9 @@ mod write {
     read::list_nodes,
     read::get_node,
     read::find_node,
+    // CHECKPOINT
+    read::list_checkpoints,
+    read::get_checkpoint,
     // SECRET
     read::list_secrets,
     read::get_secret,
@@ -71,6 +74,9 @@ mod write {
     write::rotate_node_envelope_key,
     write::delete_node,
     write::batch_delete_nodes,
+    // CHECKPOINT
+    write::update_checkpoint,
+    write::delete_checkpoint,
     // SECRET
     write::create_secret,
     write::update_secret,
