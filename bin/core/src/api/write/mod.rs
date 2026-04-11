@@ -13,6 +13,7 @@ use typeshare::typeshare;
 use crate::auth::CicadaAuthImpl;
 use crate::{api::Variant, auth::middleware::Client};
 
+pub mod checkpoint;
 pub mod device;
 pub mod encryption_key;
 pub mod filesystem;
@@ -68,6 +69,13 @@ pub enum WriteRequest {
   RotateNodeEnvelopeKey(RotateNodeEnvelopeKey),
   DeleteNode(DeleteNode),
   BatchDeleteNodes(BatchDeleteNodes),
+
+  // ==== CHECKPOINT ====
+  UpdateCheckpoint(UpdateCheckpoint),
+  UpdateCheckpointEncryptionKey(UpdateCheckpointEncryptionKey),
+  RotateCheckpointEnvelopeKey(RotateCheckpointEnvelopeKey),
+  DeleteCheckpoint(DeleteCheckpoint),
+  BatchDeleteCheckpoints(BatchDeleteCheckpoints),
 
   // ==== SECRET ====
   CreateSecret(CreateSecret),

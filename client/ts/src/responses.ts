@@ -32,6 +32,10 @@ export type ReadResponses = {
   FindNode: Types.FindNodeResponse;
   FindNodeWithPath: Types.FindNodeWithPathResponse;
 
+  // ==== CHECKPOINT ====
+  ListCheckpoints: Types.ListCheckpointsResponse;
+  GetCheckpoint: Types.GetCheckpointResponse;
+
   // ==== SECRET ====
   ListSecrets: Types.ListSecretsResponse;
   GetSecret: Types.GetSecretResponse;
@@ -75,6 +79,13 @@ export type WriteResponses = {
   RotateNodeEnvelopeKey: Types.RotateNodeEnvelopeKeyResponse;
   DeleteNode: Types.DeleteNodeResponse;
   BatchDeleteNodes: Types.BatchDeleteNodesResponse;
+
+  // ==== CHECKPOINT ====
+  UpdateCheckpoint: Types.UpdateCheckpointResponse;
+  UpdateCheckpointEncryptionKey: Types.UpdateCheckpointEncryptionKeyResponse;
+  RotateCheckpointEnvelopeKey: Types.RotateCheckpointEnvelopeKeyResponse;
+  DeleteCheckpoint: Types.DeleteCheckpointResponse;
+  BatchDeleteCheckpoints: Types.BatchDeleteCheckpointsResponse;
 
   // ==== SECRET ====
   CreateSecret: Types.CreateSecretResponse;

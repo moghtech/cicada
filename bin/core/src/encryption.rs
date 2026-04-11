@@ -2,6 +2,7 @@ use std::sync::OnceLock;
 
 use cicada_client::entities::{
   EncryptedData, InterpolationMode,
+  checkpoint::{CheckpointEntity, CheckpointRecord},
   encryption_key::{EncryptionKeyId, EncryptionKeyKind},
   node::{NodeEntity, NodeRecord},
   secret::{SecretEntity, SecretRecord},
@@ -235,6 +236,48 @@ pub async fn decrypt_nodes(
       node
         .inspect_err(|e| {
           warn!("Failed to decrypt node in list | {:#}", e.error)
+        })
+        .ok()
+    })
+    .collect()
+}
+
+pub async fn decrypt_checkpoint(
+  mut checkpoint: CheckpointRecord,
+) -> mogh_error::Result<CheckpointEntity> {
+  let (data, encryption_key) = if let Some(data) = checkpoint.data {
+    let key = data.encryption_key.clone();
+    if let Some(data) = decrypt_data(data, &checkpoint.id.0).await? {
+      (Some(data), Some(key))
+    } else {
+      (None, Some(key))
+    }
+  } else {
+    (None, None)
+  };
+  // checkpoint.data has been moved, need to assign something back so compiler doesn't complain.
+  checkpoint.data = None;
+  Ok(checkpoint.into_entity(data, encryption_key))
+}
+
+pub async fn decrypt_checkpoints(
+  checkpoints: Vec<CheckpointRecord>,
+) -> Vec<CheckpointEntity> {
+  // TODO: improve error handling
+  checkpoints
+    .into_iter()
+    .map(|checkpoint| decrypt_checkpoint(checkpoint))
+    .collect::<FuturesOrdered<_>>()
+    .collect::<Vec<_>>()
+    .await
+    .into_iter()
+    .filter_map(|checkpoint| {
+      checkpoint
+        .inspect_err(|e| {
+          warn!(
+            "Failed to decrypt checkpoint in list | {:#}",
+            e.error
+          )
         })
         .ok()
     })

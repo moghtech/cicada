@@ -81,6 +81,25 @@ pub struct CheckpointRecord {
   pub updated_at: Iso8601Timestamp,
 }
 
+impl CheckpointRecord {
+  pub fn into_entity(
+    self,
+    data: Option<String>,
+    encryption_key: Option<EncryptionKeyId>,
+  ) -> CheckpointEntity {
+    CheckpointEntity {
+      id: self.id,
+      node: self.node,
+      name: self.name,
+      description: self.description,
+      created_at: self.created_at,
+      updated_at: self.updated_at,
+      data,
+      encryption_key,
+    }
+  }
+}
+
 #[typeshare(serialized_as = "string")]
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]

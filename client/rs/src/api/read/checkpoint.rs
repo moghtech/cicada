@@ -5,7 +5,9 @@ use typeshare::typeshare;
 use crate::{
   api::read::CicadaReadRequest,
   entities::{
-    checkpoint::{CheckpointEntity, CheckpointListItem},
+    checkpoint::{
+      CheckpointEntity, CheckpointId, CheckpointListItem,
+    },
     node::NodeId,
   },
 };
@@ -65,7 +67,7 @@ pub fn get_checkpoint() {}
 #[error(mogh_error::Error)]
 pub struct GetCheckpoint {
   /// Checkpoint id
-  pub id: String,
+  pub id: CheckpointId,
 }
 
 /// Response for [GetCheckpoint].

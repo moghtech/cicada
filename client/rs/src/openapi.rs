@@ -76,7 +76,10 @@ mod write {
     write::batch_delete_nodes,
     // CHECKPOINT
     write::update_checkpoint,
+    write::update_checkpoint_encryption_key,
+    write::rotate_checkpoint_envelope_key,
     write::delete_checkpoint,
+    write::batch_delete_checkpoints,
     // SECRET
     write::create_secret,
     write::update_secret,

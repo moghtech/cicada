@@ -14,6 +14,7 @@ use crate::{
   api::Variant, auth::middleware::Client, db::query::user::get_user,
 };
 
+pub mod checkpoint;
 pub mod device;
 pub mod encryption_key;
 pub mod filesystem;
@@ -68,6 +69,10 @@ enum ReadRequest {
   GetNode(GetNode),
   FindNode(FindNode),
   FindNodeWithPath(FindNodeWithPath),
+
+  // ==== CHECKPOINT ====
+  ListCheckpoints(ListCheckpoints),
+  GetCheckpoint(GetCheckpoint),
 
   // ==== SECRET ====
   ListSecrets(ListSecrets),
