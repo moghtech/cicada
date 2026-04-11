@@ -55,7 +55,7 @@ DEFINE FUNCTION OVERWRITE fn::first_filesystem() {
 -- Initializes a default filesystem if none exist
 IF fn::first_filesystem() = NONE {
   CREATE Filesystem SET name = "Default";
-}
+};
 
 ----------------
 -- Migrations --
