@@ -5,15 +5,26 @@ import ConfirmDelete from "@/components/confirm-delete";
 import { Types } from "cicada_client";
 import { notifications } from "@mantine/notifications";
 import InitializeEncryptionKey from "@/components/initialize-encryption-key";
-import { languageFromPath, MonacoDiffEditor, Page, PageGuard } from "mogh_ui";
+import {
+  languageFromPath,
+  MonacoDiffEditor,
+  MonacoEditor,
+  Page,
+  PageGuard,
+} from "mogh_ui";
 import { ICONS } from "@/lib/icons";
 import EncryptionKeySelector from "@/components/encryption-key-selector";
 import ConfirmFileSave from "@/components/confirm-file-save";
+import { useState } from "react";
+import CheckpointSelector from "@/components/checkpoint-selector";
 
 export default function CheckpointPage() {
   const { checkpoint: _checkpoint } = useParams() as {
     checkpoint: string;
   };
+  const inv = useInvalidate();
+  const nav = useNavigate();
+
   const {
     data: checkpoint,
     isPending,
@@ -21,6 +32,7 @@ export default function CheckpointPage() {
   } = useRead("GetCheckpoint", {
     id: _checkpoint,
   });
+
   const {
     data: node,
     isPending: nodePending,
@@ -32,8 +44,7 @@ export default function CheckpointPage() {
     },
     { enabled: !!checkpoint?.node },
   );
-  const inv = useInvalidate();
-  const nav = useNavigate();
+
   const encryptionKeys = useRead("ListEncryptionKeys", {}).data;
   const missingKey = encryptionKeys?.find(
     (key) => checkpoint?.data === null && key.id === checkpoint?.encryption_key,
@@ -41,6 +52,7 @@ export default function CheckpointPage() {
   const missingNodeKey = encryptionKeys?.find(
     (key) => node?.data === null && key.id === node?.encryption_key,
   );
+
   const {
     mutate: updateCheckpointEncryptionKey,
     isPending: updateEncryptionKeyPending,
@@ -53,14 +65,25 @@ export default function CheckpointPage() {
       });
     },
   });
+
   const { mutateAsync: deleteCheckpoint, isPending: deleteCheckpointPending } =
     useWrite("DeleteCheckpoint", {
       onSuccess: () => {
         notifications.show({ message: "Checkpoint deleted." });
         inv(["ListCheckpoints"]);
-        nav("/checkpoints");
+        nav(-1);
       },
     });
+
+  const [compare, setCompare] = useState<string | undefined>(undefined);
+
+  const { data: compareCheckpoint } = useRead(
+    "GetCheckpoint",
+    {
+      id: compare!,
+    },
+    { enabled: !!compare },
+  );
 
   return (
     <PageGuard
@@ -85,7 +108,7 @@ export default function CheckpointPage() {
                   node={node}
                   data={checkpoint.data}
                   initName="Restore checkpoint"
-                  initDescription={`Restored contents before checkpoint "${checkpoint.name || checkpoint.id}"`}
+                  initDescription={`Restored contents at checkpoint "${checkpoint.name || checkpoint.id}"`}
                   disabled={node?.data === checkpoint.data}
                   restore
                 />
@@ -109,6 +132,16 @@ export default function CheckpointPage() {
                   w: { base: "100%", xs: 260 },
                   loading: updateEncryptionKeyPending,
                 }}
+              />
+              <CheckpointSelector
+                node={checkpoint.node}
+                selected={compare}
+                onSelect={setCompare}
+                placeholder="Compare"
+                targetProps={{
+                  w: { base: "100%", xs: 260 },
+                }}
+                excludeId={checkpoint.id}
               />
             </>
           }
@@ -143,11 +176,18 @@ export default function CheckpointPage() {
                 </Group>
               )}
             </>
-          ) : (
+          ) : compareCheckpoint ? (
             <MonacoDiffEditor
-              language={languageFromPath(checkpoint.name)}
+              language={node?.name ? languageFromPath(node?.name) : undefined}
               original={checkpoint.data ?? ""}
-              modified={node?.data ?? ""}
+              modified={compareCheckpoint?.data ?? ""}
+              readOnly
+            />
+          ) : (
+            <MonacoEditor
+              language={node?.name ? languageFromPath(node?.name) : undefined}
+              value={checkpoint.data ?? ""}
+              readOnly
             />
           )}
         </Page>
