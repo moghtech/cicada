@@ -1,6 +1,6 @@
-import { Button, Flex, Group, Modal, Stack } from "@mantine/core";
+import { ICONS } from "@/lib/icons";
+import { Button, Group, Modal, Stack } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { Save } from "lucide-react";
 import { languageFromPath, MonacoDiffEditor } from "mogh_ui";
 import { ReactNode } from "react";
 
@@ -12,6 +12,7 @@ export default function ConfirmSave({
   onConfirm,
   loading,
   disabled,
+  restore,
 }: {
   name: string;
   original: string;
@@ -20,8 +21,10 @@ export default function ConfirmSave({
   onConfirm: () => Promise<unknown>;
   loading?: boolean;
   disabled?: boolean;
+  restore?: boolean;
 }) {
   const [opened, { open, close }] = useDisclosure(false);
+  const Icon = restore ? ICONS.Checkpoint : ICONS.Save;
   return (
     <>
       <Modal
@@ -55,11 +58,12 @@ export default function ConfirmSave({
           </Group>
         </Stack>
       </Modal>
-      <Button disabled={disabled} onClick={open}>
-        <Flex align="center" gap="0.5rem">
-          <Save size="1rem" />
-          Save
-        </Flex>
+      <Button
+        leftSection={<Icon size="1rem" />}
+        disabled={disabled}
+        onClick={open}
+      >
+        {restore ? "Restore" : "Save"}
       </Button>
     </>
   );

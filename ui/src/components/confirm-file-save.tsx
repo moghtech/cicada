@@ -1,28 +1,40 @@
 import { Types } from "cicada_client";
 import ConfirmSave from "./confirm-save";
-import { useLocalStorage } from "@mantine/hooks";
 import { TextInput } from "@mantine/core";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useInvalidate, useWrite } from "@/lib/hooks";
 import { notifications } from "@mantine/notifications";
 
 export interface ConfirmFileSaveProps {
   node: Types.NodeEntity | undefined;
+  data: string | undefined;
+  setEdit?: (data: { data: string | undefined }) => void;
+  initName?: string;
+  initDescription?: string;
+  restore?: boolean;
+  disabled?: boolean;
 }
 
-export default function ConfirmFileSave({ node }: ConfirmFileSaveProps) {
+export default function ConfirmFileSave({
+  node,
+  data,
+  setEdit,
+  initName,
+  initDescription,
+  restore,
+  disabled,
+}: ConfirmFileSaveProps) {
   const inv = useInvalidate();
-  const [{ data }, setEdit] = useLocalStorage<{ data: string | undefined }>({
-    key: `node-${node?.id}-edit-v1`,
-    defaultValue: { data: undefined },
-  });
-  const [checkpointName, setCheckpointName] = useState("");
-  const [checkpointDescription, setCheckpointDescription] = useState("");
+  const [checkpointName, setCheckpointName] = useState(initName);
+  const [checkpointDescription, setCheckpointDescription] =
+    useState(initDescription);
+  useEffect(() => setCheckpointName(initName), [initName]);
+  useEffect(() => setCheckpointDescription(initDescription), [initDescription]);
   const { mutateAsync: updateNodeData } = useWrite("UpdateNodeData", {
     onSuccess: () => {
-      inv(["FindNode"], ["ListCheckpoints"]);
+      inv(["FindNode"], ["GetNode"], ["ListCheckpoints"]);
       notifications.show({ message: "Saved changes to file.", color: "green" });
-      setEdit({ data: undefined });
+      setEdit?.({ data: undefined });
       setCheckpointName("");
       setCheckpointDescription("");
     },
@@ -30,7 +42,7 @@ export default function ConfirmFileSave({ node }: ConfirmFileSaveProps) {
   return (
     <ConfirmSave
       name={node?.name ?? ""}
-      disabled={!node || !data}
+      disabled={disabled || !node || !data}
       original={node?.data ?? ""}
       modified={data ?? ""}
       extra={
@@ -59,6 +71,7 @@ export default function ConfirmFileSave({ node }: ConfirmFileSaveProps) {
           checkpoint_description: checkpointDescription,
         }))
       }
+      restore={restore}
     />
   );
 }

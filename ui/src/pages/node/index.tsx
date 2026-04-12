@@ -3,7 +3,6 @@ import { useParams } from "react-router-dom";
 import { lazy } from "react";
 import { Center, Text } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { EnableSwitch } from "mogh_ui";
 
 const Folder = lazy(() => import("@/pages/node/folder"));
 const File = lazy(() => import("@/pages/node/file"));
@@ -41,13 +40,8 @@ const NodePage = () => {
         filesystem={filesystem}
         node={node}
         nodeError={nodeError as { result?: unknown }}
-        toggleInterpolation={
-          <EnableSwitch
-            label="Interpolation"
-            checked={interpolated}
-            onCheckedChange={toggle}
-          />
-        }
+        interpolated={interpolated}
+        toggleInterpolated={toggle}
       />
     );
   } else {

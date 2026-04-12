@@ -8,6 +8,7 @@ import InitializeEncryptionKey from "@/components/initialize-encryption-key";
 import { languageFromPath, MonacoDiffEditor, Page, PageGuard } from "mogh_ui";
 import { ICONS } from "@/lib/icons";
 import EncryptionKeySelector from "@/components/encryption-key-selector";
+import ConfirmFileSave from "@/components/confirm-file-save";
 
 export default function CheckpointPage() {
   const { checkpoint: _checkpoint } = useParams() as {
@@ -79,6 +80,16 @@ export default function CheckpointPage() {
           icon={ICONS.Checkpoint}
           actions={
             <>
+              {checkpoint.data && (
+                <ConfirmFileSave
+                  node={node}
+                  data={checkpoint.data}
+                  initName="Restore checkpoint"
+                  initDescription={`Restored contents before checkpoint "${checkpoint.name || checkpoint.id}"`}
+                  disabled={node?.data === checkpoint.data}
+                  restore
+                />
+              )}
               <ConfirmDelete
                 entityType="Checkpoint"
                 name={checkpoint.name}

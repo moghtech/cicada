@@ -1,13 +1,17 @@
 import { DataTable, SortableHeader } from "mogh_ui";
 import { useRead } from "@/lib/hooks";
-import ResourceLink from "./resource-link";
+import CheckpointLink from "./checkpoint-link";
 
 export interface CheckpointsProps {
-  node: string;
+  node: string | undefined;
 }
 
 export default function Checkpoints({ node }: CheckpointsProps) {
-  const { data: checkpoints } = useRead("ListCheckpoints", { node });
+  const { data: checkpoints } = useRead(
+    "ListCheckpoints",
+    { node: node! },
+    { enabled: !!node },
+  );
 
   return (
     <DataTable
@@ -20,7 +24,7 @@ export default function Checkpoints({ node }: CheckpointsProps) {
           ),
           accessorKey: "name",
           cell: ({ row }) => (
-            <ResourceLink type="Checkpoint" id={row.original.id} />
+            <CheckpointLink id={row.original.id} nodeId={row.original.node} />
           ),
         },
         // {

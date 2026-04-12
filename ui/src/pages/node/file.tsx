@@ -1,5 +1,15 @@
 import { useInvalidate, useRead, useWrite } from "@/lib/hooks";
-import { Button, Group, Stack, Text, TextInput } from "@mantine/core";
+import {
+  Badge,
+  Button,
+  Center,
+  Group,
+  HoverCard,
+  Stack,
+  Tabs,
+  Text,
+  TextInput,
+} from "@mantine/core";
 import { useNavigate } from "react-router-dom";
 import { History } from "lucide-react";
 import { useLocalStorage } from "@mantine/hooks";
@@ -13,7 +23,7 @@ import {
   languageFromPath,
   MonacoEditor,
 } from "mogh_ui";
-import { ReactNode, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import InterpolationModeSelector from "@/components/interpolation-mode-selector";
 import EncryptionKeySelector from "@/components/encryption-key-selector";
 import { ICONS } from "@/lib/icons";
@@ -21,17 +31,19 @@ import CheckpointingModeSelector from "@/components/checkpointing-mode-selector"
 import Checkpoints from "@/components/checkpoints";
 import ConfirmFileSave from "@/components/confirm-file-save";
 
-const FilePage = ({
+export default function FilePage({
   filesystem,
   node,
   nodeError,
-  toggleInterpolation,
+  interpolated,
+  toggleInterpolated,
 }: {
   filesystem: Types.FilesystemRecord | undefined;
   node: Types.NodeEntity | undefined;
   nodeError: { result?: unknown } | undefined;
-  toggleInterpolation: ReactNode;
-}) => {
+  interpolated: boolean;
+  toggleInterpolated: () => void;
+}) {
   const inv = useInvalidate();
   const nav = useNavigate();
 
@@ -105,7 +117,7 @@ const FilePage = ({
         >
           Reset
         </Button>
-        <ConfirmFileSave node={node} />
+        <ConfirmFileSave node={node} data={data} setEdit={setEdit} />
         {node?.id && (
           <EncryptionKeySelector
             selected={node?.encryption_key}
@@ -119,6 +131,20 @@ const FilePage = ({
           />
         )}
         <TextInput
+          leftSection={
+            <HoverCard position="bottom-start" offset={12}>
+              <HoverCard.Target>
+                <Badge px="0.15rem" py="0.1rem">
+                  <Center>
+                    <ICONS.Permission size="0.9rem" />
+                  </Center>
+                </Badge>
+              </HoverCard.Target>
+              <HoverCard.Dropdown>
+                <Text>File permission</Text>
+              </HoverCard.Dropdown>
+            </HoverCard>
+          }
           placeholder="0o644"
           value={perm}
           onChange={(e) => setPerm(e.target.value)}
@@ -147,7 +173,38 @@ const FilePage = ({
             />
           </>
         )}
-        {toggleInterpolation}
+        <Group gap="xs">
+          <Tabs
+            value={interpolated ? "Interpolated" : "Raw"}
+            onChange={(value) =>
+              (value === "Interpolated" ? !interpolated : interpolated) &&
+              toggleInterpolated()
+            }
+            w="fit-content"
+            color="orange"
+          >
+            <Tabs.List>
+              <Tabs.Tab value="Raw" w="110">
+                Before
+              </Tabs.Tab>
+              <Tabs.Tab value="Interpolated" w="110">
+                After
+              </Tabs.Tab>
+            </Tabs.List>
+          </Tabs>
+          <HoverCard position="bottom-end" offset={12}>
+            <HoverCard.Target>
+              <Badge px="0.25rem" py="0.8rem">
+                <Center>
+                  <ICONS.Info size="1rem" />
+                </Center>
+              </Badge>
+            </HoverCard.Target>
+            <HoverCard.Dropdown>
+              <Text>Show before or after secret interpolation</Text>
+            </HoverCard.Dropdown>
+          </HoverCard>
+        </Group>
       </Group>
 
       {nodeError ? (
@@ -192,6 +249,4 @@ const FilePage = ({
       )}
     </EntityPage>
   );
-};
-
-export default FilePage;
+}

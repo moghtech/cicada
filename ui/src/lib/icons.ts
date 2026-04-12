@@ -19,6 +19,8 @@ import {
   ChevronsLeftRightEllipsis,
   Edit,
   History,
+  FileLock,
+  Info,
 } from "lucide-react";
 
 export const ICONS = {
@@ -33,7 +35,10 @@ export const ICONS = {
   Checkpoint: History,
   EncryptionKey: KeySquare,
   Secret: SquareAsterisk,
+  Interpolation: SquareAsterisk,
+  Permission: FileLock,
   Search,
+  Info,
   Create: Plus,
   Delete: Trash2,
   Add: CirclePlus,

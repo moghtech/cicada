@@ -1,4 +1,12 @@
-import { Select, SelectProps } from "@mantine/core";
+import { ICONS } from "@/lib/icons";
+import {
+  Badge,
+  Center,
+  HoverCard,
+  Select,
+  SelectProps,
+  Text,
+} from "@mantine/core";
 import { Types } from "cicada_client";
 
 const LABELS = {
@@ -41,6 +49,20 @@ export default function InterpolationModeSelector({
 }: InterpolationModeSelectorProps) {
   return (
     <Select
+      leftSection={
+        <HoverCard position="bottom-start" offset={12}>
+          <HoverCard.Target>
+            <Badge px="0.15rem" py="0.1rem">
+              <Center>
+                <ICONS.Interpolation size="1rem" />
+              </Center>
+            </Badge>
+          </HoverCard.Target>
+          <HoverCard.Dropdown>
+            <Text>Interpolation mode</Text>
+          </HoverCard.Dropdown>
+        </HoverCard>
+      }
       data={
         excludeInherit
           ? EXCLUDE_INHERIT
