@@ -153,8 +153,8 @@ impl Resolve<WriteArgs> for UpdateNodeData {
     if checkpoint {
       query::checkpoint::create_checkpoint(CreateCheckpointQuery {
         node: node.id,
-        name: None,
-        description: None,
+        name: self.checkpoint_name,
+        description: self.checkpoint_description,
         data: node.data,
       })
       .await?;

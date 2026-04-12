@@ -187,6 +187,10 @@ pub struct UpdateNodeData {
   /// Whether to store the previous file data as a restorable checkpoint.
   /// This will always be done if checkpointing is enabled on the node.
   pub checkpoint: Option<bool>,
+  /// Save the checkpoint with this name.
+  pub checkpoint_name: Option<String>,
+  /// Save the checkpoint with this description
+  pub checkpoint_description: Option<String>,
   /// Whether to interpolate secrets into returned file contents
   #[serde(default)]
   pub interpolated: bool,
