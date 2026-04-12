@@ -35,7 +35,7 @@ async_timing_util = "1.1.0"
 
 # ASYNC
 reqwest = { version = "0.13.2", default-features = false, features = ["json", "rustls"] }
-tokio = { version = "1.50.0", features = ["full"] }
+tokio = { version = "1.51.1", features = ["full"] }
 futures-util = "0.3.32"
 
 # SERVER
@@ -76,4 +76,4 @@ dashmap = "6.1.0"
 fuser = "0.17.0"
 regex = "1.12.3"
 libc = "0.2.184"
-rand = "0.10.0"
+rand = "0.10.1"
