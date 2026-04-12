@@ -18,7 +18,7 @@ import { EnableSwitch, Page } from "mogh_ui";
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-const DevicePage = () => {
+export default function DevicePage() {
   const { device: _device } = useParams() as {
     device: string;
   };
@@ -45,17 +45,15 @@ const DevicePage = () => {
   }
 
   return <DeviceInner device={device} refetchDevice={refetchDevice} />;
-};
+}
 
-export default DevicePage;
-
-const DeviceInner = ({
+function DeviceInner({
   device,
   refetchDevice,
 }: {
   device: Types.DeviceRecord;
   refetchDevice: () => void;
-}) => {
+}) {
   const nav = useNavigate();
   const { mutate: updateDevice } = useWrite("UpdateDevice", {
     onSuccess: () => {
@@ -129,4 +127,4 @@ const DeviceInner = ({
       </Fieldset>
     </Page>
   );
-};
+}

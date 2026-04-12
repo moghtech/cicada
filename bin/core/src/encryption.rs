@@ -247,7 +247,9 @@ pub async fn decrypt_checkpoint(
 ) -> mogh_error::Result<CheckpointEntity> {
   let (data, encryption_key) = if let Some(data) = checkpoint.data {
     let key = data.encryption_key.clone();
-    if let Some(data) = decrypt_data(data, &checkpoint.id.0).await? {
+    // Checkpoint data still uses node id as associated data
+    if let Some(data) = decrypt_data(data, &checkpoint.node.0).await?
+    {
       (Some(data), Some(key))
     } else {
       (None, Some(key))

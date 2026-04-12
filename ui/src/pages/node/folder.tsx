@@ -12,6 +12,7 @@ import { useNavigate } from "react-router-dom";
 import InterpolationModeSelector from "@/components/interpolation-mode-selector";
 import EncryptionKeySelector from "@/components/encryption-key-selector";
 import ResourceLink from "@/components/resource-link";
+import CheckpointingModeSelector from "@/components/checkpointing-mode-selector";
 
 const FolderPage = ({
   filesystem,
@@ -157,6 +158,13 @@ const FolderPage = ({
               targetProps={{
                 w: { base: "100%", xs: 260 },
               }}
+            />
+            <CheckpointingModeSelector
+              value={filesystem.checkpointing}
+              onChange={(checkpointing) =>
+                updateFilesystem({ id: filesystem.id, checkpointing })
+              }
+              excludeInherit
             />
             <InterpolationModeSelector
               value={filesystem.interpolation}

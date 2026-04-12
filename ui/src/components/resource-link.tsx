@@ -10,7 +10,8 @@ export type ResourceType =
   | "Secret"
   | "Filesystem"
   | "Device"
-  | "OnboardingKey";
+  | "OnboardingKey"
+  | "Checkpoint";
 
 export interface ResourceLinkProps {
   type: ResourceType;
@@ -29,6 +30,8 @@ function link(type: ResourceType, id: string) {
       return "/devices/" + id;
     case "OnboardingKey":
       return "/onboarding-keys/" + id;
+    case "Checkpoint":
+      return "/checkpoints/" + id;
   }
 }
 
@@ -41,7 +44,7 @@ export default function ResourceLink({ type, id }: ResourceLinkProps) {
       ? (resource as Types.EncryptionKeyEntity)?.initialized
         ? "Good"
         : "Critical"
-      : type === "Secret"
+      : ["Secret", "Checkpoint"].includes(type)
         ? (resource as Types.SecretListItem)?.encryption_key &&
           !encryptionKeys?.find(
             (e) => e.id === (resource as Types.SecretListItem)?.encryption_key,
@@ -65,7 +68,7 @@ export default function ResourceLink({ type, id }: ResourceLinkProps) {
       onClick={(e) => e.stopPropagation()}
     >
       <Icon size="1rem" color={hexColorByIntention(intention)} />
-      {resource?.name ?? "Unknown"}
+      {resource?.name ?? (type === "Checkpoint" ? "Checkpoint" : "Unknown")}
     </Group>
   );
 }

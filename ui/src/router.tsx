@@ -21,6 +21,7 @@ const Device = lazy(() => import("@/pages/device"));
 const OnboardingKey = lazy(() => import("@/pages/onboarding-key"));
 const Filesystems = lazy(() => import("@/pages/filesystems"));
 const Node = lazy(() => import("@/pages/node"));
+const Checkpoint = lazy(() => import("@/pages/checkpoint"));
 const Secrets = lazy(() => import("@/pages/secrets"));
 const Secret = lazy(() => import("@/pages/secret"));
 const EncryptionKeys = lazy(() => import("@/pages/encryption-keys"));
@@ -53,6 +54,7 @@ export const Router = () => {
             <Route path="filesystems" element={<Filesystems />} />
             <Route path="filesystems/:filesystem" element={<Node />} />
             <Route path="filesystems/:filesystem/:inode" element={<Node />} />
+            <Route path="checkpoints/:checkpoint" element={<Checkpoint />} />
             <Route path="profile" element={<Profile />} />
             <Route path="access" element={<Access />} />
             <Route path="devices/:device" element={<Device />} />

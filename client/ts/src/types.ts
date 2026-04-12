@@ -71,6 +71,20 @@ export enum NodeKind {
 	File = "File",
 }
 
+/** Set the checkpointing mode for files */
+export enum CheckpointingMode {
+	/** Checkpointing is enabled. */
+	Enabled = "Enabled",
+	/**
+	 * Inherit the mode from the filesystem. This is the default for files.
+	 * 
+	 * Note. This is only valid mode for files, not filesystems themselves.
+	 */
+	Inherit = "Inherit",
+	/** Checkpointing is disabled. */
+	Disabled = "Disabled",
+}
+
 /** Set the interpolation mode for files */
 export enum InterpolationMode {
 	/**
@@ -127,12 +141,12 @@ export interface NodeEntity {
 	 */
 	kind: NodeKind;
 	/**
-	 * Whether to checkpoint by default when updating node data.
-	 * - If null, inherits the filesystem default.
-	 * - If false, individual saves can manually still pass the checkpoint
-	 * flag when updating node data.
+	 * The file checkpointing mode
+	 * - `"Inherit"` (default)
+	 * - `"Enabled"`
+	 * - `"Disabled"`
 	 */
-	checkpointing?: boolean;
+	checkpointing: CheckpointingMode;
 	/** The interpolation mode */
 	interpolation: InterpolationMode;
 	/**
@@ -349,20 +363,6 @@ export interface EncryptionKeyRecord {
 
 /** Response for [CreateEncryptionKey]. */
 export type CreateEncryptionKeyResponse = EncryptionKeyRecord;
-
-/** Set the checkpointing mode for files */
-export enum CheckpointingMode {
-	/** Checkpointing is enabled. */
-	Enabled = "Enabled",
-	/**
-	 * Inherit the mode from the filesystem. This is the default for files.
-	 * 
-	 * Note. This is only valid mode for files, not filesystems themselves.
-	 */
-	Inherit = "Inherit",
-	/** Checkpointing is disabled. */
-	Disabled = "Disabled",
-}
 
 export interface FilesystemRecord {
 	/** The unique filesystem id */
@@ -633,12 +633,12 @@ export interface NodeListItem {
 	 */
 	kind: NodeKind;
 	/**
-	 * Whether to checkpoint by default when updating node data.
-	 * - If null, inherits the filesystem default.
-	 * - If false, individual saves can manually still pass the checkpoint
-	 * flag when updating node data.
+	 * The file checkpointing mode
+	 * - `"Inherit"` (default)
+	 * - `"Enabled"`
+	 * - `"Disabled"`
 	 */
-	checkpointing?: boolean;
+	checkpointing: CheckpointingMode;
 	/** The interpolation mode */
 	interpolation: InterpolationMode;
 	/** The encryption key used with data */
@@ -1317,12 +1317,12 @@ export interface NodeRecord {
 	 */
 	kind: NodeKind;
 	/**
-	 * Whether to checkpoint by default when updating node data.
-	 * - If null, inherits the filesystem default.
-	 * - If false, individual saves can manually still pass the checkpoint
-	 * flag when updating node data.
+	 * The file checkpointing mode
+	 * - `"Inherit"` (default)
+	 * - `"Enabled"`
+	 * - `"Disabled"`
 	 */
-	checkpointing?: boolean;
+	checkpointing: CheckpointingMode;
 	/** The interpolation mode */
 	interpolation: InterpolationMode;
 	/**

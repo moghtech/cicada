@@ -18,6 +18,7 @@ import {
   Lock,
   ChevronsLeftRightEllipsis,
   Edit,
+  History,
 } from "lucide-react";
 
 export const ICONS = {
@@ -29,6 +30,7 @@ export const ICONS = {
   Filesystem: HardDrive,
   Folder: FolderOpen,
   File,
+  Checkpoint: History,
   EncryptionKey: KeySquare,
   Secret: SquareAsterisk,
   Search,

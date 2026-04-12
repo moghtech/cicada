@@ -18,6 +18,8 @@ import { ReactNode, useEffect, useState } from "react";
 import InterpolationModeSelector from "@/components/interpolation-mode-selector";
 import EncryptionKeySelector from "@/components/encryption-key-selector";
 import { ICONS } from "@/lib/icons";
+import CheckpointingModeSelector from "@/components/checkpointing-mode-selector";
+import Checkpoints from "@/components/checkpoints";
 
 const FilePage = ({
   filesystem,
@@ -66,7 +68,7 @@ const FilePage = ({
   });
   const { mutateAsync: updateNodeData } = useWrite("UpdateNodeData", {
     onSuccess: () => {
-      inv(["FindNode"]);
+      inv(["FindNode"], ["ListCheckpoints"]);
       notifications.show({ message: "Saved changes to file.", color: "green" });
       setEdit({ data: undefined });
     },
@@ -143,13 +145,22 @@ const FilePage = ({
           disabled={!node}
         />
         {node && (
-          <InterpolationModeSelector
-            value={node?.interpolation}
-            onChange={(interpolation) =>
-              updateNode({ id: node.id, interpolation })
-            }
-            inherit={filesystem?.interpolation}
-          />
+          <>
+            <CheckpointingModeSelector
+              value={node?.checkpointing}
+              onChange={(checkpointing) =>
+                updateNode({ id: node.id, checkpointing })
+              }
+              inherit={filesystem?.checkpointing}
+            />
+            <InterpolationModeSelector
+              value={node?.interpolation}
+              onChange={(interpolation) =>
+                updateNode({ id: node.id, interpolation })
+              }
+              inherit={filesystem?.interpolation}
+            />
+          </>
         )}
         {toggleInterpolation}
       </Group>
@@ -184,11 +195,14 @@ const FilePage = ({
         </>
       ) : (
         node && (
-          <MonacoEditor
-            language={languageFromPath(node.name)}
-            value={data ?? node.data ?? ""}
-            onValueChange={(data) => setEdit({ data })}
-          />
+          <>
+            <MonacoEditor
+              language={languageFromPath(node.name)}
+              value={data ?? node.data ?? ""}
+              onValueChange={(data) => setEdit({ data })}
+            />
+            <Checkpoints node={node.id} />
+          </>
         )
       )}
     </EntityPage>
