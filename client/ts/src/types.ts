@@ -1509,6 +1509,10 @@ export interface UpdateNodeData {
 	 * This will always be done if checkpointing is enabled on the node.
 	 */
 	checkpoint?: boolean;
+	/** Save the checkpoint with this name. */
+	checkpoint_name?: string;
+	/** Save the checkpoint with this description */
+	checkpoint_description?: string;
 	/** Whether to interpolate secrets into returned file contents */
 	interpolated?: boolean;
 }
