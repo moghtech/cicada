@@ -130,6 +130,23 @@ pub enum CheckpointingMode {
   Disabled,
 }
 
+impl CheckpointingMode {
+  pub fn maybe_inherit(
+    self,
+    inherit: CheckpointingMode,
+  ) -> CheckpointingMode {
+    if let CheckpointingMode::Inherit = self {
+      inherit
+    } else {
+      self
+    }
+  }
+
+  pub fn enabled(self) -> bool {
+    matches!(self, CheckpointingMode::Enabled)
+  }
+}
+
 /// Set the interpolation mode for files
 #[typeshare]
 #[derive(

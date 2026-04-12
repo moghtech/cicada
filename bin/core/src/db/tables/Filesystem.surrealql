@@ -56,10 +56,3 @@ DEFINE FUNCTION OVERWRITE fn::first_filesystem() {
 IF fn::first_filesystem() = NONE {
   CREATE Filesystem SET name = "Default";
 };
-
-----------------
--- Migrations --
-----------------
-
--- Ensure checkpointing field is not NONE
-UPDATE Filesystem SET checkpointing = "Enabled" WHERE checkpointing = NONE;

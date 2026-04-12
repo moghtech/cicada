@@ -5,7 +5,7 @@ use cicada_client::{
     write::UpdateNode,
   },
   entities::{
-    EncryptedData, InterpolationMode,
+    CheckpointingMode, EncryptedData, InterpolationMode,
     filesystem::FilesystemId,
     node::{NodeId, NodeKind, NodeListItem, NodeRecord},
   },
@@ -122,6 +122,7 @@ pub struct CreateNodeQuery {
   pub name: String,
   pub kind: NodeKind,
   pub perm: Option<u16>,
+  pub checkpointing: Option<CheckpointingMode>,
   pub interpolation: Option<InterpolationMode>,
 }
 
@@ -152,11 +153,11 @@ pub async fn update_node(
 
 pub async fn update_node_data(
   id: NodeId,
-  data: Option<EncryptedData>,
+  data: EncryptedData,
 ) -> mogh_error::Result<NodeRecord> {
   #[derive(SurrealValue)]
   struct UpdateNodeDataQuery {
-    data: Option<EncryptedData>,
+    data: EncryptedData,
   }
   DB.update(id.as_record_id())
     .merge(UpdateNodeDataQuery { data })

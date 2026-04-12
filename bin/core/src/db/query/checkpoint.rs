@@ -47,7 +47,7 @@ pub struct CreateCheckpointQuery {
   pub node: NodeId,
   pub name: Option<String>,
   pub description: Option<String>,
-  pub data: Option<EncryptedData>,
+  pub data: EncryptedData,
 }
 
 pub async fn create_checkpoint(

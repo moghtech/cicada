@@ -117,10 +117,3 @@ DEFINE FUNCTION OVERWRITE fn::node_by_path_components_rec(
   };
   RETURN fn::node_by_path_components_rec($filesystem, $components, $node.inode, $i + 1);
 };
-
-----------------
--- Migrations --
-----------------
-
--- Ensure checkpointing field is not NONE
-UPDATE Node SET checkpointing = "Inherit" WHERE checkpointing = NONE;

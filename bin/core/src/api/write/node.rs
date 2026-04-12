@@ -3,10 +3,10 @@ use cicada_client::{
     BatchDeleteNodes, CreateNode, DeleteNode, RotateNodeEnvelopeKey,
     UpdateNode, UpdateNodeData, UpdateNodeEncryptionKey,
   },
-  entities::{CheckpointingMode, node::NodeKind},
+  entities::node::NodeKind,
 };
 use futures_util::{StreamExt, stream::FuturesUnordered};
-use mogh_error::anyhow::{Context as _, anyhow};
+use mogh_error::anyhow::Context as _;
 use mogh_resolver::Resolve;
 
 use crate::{
@@ -38,6 +38,7 @@ impl Resolve<WriteArgs> for CreateNode {
       name: self.name,
       perm: self.perm,
       kind: self.kind,
+      checkpointing: self.checkpointing,
       interpolation: self.interpolation,
     })
     .await?;
@@ -64,7 +65,7 @@ impl Resolve<WriteArgs> for CreateNode {
         &node.id.0,
       )
       .await?;
-      query::node::update_node_data(node.id, Some(data)).await?
+      query::node::update_node_data(node.id, data).await?
     } else {
       node
     };
@@ -102,7 +103,8 @@ impl Resolve<WriteArgs> for UpdateNodeData {
     self,
     WriteArgs { client }: &WriteArgs,
   ) -> Result<Self::Response, Self::Error> {
-    let node = query::node::get_node(&self.id.0).await?;
+    let node =
+      query::node::get_node_list_item(self.id.0.clone()).await?;
     ensure_client_filesystem_permission(
       client,
       node.filesystem.clone(),
@@ -114,55 +116,9 @@ impl Resolve<WriteArgs> for UpdateNodeData {
       query::filesystem::get_filesystem(node.filesystem.0.clone())
         .await?;
 
-    let checkpoint = match (
-      self.checkpoint,
-      node.checkpointing,
-      filesystem.checkpointing,
-    ) {
-      (Some(checkpoint), _, _) => checkpoint,
-      (None, CheckpointingMode::Enabled, _) => true,
-      (None, CheckpointingMode::Disabled, _) => false,
-      (
-        None,
-        CheckpointingMode::Inherit,
-        CheckpointingMode::Enabled,
-      ) => true,
-      (
-        None,
-        CheckpointingMode::Inherit,
-        CheckpointingMode::Disabled,
-      ) => false,
-      (
-        None,
-        CheckpointingMode::Inherit,
-        CheckpointingMode::Inherit,
-      ) => {
-        return Err(
-          anyhow!(
-            "Filesystem should not have checkpointing mode Inherit"
-          )
-          .into(),
-        );
-      }
-    };
-
-    // Clone just encryption key id rather than whole previous node data
-    let node_encryption_key =
-      node.data.as_ref().map(|d| d.encryption_key.clone());
-
-    if checkpoint {
-      query::checkpoint::create_checkpoint(CreateCheckpointQuery {
-        node: node.id,
-        name: self.checkpoint_name,
-        description: self.checkpoint_description,
-        data: node.data,
-      })
-      .await?;
-    }
-
     let encryption_key = if let Some(id) = self
       .encryption_key
-      .or_else(|| node_encryption_key)
+      .or_else(|| node.encryption_key)
       .or_else(|| filesystem.encryption_key)
     {
       id
@@ -182,8 +138,36 @@ impl Resolve<WriteArgs> for UpdateNodeData {
     )
     .await?;
 
-    let node =
-      query::node::update_node_data(self.id, data.into()).await?;
+    let checkpoint = self.checkpoint.unwrap_or_else(|| {
+      node
+        .checkpointing
+        .maybe_inherit(filesystem.checkpointing)
+        .enabled()
+    });
+
+    // This just avoids cloning data unless necessary.
+    let checkpoint_data = checkpoint.then(|| data.clone());
+
+    let (_, node) = tokio::try_join!(
+      async {
+        if checkpoint {
+          query::checkpoint::create_checkpoint(
+            CreateCheckpointQuery {
+              node: node.id,
+              name: self.checkpoint_name,
+              description: self.checkpoint_description,
+              // In this branch, checkpoint_data is always Some(_)
+              data: checkpoint_data.unwrap(),
+            },
+          )
+          .await
+          .map(|_| ())
+        } else {
+          Ok(())
+        }
+      },
+      query::node::update_node_data(self.id, data)
+    )?;
 
     decrypt_node(node, self.interpolated).await
   }
