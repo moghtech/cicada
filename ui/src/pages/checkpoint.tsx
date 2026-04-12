@@ -36,10 +36,10 @@ export default function CheckpointPage() {
   const nav = useNavigate();
   const encryptionKeys = useRead("ListEncryptionKeys", {}).data;
   const missingKey = encryptionKeys?.find(
-    (key) => !checkpoint?.data && key.id === checkpoint?.encryption_key,
+    (key) => checkpoint?.data === null && key.id === checkpoint?.encryption_key,
   );
   const missingNodeKey = encryptionKeys?.find(
-    (key) => !node?.data && key.id === node?.encryption_key,
+    (key) => node?.data === null && key.id === node?.encryption_key,
   );
   const {
     mutate: updateCheckpointEncryptionKey,
