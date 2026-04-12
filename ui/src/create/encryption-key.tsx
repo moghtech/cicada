@@ -8,7 +8,7 @@ import { Types } from "cicada_client";
 import { CircleCheckBig, Plus } from "lucide-react";
 import { useState } from "react";
 
-const CreateEncryptionKey = () => {
+export default function CreateEncryptionKey() {
   const [opened, { open, close, toggle }] = useDisclosure(false);
   useShiftKeyListener("N", () => open());
   return (
@@ -30,16 +30,16 @@ const CreateEncryptionKey = () => {
       </Popover.Dropdown>
     </Popover>
   );
-};
+}
 
-const CreateEncryptionKeyForm = ({ close }: { close: () => void }) => {
+function CreateEncryptionKeyForm({ close }: { close: () => void }) {
   const inv = useInvalidate();
   const [created, setCreated] = useState<Types.EncryptionKeyRecord | null>(
     null,
   );
   const { mutate, isPending } = useWrite("CreateEncryptionKey", {
     onSuccess: (key) => {
-      notifications.show({ message: "Created onboarding key." });
+      notifications.show({ message: "Created encryption key." });
       inv(["ListEncryptionKeys"]);
       if (key && key.kind === Types.EncryptionKeyKind.Memory) {
         setCreated(key);
@@ -123,6 +123,4 @@ const CreateEncryptionKeyForm = ({ close }: { close: () => void }) => {
       </Button>
     </form>
   );
-};
-
-export default CreateEncryptionKey;
+}

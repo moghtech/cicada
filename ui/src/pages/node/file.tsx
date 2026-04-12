@@ -3,7 +3,6 @@ import { Button, Group, Stack, Text, TextInput } from "@mantine/core";
 import { useNavigate } from "react-router-dom";
 import { History } from "lucide-react";
 import { useLocalStorage } from "@mantine/hooks";
-import ConfirmSave from "@/components/confirm-save";
 import ConfirmDelete from "@/components/confirm-delete";
 import { Types } from "cicada_client";
 import { notifications } from "@mantine/notifications";
@@ -20,6 +19,7 @@ import EncryptionKeySelector from "@/components/encryption-key-selector";
 import { ICONS } from "@/lib/icons";
 import CheckpointingModeSelector from "@/components/checkpointing-mode-selector";
 import Checkpoints from "@/components/checkpoints";
+import ConfirmFileSave from "@/components/confirm-file-save";
 
 const FilePage = ({
   filesystem,
@@ -66,13 +66,6 @@ const FilePage = ({
       });
     },
   });
-  const { mutateAsync: updateNodeData } = useWrite("UpdateNodeData", {
-    onSuccess: () => {
-      inv(["FindNode"], ["ListCheckpoints"]);
-      notifications.show({ message: "Saved changes to file.", color: "green" });
-      setEdit({ data: undefined });
-    },
-  });
   const { mutateAsync: deleteNode, isPending: deleteNodePending } = useWrite(
     "DeleteNode",
     {
@@ -112,15 +105,7 @@ const FilePage = ({
         >
           Reset
         </Button>
-        <ConfirmSave
-          name={node?.name ?? ""}
-          disabled={!node || !data}
-          original={node?.data ?? ""}
-          modified={data ?? ""}
-          onConfirm={async () =>
-            node && (await updateNodeData({ id: node.id, data: data ?? "" }))
-          }
-        />
+        <ConfirmFileSave node={node} />
         {node?.id && (
           <EncryptionKeySelector
             selected={node?.encryption_key}

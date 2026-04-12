@@ -1,12 +1,14 @@
-import { Button, Flex, Group, Modal } from "@mantine/core";
+import { Button, Flex, Group, Modal, Stack } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { Save } from "lucide-react";
 import { languageFromPath, MonacoDiffEditor } from "mogh_ui";
+import { ReactNode } from "react";
 
-const ConfirmSave = ({
+export default function ConfirmSave({
   name,
   original,
   modified,
+  extra,
   onConfirm,
   loading,
   disabled,
@@ -14,10 +16,11 @@ const ConfirmSave = ({
   name: string;
   original: string;
   modified: string;
+  extra?: ReactNode;
   onConfirm: () => Promise<unknown>;
   loading?: boolean;
   disabled?: boolean;
-}) => {
+}) {
   const [opened, { open, close }] = useDisclosure(false);
   return (
     <>
@@ -26,26 +29,31 @@ const ConfirmSave = ({
         onClose={close}
         title={"Save changes to " + name}
         size="auto"
+        trapFocus
       >
-        <MonacoDiffEditor
-          original={original}
-          modified={modified}
-          language={languageFromPath(name)}
-          style={{ width: 1400, maxWidth: "85vw" }}
-        />
-        <Group mt="md" w="100%">
-          <Button
-            onClick={() =>
-              onConfirm()
-                .then(close)
-                .catch((err) => console.error(err))
-            }
-            loading={loading}
-            fullWidth
-          >
-            Save
-          </Button>
-        </Group>
+        <Stack>
+          <MonacoDiffEditor
+            original={original}
+            modified={modified}
+            language={languageFromPath(name)}
+            style={{ width: 1400, maxWidth: "85vw" }}
+            readOnly
+          />
+          {extra}
+          <Group mt="md" w="100%">
+            <Button
+              onClick={() =>
+                onConfirm()
+                  .then(close)
+                  .catch((err) => console.error(err))
+              }
+              loading={loading}
+              fullWidth
+            >
+              Save
+            </Button>
+          </Group>
+        </Stack>
       </Modal>
       <Button disabled={disabled} onClick={open}>
         <Flex align="center" gap="0.5rem">
@@ -55,6 +63,4 @@ const ConfirmSave = ({
       </Button>
     </>
   );
-};
-
-export default ConfirmSave;
+}
