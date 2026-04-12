@@ -44,28 +44,58 @@ impl Resolve<WriteArgs> for CreateNode {
     .await?;
     let node = if let NodeKind::File = node.kind {
       let data = self.data.unwrap_or_default();
-      let encryption_key_id = if let Some(id) = self.encryption_key {
-        id
-      } else if let Some(id) =
-        query::filesystem::get_filesystem(node.filesystem.0)
-          .await?
-          .encryption_key
+
+      let filesystem =
+        query::filesystem::get_filesystem(node.filesystem.0.clone())
+          .await?;
+
+      let encryption_key = if let Some(id) =
+        self.encryption_key.or_else(|| filesystem.encryption_key)
       {
         id
       } else {
+        // Takes the first available encryption key
         query::encryption_key::list_all_encryption_keys()
           .await?
           .pop()
           .context("No encryption keys")?
           .id
       };
-      let data = encrypt_data(
-        encryption_key_id.0,
-        data.as_bytes(),
-        &node.id.0,
-      )
-      .await?;
-      query::node::update_node_data(node.id, data).await?
+
+      let data =
+        encrypt_data(encryption_key.0, data.as_bytes(), &node.id.0)
+          .await?;
+
+      let checkpoint = self
+        .checkpoint
+        .unwrap_or_else(|| filesystem.checkpointing.enabled())
+        // Doing like this only clones when necessary
+        .then(|| (node.id.clone(), data.clone()));
+
+      let (node, _) = tokio::try_join!(
+        query::node::update_node_data(node.id, data),
+        async {
+          if let Some((node, data)) = checkpoint {
+            query::checkpoint::create_checkpoint(
+              CreateCheckpointQuery {
+                node,
+                name: self
+                  .checkpoint_name
+                  .unwrap_or_else(|| String::from("Create file"))
+                  .into(),
+                description: self.checkpoint_description,
+                data,
+              },
+            )
+            .await
+            .map(|_| ())
+          } else {
+            Ok(())
+          }
+        },
+      )?;
+
+      node
     } else {
       node
     };
@@ -138,26 +168,27 @@ impl Resolve<WriteArgs> for UpdateNodeData {
     )
     .await?;
 
-    let checkpoint = self.checkpoint.unwrap_or_else(|| {
-      node
-        .checkpointing
-        .maybe_inherit(filesystem.checkpointing)
-        .enabled()
-    });
+    let checkpoint = self
+      .checkpoint
+      .unwrap_or_else(|| {
+        node
+          .checkpointing
+          .maybe_inherit(filesystem.checkpointing)
+          .enabled()
+      })
+      // Doing like this only clones when necessary
+      .then(|| data.clone());
 
-    // This just avoids cloning data unless necessary.
-    let checkpoint_data = checkpoint.then(|| data.clone());
-
-    let (_, node) = tokio::try_join!(
+    let (node, _) = tokio::try_join!(
+      query::node::update_node_data(self.id, data),
       async {
-        if checkpoint {
+        if let Some(data) = checkpoint {
           query::checkpoint::create_checkpoint(
             CreateCheckpointQuery {
               node: node.id,
               name: self.checkpoint_name,
               description: self.checkpoint_description,
-              // In this branch, checkpoint_data is always Some(_)
-              data: checkpoint_data.unwrap(),
+              data,
             },
           )
           .await
@@ -166,7 +197,6 @@ impl Resolve<WriteArgs> for UpdateNodeData {
           Ok(())
         }
       },
-      query::node::update_node_data(self.id, data)
     )?;
 
     decrypt_node(node, self.interpolated).await

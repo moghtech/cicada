@@ -81,6 +81,13 @@ pub struct CreateNode {
   /// Otherwise uses the current filesystem default,
   /// followed by the current global default.
   pub encryption_key: Option<EncryptionKeyId>,
+  /// Whether to store the contents as a restorable checkpoint.
+  /// This will always be done if checkpointing is enabled on the node.
+  pub checkpoint: Option<bool>,
+  /// Save the checkpoint with this name.
+  pub checkpoint_name: Option<String>,
+  /// Save the checkpoint with this description
+  pub checkpoint_description: Option<String>,
   /// Whether to interpolate secrets into returned file contents
   #[serde(default)]
   pub interpolated: bool,
@@ -184,7 +191,7 @@ pub struct UpdateNodeData {
   pub data: String,
   /// Optionally update the encryption key used as master in the envelope encryption.
   pub encryption_key: Option<EncryptionKeyId>,
-  /// Whether to store the previous file data as a restorable checkpoint.
+  /// Whether to store the contents as a restorable checkpoint.
   /// This will always be done if checkpointing is enabled on the node.
   pub checkpoint: Option<bool>,
   /// Save the checkpoint with this name.
