@@ -4,11 +4,10 @@ import CreateEncryptionKey from "@/create/encryption-key";
 import { useRead } from "@/lib/hooks";
 import { ICONS } from "@/lib/icons";
 import { Badge } from "@mantine/core";
-import { useNavigate } from "react-router-dom";
+import ResourceLink from "@/components/resource-link";
 
 const EncryptionKeysPage = () => {
   // const inv = useInvalidate();
-  const nav = useNavigate();
   const { data } = useRead("ListEncryptionKeys", {});
   // const byId = useMemo(
   //   () => data && Object.fromEntries(data.map((ok) => [ok.id, ok.name])),
@@ -51,9 +50,6 @@ const EncryptionKeysPage = () => {
       <DataTable
         tableKey="encryption-keys-table-v1"
         data={data ?? []}
-        onRowClick={(encryption_key) =>
-          nav("/encryption-keys/" + encryption_key.id)
-        }
         // selectOptions={{
         //   selectKey: (row) => row.id,
         //   state: [selected, setSelected],
@@ -64,12 +60,9 @@ const EncryptionKeysPage = () => {
               <SortableHeader column={column} title="Name" />
             ),
             accessorKey: "name",
-          },
-          {
-            header: ({ column }) => (
-              <SortableHeader column={column} title="Id" />
+            cell: ({ row }) => (
+              <ResourceLink type="EncryptionKey" id={row.original.id} />
             ),
-            accessorKey: "id",
           },
           {
             header: ({ column }) => (

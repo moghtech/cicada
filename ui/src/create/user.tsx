@@ -101,7 +101,6 @@ function CreateUserForm({ close }: { close: () => void }) {
               autoFocus
               label="Username"
               placeholder="Enter username"
-              fz="md"
               key={form.key("username")}
             />
             <PasswordInput

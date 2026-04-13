@@ -57,15 +57,18 @@ export default function FilePage({
     key: `node-${node?.id}-edit-v1`,
     defaultValue: { data: undefined },
   });
+
   const missingKey = useRead("ListEncryptionKeys", {}).data?.find(
     (key) => node?.missing_key && key.id === node?.encryption_key,
   );
+
   const { mutateAsync: updateNode } = useWrite("UpdateNode", {
     onSuccess: () => {
       inv(["ListNodes"], ["FindNode"]);
       notifications.show({ message: "Saved changes to node.", color: "green" });
     },
   });
+
   const {
     mutate: updateNodeEncryptionKey,
     isPending: updateEncryptionKeyPending,
@@ -78,6 +81,7 @@ export default function FilePage({
       });
     },
   });
+
   const { mutateAsync: deleteNode, isPending: deleteNodePending } = useWrite(
     "DeleteNode",
     {

@@ -1,6 +1,6 @@
 import EncryptionKeySelector from "@/components/encryption-key-selector";
 import { useInvalidate, useWrite } from "@/lib/hooks";
-import { Button, Popover, TextInput } from "@mantine/core";
+import { Button, PasswordInput, Popover, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
@@ -44,6 +44,7 @@ function CreateSecretForm({ close }: { close: () => void }) {
     mode: "controlled",
     initialValues: {
       name: "",
+      data: "",
       encryption_key: undefined as string | undefined,
     },
     validate: {
@@ -61,6 +62,13 @@ function CreateSecretForm({ close }: { close: () => void }) {
         label="Name"
         placeholder="Enter name"
         key={form.key("name")}
+      />
+      <PasswordInput
+        {...form.getInputProps("data")}
+        label="Data"
+        placeholder="Enter data"
+        size="sm"
+        key={form.key("data")}
       />
       <EncryptionKeySelector
         label="Encryption Key"

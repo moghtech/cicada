@@ -1,130 +1,117 @@
 import ConfirmDelete from "@/components/confirm-delete";
-import { useRead, useWrite } from "@/lib/hooks";
+import { useInvalidate, useRead, useWrite } from "@/lib/hooks";
 import { ICONS } from "@/lib/icons";
 import {
   ActionIcon,
-  Center,
   Fieldset,
-  Flex,
   Group,
-  Loader,
+  Stack,
   Text,
   TextInput,
 } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
-import { Types } from "cicada_client";
 import { Save } from "lucide-react";
-import { EnableSwitch, Page } from "mogh_ui";
-import { useState } from "react";
+import { EnableSwitch, EntityHeader, EntityPage, PageGuard } from "mogh_ui";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 export default function DevicePage() {
   const { device: _device } = useParams() as {
     device: string;
   };
-  const {
-    data: device,
-    isPending,
-    refetch: refetchDevice,
-  } = useRead("GetDevice", { id: _device });
-
-  if (isPending) {
-    return (
-      <Center>
-        <Loader />
-      </Center>
-    );
-  }
-
-  if (!device) {
-    return (
-      <Center>
-        <Text size="lg">404: No device found</Text>
-      </Center>
-    );
-  }
-
-  return <DeviceInner device={device} refetchDevice={refetchDevice} />;
-}
-
-function DeviceInner({
-  device,
-  refetchDevice,
-}: {
-  device: Types.DeviceRecord;
-  refetchDevice: () => void;
-}) {
+  const inv = useInvalidate();
   const nav = useNavigate();
-  const { mutate: updateDevice } = useWrite("UpdateDevice", {
+
+  const { data: device, isPending } = useRead("GetDevice", { id: _device });
+
+  const { mutateAsync: updateDevice } = useWrite("UpdateDevice", {
     onSuccess: () => {
-      refetchDevice();
+      inv(["ListDevices"], ["GetDevice"]);
       notifications.show({
         message: "Device updated.",
       });
     },
   });
+
   const { mutateAsync: deleteDevice, isPending: deleteDevicePending } =
     useWrite("DeleteDevice", {
       onSuccess: () => {
         notifications.show({
           message: "Device deleted.",
         });
+        inv(["ListDevices"]);
         nav("/devices");
       },
     });
-  const [publicKey, setPublicKey] = useState(device.public_key);
+
+  const [publicKey, setPublicKey] = useState(device?.public_key);
+  useEffect(() => setPublicKey(device?.public_key), [device?.public_key]);
 
   return (
-    <Page
-      title={device.name}
-      icon={ICONS.Device}
-      description="Device"
-      actions={
-        <>
-          <ConfirmDelete
-            entityType="Device"
-            name={device.name}
-            onConfirm={() => deleteDevice({ id: device.id })}
-            loading={deleteDevicePending}
-            disabled={false}
-          />
-          <EnableSwitch
-            ml="md"
-            label="File Access"
-            color="green.8"
-            checked={device.enabled}
-            onCheckedChange={(enabled) =>
-              updateDevice({ id: device.id, enabled })
-            }
-            redDisabled
-          />
-        </>
-      }
+    <PageGuard
+      isPending={isPending}
+      error={!device ? "404: No device found" : undefined}
     >
-      <Fieldset legend={<Text size="lg">Config</Text>}>
-        <Flex direction="column" gap="lg">
-          <Group>
-            <Text ff="monospace">Public Key:</Text>
+      {device && (
+        <EntityPage>
+          <EntityHeader
+            name={device?.name}
+            state="Device"
+            status={device.created_at}
+            icon={ICONS.Device}
+            intent={device.enabled ? "Good" : "Critical"}
+            onRename={(name) => updateDevice({ id: device.id, name })}
+            action={
+              <ConfirmDelete
+                entityType="Device"
+                name={device?.name ?? "Unknown"}
+                onConfirm={async () => deleteDevice({ id: device.id })}
+                loading={deleteDevicePending}
+                disabled={false}
+                iconOnly
+              />
+            }
+          />
 
-            <TextInput
-              w={550}
-              maw="90vw"
-              value={publicKey}
-              onChange={(e) => setPublicKey(e.target.value)}
-            />
+          <Fieldset legend={<Text size="lg">Config</Text>}>
+            <Stack>
+              <Group>
+                <Text ff="monospace">Public Key:</Text>
 
-            <ActionIcon
-              onClick={() =>
-                publicKey &&
-                updateDevice({ id: device.id, public_key: publicKey })
-              }
-              disabled={!publicKey || publicKey === device.public_key}
-            >
-              <Save size="1rem" />
-            </ActionIcon>
-          </Group>
-        </Flex>
-      </Fieldset>
-    </Page>
+                <TextInput
+                  w={550}
+                  maw="90vw"
+                  value={publicKey}
+                  onChange={(e) => setPublicKey(e.target.value)}
+                />
+
+                <ActionIcon
+                  onClick={() =>
+                    publicKey &&
+                    updateDevice({ id: device.id, public_key: publicKey })
+                  }
+                  disabled={!publicKey || publicKey === device.public_key}
+                >
+                  <Save size="1rem" />
+                </ActionIcon>
+              </Group>
+
+              <Group>
+                <EnableSwitch
+                  ml="md"
+                  label="File Access"
+                  color="green.8"
+                  checked={device.enabled}
+                  onCheckedChange={(enabled) =>
+                    updateDevice({ id: device.id, enabled })
+                  }
+                  redDisabled
+                />
+              </Group>
+            </Stack>
+          </Fieldset>
+        </EntityPage>
+      )}
+    </PageGuard>
   );
 }

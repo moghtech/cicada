@@ -6,10 +6,11 @@ import { Types } from "cicada_client";
 import { notifications } from "@mantine/notifications";
 import InitializeEncryptionKey from "@/components/initialize-encryption-key";
 import {
+  EntityHeader,
+  EntityPage,
   languageFromPath,
   MonacoDiffEditor,
   MonacoEditor,
-  Page,
   PageGuard,
 } from "mogh_ui";
 import { ICONS } from "@/lib/icons";
@@ -44,6 +45,16 @@ export default function CheckpointPage() {
     },
     { enabled: !!checkpoint?.node },
   );
+
+  const { mutateAsync: updateCheckpoint } = useWrite("UpdateCheckpoint", {
+    onSuccess: () => {
+      inv(["ListCheckpoints"], ["GetCheckpoint"]);
+      notifications.show({
+        message: "Saved changes to checkpoint.",
+        color: "green",
+      });
+    },
+  });
 
   const encryptionKeys = useRead("ListEncryptionKeys", {}).data;
   const missingKey = encryptionKeys?.find(
@@ -90,62 +101,71 @@ export default function CheckpointPage() {
       isPending={isPending || isRefetching || nodePending || nodeRefetching}
       error={
         !checkpoint
-          ? "404: No file found"
+          ? "404: No checkpoint found"
           : !node
             ? "404: No node found associated with checkpoint"
             : undefined
       }
     >
       {checkpoint && (
-        <Page
-          title={checkpoint.name || "Checkpoint"}
-          description={checkpoint.created_at}
-          icon={ICONS.Checkpoint}
-          actions={
-            <>
-              {checkpoint.data && (
-                <ConfirmFileSave
-                  node={node}
-                  data={checkpoint.data}
-                  initName="Restore checkpoint"
-                  initDescription={`Restored contents at checkpoint "${checkpoint.name || checkpoint.id}"`}
-                  disabled={node?.data === checkpoint.data}
-                  restore
-                />
-              )}
+        <EntityPage>
+          <EntityHeader
+            name={checkpoint?.name}
+            state="Checkpoint"
+            status={checkpoint.created_at}
+            icon={ICONS.Checkpoint}
+            intent={missingKey ? "Critical" : "Good"}
+            onRename={async (name) =>
+              await updateCheckpoint({ id: checkpoint.id, name })
+            }
+            action={
               <ConfirmDelete
                 entityType="Checkpoint"
-                name={checkpoint.name}
-                onConfirm={() => deleteCheckpoint({ id: checkpoint.id })}
+                name={checkpoint?.name ?? "Unknown"}
+                onConfirm={async () => deleteCheckpoint({ id: checkpoint.id })}
                 loading={deleteCheckpointPending}
                 disabled={false}
+                iconOnly
               />
-              <EncryptionKeySelector
-                selected={checkpoint.encryption_key}
-                onSelect={(encryption_key) =>
-                  updateCheckpointEncryptionKey({
-                    id: checkpoint.id,
-                    encryption_key,
-                  })
-                }
-                targetProps={{
-                  w: { base: "100%", xs: 260 },
-                  loading: updateEncryptionKeyPending,
-                }}
+            }
+          />
+
+          <Group>
+            {checkpoint.data && (
+              <ConfirmFileSave
+                node={node}
+                data={checkpoint.data}
+                initName="Restore checkpoint"
+                initDescription={`Restored contents at checkpoint "${checkpoint.name || checkpoint.id}"`}
+                disabled={node?.data === checkpoint.data}
+                restore
               />
-              <CheckpointSelector
-                node={checkpoint.node}
-                selected={compare}
-                onSelect={setCompare}
-                placeholder="Compare"
-                targetProps={{
-                  w: { base: "100%", xs: 260 },
-                }}
-                excludeId={checkpoint.id}
-              />
-            </>
-          }
-        >
+            )}
+            <EncryptionKeySelector
+              selected={checkpoint.encryption_key}
+              onSelect={(encryption_key) =>
+                updateCheckpointEncryptionKey({
+                  id: checkpoint.id,
+                  encryption_key,
+                })
+              }
+              targetProps={{
+                w: { base: "100%", xs: 260 },
+                loading: updateEncryptionKeyPending,
+              }}
+            />
+            <CheckpointSelector
+              node={checkpoint.node}
+              selected={compare}
+              onSelect={setCompare}
+              placeholder="Compare"
+              targetProps={{
+                w: { base: "100%", xs: 260 },
+              }}
+              excludeId={checkpoint.id}
+            />
+          </Group>
+
           {missingKey ? (
             <>
               <Text fz="h2">
@@ -190,7 +210,7 @@ export default function CheckpointPage() {
               readOnly
             />
           )}
-        </Page>
+        </EntityPage>
       )}
     </PageGuard>
   );
