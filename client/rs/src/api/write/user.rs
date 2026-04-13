@@ -36,20 +36,20 @@ pub fn create_user() {}
 pub struct CreateUser {
   /// The username of the user
   pub username: String,
-  /// The password of the user
-  pub password: String,
+  /// The password of the user.
+  pub password: Option<String>,
+  /// An avatar url for user icon.
+  pub avatar: Option<String>,
   /// Whether user is enabled. Default: true
   #[serde(default = "default_enabled")]
   pub enabled: bool,
   /// The groups to assign to user
-  #[serde(default)]
-  pub groups: Vec<String>,
+  pub groups: Option<Vec<String>>,
   /// User has full API access as an administrator.
-  #[serde(default)]
-  pub admin: bool,
+  pub admin: Option<bool>,
   /// User can elevate or demote other users admin and super_admin properties.
   #[serde(default)]
-  pub super_admin: bool,
+  pub super_admin: Option<bool>,
 }
 
 fn default_enabled() -> bool {

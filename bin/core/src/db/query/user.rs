@@ -108,42 +108,20 @@ pub async fn find_user_with_external_login(
   .map_err(Into::into)
 }
 
-pub async fn sign_up_local_user(
-  username: String,
-  hashed_password: String,
-  enabled: bool,
-) -> mogh_error::Result<String> {
-  let user = DB
-    .query("CREATE ONLY User SET username = $username, password = $password, enabled = $enabled;")
-    .bind(("username", username))
-    .bind(("password", hashed_password))
-    .bind(("enabled", enabled))
-    .await
-    .context("Failed to query database to sign up user")?
-    .take::<Option<UserRecord>>(0)
-    .context("Failed to deserialize UserRecord")?
-    .context("Query response missing created UserRecord")?;
-  Ok(user.id.0)
-}
-
 pub async fn sign_up_external_user(
-  username: String,
-  avatar: String,
+  body: CreateUser,
   kind: ExternalLoginKind,
   external_id: String,
-  enabled: bool,
 ) -> mogh_error::Result<String> {
   let user = DB
     .query(
       "
       BEGIN TRANSACTION;
-      let $user = CREATE ONLY User SET username = $username, avatar = $avatar, enabled = $enabled; $user;
+      let $user = CREATE ONLY User CONTENT $body; $user;
       CREATE ExternalLogin SET user = $user.id, kind = $kind, external_id = $external_id RETURN NONE;
       COMMIT TRANSACTION;",
     )
-    .bind(("username", username))
-    .bind(("avatar", avatar))
-    .bind(("enabled", enabled))
+    .bind(("body", body))
     .bind(("kind", kind))
     .bind(("external_id", external_id))
     .await

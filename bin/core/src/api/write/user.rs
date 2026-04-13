@@ -14,13 +14,16 @@ impl Resolve<WriteArgs> for CreateUser {
   ) -> Result<Self::Response, Self::Error> {
     client.admin_only()?;
 
+    let password = self.password.unwrap_or_default();
+
     CicadaAuthImpl.validate_username(&self.username)?;
-    CicadaAuthImpl.validate_password(&self.password)?;
+    CicadaAuthImpl.validate_password(&password)?;
 
     self.password = bcrypt::hash(
-      self.password.as_bytes(),
+      password.as_bytes(),
       CicadaAuthImpl.local_auth_bcrypt_cost(),
-    )?;
+    )?
+    .into();
 
     query::user::create_user(self).await
   }

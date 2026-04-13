@@ -1,8 +1,9 @@
 use std::sync::{Arc, LazyLock};
 
 use async_timing_util::{Timelength, get_timelength_in_ms};
-use cicada_client::entities::{
-  external_login::ExternalLoginKind, user::UserRecord,
+use cicada_client::{
+  api::write::CreateUser,
+  entities::{external_login::ExternalLoginKind, user::UserRecord},
 };
 use mogh_auth_client::{
   api::login::LoginProvider,
@@ -228,12 +229,17 @@ impl AuthImpl for CicadaAuthImpl {
     no_users_exist: bool,
   ) -> mogh_auth_server::DynFuture<mogh_error::Result<String>> {
     Box::pin(async move {
-      sign_up_local_user(
+      create_user(CreateUser {
         username,
-        hashed_password,
-        no_users_exist || core_config().enable_new_users,
-      )
+        password: Some(hashed_password),
+        avatar: None,
+        enabled: no_users_exist || core_config().enable_new_users,
+        admin: Some(no_users_exist),
+        super_admin: Some(no_users_exist),
+        groups: None,
+      })
       .await
+      .map(|user| user.id.0)
     })
   }
 
@@ -320,11 +326,17 @@ impl AuthImpl for CicadaAuthImpl {
   ) -> mogh_auth_server::DynFuture<mogh_error::Result<String>> {
     Box::pin(async move {
       sign_up_external_user(
-        username,
-        String::new(),
+        CreateUser {
+          username,
+          password: None,
+          avatar: None,
+          enabled: no_users_exist || core_config().enable_new_users,
+          admin: Some(no_users_exist),
+          super_admin: Some(no_users_exist),
+          groups: None,
+        },
         ExternalLoginKind::Oidc,
         subject.into(),
-        no_users_exist || core_config().enable_new_users,
       )
       .await
     })
@@ -397,11 +409,17 @@ impl AuthImpl for CicadaAuthImpl {
   ) -> mogh_auth_server::DynFuture<mogh_error::Result<String>> {
     Box::pin(async move {
       sign_up_external_user(
-        username,
-        avatar,
+        CreateUser {
+          username,
+          password: None,
+          avatar: Some(avatar),
+          enabled: no_users_exist || core_config().enable_new_users,
+          admin: Some(no_users_exist),
+          super_admin: Some(no_users_exist),
+          groups: None,
+        },
         ExternalLoginKind::Github,
         github_id,
-        no_users_exist || core_config().enable_new_users,
       )
       .await
     })
@@ -458,11 +476,17 @@ impl AuthImpl for CicadaAuthImpl {
   ) -> mogh_auth_server::DynFuture<mogh_error::Result<String>> {
     Box::pin(async move {
       sign_up_external_user(
-        username,
-        avatar,
+        CreateUser {
+          username,
+          password: None,
+          avatar: Some(avatar),
+          enabled: no_users_exist || core_config().enable_new_users,
+          admin: Some(no_users_exist),
+          super_admin: Some(no_users_exist),
+          groups: None,
+        },
         ExternalLoginKind::Google,
         google_id,
-        no_users_exist || core_config().enable_new_users,
       )
       .await
     })
