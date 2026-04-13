@@ -6,7 +6,7 @@ import {
   SortableHeader,
 } from "mogh_ui";
 import CreateFilesystem from "@/create/filesystem";
-import { useInvalidate, useRead, useWrite } from "@/lib/hooks";
+import { useInvalidate, useRead, useSetTitle, useWrite } from "@/lib/hooks";
 import { ICONS } from "@/lib/icons";
 import ResourceLink from "@/components/resource-link";
 import { useMemo, useState } from "react";
@@ -16,6 +16,8 @@ import { RowSelectionState } from "@tanstack/react-table";
 import { List, Text } from "@mantine/core";
 
 const FilesystemsPage = () => {
+  useSetTitle("Filesystems");
+  
   const inv = useInvalidate();
 
   const { data } = useRead("ListFilesystems", {});

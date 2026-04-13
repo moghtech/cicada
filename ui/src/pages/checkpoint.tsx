@@ -1,4 +1,4 @@
-import { useInvalidate, useRead, useWrite } from "@/lib/hooks";
+import { useInvalidate, useRead, useSetTitle, useWrite } from "@/lib/hooks";
 import { Group, Text } from "@mantine/core";
 import { useNavigate, useParams } from "react-router-dom";
 import ConfirmDelete from "@/components/confirm-delete";
@@ -46,6 +46,8 @@ export default function CheckpointPage() {
     },
     { enabled: !!checkpoint?.node },
   );
+
+  useSetTitle(checkpoint?.name + (node ? " | " + node?.name : ""));
 
   const { mutateAsync: updateCheckpoint } = useWrite("UpdateCheckpoint", {
     onSuccess: () => {

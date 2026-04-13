@@ -1,7 +1,7 @@
 import ConfirmDelete from "@/components/confirm-delete";
 import { DataTable, SortableHeader } from "mogh_ui";
 import CreateOnboardingKey from "@/create/onboarding-key";
-import { useInvalidate, useRead, useWrite } from "@/lib/hooks";
+import { useInvalidate, useRead, useSetTitle, useWrite } from "@/lib/hooks";
 import { Group, List, Text } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { RowSelectionState } from "@tanstack/react-table";
@@ -10,6 +10,8 @@ import GroupMultiSelector from "@/components/group-multi-selector";
 import ResourceLink from "@/components/resource-link";
 
 export default function OnboardingKeysPage() {
+  useSetTitle("Onboarding");
+  
   const inv = useInvalidate();
   const { data } = useRead("ListOnboardingKeys", {});
   const byId = useMemo(

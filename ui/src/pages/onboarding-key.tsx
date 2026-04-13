@@ -1,5 +1,5 @@
 import ConfirmDelete from "@/components/confirm-delete";
-import { useInvalidate, useRead, useWrite } from "@/lib/hooks";
+import { useInvalidate, useRead, useSetTitle, useWrite } from "@/lib/hooks";
 import { ICONS } from "@/lib/icons";
 import { ActionIcon, Group, Text, TextInput } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
@@ -19,6 +19,8 @@ export default function OnboardingKeyPage() {
   const { data: onboardingKey, isPending } = useRead("GetOnboardingKey", {
     id: _onboardingKey,
   });
+
+  useSetTitle(onboardingKey?.name + " | Onboarding");
 
   const { mutateAsync: updateOnboardingKey } = useWrite("UpdateOnboardingKey", {
     onSuccess: () => {

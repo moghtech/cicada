@@ -1,7 +1,7 @@
 import ConfirmDelete from "@/components/confirm-delete";
 import { DataTable, EntityHeader, EntityPage, SortableHeader } from "mogh_ui";
 import CreateNode from "@/create/node";
-import { useInvalidate, useRead, useWrite } from "@/lib/hooks";
+import { useInvalidate, useRead, useSetTitle, useWrite } from "@/lib/hooks";
 import { ICONS } from "@/lib/icons";
 import { Button, Flex, Group, List, Text } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
@@ -21,6 +21,8 @@ const FolderPage = ({
   filesystem: Types.FilesystemRecord | undefined;
   node: Types.NodeEntity | undefined;
 }) => {
+  useSetTitle((node ? node?.name + " | " : "") + filesystem?.name);
+
   const nav = useNavigate();
   const inv = useInvalidate();
   const { mutateAsync: deleteFilesystem, isPending: deleteFilesystemPending } =

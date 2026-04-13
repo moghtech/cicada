@@ -6,7 +6,7 @@ import {
   SearchInput,
   SortableHeader,
 } from "mogh_ui";
-import { useInvalidate, useRead, useWrite } from "@/lib/hooks";
+import { useInvalidate, useRead, useSetTitle, useWrite } from "@/lib/hooks";
 import { Group, List, Text } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { RowSelectionState } from "@tanstack/react-table";
@@ -15,6 +15,8 @@ import GroupMultiSelector from "@/components/group-multi-selector";
 import ResourceLink from "@/components/resource-link";
 
 export default function DevicesPage() {
+  useSetTitle("Devices");
+  
   const inv = useInvalidate();
   const { data } = useRead("ListDevices", {});
   const byId = useMemo(

@@ -6,7 +6,7 @@ import {
   SortableHeader,
   useLoginOptions,
 } from "mogh_ui";
-import { useInvalidate, useRead, useUser, useWrite } from "@/lib/hooks";
+import { useInvalidate, useRead, useSetTitle, useUser, useWrite } from "@/lib/hooks";
 import { RowSelectionState } from "@tanstack/react-table";
 import { useMemo, useState } from "react";
 import GroupMultiSelector from "@/components/group-multi-selector";
@@ -16,6 +16,8 @@ import { notifications } from "@mantine/notifications";
 import CreateUser from "@/create/user";
 
 export default function UsersPage() {
+  useSetTitle("Users");
+  
   const client = useUser().data;
   const loginOptions = useLoginOptions().data;
   const inv = useInvalidate();

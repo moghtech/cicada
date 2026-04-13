@@ -1,4 +1,4 @@
-import { useUser } from "@/lib/hooks";
+import { useSetTitle, useUser } from "@/lib/hooks";
 import {
   ActionIcon,
   Center,
@@ -25,6 +25,8 @@ import {
 } from "mogh_ui";
 
 export default function ProfilePage() {
+  useSetTitle("Profile");
+
   const user = useUser().data;
 
   if (!user) {

@@ -1,5 +1,5 @@
 import InitializeEncryptionKey from "@/components/initialize-encryption-key";
-import { useInvalidate, useRead, useWrite } from "@/lib/hooks";
+import { useInvalidate, useRead, useSetTitle, useWrite } from "@/lib/hooks";
 import { ICONS } from "@/lib/icons";
 import { Group } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
@@ -17,6 +17,8 @@ export default function EncryptionKeyPage() {
   const { data: encryptionKey, isPending } = useRead("GetEncryptionKey", {
     id: _encryptionKey,
   });
+
+  useSetTitle(encryptionKey?.name + " | Encryption");
 
   const { mutateAsync: updateEncryptionKey } = useWrite("UpdateEncryptionKey", {
     onSuccess: () => {

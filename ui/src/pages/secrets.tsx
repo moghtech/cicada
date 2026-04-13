@@ -9,7 +9,7 @@ import {
 } from "mogh_ui";
 import CreateSecret from "@/create/secret";
 import EditSecretModal from "@/components/edit-secret-modal";
-import { useInvalidate, useRead, useWrite } from "@/lib/hooks";
+import { useInvalidate, useRead, useSetTitle, useWrite } from "@/lib/hooks";
 import { ICONS } from "@/lib/icons";
 import { Button, List, Text } from "@mantine/core";
 import { useMemo, useState } from "react";
@@ -19,6 +19,8 @@ import { notifications } from "@mantine/notifications";
 import ResourceLink from "@/components/resource-link";
 
 export default function SecretsPage() {
+  useSetTitle("Secrets");
+
   const inv = useInvalidate();
 
   const { data } = useRead("ListSecrets", {});

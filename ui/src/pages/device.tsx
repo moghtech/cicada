@@ -1,5 +1,5 @@
 import ConfirmDelete from "@/components/confirm-delete";
-import { useInvalidate, useRead, useWrite } from "@/lib/hooks";
+import { useInvalidate, useRead, useSetTitle, useWrite } from "@/lib/hooks";
 import { ICONS } from "@/lib/icons";
 import {
   ActionIcon,
@@ -23,6 +23,8 @@ export default function DevicePage() {
   const nav = useNavigate();
 
   const { data: device, isPending } = useRead("GetDevice", { id: _device });
+
+  useSetTitle(device?.name + " | Device");
 
   const { mutateAsync: updateDevice } = useWrite("UpdateDevice", {
     onSuccess: () => {

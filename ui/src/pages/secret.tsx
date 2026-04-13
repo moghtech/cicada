@@ -1,4 +1,4 @@
-import { useInvalidate, useRead, useWrite } from "@/lib/hooks";
+import { useInvalidate, useRead, useSetTitle, useWrite } from "@/lib/hooks";
 import { Button, Group, Text } from "@mantine/core";
 import { useNavigate, useParams } from "react-router-dom";
 import { History } from "lucide-react";
@@ -33,6 +33,8 @@ export default function SecretPage() {
   } = useRead("GetSecret", {
     id: _secret,
   });
+
+  useSetTitle(secret?.name + " | Secret");
 
   const [{ data }, setEdit] = useLocalStorage<{ data: string | undefined }>({
     key: `secret-${secret?.id}-edit-v1`,

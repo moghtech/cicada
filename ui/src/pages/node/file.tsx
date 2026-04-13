@@ -1,4 +1,4 @@
-import { useInvalidate, useRead, useWrite } from "@/lib/hooks";
+import { useInvalidate, useRead, useSetTitle, useWrite } from "@/lib/hooks";
 import {
   Badge,
   Button,
@@ -44,6 +44,8 @@ export default function FilePage({
   interpolated: boolean;
   toggleInterpolated: () => void;
 }) {
+  useSetTitle((node ? node?.name + " | " : "") + filesystem?.name);
+
   const inv = useInvalidate();
   const nav = useNavigate();
 

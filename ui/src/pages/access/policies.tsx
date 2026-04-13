@@ -10,7 +10,7 @@ import {
   SearchInput,
   SortableHeader,
 } from "mogh_ui";
-import { useInvalidate, useRead, useWrite } from "@/lib/hooks";
+import { useInvalidate, useRead, useSetTitle, useWrite } from "@/lib/hooks";
 import { Group, List, Text, TextInput } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { RowSelectionState } from "@tanstack/react-table";
@@ -18,6 +18,8 @@ import { useEffect, useMemo, useState } from "react";
 import CreatePolicy from "@/create/policy";
 
 export default function PoliciesPage() {
+  useSetTitle("Policies");
+  
   const inv = useInvalidate();
   const { data } = useRead("ListPolicies", {});
   const byId = useMemo(

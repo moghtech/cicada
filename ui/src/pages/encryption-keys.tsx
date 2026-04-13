@@ -1,12 +1,13 @@
 import { DataTable, Page, SortableHeader } from "mogh_ui";
 import InitializeEncryptionKey from "@/components/initialize-encryption-key";
 import CreateEncryptionKey from "@/create/encryption-key";
-import { useRead } from "@/lib/hooks";
+import { useRead, useSetTitle } from "@/lib/hooks";
 import { ICONS } from "@/lib/icons";
 import { Badge } from "@mantine/core";
 import ResourceLink from "@/components/resource-link";
 
 const EncryptionKeysPage = () => {
+  useSetTitle("Encryption");
   // const inv = useInvalidate();
   const { data } = useRead("ListEncryptionKeys", {});
   // const byId = useMemo(
