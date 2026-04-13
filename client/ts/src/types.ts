@@ -1250,7 +1250,7 @@ export interface GetUsernameResponse {
 }
 
 /**
- * Get the version of the Cicada Core.
+ * Get the version of Cicada Core.
  * Response: [GetVersionResponse].
  */
 export interface GetVersion {
@@ -1497,6 +1497,8 @@ export interface UpdateFilesystem {
 export interface UpdateNode {
 	/** The node id */
 	id: NodeId;
+	/** The filesystem ID */
+	filesystem?: FilesystemId;
 	/** parent inode number. */
 	parent?: U64;
 	/** The name of the node */
