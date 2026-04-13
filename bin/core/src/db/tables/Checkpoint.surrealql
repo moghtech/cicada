@@ -7,7 +7,8 @@ DEFINE TABLE IF NOT EXISTS Checkpoint SCHEMAFULL;
 -- node
 DEFINE FIELD OVERWRITE node
   ON TABLE Checkpoint
-  TYPE record<Node>;
+  TYPE record<Node>
+  REFERENCE ON DELETE CASCADE;
 
 -- name
 DEFINE FIELD OVERWRITE name

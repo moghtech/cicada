@@ -2,7 +2,7 @@ use axum::http::StatusCode;
 use cicada_client::{
   api::write::UpdateEncryptionKey,
   entities::encryption_key::{
-    EncryptionKeyKind, EncryptionKeyRecord,
+    EncryptionKeyId, EncryptionKeyKind, EncryptionKeyRecord,
   },
 };
 use mogh_error::AddStatusCode as _;
@@ -73,4 +73,25 @@ pub async fn update_encryption_key(
     .context("Failed to get query result")?
     .context("Failed to find encryption key with given parameters.")
     .status_code(StatusCode::NOT_FOUND)
+}
+
+pub async fn delete_encryption_key(
+  id: String,
+) -> mogh_error::Result<EncryptionKeyRecord> {
+  DB.delete(("EncryptionKey", id))
+    .await?
+    .context("No EncryptionKey matching given ID")
+    .status_code(StatusCode::NOT_FOUND)
+}
+
+pub async fn batch_delete_encryption_keys(
+  ids: Vec<EncryptionKeyId>,
+) -> mogh_error::Result<Vec<EncryptionKeyRecord>> {
+  DB.query("DELETE EncryptionKey WHERE id IN $ids RETURN BEFORE;")
+    .bind(("ids", ids))
+    .await
+    .context("Failed to delete encryption keys")?
+    .take(0)
+    .context("Invalid delete encryption keys query response")
+    .map_err(Into::into)
 }

@@ -12,7 +12,8 @@ DEFINE FIELD OVERWRITE name
 -- encryption_key
 DEFINE FIELD OVERWRITE encryption_key
   ON TABLE Filesystem
-  TYPE option<record<EncryptionKey>>;
+  TYPE option<record<EncryptionKey>>
+  REFERENCE ON DELETE REJECT;
 
 -- checkpointing
 DEFINE FIELD OVERWRITE checkpointing

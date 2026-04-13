@@ -91,6 +91,8 @@ pub enum WriteRequest {
   UpdateEncryptionKey(UpdateEncryptionKey),
   InitializeEncryptionKey(InitializeEncryptionKey),
   UninitializeEncryptionKey(UninitializeEncryptionKey),
+  DeleteEncryptionKey(DeleteEncryptionKey),
+  BatchDeleteEncryptionKeys(BatchDeleteEncryptionKeys),
 
   // ==== POLICY ====
   CreatePolicy(CreatePolicy),

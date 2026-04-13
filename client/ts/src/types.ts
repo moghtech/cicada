@@ -61,6 +61,50 @@ export interface DeviceRecord {
 /** Response for [BatchDeleteDevices]. */
 export type BatchDeleteDevicesResponse = DeviceRecord[];
 
+/** The available kinds external of encryption keys. */
+export enum EncryptionKeyKind {
+	/**
+	 * Store the encryption key in memory.
+	 * These must be initialized via API call after each Cicada Core startup.
+	 */
+	Memory = "Memory",
+	/**
+	 * UNSAFE DEVELOPMENT OPTION, DO NOT USE IN PRODUCTION.
+	 * Load the key from a base64 encoded file on local disk.
+	 */
+	Disk = "Disk",
+}
+
+/**
+ * Record fields are encrypted by storing them as [EncryptedData] type.
+ * These keys are themselves encrypted using an [EncryptionKeyRecord],
+ * which can point to an in-memory key or a remote KMS.
+ */
+export interface EncryptionKeyEntity {
+	/** The unique encryption key id */
+	id: EncryptionKeyId;
+	/** The name of the encryption key. Must be unique. */
+	name: string;
+	/**
+	 * The kind of encryption key.
+	 * - Memory
+	 * - Disk
+	 */
+	kind: EncryptionKeyKind;
+	/**
+	 * For Memory keys:
+	 * Whether the key has been initialized.
+	 */
+	initialized?: boolean;
+	/** Created at as ISO8601 timestamp. */
+	created_at: Iso8601Timestamp;
+	/** Updated at as ISO8601 timestamp. */
+	updated_at: Iso8601Timestamp;
+}
+
+/** Response for [BatchDeleteEncryptionKeys]. */
+export type BatchDeleteEncryptionKeysResponse = EncryptionKeyEntity[];
+
 export type FilesystemId = string;
 
 /** Set the checkpointing mode for files */
@@ -328,20 +372,6 @@ export type BatchDeleteUsersResponse = UserRecord[];
 /** Response for [CreateDevice]. */
 export type CreateDeviceResponse = DeviceRecord;
 
-/** The available kinds external of encryption keys. */
-export enum EncryptionKeyKind {
-	/**
-	 * Store the encryption key in memory.
-	 * These must be initialized via API call after each Cicada Core startup.
-	 */
-	Memory = "Memory",
-	/**
-	 * UNSAFE DEVELOPMENT OPTION, DO NOT USE IN PRODUCTION.
-	 * Load the key from a base64 encoded file on local disk.
-	 */
-	Disk = "Disk",
-}
-
 /**
  * Record fields are encrypted by storing them as [EncryptedData] type.
  * These keys are themselves encrypted using an [EncryptionKeyRecord],
@@ -405,6 +435,9 @@ export type DeleteCheckpointResponse = CheckpointEntity;
 /** Response for [DeleteDevice]. */
 export type DeleteDeviceResponse = DeviceRecord;
 
+/** Response for [DeleteEncryptionKey]. */
+export type DeleteEncryptionKeyResponse = EncryptionKeyEntity;
+
 /** Response for [DeleteFilesystem]. */
 export type DeleteFilesystemResponse = FilesystemRecord;
 
@@ -439,33 +472,6 @@ export type GetCheckpointResponse = CheckpointEntity;
 
 /** Response for [GetDevice]. */
 export type GetDeviceResponse = DeviceRecord;
-
-/**
- * Record fields are encrypted by storing them as [EncryptedData] type.
- * These keys are themselves encrypted using an [EncryptionKeyRecord],
- * which can point to an in-memory key or a remote KMS.
- */
-export interface EncryptionKeyEntity {
-	/** The unique encryption key id */
-	id: EncryptionKeyId;
-	/** The name of the encryption key. Must be unique. */
-	name: string;
-	/**
-	 * The kind of encryption key.
-	 * - Memory
-	 * - Disk
-	 */
-	kind: EncryptionKeyKind;
-	/**
-	 * For Memory keys:
-	 * Whether the key has been initialized.
-	 */
-	initialized: boolean;
-	/** Created at as ISO8601 timestamp. */
-	created_at: Iso8601Timestamp;
-	/** Updated at as ISO8601 timestamp. */
-	updated_at: Iso8601Timestamp;
-}
 
 /** Response for [GetEncryptionKey]. */
 export type GetEncryptionKeyResponse = EncryptionKeyEntity;
@@ -770,6 +776,12 @@ export interface BatchDeleteDevices {
 	ids: DeviceId[];
 }
 
+/** Batch delete encryption_keys. Response: [BatchDeleteEncryptionKeysResponse]. */
+export interface BatchDeleteEncryptionKeys {
+	/** The onboarding_key ID */
+	ids: EncryptionKeyId[];
+}
+
 /** Batch delete filesystems. Response: [BatchDeleteFilesystemsResponse]. */
 export interface BatchDeleteFilesystems {
 	/** The onboarding_key ID */
@@ -1064,6 +1076,12 @@ export interface DeleteCheckpoint {
 export interface DeleteDevice {
 	/** The device ID */
 	id: DeviceId;
+}
+
+/** Delete an encryption key. Response: [DeleteEncryptionKeyResponse]. */
+export interface DeleteEncryptionKey {
+	/** The encryption key id */
+	id: EncryptionKeyId;
 }
 
 /**
@@ -1793,6 +1811,8 @@ export type WriteRequest =
 	| { type: "UpdateEncryptionKey", params: UpdateEncryptionKey }
 	| { type: "InitializeEncryptionKey", params: InitializeEncryptionKey }
 	| { type: "UninitializeEncryptionKey", params: UninitializeEncryptionKey }
+	| { type: "DeleteEncryptionKey", params: DeleteEncryptionKey }
+	| { type: "BatchDeleteEncryptionKeys", params: BatchDeleteEncryptionKeys }
 	| { type: "CreatePolicy", params: CreatePolicy }
 	| { type: "UpdatePolicy", params: UpdatePolicy }
 	| { type: "DeletePolicy", params: DeletePolicy }

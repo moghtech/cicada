@@ -10,7 +10,9 @@ use crate::{
   api::read::ReadArgs, db::query, encryption::encryption_keys,
 };
 
-fn convert_key(key: EncryptionKeyRecord) -> EncryptionKeyEntity {
+pub fn convert_encryption_key(
+  key: EncryptionKeyRecord,
+) -> EncryptionKeyEntity {
   let initialized = if matches!(key.kind, EncryptionKeyKind::Memory) {
     encryption_keys().contains(&key.id.0)
   } else {
@@ -34,7 +36,7 @@ impl Resolve<ReadArgs> for ListEncryptionKeys {
     let keys = query::encryption_key::list_all_encryption_keys()
       .await?
       .into_iter()
-      .map(convert_key)
+      .map(convert_encryption_key)
       .collect();
     Ok(keys)
   }
@@ -49,6 +51,6 @@ impl Resolve<ReadArgs> for GetEncryptionKey {
   ) -> Result<Self::Response, Self::Error> {
     let key =
       query::encryption_key::get_encryption_key(&self.id.0).await?;
-    Ok(convert_key(key))
+    Ok(convert_encryption_key(key))
   }
 }

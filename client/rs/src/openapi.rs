@@ -95,6 +95,8 @@ mod write {
     write::update_encryption_key,
     write::initialize_encryption_key,
     write::uninitialize_encryption_key,
+    write::delete_encryption_key,
+    write::batch_delete_encryption_keys,
     // POLICY
     write::create_policy,
     write::update_policy,

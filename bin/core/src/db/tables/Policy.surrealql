@@ -25,19 +25,22 @@ DEFINE FIELD OVERWRITE groups
 DEFINE FIELD OVERWRITE users
   ON TABLE Policy
   TYPE array<record<User>>
-  DEFAULT [];
+  DEFAULT []
+  REFERENCE ON DELETE UNSET;
 
 -- devices
 DEFINE FIELD OVERWRITE devices
   ON TABLE Policy
   TYPE array<record<Device>>
-  DEFAULT [];
+  DEFAULT []
+  REFERENCE ON DELETE UNSET;
 
 -- filesystems
 DEFINE FIELD OVERWRITE filesystems
   ON TABLE Policy
   TYPE array<record<Filesystem>>
-  DEFAULT [];
+  DEFAULT []
+  REFERENCE ON DELETE UNSET;
 
 -- filesystem_write
 DEFINE FIELD OVERWRITE filesystem_write

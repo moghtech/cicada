@@ -11,5 +11,6 @@ DEFINE FUNCTION OVERWRITE fn::define_encrypted_data_field(
     key_nonce: string,
     data: string,
     data_nonce: string,
-  }>;
+  }>
+  REFERENCE ON DELETE REJECT;
 };

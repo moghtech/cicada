@@ -1,7 +1,8 @@
 use axum::http::StatusCode;
 use cicada_client::{
   api::write::{
-    CreateEncryptionKey, InitializeEncryptionKey,
+    BatchDeleteEncryptionKeys, CreateEncryptionKey,
+    DeleteEncryptionKey, InitializeEncryptionKey,
     InitializeEncryptionKeyResponse, UninitializeEncryptionKey,
     UninitializeEncryptionKeyResponse, UpdateEncryptionKey,
   },
@@ -13,7 +14,9 @@ use mogh_error::anyhow::{Context as _, anyhow};
 use mogh_resolver::Resolve;
 
 use crate::{
-  api::write::WriteArgs,
+  api::{
+    read::encryption_key::convert_encryption_key, write::WriteArgs,
+  },
   db::query::{self, encryption_key::CreateEncryptionKeyQuery},
   encryption::{base64url_to_array, encryption_keys},
 };
@@ -142,5 +145,35 @@ impl Resolve<WriteArgs> for UninitializeEncryptionKey {
     Ok(UninitializeEncryptionKeyResponse {
       removed: encryption_keys().remove(&self.id.0),
     })
+  }
+}
+
+//
+
+impl Resolve<WriteArgs> for DeleteEncryptionKey {
+  async fn resolve(
+    self,
+    _: &WriteArgs,
+  ) -> Result<Self::Response, Self::Error> {
+    let deleted =
+      query::encryption_key::delete_encryption_key(self.id.0).await?;
+    Ok(convert_encryption_key(deleted))
+  }
+}
+
+//
+
+impl Resolve<WriteArgs> for BatchDeleteEncryptionKeys {
+  async fn resolve(
+    self,
+    _: &WriteArgs,
+  ) -> Result<Self::Response, Self::Error> {
+    let deleted =
+      query::encryption_key::batch_delete_encryption_keys(self.ids)
+        .await?
+        .into_iter()
+        .map(convert_encryption_key)
+        .collect();
+    Ok(deleted)
   }
 }

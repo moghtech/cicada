@@ -7,7 +7,7 @@ use typeshare::typeshare;
 use crate::{
   api::write::CicadaWriteRequest,
   entities::encryption_key::{
-    EncryptionKeyId, EncryptionKeyKind, EncryptionKeyRecord,
+    EncryptionKeyEntity, EncryptionKeyId, EncryptionKeyKind, EncryptionKeyRecord
   },
 };
 
@@ -166,3 +166,72 @@ pub struct UninitializeEncryptionKeyResponse {
   /// - There is no encryption key at id.
   pub removed: bool,
 }
+
+//
+
+#[cfg(feature = "utoipa")]
+#[utoipa::path(
+  post,
+  path = "/write/DeleteEncryptionKey",
+  description = "Delete an encryption key",
+  request_body(content = DeleteEncryptionKey),
+  responses(
+    (status = 200, description = "The deleted encryption key", body = EncryptionKeyEntity),
+    (status = 404, description = "Encryption Key not found", body = mogh_error::Serror),
+    (status = 500, description = "Request failed", body = mogh_error::Serror)
+  ),
+)]
+pub fn delete_encryption_key() {}
+
+/// Delete an encryption key. Response: [DeleteEncryptionKeyResponse].
+#[typeshare]
+#[derive(
+  Debug, Clone, Serialize, Deserialize, SurrealValue, Resolve,
+)]
+#[surreal(crate = "surrealdb_types")]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
+#[empty_traits(CicadaWriteRequest)]
+#[response(DeleteEncryptionKeyResponse)]
+#[error(mogh_error::Error)]
+pub struct DeleteEncryptionKey {
+  /// The encryption key id
+  pub id: EncryptionKeyId,
+}
+
+/// Response for [DeleteEncryptionKey].
+#[typeshare]
+pub type DeleteEncryptionKeyResponse = EncryptionKeyEntity;
+
+//
+
+#[cfg(feature = "utoipa")]
+#[utoipa::path(
+  post,
+  path = "/write/BatchDeleteEncryptionKeys",
+  description = "Batch delete many encryption keys.",
+  request_body(content = BatchDeleteEncryptionKeys),
+  responses(
+    (status = 200, description = "The deleted encryption keys", body = BatchDeleteEncryptionKeysResponse),
+    (status = 500, description = "Request failed", body = mogh_error::Serror)
+  ),
+)]
+pub fn batch_delete_encryption_keys() {}
+
+/// Batch delete encryption_keys. Response: [BatchDeleteEncryptionKeysResponse].
+#[typeshare]
+#[derive(
+  Debug, Clone, Serialize, Deserialize, SurrealValue, Resolve,
+)]
+#[surreal(crate = "surrealdb_types")]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
+#[empty_traits(CicadaWriteRequest)]
+#[response(BatchDeleteEncryptionKeysResponse)]
+#[error(mogh_error::Error)]
+pub struct BatchDeleteEncryptionKeys {
+  /// The onboarding_key ID
+  pub ids: Vec<EncryptionKeyId>,
+}
+
+/// Response for [BatchDeleteEncryptionKeys].
+#[typeshare]
+pub type BatchDeleteEncryptionKeysResponse = Vec<EncryptionKeyEntity>;

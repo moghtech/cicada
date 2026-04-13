@@ -1,21 +1,52 @@
-import { DataTable, Page, SortableHeader } from "mogh_ui";
+import {
+  DataTable,
+  filterBySplit,
+  Page,
+  SearchInput,
+  SortableHeader,
+} from "mogh_ui";
 import InitializeEncryptionKey from "@/components/initialize-encryption-key";
 import CreateEncryptionKey from "@/create/encryption-key";
-import { useRead, useSetTitle } from "@/lib/hooks";
+import { useInvalidate, useRead, useSetTitle, useWrite } from "@/lib/hooks";
 import { ICONS } from "@/lib/icons";
-import { Badge } from "@mantine/core";
+import { Badge, List, Text } from "@mantine/core";
 import ResourceLink from "@/components/resource-link";
+import { useMemo, useState } from "react";
+import { RowSelectionState } from "@tanstack/react-table";
+import { notifications } from "@mantine/notifications";
+import ConfirmDelete from "@/components/confirm-delete";
 
 const EncryptionKeysPage = () => {
   useSetTitle("Encryption");
-  // const inv = useInvalidate();
+
+  const inv = useInvalidate();
+
   const { data } = useRead("ListEncryptionKeys", {});
-  // const byId = useMemo(
-  //   () => data && Object.fromEntries(data.map((ok) => [ok.id, ok.name])),
-  //   [data],
-  // );
-  // const [selected, setSelected] = useState<RowSelectionState>({});
-  // const selectedIds = useMemo(() => Object.keys(selected), [selected]);
+  const byId = useMemo(
+    () => data && Object.fromEntries(data.map((ok) => [ok.id, ok.name])),
+    [data],
+  );
+
+  const [selected, setSelected] = useState<RowSelectionState>({});
+  const selectedIds = useMemo(() => Object.keys(selected), [selected]);
+
+  const { mutateAsync: batchDelete } = useWrite("BatchDeleteEncryptionKeys", {
+    onSuccess: (deleted) => {
+      notifications.show({
+        message: `Deleted ${deleted.length} encryption key${deleted.length === 1 ? "" : "s"}.`,
+      });
+      inv(["ListEncryptionKeys"]);
+      setSelected({});
+    },
+  });
+
+  const [search, setSearch] = useState("");
+  const encryptionKeys = filterBySplit(
+    data,
+    search,
+    (encryptionKey) => encryptionKey.name,
+  );
+
   return (
     <Page
       title="Encryption Keys"
@@ -23,9 +54,11 @@ const EncryptionKeysPage = () => {
       actions={
         <>
           <CreateEncryptionKey />
-          {/* <ConfirmDelete
+          <ConfirmDelete
             name=""
-            entityType="Encryption Keys"
+            entityType={
+              "Encryption Key" + (selectedIds.length === 1 ? "" : "s")
+            }
             onConfirm={async () => {
               if (selectedIds.length) {
                 await batchDelete({ ids: selectedIds });
@@ -44,17 +77,18 @@ const EncryptionKeysPage = () => {
                 </List>
               </>
             }
-          /> */}
+          />
+          <SearchInput value={search} onSearch={setSearch} />
         </>
       }
     >
       <DataTable
         tableKey="encryption-keys-table-v1"
-        data={data ?? []}
-        // selectOptions={{
-        //   selectKey: (row) => row.id,
-        //   state: [selected, setSelected],
-        // }}
+        data={encryptionKeys}
+        selectOptions={{
+          selectKey: (row) => row.id,
+          state: [selected, setSelected],
+        }}
         columns={[
           {
             header: ({ column }) => (

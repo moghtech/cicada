@@ -103,6 +103,8 @@ export type WriteResponses = {
   UpdateEncryptionKey: Types.UpdateEncryptionKeyResponse;
   InitializeEncryptionKey: Types.InitializeEncryptionKeyResponse;
   UninitializeEncryptionKey: Types.UninitializeEncryptionKeyResponse;
+  DeleteEncryptionKey: Types.DeleteEncryptionKeyResponse;
+  BatchDeleteEncryptionKeys: Types.BatchDeleteEncryptionKeysResponse;
 
   // ==== FILESYSTEM ====
   CreatePolicy: Types.CreatePolicyResponse;

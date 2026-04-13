@@ -64,10 +64,6 @@ pub async fn update_filesystem(
 pub async fn delete_filesystem(
   id: FilesystemId,
 ) -> mogh_error::Result<FilesystemRecord> {
-  DB.query("DELETE Node WHERE filesystem = $filesystem RETURN NONE;")
-    .bind(("filesystem", id.clone()))
-    .await
-    .context("Failed to delete Filesystem nodes")?;
   DB.delete(id.as_record_id())
     .await?
     .context("No Filesystem matching given ID")
@@ -77,10 +73,6 @@ pub async fn delete_filesystem(
 pub async fn batch_delete_filesystems(
   ids: Vec<FilesystemId>,
 ) -> mogh_error::Result<Vec<FilesystemRecord>> {
-  DB.query("DELETE Node WHERE filesystem IN $ids RETURN NONE;")
-    .bind(("ids", ids.clone()))
-    .await
-    .context("Failed to delete Filesystem nodes")?;
   DB.query("DELETE Filesystem WHERE id IN $ids RETURN BEFORE;")
     .bind(("ids", ids))
     .await

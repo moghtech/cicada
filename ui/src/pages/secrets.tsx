@@ -42,7 +42,7 @@ export default function SecretsPage() {
   const { mutateAsync: batchDelete } = useWrite("BatchDeleteSecrets", {
     onSuccess: (deleted) => {
       notifications.show({
-        message: `Deleted ${deleted.length} filesystem secret${deleted.length === 1 ? "" : "s"}.`,
+        message: `Deleted ${deleted.length} secret${deleted.length === 1 ? "" : "s"}.`,
       });
       inv(["ListSecrets"]);
       setSelected({});
