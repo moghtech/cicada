@@ -38,21 +38,3 @@ DEFINE INDEX OVERWRITE Name
   ON TABLE Filesystem
   FIELDS name
   UNIQUE;
-
----------------
--- Functions --
----------------
-
--- Returns the ID of the first created filesystem to use as node default
-DEFINE FUNCTION OVERWRITE fn::first_filesystem() {
-  RETURN (SELECT id, created_at FROM Filesystem ORDER BY created_at LIMIT 1)[0].id
-};
-
-----------
--- Init --
-----------
-
--- Initializes a default filesystem if none exist
-IF fn::first_filesystem() = NONE {
-  CREATE Filesystem SET name = "Default";
-};

@@ -7,8 +7,7 @@ DEFINE TABLE IF NOT EXISTS Node SCHEMAFULL;
 -- filesystem
 DEFINE FIELD OVERWRITE filesystem
   ON TABLE Node
-  TYPE record<Filesystem>
-  DEFAULT fn::first_filesystem();
+  TYPE record<Filesystem>;
 
 -- inode
 DEFINE FIELD OVERWRITE inode
