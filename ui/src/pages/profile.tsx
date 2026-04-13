@@ -24,7 +24,7 @@ import {
   useManageAuth,
 } from "mogh_ui";
 
-const ProfilePage = () => {
+export default function ProfilePage() {
   const user = useUser().data;
 
   if (!user) {
@@ -36,9 +36,9 @@ const ProfilePage = () => {
   }
 
   return <ProfileInner user={user} />;
-};
+}
 
-const ProfileInner = ({ user }: { user: Types.UserEntity }) => {
+function ProfileInner({ user }: { user: Types.UserEntity }) {
   const { refetch: refetchUser } = useUser();
   const options = useLoginOptions().data;
   const [username, setUsername] = useState(user.username);
@@ -155,6 +155,4 @@ const ProfileInner = ({ user }: { user: Types.UserEntity }) => {
       </Fieldset>
     </Page>
   );
-};
-
-export default ProfilePage;
+}

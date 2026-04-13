@@ -4,7 +4,6 @@ import {
   ActionIcon,
   Box,
   Button,
-  Center,
   Divider,
   Group,
   ScrollArea,
@@ -13,7 +12,7 @@ import {
   Tree,
   TreeNodeData,
 } from "@mantine/core";
-import { ChevronRight, Link2, PointerOff } from "lucide-react";
+import { ChevronRight, Link2 } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 
 export default function Sidebar({ close }: { close: () => void }) {
@@ -26,16 +25,18 @@ export default function Sidebar({ close }: { close: () => void }) {
   const encryptionPage = location.pathname.startsWith("/encryption-keys");
   const secretPage = location.pathname.startsWith("/secrets");
   const filesystemPage = location.pathname.startsWith("/filesystems");
-  const { filesystem: selected_filesystem, inode: _selected_inode } =
+  const { filesystem: selectedFilesystem, inode: _selectedInode } =
     useParams() as {
       filesystem?: string;
       inode?: string;
     };
 
-  const n_selected_inode = _selected_inode
-    ? Number(_selected_inode)
-    : undefined;
-  const selected_inode = n_selected_inode ? n_selected_inode : undefined;
+  const filesystem = useRead("ListFilesystems", {}).data?.find(
+    (f) => f.id === selectedFilesystem,
+  );
+
+  const nSelectedInode = _selectedInode ? Number(_selectedInode) : undefined;
+  const selectedInode = nSelectedInode ? nSelectedInode : undefined;
 
   const _nav = useNavigate();
   const nav = (to: string) => {
@@ -49,22 +50,13 @@ export default function Sidebar({ close }: { close: () => void }) {
       <ScrollArea>
         <Stack gap="0.15rem" mr="md">
           <Button
-            variant={accessPage ? "default" : "subtle"}
-            onClick={() => nav("/access")}
-            leftSection={<ICONS.Access size="1rem" />}
+            variant={filesystemPage ? "default" : "subtle"}
+            onClick={() => nav("/filesystems")}
+            leftSection={<ICONS.Filesystem size="1rem" />}
             justify="flex-start"
             fullWidth
           >
-            Access
-          </Button>
-          <Button
-            variant={encryptionPage ? "default" : "subtle"}
-            onClick={() => nav("/encryption-keys")}
-            leftSection={<ICONS.EncryptionKey size="1rem" />}
-            justify="flex-start"
-            fullWidth
-          >
-            Encryption
+            Filesystems
           </Button>
           <Button
             variant={secretPage ? "default" : "subtle"}
@@ -76,35 +68,41 @@ export default function Sidebar({ close }: { close: () => void }) {
             Secrets
           </Button>
           <Button
-            variant={filesystemPage ? "default" : "subtle"}
-            onClick={() => nav("/filesystems")}
-            leftSection={<ICONS.Filesystem size="1rem" />}
+            variant={encryptionPage ? "default" : "subtle"}
+            onClick={() => nav("/encryption-keys")}
+            leftSection={<ICONS.EncryptionKey size="1rem" />}
             justify="flex-start"
             fullWidth
           >
-            Filesystems
+            Encryption
+          </Button>
+          <Button
+            variant={accessPage ? "default" : "subtle"}
+            onClick={() => nav("/access")}
+            leftSection={<ICONS.Access size="1rem" />}
+            justify="flex-start"
+            fullWidth
+          >
+            Access
           </Button>
 
-          <Divider
-            label={
-              <Group gap="sm" opacity={0.7} wrap="nowrap">
-                <ICONS.Folder size="1rem" />
-                <Text>Files</Text>
-              </Group>
-            }
-          />
-          {selected_filesystem ? (
-            <NodeTree
-              filesystem={selected_filesystem}
-              parent={1}
-              selected={selected_inode}
-              nav={nav}
-            />
-          ) : (
-            <Center opacity={0.6} mt="xs">
-              <PointerOff size="1rem" />
-              <Text ml="xs">No Filesystem Selected</Text>
-            </Center>
+          {selectedFilesystem && (
+            <>
+              <Divider
+                label={
+                  <Group gap="sm" opacity={0.7} wrap="nowrap">
+                    <ICONS.Folder size="1rem" />
+                    <Text>{filesystem?.name || "Files"}</Text>
+                  </Group>
+                }
+              />
+              <NodeTree
+                filesystem={selectedFilesystem}
+                parent={1}
+                selected={selectedInode}
+                nav={nav}
+              />
+            </>
           )}
         </Stack>
       </ScrollArea>
