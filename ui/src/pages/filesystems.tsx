@@ -1,23 +1,89 @@
-import { DataTable, Page, SortableHeader } from "mogh_ui";
+import {
+  DataTable,
+  filterBySplit,
+  Page,
+  SearchInput,
+  SortableHeader,
+} from "mogh_ui";
 import CreateFilesystem from "@/create/filesystem";
-import { useRead } from "@/lib/hooks";
+import { useInvalidate, useRead, useWrite } from "@/lib/hooks";
 import { ICONS } from "@/lib/icons";
-import { useNavigate } from "react-router-dom";
 import ResourceLink from "@/components/resource-link";
+import { useMemo, useState } from "react";
+import ConfirmDelete from "@/components/confirm-delete";
+import { notifications } from "@mantine/notifications";
+import { RowSelectionState } from "@tanstack/react-table";
+import { List, Text } from "@mantine/core";
 
 const FilesystemsPage = () => {
+  const inv = useInvalidate();
+
   const { data } = useRead("ListFilesystems", {});
-  const nav = useNavigate();
+  const byId = useMemo(
+    () => data && Object.fromEntries(data.map((ok) => [ok.id, ok.name])),
+    [data],
+  );
+
+  const [selected, setSelected] = useState<RowSelectionState>({});
+  const selectedIds = useMemo(() => Object.keys(selected), [selected]);
+
+  const { mutateAsync: batchDelete } = useWrite("BatchDeleteFilesystems", {
+    onSuccess: (deleted) => {
+      notifications.show({
+        message: `Deleted ${deleted.length} filesystem${deleted.length === 1 ? "" : "s"}.`,
+      });
+      inv(["ListFilesystems"]);
+      setSelected({});
+    },
+  });
+
+  const [search, setSearch] = useState("");
+  const filesystems = filterBySplit(
+    data,
+    search,
+    (filesystem) => filesystem.name,
+  );
+
   return (
     <Page
       title="Filesystems"
       icon={ICONS.Filesystem}
-      actions={<CreateFilesystem />}
+      actions={
+        <>
+          <CreateFilesystem />
+          <ConfirmDelete
+            name=""
+            entityType={"Filesystem" + (selectedIds.length === 1 ? "" : "s")}
+            onConfirm={async () => {
+              if (selectedIds.length) {
+                await batchDelete({ ids: selectedIds });
+              }
+            }}
+            disabled={!selectedIds.length}
+            info={
+              <>
+                <Text fw="bold" fz="lg">
+                  To Delete:
+                </Text>
+                <List>
+                  {selectedIds.map((id) => (
+                    <List.Item key={id}>{byId?.[id]}</List.Item>
+                  ))}
+                </List>
+              </>
+            }
+          />
+          <SearchInput value={search} onSearch={setSearch} />
+        </>
+      }
     >
       <DataTable
         tableKey="filesystems-table-v1"
-        data={data ?? []}
-        onRowClick={(fs) => nav("/filesystems/" + fs.id)}
+        data={filesystems}
+        selectOptions={{
+          selectKey: (row) => row.id,
+          state: [selected, setSelected],
+        }}
         columns={[
           {
             header: ({ column }) => (

@@ -143,3 +143,37 @@ pub struct DeleteFilesystem {
 /// Response for [DeleteFilesystem].
 #[typeshare]
 pub type DeleteFilesystemResponse = FilesystemRecord;
+
+//
+
+#[cfg(feature = "utoipa")]
+#[utoipa::path(
+  post,
+  path = "/write/BatchDeleteFilesystems",
+  description = "Batch delete many filesystems.",
+  request_body(content = BatchDeleteFilesystems),
+  responses(
+    (status = 200, description = "The deleted filesystems", body = BatchDeleteFilesystemsResponse),
+    (status = 500, description = "Request failed", body = mogh_error::Serror)
+  ),
+)]
+pub fn batch_delete_filesystems() {}
+
+/// Batch delete filesystems. Response: [BatchDeleteFilesystemsResponse].
+#[typeshare]
+#[derive(
+  Debug, Clone, Serialize, Deserialize, SurrealValue, Resolve,
+)]
+#[surreal(crate = "surrealdb_types")]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
+#[empty_traits(CicadaWriteRequest)]
+#[response(BatchDeleteFilesystemsResponse)]
+#[error(mogh_error::Error)]
+pub struct BatchDeleteFilesystems {
+  /// The onboarding_key ID
+  pub ids: Vec<FilesystemId>,
+}
+
+/// Response for [BatchDeleteFilesystems].
+#[typeshare]
+pub type BatchDeleteFilesystemsResponse = Vec<FilesystemRecord>;

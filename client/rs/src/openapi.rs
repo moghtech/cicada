@@ -65,6 +65,7 @@ mod write {
     write::create_filesystem,
     write::update_filesystem,
     write::delete_filesystem,
+    write::batch_delete_filesystems,
     // NODE
     write::create_node,
     write::update_node,

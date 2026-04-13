@@ -1,5 +1,6 @@
 use cicada_client::api::write::{
-  CreateFilesystem, DeleteFilesystem, UpdateFilesystem,
+  BatchDeleteFilesystems, CreateFilesystem, DeleteFilesystem,
+  UpdateFilesystem,
 };
 use mogh_resolver::Resolve;
 
@@ -44,5 +45,16 @@ impl Resolve<WriteArgs> for DeleteFilesystem {
   ) -> Result<Self::Response, Self::Error> {
     client.admin_only()?;
     query::filesystem::delete_filesystem(self.id).await
+  }
+}
+
+//
+
+impl Resolve<WriteArgs> for BatchDeleteFilesystems {
+  async fn resolve(
+    self,
+    _: &WriteArgs,
+  ) -> Result<Self::Response, Self::Error> {
+    query::filesystem::batch_delete_filesystems(self.ids).await
   }
 }

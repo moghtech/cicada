@@ -20,19 +20,23 @@ import ResourceLink from "@/components/resource-link";
 
 export default function SecretsPage() {
   const inv = useInvalidate();
+
   const { data } = useRead("ListSecrets", {});
   const byId = useMemo(
     () => data && Object.fromEntries(data.map((ok) => [ok.id, ok.name])),
     [data],
   );
+
   const [selected, setSelected] = useState<RowSelectionState>({});
   const selectedIds = useMemo(() => Object.keys(selected), [selected]);
+
   const { mutate: updateSecret } = useWrite("UpdateSecret", {
     onSuccess: (secret) => {
       notifications.show({ message: "Updated secret.", color: "green" });
       inv(["ListSecrets"], ["GetSecret", { id: secret.id }]);
     },
   });
+
   const { mutateAsync: batchDelete } = useWrite("BatchDeleteSecrets", {
     onSuccess: (deleted) => {
       notifications.show({
@@ -42,9 +46,11 @@ export default function SecretsPage() {
       setSelected({});
     },
   });
+
   const [search, setSearch] = useState("");
   const secrets = filterBySplit(data, search, (secret) => secret.name);
   const [updateMenuData, setUpdateMenuData] = useSharedTextUpdateData();
+  
   return (
     <Page
       title="Secrets"

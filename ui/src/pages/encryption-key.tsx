@@ -47,7 +47,7 @@ export default function EncryptionKeyPage() {
       error={!encryptionKey ? "Encryption Key could not be found." : undefined}
     >
       {encryptionKey && (
-        <EntityPage title={encryptionKey.name}>
+        <EntityPage title={encryptionKey.name} backTo="/encryption-keys">
           <EntityHeader
             name={encryptionKey.name}
             state="Encryption Key"

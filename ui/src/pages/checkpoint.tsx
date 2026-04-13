@@ -18,6 +18,7 @@ import EncryptionKeySelector from "@/components/encryption-key-selector";
 import ConfirmFileSave from "@/components/confirm-file-save";
 import { useState } from "react";
 import CheckpointSelector from "@/components/checkpoint-selector";
+import Checkpoints from "@/components/checkpoints";
 
 export default function CheckpointPage() {
   const { checkpoint: _checkpoint } = useParams() as {
@@ -108,11 +109,13 @@ export default function CheckpointPage() {
       }
     >
       {checkpoint && (
-        <EntityPage>
+        <EntityPage
+          backTo={node && `/filesystems/${node?.filesystem}/${node?.inode}`}
+        >
           <EntityHeader
-            name={checkpoint?.name}
+            name={checkpoint?.name || "Checkpoint"}
             state="Checkpoint"
-            status={checkpoint.created_at}
+            status={new Date(checkpoint.created_at).toLocaleString()}
             icon={ICONS.Checkpoint}
             intent={missingKey ? "Critical" : "Good"}
             onRename={async (name) =>
@@ -210,6 +213,8 @@ export default function CheckpointPage() {
               readOnly
             />
           )}
+
+          <Checkpoints node={checkpoint.node} />
         </EntityPage>
       )}
     </PageGuard>

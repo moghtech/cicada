@@ -63,14 +63,6 @@ export type BatchDeleteDevicesResponse = DeviceRecord[];
 
 export type FilesystemId = string;
 
-export type U64 = number;
-
-/** Nodes can be either folders or files. */
-export enum NodeKind {
-	Folder = "Folder",
-	File = "File",
-}
-
 /** Set the checkpointing mode for files */
 export enum CheckpointingMode {
 	/** Checkpointing is enabled. */
@@ -112,6 +104,34 @@ export enum InterpolationMode {
 	Inherit = "Inherit",
 	/** Interpolation is disabled. */
 	Disabled = "Disabled",
+}
+
+export interface FilesystemRecord {
+	/** The unique filesystem id */
+	id: FilesystemId;
+	/** The name of the filesystem. Must be unique. */
+	name: string;
+	/** The default checkpointing mode for the filesystem */
+	checkpointing: CheckpointingMode;
+	/** The default interpolation mode for the filesystem */
+	interpolation: InterpolationMode;
+	/** The filesystem default encryption key. */
+	encryption_key?: EncryptionKeyId;
+	/** Created at as ISO8601 timestamp. */
+	created_at: Iso8601Timestamp;
+	/** Updated at as ISO8601 timestamp. */
+	updated_at: Iso8601Timestamp;
+}
+
+/** Response for [BatchDeleteFilesystems]. */
+export type BatchDeleteFilesystemsResponse = FilesystemRecord[];
+
+export type U64 = number;
+
+/** Nodes can be either folders or files. */
+export enum NodeKind {
+	Folder = "Folder",
+	File = "File",
 }
 
 /** Nodes over the API, with unencrypted data */
@@ -363,23 +383,6 @@ export interface EncryptionKeyRecord {
 
 /** Response for [CreateEncryptionKey]. */
 export type CreateEncryptionKeyResponse = EncryptionKeyRecord;
-
-export interface FilesystemRecord {
-	/** The unique filesystem id */
-	id: FilesystemId;
-	/** The name of the filesystem. Must be unique. */
-	name: string;
-	/** The default checkpointing mode for the filesystem */
-	checkpointing: CheckpointingMode;
-	/** The default interpolation mode for the filesystem */
-	interpolation: InterpolationMode;
-	/** The filesystem default encryption key. */
-	encryption_key?: EncryptionKeyId;
-	/** Created at as ISO8601 timestamp. */
-	created_at: Iso8601Timestamp;
-	/** Updated at as ISO8601 timestamp. */
-	updated_at: Iso8601Timestamp;
-}
 
 /** Response for [CreateFilesystem]. */
 export type CreateFilesystemResponse = FilesystemRecord;
@@ -767,6 +770,12 @@ export interface BatchDeleteDevices {
 	ids: DeviceId[];
 }
 
+/** Batch delete filesystems. Response: [BatchDeleteFilesystemsResponse]. */
+export interface BatchDeleteFilesystems {
+	/** The onboarding_key ID */
+	ids: FilesystemId[];
+}
+
 /**
  * Batch delete files / folders. Response: [BatchDeleteNodesResponse].
  * 
@@ -950,6 +959,15 @@ export interface CreateNode {
 	 * followed by the current global default.
 	 */
 	encryption_key?: EncryptionKeyId;
+	/**
+	 * Whether to store the contents as a restorable checkpoint.
+	 * This will always be done if checkpointing is enabled on the node.
+	 */
+	checkpoint?: boolean;
+	/** Save the checkpoint with this name. */
+	checkpoint_name?: string;
+	/** Save the checkpoint with this description */
+	checkpoint_description?: string;
 	/** Whether to interpolate secrets into returned file contents */
 	interpolated?: boolean;
 }
@@ -1505,7 +1523,7 @@ export interface UpdateNodeData {
 	/** Optionally update the encryption key used as master in the envelope encryption. */
 	encryption_key?: EncryptionKeyId;
 	/**
-	 * Whether to store the previous file data as a restorable checkpoint.
+	 * Whether to store the contents as a restorable checkpoint.
 	 * This will always be done if checkpointing is enabled on the node.
 	 */
 	checkpoint?: boolean;
@@ -1717,6 +1735,7 @@ export type WriteRequest =
 	| { type: "CreateFilesystem", params: CreateFilesystem }
 	| { type: "UpdateFilesystem", params: UpdateFilesystem }
 	| { type: "DeleteFilesystem", params: DeleteFilesystem }
+	| { type: "BatchDeleteFilesystems", params: BatchDeleteFilesystems }
 	| { type: "CreateNode", params: CreateNode }
 	| { type: "UpdateNode", params: UpdateNode }
 	| { type: "UpdateNodeData", params: UpdateNodeData }

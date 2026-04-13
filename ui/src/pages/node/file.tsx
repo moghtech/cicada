@@ -93,7 +93,12 @@ export default function FilePage({
   );
 
   return (
-    <EntityPage>
+    <EntityPage
+      backTo={
+        node &&
+        `/filesystems/${node.filesystem}${node.parent === 1 ? "" : "/" + node.parent}`
+      }
+    >
       <EntityHeader
         name={node?.name}
         state="File"

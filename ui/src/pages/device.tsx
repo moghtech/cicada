@@ -53,7 +53,7 @@ export default function DevicePage() {
       error={!device ? "404: No device found" : undefined}
     >
       {device && (
-        <EntityPage>
+        <EntityPage backTo="/access">
           <EntityHeader
             name={device?.name}
             state="Device"

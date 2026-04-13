@@ -77,7 +77,13 @@ const FolderPage = ({
   });
 
   return (
-    <EntityPage>
+    <EntityPage
+      backTo={
+        node
+          ? `/filesystems/${node.filesystem}${node.parent === 1 ? "" : "/" + node.parent}`
+          : "/filesystems"
+      }
+    >
       <EntityHeader
         name={node?.name ?? filesystem?.name}
         state={node ? "Folder" : "Filesystem"}

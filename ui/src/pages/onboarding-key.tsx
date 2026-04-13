@@ -1,118 +1,82 @@
 import ConfirmDelete from "@/components/confirm-delete";
 import { useInvalidate, useRead, useWrite } from "@/lib/hooks";
 import { ICONS } from "@/lib/icons";
-import {
-  ActionIcon,
-  Center,
-  Fieldset,
-  Flex,
-  Group,
-  Loader,
-  Text,
-  TextInput,
-} from "@mantine/core";
+import { ActionIcon, Group, Text, TextInput } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
-import { Types } from "cicada_client";
 import { Save } from "lucide-react";
-import { EnableSwitch, Page } from "mogh_ui";
-import { useState } from "react";
+import { EnableSwitch, EntityHeader, EntityPage, PageGuard } from "mogh_ui";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 export default function OnboardingKeyPage() {
   const { onboardingKey: _onboardingKey } = useParams() as {
     onboardingKey: string;
   };
-  const {
-    data: onboardingKey,
-    isPending,
-    refetch: refetchOnboardingKey,
-  } = useRead("GetOnboardingKey", { id: _onboardingKey });
 
-  if (isPending) {
-    return (
-      <Center>
-        <Loader />
-      </Center>
-    );
-  }
-
-  if (!onboardingKey) {
-    return (
-      <Center>
-        <Text size="lg">404: No onboardingKey found</Text>
-      </Center>
-    );
-  }
-
-  return (
-    <OnboardingKeyInner
-      onboardingKey={onboardingKey}
-      refetchOnboardingKey={refetchOnboardingKey}
-    />
-  );
-}
-
-function OnboardingKeyInner({
-  onboardingKey,
-  refetchOnboardingKey,
-}: {
-  onboardingKey: Types.OnboardingKeyRecord;
-  refetchOnboardingKey: () => void;
-}) {
-  const nav = useNavigate();
   const inv = useInvalidate();
-  const { mutate: updateOnboardingKey } = useWrite("UpdateOnboardingKey", {
+  const nav = useNavigate();
+
+  const { data: onboardingKey, isPending } = useRead("GetOnboardingKey", {
+    id: _onboardingKey,
+  });
+
+  const { mutateAsync: updateOnboardingKey } = useWrite("UpdateOnboardingKey", {
     onSuccess: () => {
-      refetchOnboardingKey();
-      inv(["GetOnboardingKey", { id: onboardingKey.id }]);
+      inv(["ListOnboardingKeys"], ["GetOnboardingKey"]);
       notifications.show({
-        message: "OnboardingKey updated.",
+        message: "Saved changes to onboarding key.",
+        color: "green",
       });
     },
   });
+
   const {
     mutateAsync: deleteOnboardingKey,
     isPending: deleteOnboardingKeyPending,
   } = useWrite("DeleteOnboardingKey", {
     onSuccess: () => {
-      notifications.show({
-        message: "OnboardingKey deleted.",
-      });
+      notifications.show({ message: "Onboarding key deleted." });
       inv(["ListOnboardingKeys"]);
-      nav("/devices");
+      nav("/secrets");
     },
   });
-  const [publicKey, setPublicKey] = useState(onboardingKey.public_key);
+
+  const [publicKey, setPublicKey] = useState(onboardingKey?.public_key);
+  useEffect(
+    () => setPublicKey(onboardingKey?.public_key),
+    [onboardingKey?.public_key],
+  );
 
   return (
-    <Page
-      title={onboardingKey.name}
-      icon={ICONS.OnboardingKey}
-      description="Onboarding Key"
-      actions={
-        <>
-          <ConfirmDelete
-            entityType="Onboarding Key"
-            name={onboardingKey.name}
-            onConfirm={() => deleteOnboardingKey({ id: onboardingKey.id })}
-            loading={deleteOnboardingKeyPending}
-            disabled={false}
-          />
-          <EnableSwitch
-            ml="md"
-            label="Can onboard devices"
-            color="green.8"
-            checked={onboardingKey.enabled}
-            onCheckedChange={(enabled) =>
-              updateOnboardingKey({ id: onboardingKey.id, enabled })
-            }
-            redDisabled
-          />
-        </>
-      }
+    <PageGuard
+      isPending={isPending}
+      error={!onboardingKey ? "404: No onboarding key found" : undefined}
     >
-      <Fieldset legend={<Text size="lg">Config</Text>}>
-        <Flex direction="column" gap="lg">
+      {onboardingKey && (
+        <EntityPage backTo="/access">
+          <EntityHeader
+            name={onboardingKey.name}
+            state="Onboarding Key"
+            status={new Date(onboardingKey.created_at).toLocaleString()}
+            icon={ICONS.OnboardingKey}
+            intent={onboardingKey.enabled ? "Good" : "Critical"}
+            onRename={async (name) =>
+              await updateOnboardingKey({ id: onboardingKey.id, name })
+            }
+            action={
+              <ConfirmDelete
+                entityType="Onboarding Key"
+                name={onboardingKey?.name ?? "Unknown"}
+                onConfirm={async () =>
+                  deleteOnboardingKey({ id: onboardingKey.id })
+                }
+                loading={deleteOnboardingKeyPending}
+                disabled={false}
+                iconOnly
+              />
+            }
+          />
+
           <Group>
             <Text ff="monospace">Public Key:</Text>
 
@@ -135,9 +99,20 @@ function OnboardingKeyInner({
             >
               <Save size="1rem" />
             </ActionIcon>
+
+            <EnableSwitch
+              ml="md"
+              label="Can onboard devices"
+              color="green.8"
+              checked={onboardingKey.enabled}
+              onCheckedChange={(enabled) =>
+                updateOnboardingKey({ id: onboardingKey.id, enabled })
+              }
+              redDisabled
+            />
           </Group>
-        </Flex>
-      </Fieldset>
-    </Page>
+        </EntityPage>
+      )}
+    </PageGuard>
   );
 }

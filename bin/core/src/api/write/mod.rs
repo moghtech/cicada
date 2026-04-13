@@ -59,6 +59,7 @@ pub enum WriteRequest {
   CreateFilesystem(CreateFilesystem),
   UpdateFilesystem(UpdateFilesystem),
   DeleteFilesystem(DeleteFilesystem),
+  BatchDeleteFilesystems(BatchDeleteFilesystems),
 
   // ==== NODE ====
   CreateNode(CreateNode),

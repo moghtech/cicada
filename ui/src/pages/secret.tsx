@@ -91,7 +91,7 @@ export default function SecretPage() {
       error={!secret ? "404: No file found" : undefined}
     >
       {secret && (
-        <EntityPage>
+        <EntityPage backTo="/secrets">
           <EntityHeader
             name={secret?.name}
             state="Secret"
