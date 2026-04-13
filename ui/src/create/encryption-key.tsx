@@ -39,7 +39,10 @@ function CreateEncryptionKeyForm({ close }: { close: () => void }) {
   );
   const { mutate, isPending } = useWrite("CreateEncryptionKey", {
     onSuccess: (key) => {
-      notifications.show({ message: "Created encryption key." });
+      notifications.show({
+        message: "Created encryption key.",
+        color: "green",
+      });
       inv(["ListEncryptionKeys"]);
       if (key && key.kind === Types.EncryptionKeyKind.Memory) {
         setCreated(key);

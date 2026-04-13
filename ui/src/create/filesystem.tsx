@@ -35,7 +35,7 @@ function CreateFilesystemForm({ close }: { close: () => void }) {
   const inv = useInvalidate();
   const { mutate, isPending } = useWrite("CreateFilesystem", {
     onSuccess: () => {
-      notifications.show({ message: "Created filesystem." });
+      notifications.show({ message: "Created filesystem.", color: "green" });
       inv(["ListFilesystems"]);
       close();
     },

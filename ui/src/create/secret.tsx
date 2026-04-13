@@ -35,7 +35,7 @@ function CreateSecretForm({ close }: { close: () => void }) {
   const inv = useInvalidate();
   const { mutate, isPending } = useWrite("CreateSecret", {
     onSuccess: () => {
-      notifications.show({ message: "Created secret." });
+      notifications.show({ message: "Created secret.", color: "green" });
       inv(["ListSecrets"]);
       close();
     },

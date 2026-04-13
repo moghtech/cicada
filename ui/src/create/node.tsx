@@ -63,7 +63,10 @@ function CreateNodeForm({
   const inv = useInvalidate();
   const { mutate, isPending } = useWrite("CreateNode", {
     onSuccess: () => {
-      notifications.show({ message: `Created ${kind.toLowerCase()}.` });
+      notifications.show({
+        message: `Created ${kind.toLowerCase()}.`,
+        color: "green",
+      });
       inv(["ListNodes"]);
       close();
     },

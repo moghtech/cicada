@@ -41,7 +41,10 @@ function CreateOnboardingKeyForm({ close }: { close: () => void }) {
   );
   const { mutate, isPending } = useWrite("CreateOnboardingKey", {
     onSuccess: ({ private_key }) => {
-      notifications.show({ message: "Created onboarding key." });
+      notifications.show({
+        message: "Created onboarding key.",
+        color: "green",
+      });
       inv(["ListOnboardingKeys"]);
       if (private_key) {
         setCreatedPrivateKey(private_key);

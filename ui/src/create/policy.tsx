@@ -46,7 +46,7 @@ function CreatePolicyForm({ close }: { close: () => void }) {
   const inv = useInvalidate();
   const { mutate, isPending } = useWrite("CreatePolicy", {
     onSuccess: () => {
-      notifications.show({ message: "Created policy." });
+      notifications.show({ message: "Created policy.", color: "green" });
       inv(["ListPolicies"]);
       close();
     },

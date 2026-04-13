@@ -46,7 +46,7 @@ function CreateUserForm({ close }: { close: () => void }) {
   const inv = useInvalidate();
   const { mutate, isPending } = useWrite("CreateUser", {
     onSuccess: () => {
-      notifications.show({ message: "Created filesystem." });
+      notifications.show({ message: "Created user.", color: "green" });
       inv(["ListUsers"]);
       close();
     },
