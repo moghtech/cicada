@@ -1,5 +1,12 @@
-import { AppShell, Burger, Button, Flex, Group, Text } from "@mantine/core";
-import { useNavigate } from "react-router-dom";
+import {
+  ActionIcon,
+  AppShell,
+  Burger,
+  Button,
+  Group,
+  Text,
+} from "@mantine/core";
+import { Link } from "react-router-dom";
 import { ThemeToggle } from "mogh_ui";
 import UserDropdown from "./user-dropdown";
 import { useRead } from "@/lib/hooks";
@@ -12,7 +19,6 @@ export default function Topbar({
   opened: boolean;
   toggle: () => void;
 }) {
-  const nav = useNavigate();
   const version = useRead("GetVersion", {}, { refetchInterval: 30_000 }).data
     ?.version;
   return (
@@ -28,22 +34,34 @@ export default function Topbar({
       pr="2rem"
       py="0rem"
     >
-      <Flex align="center" gap="md">
+      <Group gap="xs" wrap="nowrap" w="fit-content">
         <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
+
+        <ActionIcon
+          variant="subtle"
+          renderRoot={(props) => <Link to="/" {...props} />}
+          size="lg"
+          hiddenFrom="md"
+        >
+          <img src="/mogh-512x512.png" width={32} alt="moghtech" />
+        </ActionIcon>
+
         <Button
           variant="subtle"
-          c="inherit"
+          renderRoot={(props) => <Link to="/" {...props} />}
           leftSection={
             <img src="/mogh-512x512.png" width={32} alt="moghtech" />
           }
-          onClick={() => nav("/")}
+          size="lg"
+          visibleFrom="md"
         >
           <Text fz="h2" fw="450" lts="0.1rem">
             CICADA
           </Text>
         </Button>
-      </Flex>
-      <Flex align="center" gap="0.3rem">
+      </Group>
+      
+      <Group gap="0.3rem" wrap="nowrap" w="fit-content">
         {version && (
           <TopbarLink to="https://github.com/moghtech/cicada/releases">
             v{version}
@@ -51,7 +69,7 @@ export default function Topbar({
         )}
         <ThemeToggle />
         <UserDropdown />
-      </Flex>
+      </Group>
     </AppShell.Header>
   );
 }
