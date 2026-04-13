@@ -129,6 +129,8 @@ pub fn update_node() {}
 pub struct UpdateNode {
   /// The node id
   pub id: NodeId,
+  /// The filesystem ID
+  pub filesystem: Option<FilesystemId>,
   /// parent inode number.
   pub parent: Option<U64>,
   /// The name of the node
