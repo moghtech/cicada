@@ -100,8 +100,8 @@ export default function FilePage({
         }
         action={
           <ConfirmDelete
-            entityType={node ? "Folder" : "Filesystem"}
-            name={node ? node.name : (filesystem?.name ?? "")}
+            entityType="File"
+            name={node?.name ?? "Unknown"}
             onConfirm={async () => node && deleteNode({ id: node.id })}
             loading={deleteNodePending}
             disabled={false}
