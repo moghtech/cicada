@@ -1167,6 +1167,21 @@ export interface GetCheckpoint {
 	id: CheckpointId;
 }
 
+/**
+ * Get info about the configuration of the Cicada Core.
+ * Response: [GetCoreInfoResponse].
+ */
+export interface GetCoreInfo {
+}
+
+/** Response for [GetCoreInfo]. */
+export interface GetCoreInfoResponse {
+	/** The title assigned to this core api. */
+	title: string;
+	/** Public key for Core / Periphery authentication. */
+	public_key: string;
+}
+
 /** Get a device by id. Response: [DeviceRecord]. */
 export interface GetDevice {
 	/** The device id */
@@ -1235,7 +1250,7 @@ export interface GetUsernameResponse {
 }
 
 /**
- * Get the version of the Cicada Core API.
+ * Get the version of the Cicada Core.
  * Response: [GetVersionResponse].
  */
 export interface GetVersion {
@@ -1641,6 +1656,7 @@ export enum ClientType {
 
 export type ReadRequest = 
 	| { type: "GetVersion", params: GetVersion }
+	| { type: "GetCoreInfo", params: GetCoreInfo }
 	| { type: "GetUsername", params: GetUsername }
 	| { type: "ListGroups", params: ListGroups }
 	| { type: "ListUsers", params: ListUsers }

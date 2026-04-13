@@ -16,13 +16,14 @@ import {
 import { useEffect } from "react";
 import { notifications } from "@mantine/notifications";
 
-export const cicada_client = () =>
-  CicadaClient(CICADA_BASE_URL, {
+export function cicada_client() {
+  return CicadaClient(CICADA_BASE_URL, {
     type: "jwt",
     params: { jwt: MoghAuth.LOGIN_TOKENS.jwt() },
   });
+}
 
-export const useUser = () => {
+export function useUser() {
   const userReset = useUserReset();
   const hasJwt = !!MoghAuth.LOGIN_TOKENS.jwt();
 
@@ -40,25 +41,25 @@ export const useUser = () => {
   }, [query.data, query.error]);
 
   return query;
-};
+}
 
-export const useUserInvalidate = () => {
+export function useUserInvalidate() {
   const qc = useQueryClient();
   return () => {
     qc.invalidateQueries({ queryKey: ["GetUser"] });
   };
-};
+}
 
-export const useUserReset = () => {
+export function useUserReset() {
   const qc = useQueryClient();
   return () => {
     qc.resetQueries({ queryKey: ["GetUser"] });
   };
-};
+}
 
 //
 
-export const useRead = <
+export function useRead<
   T extends Types.ReadRequest["type"],
   R extends Extract<Types.ReadRequest, { type: T }>,
   P extends R["params"],
@@ -71,11 +72,7 @@ export const useRead = <
     >,
     "queryFn" | "queryKey"
   >,
->(
-  type: T,
-  params: P,
-  config?: C,
-) => {
+>(type: T, params: P, config?: C) {
   const hasJwt = !!MoghAuth.LOGIN_TOKENS.jwt();
   return useQuery({
     queryKey: [type, params],
@@ -83,9 +80,9 @@ export const useRead = <
     enabled: hasJwt && config?.enabled !== false,
     ...config,
   });
-};
+}
 
-export const useInvalidate = () => {
+export function useInvalidate() {
   const qc = useQueryClient();
   return <
     Type extends Types.ReadRequest["type"],
@@ -93,11 +90,11 @@ export const useInvalidate = () => {
   >(
     ...keys: Array<[Type] | [Type, Params]>
   ) => keys.forEach((key) => qc.invalidateQueries({ queryKey: key }));
-};
+}
 
 //
 
-export const useWrite = <
+export function useWrite<
   T extends Types.WriteRequest["type"],
   R extends Extract<Types.WriteRequest, { type: T }>,
   P extends R["params"],
@@ -105,10 +102,7 @@ export const useWrite = <
     UseMutationOptions<WriteResponses[R["type"]], unknown, P, unknown>,
     "mutationKey" | "mutationFn"
   >,
->(
-  type: T,
-  config?: C,
-) => {
+>(type: T, config?: C) {
   return useMutation({
     mutationKey: [type],
     mutationFn: (params: P) => cicada_client().write<T, R>(type, params),
@@ -131,4 +125,14 @@ export const useWrite = <
     },
     ...config,
   });
-};
+}
+
+export function useSetTitle(more?: string) {
+  const info = useRead("GetCoreInfo", {}).data;
+  const title = more ? `${more} | ${info?.title}` : info?.title;
+  useEffect(() => {
+    if (title) {
+      document.title = title;
+    }
+  }, [title]);
+}

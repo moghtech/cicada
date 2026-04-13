@@ -34,15 +34,15 @@ pub trait CicadaReadRequest: HasResponse {}
 #[utoipa::path(
   post,
   path = "/read/GetVersion",
-  description = "Get the version of the Cicada Core API.",
+  description = "Get the version of Cicada Core.",
   request_body(content = GetVersion),
   responses(
-    (status = 200, description = "Cicada Core API version", body = GetVersionResponse),
+    (status = 200, description = "Cicada Core version", body = GetVersionResponse),
   ),
 )]
 pub fn get_version() {}
 
-/// Get the version of the Cicada Core API.
+/// Get the version of Cicada Core.
 /// Response: [GetVersionResponse].
 #[typeshare]
 #[derive(Debug, Clone, Serialize, Deserialize, Resolve)]
@@ -59,6 +59,41 @@ pub struct GetVersion {}
 pub struct GetVersionResponse {
   /// The version of the core api.
   pub version: String,
+}
+
+//
+
+#[cfg(feature = "utoipa")]
+#[utoipa::path(
+  post,
+  path = "/read/GetCoreInfo",
+  description = "Get info about the configuration of the Cicada Core.",
+  request_body(content = GetCoreInfo),
+  responses(
+    (status = 200, description = "Cicada Core configuration info", body = GetCoreInfoResponse),
+  ),
+)]
+pub fn get_core_info() {}
+
+/// Get info about the configuration of the Cicada Core.
+/// Response: [GetCoreInfoResponse].
+#[typeshare]
+#[derive(Debug, Clone, Serialize, Deserialize, Resolve)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
+#[empty_traits(CicadaReadRequest)]
+#[response(GetCoreInfoResponse)]
+#[error(mogh_error::Error)]
+pub struct GetCoreInfo {}
+
+/// Response for [GetCoreInfo].
+#[typeshare]
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
+pub struct GetCoreInfoResponse {
+  /// The title assigned to this core api.
+  pub title: String,
+  /// Public key for Core / Periphery authentication.
+  pub public_key: String,
 }
 
 //

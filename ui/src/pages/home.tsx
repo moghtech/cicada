@@ -1,4 +1,4 @@
-import { useRead } from "@/lib/hooks";
+import { useRead, useSetTitle } from "@/lib/hooks";
 import { ICONS } from "@/lib/icons";
 import { FancyCard, Page } from "mogh_ui";
 import { Group, SimpleGrid, Text } from "@mantine/core";
@@ -6,6 +6,8 @@ import { Link } from "react-router-dom";
 import { type LucideIcon } from "lucide-react";
 
 export default function HomePage() {
+  useSetTitle(undefined);
+
   const { data: filesystems } = useRead("ListFilesystems", {});
   const { data: secrets } = useRead("ListSecrets", {});
   const { data: encryptionKeys } = useRead("ListEncryptionKeys", {});

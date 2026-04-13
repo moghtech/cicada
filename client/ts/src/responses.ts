@@ -2,6 +2,7 @@ import * as Types from "./types.js";
 
 export type ReadResponses = {
   GetVersion: Types.GetVersionResponse;
+  GetCoreInfo: Types.GetCoreInfoResponse;
   GetUsername: Types.GetUsernameResponse;
 
   // ==== GROUP ====

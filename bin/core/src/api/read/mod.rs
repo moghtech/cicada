@@ -10,6 +10,7 @@ use surrealdb::types::Uuid;
 use typeshare::typeshare;
 
 use crate::auth::CicadaAuthImpl;
+use crate::config::{core_config, core_keys};
 use crate::{
   api::Variant, auth::middleware::Client, db::query::user::get_user,
 };
@@ -40,6 +41,7 @@ pub struct ReadArgs {
 #[serde(tag = "type", content = "params")]
 enum ReadRequest {
   GetVersion(GetVersion),
+  GetCoreInfo(GetCoreInfo),
   GetUsername(GetUsername),
 
   // ==== GROUP ====
@@ -139,6 +141,22 @@ impl Resolve<ReadArgs> for GetVersion {
     Ok(GetVersionResponse {
       version: env!("CARGO_PKG_VERSION").to_string(),
     })
+  }
+}
+
+//
+
+impl Resolve<ReadArgs> for GetCoreInfo {
+  async fn resolve(
+    self,
+    _: &ReadArgs,
+  ) -> mogh_error::Result<GetCoreInfoResponse> {
+    let config = core_config();
+    let info = GetCoreInfoResponse {
+      title: config.title.clone(),
+      public_key: core_keys().load().public.to_string(),
+    };
+    Ok(info)
   }
 }
 
