@@ -1,9 +1,12 @@
 import {
   ActionIcon,
   AppShell,
+  Box,
   Burger,
   Button,
+  Center,
   Group,
+  SimpleGrid,
   Text,
 } from "@mantine/core";
 import { Link } from "react-router-dom";
@@ -11,6 +14,7 @@ import { ThemeToggle } from "mogh_ui";
 import UserDropdown from "./user-dropdown";
 import { useRead } from "@/lib/hooks";
 import TopbarLink from "./link";
+import OmniSearch from "./omni-search";
 
 export default function Topbar({
   opened,
@@ -24,7 +28,7 @@ export default function Topbar({
   return (
     <AppShell.Header
       renderRoot={(props) => (
-        <Group justify="space-between" wrap="nowrap" {...props} />
+        <SimpleGrid cols={{ base: 2, lg: 3 }} {...props} />
       )}
       style={(theme) => ({
         borderColor: theme.colors["accent-border"][1],
@@ -34,6 +38,7 @@ export default function Topbar({
       pr="2rem"
       py="0rem"
     >
+      {/** LEFT AREA */}
       <Group gap="xs" wrap="nowrap" w="fit-content">
         <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
 
@@ -60,8 +65,21 @@ export default function Topbar({
           </Text>
         </Button>
       </Group>
-      
-      <Group gap="0.3rem" wrap="nowrap" w="fit-content">
+
+      {/** OMNI SEARCH */}
+      <Center visibleFrom="lg">
+        <OmniSearch />
+      </Center>
+
+      {/** RIGHT AREA */}
+      <Group
+        gap="0"
+        wrap="nowrap"
+        style={{ justifySelf: "flex-end" }}
+      >
+        <Box hiddenFrom="lg">
+          <OmniSearch />
+        </Box>
         {version && (
           <TopbarLink to="https://github.com/moghtech/cicada/releases">
             v{version}

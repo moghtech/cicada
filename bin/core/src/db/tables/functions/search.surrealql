@@ -15,5 +15,5 @@ DEFINE FUNCTION OVERWRITE fn::search_table($table: string, $keyword: string) {
   RETURN SELECT * FROM $with_score
     WHERE score > 0
     ORDER BY score DESC
-    LIMIT 20;
+    LIMIT 10;
 };

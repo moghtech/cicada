@@ -8,6 +8,7 @@ import { setAuthUrl, ThemeProvider } from "mogh_ui";
 import "@mantine/core/styles.css";
 // ‼️ import notifications styles after core package styles
 import "@mantine/notifications/styles.css";
+import "@mantine/spotlight/styles.css";
 // Import local css after to avoid mantine default body color flash.
 import "./index.scss";
 // Import mogh_ui scss
