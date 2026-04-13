@@ -31,7 +31,7 @@ pub async fn init() -> mogh_error::Result<()> {
   // All tables depend on this one
   DB.query(include_str!("tables/functions/timestamps.surrealql"))
     .await
-    .context("Failed to initialize define timestamps function.")?;
+    .context("Failed to initialize timestamps function.")?;
 
   // Tables utilizing encrypted fields depend on this one
   DB.query(include_str!("tables/EncryptionKey.surrealql"))
@@ -40,14 +40,14 @@ pub async fn init() -> mogh_error::Result<()> {
   DB.query(include_str!("tables/functions/encrypted_data.surrealql"))
     .await
     .context(
-      "Failed to initialize define encrypted_data_field function.",
+      "Failed to initialize encrypted_data_field function.",
     )?;
   DB.query(include_str!(
     "tables/functions/object_strip_none.surrealql"
   ))
   .await
   .context(
-    "Failed to initialize define object_strip_none function.",
+    "Failed to initialize object_strip_none function.",
   )?;
 
   DB.query(include_str!("tables/User.surrealql"))
@@ -78,10 +78,13 @@ pub async fn init() -> mogh_error::Result<()> {
     .await
     .context("Failed to initialize Policy table")?;
 
-  // List groups depends on the tables
+  // These depend on the resource tables
   DB.query(include_str!("tables/functions/list_groups.surrealql"))
     .await
-    .context("Failed to initialize define list_groups function.")?;
+    .context("Failed to initialize list_groups function.")?;
+  DB.query(include_str!("tables/functions/search.surrealql"))
+    .await
+    .context("Failed to initialize search function.")?;
 
   Ok(())
 }

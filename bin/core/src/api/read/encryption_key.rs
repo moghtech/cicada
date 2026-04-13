@@ -22,7 +22,7 @@ fn convert_key(key: EncryptionKeyRecord) -> EncryptionKeyEntity {
     kind: key.kind,
     created_at: key.created_at,
     updated_at: key.updated_at,
-    initialized,
+    initialized: Some(initialized),
   }
 }
 

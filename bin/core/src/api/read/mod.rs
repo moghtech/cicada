@@ -23,6 +23,7 @@ pub mod group;
 pub mod node;
 pub mod onboarding_key;
 pub mod policy;
+pub mod search;
 pub mod secret;
 pub mod user;
 
@@ -43,6 +44,7 @@ enum ReadRequest {
   GetVersion(GetVersion),
   GetCoreInfo(GetCoreInfo),
   GetUsername(GetUsername),
+  Search(Search),
 
   // ==== GROUP ====
   ListGroups(ListGroups),

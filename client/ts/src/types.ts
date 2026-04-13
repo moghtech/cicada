@@ -1391,6 +1391,21 @@ export interface RotateSecretEnvelopeKey {
 	id: SecretId;
 }
 
+/** Search resources. Response: [SearchResponse]. */
+export interface Search {
+	/** The search keyword to match resources by name */
+	keyword: string;
+}
+
+/** Response for [Search]. */
+export interface SearchResponse {
+	encryption_keys: EncryptionKeyEntity[];
+	secrets: SecretListItem[];
+	filesystems: FilesystemRecord[];
+	nodes: NodeListItem[];
+	policies: PolicyRecord[];
+}
+
 /** Secrets stored on the database, with encrypted data */
 export interface SecretRecord {
 	/** The unique secret id. */
@@ -1660,6 +1675,7 @@ export type ReadRequest =
 	| { type: "GetVersion", params: GetVersion }
 	| { type: "GetCoreInfo", params: GetCoreInfo }
 	| { type: "GetUsername", params: GetUsername }
+	| { type: "Search", params: Search }
 	| { type: "ListGroups", params: ListGroups }
 	| { type: "ListUsers", params: ListUsers }
 	| { type: "ListDevices", params: ListDevices }

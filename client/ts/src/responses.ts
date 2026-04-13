@@ -4,6 +4,7 @@ export type ReadResponses = {
   GetVersion: Types.GetVersionResponse;
   GetCoreInfo: Types.GetCoreInfoResponse;
   GetUsername: Types.GetUsernameResponse;
+  Search: Types.SearchResponse;
 
   // ==== GROUP ====
   ListGroups: Types.ListGroupsResponse;

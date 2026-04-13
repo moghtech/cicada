@@ -1,0 +1,19 @@
+DEFINE FUNCTION OVERWRITE fn::search($keyword: string) {
+  RETURN {
+    encryption_keys: fn::search_table("EncryptionKey", $keyword),
+    secrets: fn::search_table("Secret", $keyword),
+    filesystems: fn::search_table("Filesystem", $keyword),
+    nodes: fn::search_table("Node", $keyword),
+    policies: fn::search_table("Policy", $keyword)
+  };
+};
+
+DEFINE FUNCTION OVERWRITE fn::search_table($table: string, $keyword: string) {
+  let $with_score = 
+    SELECT *, data.encryption_key AS encryption_key, string::similarity::fuzzy(name, $keyword) AS score
+    OMIT data FROM type::table($table);
+  RETURN SELECT * FROM $with_score
+    WHERE score > 0
+    ORDER BY score DESC
+    LIMIT 20;
+};

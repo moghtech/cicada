@@ -19,7 +19,9 @@ mod write {
     //  READ
     // ======
     read::get_version,
+    read::get_core_info,
     read::get_username,
+    read::search,
     // DEVICE
     read::list_devices,
     read::get_device,

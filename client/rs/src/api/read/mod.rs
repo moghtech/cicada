@@ -10,6 +10,7 @@ mod group;
 mod node;
 mod onboarding_key;
 mod policy;
+mod search;
 mod secret;
 mod user;
 
@@ -21,6 +22,7 @@ pub use group::*;
 pub use node::*;
 pub use onboarding_key::*;
 pub use policy::*;
+pub use search::*;
 pub use secret::*;
 pub use user::*;
 

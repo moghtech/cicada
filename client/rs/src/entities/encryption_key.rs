@@ -9,7 +9,8 @@ use crate::entities::Iso8601Timestamp;
 /// These keys are themselves encrypted using an [EncryptionKeyRecord],
 /// which can point to an in-memory key or a remote KMS.
 #[typeshare]
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, SurrealValue)]
+#[surreal(crate = "surrealdb_types")]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 pub struct EncryptionKeyEntity {
   /// The unique encryption key id
@@ -22,7 +23,7 @@ pub struct EncryptionKeyEntity {
   pub kind: EncryptionKeyKind,
   /// For Memory keys:
   /// Whether the key has been initialized.
-  pub initialized: bool,
+  pub initialized: Option<bool>,
   /// Created at as ISO8601 timestamp.
   #[cfg_attr(feature = "utoipa", schema(value_type = String))]
   pub created_at: Iso8601Timestamp,
