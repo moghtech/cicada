@@ -57,7 +57,7 @@ export default function HomePage() {
             p="md"
             bdrs="md"
           >
-            <Group mb="6">
+            <Group mb="6" gap="sm">
               <section.icon size="1.4rem" />
               <Text fw={600} size="lg">
                 {section.title}
