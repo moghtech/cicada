@@ -4,16 +4,19 @@ import {
   ActionIcon,
   Box,
   Button,
+  Center,
   Divider,
   Group,
+  Loader,
   ScrollArea,
   Stack,
   Text,
   Tree,
   TreeNodeData,
+  TreeProps,
 } from "@mantine/core";
 import { ChevronRight, Link2 } from "lucide-react";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 
 export default function Sidebar({ close }: { close: () => void }) {
   const accessPage =
@@ -31,9 +34,7 @@ export default function Sidebar({ close }: { close: () => void }) {
       inode?: string;
     };
 
-  const filesystem = useRead("ListFilesystems", {}).data?.find(
-    (f) => f.id === selectedFilesystem,
-  );
+  const filesystems = useRead("ListFilesystems", {}).data;
 
   const nSelectedInode = _selectedInode ? Number(_selectedInode) : undefined;
   const selectedInode = nSelectedInode ? nSelectedInode : undefined;
@@ -86,24 +87,23 @@ export default function Sidebar({ close }: { close: () => void }) {
             Access
           </Button>
 
-          {selectedFilesystem && (
-            <>
-              <Divider
-                label={
-                  <Group gap="sm" opacity={0.7} wrap="nowrap">
-                    <ICONS.Folder size="1rem" />
-                    <Text>{filesystem?.name || "Files"}</Text>
-                  </Group>
-                }
-              />
-              <NodeTree
-                filesystem={selectedFilesystem}
-                parent={1}
-                selected={selectedInode}
-                nav={nav}
-              />
-            </>
-          )}
+          <Divider
+            label={
+              <Group gap="sm" opacity={0.7} wrap="nowrap">
+                <ICONS.Folder size="1rem" />
+                <Text>Filesystems</Text>
+              </Group>
+            }
+          />
+
+          {filesystems?.map((filesystem) => (
+            <FilesystemTree
+              key={filesystem.id}
+              filesystem={filesystem.id}
+              selectedFilesystem={selectedFilesystem}
+              selectedInode={selectedInode}
+            />
+          ))}
         </Stack>
       </ScrollArea>
 
@@ -122,19 +122,61 @@ export default function Sidebar({ close }: { close: () => void }) {
   );
 }
 
-/* This value must not  */
+/* This value must not be a node path */
 const CHILD_VALUE_IDENTIFIER = "__CHILD__";
+
+function FilesystemTree({
+  filesystem: _filesystem,
+  selectedFilesystem,
+  selectedInode: _selectedInode,
+}: {
+  filesystem: string;
+  selectedFilesystem: string | undefined;
+  selectedInode: number | undefined;
+}) {
+  const filesystem = useRead("ListFilesystems", {}).data?.find(
+    (fs) => fs.id === _filesystem,
+  );
+
+  if (!filesystem) {
+    return (
+      <Center>
+        <Loader />
+      </Center>
+    );
+  }
+
+  const selectedInode =
+    selectedFilesystem === filesystem.id ? _selectedInode : 0;
+
+  const data: TreeNodeData = {
+    value: filesystem.id,
+    label: filesystem.name,
+    children: [
+      {
+        value: CHILD_VALUE_IDENTIFIER,
+        label: (
+          <NodeTree
+            filesystem={filesystem.id}
+            parent={1}
+            selectedInode={selectedInode}
+          />
+        ),
+      },
+    ],
+  };
+
+  return <Tree w="100%" data={[data]} renderNode={renderNode(selectedInode)} />;
+}
 
 function NodeTree({
   filesystem,
   parent,
-  selected,
-  nav,
+  selectedInode,
 }: {
   filesystem: string;
   parent: number;
-  selected: number | undefined;
-  nav: (to: string) => void;
+  selectedInode: number | undefined;
 }) {
   const nodes = useRead("ListNodes", { filesystem, parent }).data ?? [];
 
@@ -150,8 +192,7 @@ function NodeTree({
                 <NodeTree
                   filesystem={node.filesystem}
                   parent={node.inode}
-                  selected={selected}
-                  nav={nav}
+                  selectedInode={selectedInode}
                 />
               ),
             },
@@ -159,66 +200,69 @@ function NodeTree({
         : undefined,
   }));
 
-  return (
-    <Tree
-      w="100%"
-      data={data}
-      renderNode={({ node, expanded, hasChildren, elementProps }) => {
-        if (node.value === CHILD_VALUE_IDENTIFIER) {
-          return <Box {...elementProps}>{node.label}</Box>;
-        }
-
-        const inode = Number(node.value.split("/")[1]);
-
-        return (
-          <Button
-            variant={selected && selected === inode ? "default" : "subtle"}
-            p="0rem 0.5rem"
-            mb="0.25rem"
-            justify="space-between"
-            fullWidth
-            rightSection={
-              hasChildren && (
-                <ActionIcon
-                  component="div"
-                  variant="subtle"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    nav("/filesystems/" + node.value);
-                  }}
-                >
-                  <Link2 size="1rem" />
-                </ActionIcon>
-              )
-            }
-            {...elementProps}
-            onClick={(e) =>
-              hasChildren
-                ? elementProps.onClick(e)
-                : nav("/filesystems/" + node.value)
-            }
-          >
-            {hasChildren ? (
-              <ChevronRight
-                size="1rem"
-                style={{
-                  transitionProperty: "transform",
-                  transform: expanded ? "rotate(90deg)" : "rotate(0deg)",
-                  marginRight: "0.5rem",
-                }}
-              />
-            ) : (
-              <ICONS.File
-                size="1rem"
-                style={{
-                  marginRight: "0.5rem",
-                }}
-              />
-            )}
-            {node.label}
-          </Button>
-        );
-      }}
-    />
-  );
+  return <Tree w="100%" data={data} renderNode={renderNode(selectedInode)} />;
 }
+
+const renderNode: (
+  selectedInode: number | undefined,
+) => TreeProps["renderNode"] =
+  (selectedInode) =>
+  ({ node, expanded, hasChildren, elementProps }) => {
+    if (node.value === CHILD_VALUE_IDENTIFIER) {
+      return <Box {...elementProps}>{node.label}</Box>;
+    }
+
+    const inode = Number(node.value.split("/")[1]) || undefined;
+
+    return (
+      <Button
+        variant={selectedInode === inode ? "default" : "subtle"}
+        p="0rem 0.5rem"
+        mb="0.25rem"
+        justify="space-between"
+        fullWidth
+        rightSection={
+          hasChildren && (
+            <ActionIcon
+              component="div"
+              variant="subtle"
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
+              renderRoot={(props) => (
+                <Link to={"/filesystems/" + node.value} {...props} />
+              )}
+            >
+              <Link2 size="1rem" />
+            </ActionIcon>
+          )
+        }
+        {...elementProps}
+        renderRoot={
+          hasChildren
+            ? undefined
+            : (props) => <Link to={"/filesystems/" + node.value} {...props} />
+        }
+        onClick={(e) => hasChildren && elementProps.onClick(e)}
+      >
+        {hasChildren ? (
+          <ChevronRight
+            size="1rem"
+            style={{
+              transitionProperty: "transform",
+              transform: expanded ? "rotate(90deg)" : "rotate(0deg)",
+              marginRight: "0.5rem",
+            }}
+          />
+        ) : (
+          <ICONS.File
+            size="1rem"
+            style={{
+              marginRight: "0.5rem",
+            }}
+          />
+        )}
+        {node.label}
+      </Button>
+    );
+  };
