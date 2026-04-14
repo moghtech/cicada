@@ -274,7 +274,7 @@ pub async fn decrypt_checkpoints(
   // TODO: improve error handling
   checkpoints
     .into_iter()
-    .map(|checkpoint| decrypt_checkpoint(checkpoint))
+    .map(decrypt_checkpoint)
     .collect::<FuturesOrdered<_>>()
     .collect::<Vec<_>>()
     .await

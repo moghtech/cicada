@@ -3,6 +3,7 @@ use cicada_client::{
   api::{read::FindSecret, write::UpdateSecret},
   entities::{
     EncryptedData,
+    encryption_key::EncryptionKeyId,
     secret::{SecretId, SecretListItem, SecretRecord},
   },
 };
@@ -108,14 +109,19 @@ pub async fn update_secret(
 
 pub async fn update_secret_data(
   id: SecretId,
-  data: Option<EncryptedData>,
+  encryption_key: EncryptionKeyId,
+  data: EncryptedData,
 ) -> mogh_error::Result<SecretRecord> {
   #[derive(SurrealValue)]
   struct UpdateSecretDataQuery {
-    data: Option<EncryptedData>,
+    encryption_key: EncryptionKeyId,
+    data: EncryptedData,
   }
   DB.update(id.as_record_id())
-    .merge(UpdateSecretDataQuery { data })
+    .merge(UpdateSecretDataQuery {
+      encryption_key,
+      data,
+    })
     .await
     .context("Failed to update Secret on database")?
     .context("Failed to update Secret on database: No update result")

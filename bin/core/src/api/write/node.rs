@@ -50,7 +50,7 @@ impl Resolve<WriteArgs> for CreateNode {
           .await?;
 
       let encryption_key = if let Some(id) =
-        self.encryption_key.or_else(|| filesystem.encryption_key)
+        self.encryption_key.or(filesystem.encryption_key)
       {
         id
       } else {
@@ -151,8 +151,8 @@ impl Resolve<WriteArgs> for UpdateNodeData {
 
     let encryption_key = if let Some(id) = self
       .encryption_key
-      .or_else(|| node.encryption_key)
-      .or_else(|| filesystem.encryption_key)
+      .or(node.encryption_key)
+      .or(filesystem.encryption_key)
     {
       id
     } else {
@@ -239,7 +239,7 @@ impl Resolve<WriteArgs> for UpdateNodeEncryptionKey {
     let node = query::node::update_node_data(
       self.id,
       self.encryption_key,
-      data.into(),
+      data,
     )
     .await?;
     decrypt_node(node, self.interpolated).await
@@ -274,7 +274,7 @@ impl Resolve<WriteArgs> for RotateNodeEnvelopeKey {
     let node = query::node::update_node_data(
       self.id,
       encryption_key,
-      data.into(),
+      data,
     )
     .await?;
     decrypt_node(node, self.interpolated).await

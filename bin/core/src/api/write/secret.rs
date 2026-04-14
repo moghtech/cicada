@@ -25,7 +25,7 @@ impl Resolve<WriteArgs> for CreateSecret {
       description: self.description,
     })
     .await?;
-    let encryption_key_id = if let Some(id) = self.encryption_key {
+    let encryption_key = if let Some(id) = self.encryption_key {
       id
     } else {
       query::encryption_key::list_all_encryption_keys()
@@ -35,14 +35,17 @@ impl Resolve<WriteArgs> for CreateSecret {
         .id
     };
     let data = encrypt_data(
-      &encryption_key_id.0,
+      &encryption_key.0,
       self.data.unwrap_or_default().as_bytes(),
       &secret.id.0,
     )
     .await?;
-    let secret =
-      query::secret::update_secret_data(secret.id, Some(data))
-        .await?;
+    let secret = query::secret::update_secret_data(
+      secret.id,
+      encryption_key,
+      data,
+    )
+    .await?;
     decrypt_secret(secret).await
   }
 }
@@ -77,8 +80,12 @@ impl Resolve<WriteArgs> for UpdateSecretData {
       &self.id.0,
     )
     .await?;
-    let secret =
-      query::secret::update_secret_data(self.id, data.into()).await?;
+    let secret = query::secret::update_secret_data(
+      self.id,
+      encryption_key,
+      data,
+    )
+    .await?;
     decrypt_secret(secret).await
   }
 }
@@ -99,8 +106,12 @@ impl Resolve<WriteArgs> for UpdateSecretEncryptionKey {
       &self.encryption_key.0,
     )
     .await?;
-    let secret =
-      query::secret::update_secret_data(self.id, data.into()).await?;
+    let secret = query::secret::update_secret_data(
+      self.id,
+      self.encryption_key,
+      data,
+    )
+    .await?;
     decrypt_secret(secret).await
   }
 }
@@ -120,8 +131,12 @@ impl Resolve<WriteArgs> for RotateSecretEnvelopeKey {
       &secret.id.0,
     )
     .await?;
-    let secret =
-      query::secret::update_secret_data(self.id, data.into()).await?;
+    let secret = query::secret::update_secret_data(
+      self.id,
+      secret.encryption_key,
+      data,
+    )
+    .await?;
     decrypt_secret(secret).await
   }
 }
