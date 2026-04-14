@@ -114,7 +114,7 @@ impl Resolve<WriteArgs> for UpdateNode {
     WriteArgs { client }: &WriteArgs,
   ) -> Result<Self::Response, Self::Error> {
     let node =
-      query::node::get_node_list_item(self.id.0.clone()).await?;
+      query::node::get_node_list_item(self.id.clone()).await?;
     ensure_client_filesystem_permission(
       client,
       node.filesystem,
@@ -137,7 +137,7 @@ impl Resolve<WriteArgs> for UpdateNodeData {
     WriteArgs { client }: &WriteArgs,
   ) -> Result<Self::Response, Self::Error> {
     let node =
-      query::node::get_node_list_item(self.id.0.clone()).await?;
+      query::node::get_node_list_item(self.id.clone()).await?;
     ensure_client_filesystem_permission(
       client,
       node.filesystem.clone(),
@@ -292,7 +292,7 @@ impl Resolve<WriteArgs> for DeleteNode {
     WriteArgs { client }: &WriteArgs,
   ) -> Result<Self::Response, Self::Error> {
     let node =
-      query::node::get_node_list_item(self.id.0.clone()).await?;
+      query::node::get_node_list_item(self.id.clone()).await?;
     ensure_client_filesystem_permission(
       client,
       node.filesystem,
@@ -300,7 +300,7 @@ impl Resolve<WriteArgs> for DeleteNode {
     )
     .await?;
     let deleted =
-      query::node::delete_node(self.id.0, self.move_children).await?;
+      query::node::delete_node(self.id, self.move_children).await?;
     Ok(decrypt_nodes(deleted, self.interpolated).await)
   }
 }
@@ -322,7 +322,7 @@ impl Resolve<WriteArgs> for BatchDeleteNodes {
         .into_iter()
         .map(|id| async {
           let node =
-            query::node::get_node_list_item(id.0.clone()).await?;
+            query::node::get_node_list_item(id.clone()).await?;
           ensure_client_filesystem_permission(
             client,
             node.filesystem,

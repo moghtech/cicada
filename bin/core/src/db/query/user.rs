@@ -94,18 +94,14 @@ pub async fn find_user_with_external_login(
   kind: ExternalLoginKind,
   external_id: String,
 ) -> mogh_error::Result<Option<UserRecord>> {
-  DB.query(
-    "
-    SELECT VALUE user.* FROM ONLY ExternalLogin
-    WHERE kind = $kind AND external_id = $external_id;",
-  )
-  .bind(("kind", kind))
-  .bind(("external_id", external_id))
-  .await
-  .context("Failed to query database for user")?
-  .take(0)
-  .context("Failed to deserialize UserRecord")
-  .map_err(Into::into)
+  DB.query("fn::find_user_with_external_login($kind, $external_id);")
+    .bind(("kind", kind))
+    .bind(("external_id", external_id))
+    .await
+    .context("Failed to query database for user")?
+    .take(0)
+    .context("Failed to deserialize UserRecord")
+    .map_err(Into::into)
 }
 
 pub async fn sign_up_external_user(
@@ -114,31 +110,25 @@ pub async fn sign_up_external_user(
   external_id: String,
 ) -> mogh_error::Result<String> {
   let user = DB
-    .query(
-      "
-      BEGIN TRANSACTION;
-      let $user = CREATE ONLY User CONTENT $body; $user;
-      CREATE ExternalLogin SET user = $user.id, kind = $kind, external_id = $external_id RETURN NONE;
-      COMMIT TRANSACTION;",
-    )
+    .query("fn::sign_up_external_user($body, $kind, $external_id);")
     .bind(("body", body))
     .bind(("kind", kind))
     .bind(("external_id", external_id))
     .await
     .context("Failed to query database to sign up external user")?
-    .take::<Option<UserRecord>>(2)
+    .take::<Option<UserRecord>>(0)
     .context("Failed to deserialize UserRecord")?
     .context("Query response missing created UserRecord")?;
   Ok(user.id.0)
 }
 
 pub async fn link_external_login(
-  user_id: String,
+  user: UserId,
   kind: ExternalLoginKind,
   external_id: String,
 ) -> mogh_error::Result<ExternalLoginRecord> {
-  DB.query("CREATE ONLY ExternalLogin SET user = $user, kind = $kind, external_id = $external_id;")
-    .bind(("user", UserId(user_id)))
+  DB.query("fn::link_external_login($user, $kind, $external_id);")
+    .bind(("user", user))
     .bind(("kind", kind))
     .bind(("external_id", external_id))
     .await

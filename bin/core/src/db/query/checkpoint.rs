@@ -19,18 +19,13 @@ use crate::db::DB;
 pub async fn list_checkpoints(
   target: CheckpointTarget,
 ) -> mogh_error::Result<Vec<CheckpointListItem>> {
-  DB.query(
-    "
-SELECT * OMIT data FROM Checkpoint
-WHERE target = $target
-ORDER BY created_at DESC;",
-  )
-  .bind(("target", target))
-  .await
-  .context("Failed to query database for checkpoints")?
-  .take(0)
-  .context("Failed to get checkpoint query result")
-  .map_err(Into::into)
+  DB.query("fn::list_checkpoints($target);")
+    .bind(("target", target))
+    .await
+    .context("Failed to query database for checkpoints")?
+    .take(0)
+    .context("Failed to get checkpoint query result")
+    .map_err(Into::into)
 }
 
 pub async fn get_checkpoint(

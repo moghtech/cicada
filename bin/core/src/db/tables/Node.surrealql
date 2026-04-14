@@ -92,6 +92,30 @@ DEFINE FUNCTION OVERWRITE fn::node_next_inode($filesystem: record<Filesystem>) {
   };
 };
 
+-- Lists the children of filesystem / parent
+DEFINE FUNCTION OVERWRITE fn::list_child_nodes(
+  $filesystem: record<Filesystem>,
+  $parent: int
+) {
+  RETURN SELECT * OMIT data FROM Node 
+    WHERE filesystem = $filesystem AND parent = $parent
+    ORDER BY kind DESC, name COLLATE ASC;
+};
+
+-- Find node on filesystem
+DEFINE FUNCTION OVERWRITE fn::find_node(
+  $filesystem: record<Filesystem>,
+  $inode: int | NONE,
+  $parent: int | NONE,
+  $name: string | NONE,
+) {
+  RETURN SELECT * FROM Node
+    WHERE filesystem = $filesystem
+    AND ($inode IS NONE OR inode = $inode)
+    AND ($parent IS NONE OR parent = $parent)
+    AND ($name IS NONE OR name = $name);
+};
+
 -- Find node using path components
 DEFINE FUNCTION OVERWRITE fn::node_by_path_components(
   $filesystem: record<Filesystem>,

@@ -10,25 +10,19 @@ use crate::db::DB;
 
 pub async fn list_all_filesystems()
 -> mogh_error::Result<Vec<FilesystemRecord>> {
-  DB.query(
-    "
-SELECT * FROM Filesystem
-ORDER BY name COLLATE ASC;",
-  )
-  .await
-  .context("Failed to query database for filesystems")?
-  .take(0)
-  .context("Failed to get filesystem query result")
-  .map_err(Into::into)
+  DB.query("SELECT * FROM Filesystem ORDER BY name COLLATE ASC;")
+    .await
+    .context("Failed to query database for filesystems")?
+    .take(0)
+    .context("Failed to get filesystem query result")
+    .map_err(Into::into)
 }
 
 pub async fn get_filesystem(
   id_or_name: String,
 ) -> mogh_error::Result<FilesystemRecord> {
   DB.query(
-    "
-SELECT * FROM ONLY Filesystem
-WHERE id = $id OR name = $name",
+    "SELECT * FROM ONLY Filesystem WHERE id = $id OR name = $name;",
   )
   .bind(("id", FilesystemId(id_or_name.clone())))
   .bind(("name", id_or_name))

@@ -3,7 +3,10 @@ use std::sync::{Arc, LazyLock};
 use async_timing_util::{Timelength, get_timelength_in_ms};
 use cicada_client::{
   api::write::CreateUser,
-  entities::{external_login::ExternalLoginKind, user::UserRecord},
+  entities::{
+    external_login::ExternalLoginKind,
+    user::{UserId, UserRecord},
+  },
 };
 use mogh_auth_client::{
   api::login::LoginProvider,
@@ -349,7 +352,7 @@ impl AuthImpl for CicadaAuthImpl {
   ) -> mogh_auth_server::DynFuture<mogh_error::Result<()>> {
     Box::pin(async move {
       link_external_login(
-        user_id,
+        UserId(user_id),
         ExternalLoginKind::Oidc,
         subject.into(),
       )
@@ -391,7 +394,7 @@ impl AuthImpl for CicadaAuthImpl {
   ) -> mogh_auth_server::DynFuture<mogh_error::Result<()>> {
     Box::pin(async move {
       link_external_login(
-        user_id,
+        UserId(user_id),
         ExternalLoginKind::Github,
         github_id,
       )
@@ -458,7 +461,7 @@ impl AuthImpl for CicadaAuthImpl {
   ) -> mogh_auth_server::DynFuture<mogh_error::Result<()>> {
     Box::pin(async move {
       link_external_login(
-        user_id,
+        UserId(user_id),
         ExternalLoginKind::Google,
         google_id,
       )

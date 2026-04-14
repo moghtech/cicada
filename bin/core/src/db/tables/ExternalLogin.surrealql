@@ -13,7 +13,7 @@ DEFINE FIELD OVERWRITE user
 -- kind
 DEFINE FIELD OVERWRITE kind
   ON TABLE ExternalLogin
-  TYPE string;
+  TYPE "Oidc" | "Github" | "Google";
 
 -- external_id
 DEFINE FIELD OVERWRITE external_id
@@ -38,3 +38,40 @@ DEFINE INDEX OVERWRITE KindExternalId
   ON TABLE ExternalLogin
   FIELDS kind, external_id
   UNIQUE;
+
+---------------
+-- Functions --
+---------------
+
+DEFINE FUNCTION OVERWRITE fn::find_user_with_external_login(
+  $kind: "Oidc" | "Github" | "Google",
+  $external_id: string,
+) {
+  RETURN SELECT VALUE user.* FROM ONLY ExternalLogin
+    WHERE kind = $kind AND external_id = $external_id;
+};
+
+DEFINE FUNCTION OVERWRITE fn::sign_up_external_user(
+  $body: object,
+  $kind: "Oidc" | "Github" | "Google",
+  $external_id: string,
+) {
+  let $user = CREATE ONLY User CONTENT $body;
+  CREATE ExternalLogin SET
+    user = $user.id,
+    kind = $kind,
+    external_id = $external_id
+    RETURN NONE;
+  RETURN $user;
+};
+
+DEFINE FUNCTION OVERWRITE fn::link_external_login(
+  $user: record<User>,
+  $kind: "Oidc" | "Github" | "Google",
+  $external_id: string,
+) {
+  RETURN CREATE ONLY ExternalLogin SET
+    user = $user,
+    kind = $kind,
+    external_id = $external_id;
+};

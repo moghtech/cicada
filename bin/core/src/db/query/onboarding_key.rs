@@ -38,7 +38,7 @@ pub async fn find_onboarding_key_with_public_key(
 ) -> mogh_error::Result<Option<OnboardingKeyRecord>> {
   let onboarding_key = DB
     .query(
-      "SELECT * FROM OnboardingKey WHERE public_key = $public_key",
+      "SELECT * FROM OnboardingKey WHERE public_key = $public_key;",
     )
     .bind(("public_key", public_key))
     .await

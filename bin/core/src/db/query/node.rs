@@ -21,19 +21,14 @@ pub async fn list_child_nodes(
   filesystem: FilesystemId,
   parent: u64,
 ) -> mogh_error::Result<Vec<NodeListItem>> {
-  DB.query(
-    "
-SELECT * OMIT data FROM Node 
-WHERE filesystem = $filesystem AND parent = $parent
-ORDER BY kind DESC, name COLLATE ASC;",
-  )
-  .bind(("filesystem", filesystem))
-  .bind(("parent", parent))
-  .await
-  .context("Failed to query database for nodes")?
-  .take(0)
-  .context("Failed to get node query result")
-  .map_err(Into::into)
+  DB.query("fn::list_child_nodes($filesystem, $parent);")
+    .bind(("filesystem", filesystem))
+    .bind(("parent", parent))
+    .await
+    .context("Failed to query database for nodes")?
+    .take(0)
+    .context("Failed to get node query result")
+    .map_err(Into::into)
 }
 
 pub async fn get_node(
@@ -47,10 +42,10 @@ pub async fn get_node(
 }
 
 pub async fn get_node_list_item(
-  node_id: String,
+  id: NodeId,
 ) -> mogh_error::Result<NodeListItem> {
-  DB.query(r#"SELECT *, data.encryption_key as encryption_key OMIT data FROM type::record("Node", $id)"#)
-    .bind(("id", node_id))
+  DB.query("SELECT * OMIT data FROM $id")
+    .bind(("id", id))
     .await
     .context("Failed to query database for node")?
     .take::<Option<NodeListItem>>(0)
@@ -62,24 +57,17 @@ pub async fn get_node_list_item(
 pub async fn find_node(
   body: FindNode,
 ) -> mogh_error::Result<NodeRecord> {
-  DB.query(
-    "
-SELECT * FROM Node
-WHERE filesystem = $filesystem
-AND ($inode IS NONE OR inode = $inode)
-AND ($parent IS NONE OR parent = $parent)
-AND ($name IS NONE OR name = $name)",
-  )
-  .bind(("filesystem", body.filesystem))
-  .bind(("inode", body.inode))
-  .bind(("parent", body.parent))
-  .bind(("name", body.name))
-  .await
-  .context("Failed to query database")?
-  .take::<Option<NodeRecord>>(0)
-  .context("Failed to get query result")?
-  .context("Failed to find Node with given parameters.")
-  .status_code(StatusCode::NOT_FOUND)
+  DB.query("fn::find_node($filesystem, $inode, $parent, $name);")
+    .bind(("filesystem", body.filesystem))
+    .bind(("inode", body.inode))
+    .bind(("parent", body.parent))
+    .bind(("name", body.name))
+    .await
+    .context("Failed to query database")?
+    .take::<Option<NodeRecord>>(0)
+    .context("Failed to get query result")?
+    .context("Failed to find Node with given parameters.")
+    .status_code(StatusCode::NOT_FOUND)
 }
 
 pub async fn find_node_with_path(
@@ -174,7 +162,7 @@ pub async fn update_node_data(
 }
 
 pub async fn delete_node(
-  id: String,
+  id: NodeId,
   move_children: Option<u64>,
 ) -> mogh_error::Result<Vec<NodeRecord>> {
   let node = get_node_list_item(id).await?;

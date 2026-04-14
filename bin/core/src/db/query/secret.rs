@@ -16,9 +16,7 @@ use crate::db::DB;
 pub async fn list_secrets() -> mogh_error::Result<Vec<SecretListItem>>
 {
   DB.query(
-    "
-SELECT * OMIT data FROM Secret
-ORDER BY name COLLATE ASC;",
+    "SELECT * OMIT data FROM Secret ORDER BY name COLLATE ASC;",
   )
   .await
   .context("Failed to query database for secrets")?
@@ -33,18 +31,13 @@ pub async fn list_secrets_matching(
   if names.is_empty() {
     return Ok(Vec::new());
   }
-  DB.query(
-    "
-SELECT * FROM Secret
-WHERE name IN $names
-ORDER BY name COLLATE ASC;",
-  )
-  .bind(("names", names))
-  .await
-  .context("Failed to query database for secrets")?
-  .take(0)
-  .context("Failed to get secret query result")
-  .map_err(Into::into)
+  DB.query("fn::list_secrets_matching($names);")
+    .bind(("names", names))
+    .await
+    .context("Failed to query database for secrets")?
+    .take(0)
+    .context("Failed to get secret query result")
+    .map_err(Into::into)
 }
 
 pub async fn get_secret(
@@ -60,18 +53,14 @@ pub async fn get_secret(
 pub async fn find_secret(
   body: FindSecret,
 ) -> mogh_error::Result<SecretRecord> {
-  DB.query(
-    "
-SELECT * FROM Secret
-WHERE name = $name",
-  )
-  .bind(("name", body.name))
-  .await
-  .context("Failed to query database")?
-  .take::<Option<SecretRecord>>(0)
-  .context("Failed to get query result")?
-  .context("Failed to find Secret with given parameters.")
-  .status_code(StatusCode::NOT_FOUND)
+  DB.query("SELECT * FROM Secret WHERE name = $name")
+    .bind(("name", body.name))
+    .await
+    .context("Failed to query database")?
+    .take::<Option<SecretRecord>>(0)
+    .context("Failed to get query result")?
+    .context("Failed to find Secret with given parameters.")
+    .status_code(StatusCode::NOT_FOUND)
 }
 
 #[derive(SurrealValue)]

@@ -51,19 +51,15 @@ pub async fn list_policies_for_client(
 pub async fn get_policy(
   id_or_name: String,
 ) -> mogh_error::Result<PolicyRecord> {
-  DB.query(
-    "
-SELECT * FROM Policy
-WHERE id = $id OR name = $name",
-  )
-  .bind(("id", PolicyId(id_or_name.clone())))
-  .bind(("name", id_or_name))
-  .await
-  .context("Failed to query database")?
-  .take::<Option<PolicyRecord>>(0)
-  .context("Failed to get query result")?
-  .context("Failed to find Secret with given parameters.")
-  .status_code(StatusCode::NOT_FOUND)
+  DB.query("SELECT * FROM Policy WHERE id = $id OR name = $name")
+    .bind(("id", PolicyId(id_or_name.clone())))
+    .bind(("name", id_or_name))
+    .await
+    .context("Failed to query database")?
+    .take::<Option<PolicyRecord>>(0)
+    .context("Failed to get query result")?
+    .context("Failed to find Secret with given parameters.")
+    .status_code(StatusCode::NOT_FOUND)
 }
 
 pub async fn create_policy(

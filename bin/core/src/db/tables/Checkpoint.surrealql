@@ -27,3 +27,15 @@ fn::define_encrypted_data_fields("Checkpoint");
 
 -- Standard timestamp fields 'created_at', 'updated_at'
 fn::define_timestamp_fields("Checkpoint");
+
+---------------
+-- Functions --
+---------------
+
+DEFINE FUNCTION OVERWRITE fn::list_checkpoints(
+  $target: record<Node> | record<Secret>
+) {
+  RETURN SELECT * OMIT data FROM Checkpoint
+    WHERE target = $target
+    ORDER BY created_at DESC;
+};
