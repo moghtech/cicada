@@ -2,7 +2,7 @@ use axum::http::StatusCode;
 use cicada_client::{
   api::{
     read::{FindNode, FindNodeWithPath},
-    write::UpdateNode,
+    write::{MoveNode, UpdateNode},
   },
   entities::{
     CheckpointingMode, EncryptedData, InterpolationMode,
@@ -159,6 +159,21 @@ pub async fn update_node_data(
     .context("Failed to update Node on database")?
     .context("Failed to update Node on database: No update result")
     .map_err(Into::into)
+}
+
+pub async fn move_node(
+  body: MoveNode,
+) -> mogh_error::Result<NodeRecord> {
+  DB.query("fn::move_node($node, $filesystem, $parent);")
+    .bind(("node", body.id))
+    .bind(("filesystem", body.filesystem))
+    .bind(("parent", body.parent.unwrap_or(1)))
+    .await
+    .context("Failed to query database")?
+    .take::<Option<NodeRecord>>(0)
+    .context("Failed to get query result")?
+    .context("No node found at given id")
+    .status_code(StatusCode::NOT_FOUND)
 }
 
 pub async fn delete_node(

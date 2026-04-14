@@ -723,6 +723,9 @@ export interface UserListItem {
 /** Response for [ListUsers]. */
 export type ListUsersResponse = UserListItem[];
 
+/** Response for [MoveNode]. */
+export type MoveNodeResponse = NodeEntity;
+
 /** Response for [RotateCheckpointEnvelopeKey]. */
 export type RotateCheckpointEnvelopeKeyResponse = CheckpointEntity;
 
@@ -1362,6 +1365,18 @@ export interface ListSecrets {
 export interface ListUsers {
 }
 
+/** Move a filesystem node, including between filesystems. Response: [MoveNodeResponse]. */
+export interface MoveNode {
+	/** The node id */
+	id: NodeId;
+	/** The filesystem ID */
+	filesystem?: FilesystemId;
+	/** parent inode number, or 1 for filesystem root */
+	parent?: U64;
+	/** Whether to interpolate secrets into returned file contents */
+	interpolated?: boolean;
+}
+
 /** Nodes stored on the database, with encrypted data */
 export interface NodeRecord {
 	/** The unique node id */
@@ -1555,8 +1570,6 @@ export interface UpdateFilesystem {
 export interface UpdateNode {
 	/** The node id */
 	id: NodeId;
-	/** The filesystem ID */
-	filesystem?: FilesystemId;
 	/** parent inode number. */
 	parent?: U64;
 	/** The name of the node */
@@ -1822,6 +1835,7 @@ export type WriteRequest =
 	| { type: "UpdateNodeData", params: UpdateNodeData }
 	| { type: "UpdateNodeEncryptionKey", params: UpdateNodeEncryptionKey }
 	| { type: "RotateNodeEnvelopeKey", params: RotateNodeEnvelopeKey }
+	| { type: "MoveNode", params: MoveNode }
 	| { type: "DeleteNode", params: DeleteNode }
 	| { type: "BatchDeleteNodes", params: BatchDeleteNodes }
 	| { type: "UpdateCheckpoint", params: UpdateCheckpoint }

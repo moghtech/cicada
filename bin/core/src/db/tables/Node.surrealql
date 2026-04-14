@@ -141,3 +141,34 @@ DEFINE FUNCTION OVERWRITE fn::node_by_path_components_rec(
   };
   RETURN fn::node_by_path_components_rec($filesystem, $components, $node.inode, $i + 1);
 };
+
+-- Move node to another filesystem, including children
+DEFINE FUNCTION OVERWRITE fn::move_node(
+  $node: record<Node>,
+  $filesystem: option<record<Filesystem>>,
+  $parent: int,
+) {
+  -- If not changing filesystem, just parent change is enough.
+  -- Changing just parent can also be done with UpdateNode.
+  if $filesystem == NONE {
+    RETURN UPDATE ONLY $node SET parent = $parent;
+  };
+
+  let $orig = SELECT * FROM ONLY $node;
+
+  let $res = UPDATE ONLY $node SET
+    filesystem = $filesystem,
+    parent = $parent,
+    inode = fn::node_next_inode($filesystem);
+
+  let $children = SELECT id, filesystem, parent FROM Node
+    WHERE filesystem = $orig.filesystem
+    AND parent = $orig.inode;
+
+  -- Loop over children and move recursively.
+  FOR $n IN $children {
+    fn::move_node($n.id, $filesystem, $res.inode);
+  };
+
+  RETURN $res;
+};

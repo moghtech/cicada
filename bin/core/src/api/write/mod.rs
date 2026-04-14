@@ -67,6 +67,7 @@ pub enum WriteRequest {
   UpdateNodeData(UpdateNodeData),
   UpdateNodeEncryptionKey(UpdateNodeEncryptionKey),
   RotateNodeEnvelopeKey(RotateNodeEnvelopeKey),
+  MoveNode(MoveNode),
   DeleteNode(DeleteNode),
   BatchDeleteNodes(BatchDeleteNodes),
 

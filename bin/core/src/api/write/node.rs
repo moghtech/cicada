@@ -1,7 +1,8 @@
 use cicada_client::{
   api::write::{
-    BatchDeleteNodes, CreateNode, DeleteNode, RotateNodeEnvelopeKey,
-    UpdateNode, UpdateNodeData, UpdateNodeEncryptionKey,
+    BatchDeleteNodes, CreateNode, DeleteNode, MoveNode,
+    RotateNodeEnvelopeKey, UpdateNode, UpdateNodeData,
+    UpdateNodeEncryptionKey,
   },
   entities::{checkpoint::CheckpointTarget, node::NodeKind},
 };
@@ -281,6 +282,35 @@ impl Resolve<WriteArgs> for RotateNodeEnvelopeKey {
       query::node::update_node_data(self.id, encryption_key, data)
         .await?;
     decrypt_node(node, self.interpolated).await
+  }
+}
+
+//
+
+impl Resolve<WriteArgs> for MoveNode {
+  async fn resolve(
+    self,
+    WriteArgs { client }: &WriteArgs,
+  ) -> Result<Self::Response, Self::Error> {
+    let node =
+      query::node::get_node_list_item(self.id.clone()).await?;
+    ensure_client_filesystem_permission(
+      client,
+      node.filesystem,
+      true,
+    )
+    .await?;
+
+    // If moving filesystem, ensure also has write permission on this one.
+    if let Some(filesystem) = self.filesystem.clone() {
+      ensure_client_filesystem_permission(client, filesystem, true)
+        .await?;
+    }
+
+    let interpolated = self.interpolated.unwrap_or_default();
+
+    let node = query::node::move_node(self).await?;
+    decrypt_node(node, interpolated).await
   }
 }
 
