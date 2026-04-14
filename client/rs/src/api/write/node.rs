@@ -164,46 +164,6 @@ pub type UpdateNodeResponse = NodeEntity;
 #[cfg(feature = "utoipa")]
 #[utoipa::path(
   post,
-  path = "/write/MoveNode",
-  description = "Move a node",
-  request_body(content = MoveNode),
-  responses(
-    (status = 200, description = "The moved node", body = MoveNodeResponse),
-    (status = 500, description = "Request failed", body = mogh_error::Serror)
-  ),
-)]
-pub fn move_node() {}
-
-/// Move a filesystem node, including between filesystems. Response: [MoveNodeResponse].
-#[typeshare]
-#[derive(
-  Debug, Clone, Default, Serialize, Deserialize, SurrealValue, Resolve,
-)]
-#[surreal(crate = "surrealdb_types")]
-#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
-#[empty_traits(CicadaWriteRequest)]
-#[response(MoveNodeResponse)]
-#[error(mogh_error::Error)]
-pub struct MoveNode {
-  /// The node id
-  pub id: NodeId,
-  /// The filesystem ID
-  pub filesystem: Option<FilesystemId>,
-  /// parent inode number, or 1 for filesystem root
-  pub parent: Option<U64>,
-  /// Whether to interpolate secrets into returned file contents
-  pub interpolated: Option<bool>,
-}
-
-/// Response for [MoveNode].
-#[typeshare]
-pub type MoveNodeResponse = NodeEntity;
-
-//
-
-#[cfg(feature = "utoipa")]
-#[utoipa::path(
-  post,
   path = "/write/UpdateNodeData",
   description = "Update a node's data",
   request_body(content = UpdateNode),
@@ -246,6 +206,60 @@ pub struct UpdateNodeData {
 /// Response for [UpdateNodeData].
 #[typeshare]
 pub type UpdateNodeDataResponse = NodeEntity;
+
+//
+
+#[cfg(feature = "utoipa")]
+#[utoipa::path(
+  post,
+  path = "/write/UpdateNodeDataBytes",
+  description = "Update a node's data using bytes + offset",
+  request_body(content = UpdateNode),
+  responses(
+    (status = 200, description = "The updated node", body = UpdateNodeDataBytesResponse),
+    (status = 500, description = "Request failed", body = mogh_error::Serror)
+  ),
+)]
+pub fn update_node_data_bytes() {}
+
+/// Update a filesystem node's encrypted data using bytes + offset.
+/// This is more efficient method than sending entire new data for every write.
+/// Response: [UpdateNodeDataBytesResponse].
+#[typeshare]
+#[derive(
+  Debug, Clone, Default, Serialize, Deserialize, SurrealValue, Resolve,
+)]
+#[surreal(crate = "surrealdb_types")]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
+#[empty_traits(CicadaWriteRequest)]
+#[response(UpdateNodeResponse)]
+#[error(mogh_error::Error)]
+pub struct UpdateNodeDataBytes {
+  /// The filesystem id
+  pub filesystem: FilesystemId,
+  /// The inode number.
+  pub inode: U64,
+  /// The node data bytes
+  pub data: Vec<u8>,
+  /// The update offset
+  pub offset: U64,
+  /// Optionally update the encryption key used as master in the envelope encryption.
+  pub encryption_key: Option<EncryptionKeyId>,
+  /// Whether to store the contents as a restorable checkpoint.
+  /// This will always be done if checkpointing is enabled on the node.
+  pub checkpoint: Option<bool>,
+  /// Save the checkpoint with this name.
+  pub checkpoint_name: Option<String>,
+  /// Save the checkpoint with this description
+  pub checkpoint_description: Option<String>,
+  /// Whether to interpolate secrets into returned file contents
+  #[serde(default)]
+  pub interpolated: bool,
+}
+
+/// Response for [UpdateNodeDataBytes].
+#[typeshare]
+pub type UpdateNodeDataBytesResponse = NodeEntity;
 
 //
 
@@ -322,6 +336,46 @@ pub struct RotateNodeEnvelopeKey {
 /// Response for [RotateNodeEnvelopeKey].
 #[typeshare]
 pub type RotateNodeEnvelopeKeyResponse = NodeEntity;
+
+//
+
+#[cfg(feature = "utoipa")]
+#[utoipa::path(
+  post,
+  path = "/write/MoveNode",
+  description = "Move a node",
+  request_body(content = MoveNode),
+  responses(
+    (status = 200, description = "The moved node", body = MoveNodeResponse),
+    (status = 500, description = "Request failed", body = mogh_error::Serror)
+  ),
+)]
+pub fn move_node() {}
+
+/// Move a filesystem node, including between filesystems. Response: [MoveNodeResponse].
+#[typeshare]
+#[derive(
+  Debug, Clone, Default, Serialize, Deserialize, SurrealValue, Resolve,
+)]
+#[surreal(crate = "surrealdb_types")]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
+#[empty_traits(CicadaWriteRequest)]
+#[response(MoveNodeResponse)]
+#[error(mogh_error::Error)]
+pub struct MoveNode {
+  /// The node id
+  pub id: NodeId,
+  /// The filesystem ID
+  pub filesystem: Option<FilesystemId>,
+  /// parent inode number, or 1 for filesystem root
+  pub parent: Option<U64>,
+  /// Whether to interpolate secrets into returned file contents
+  pub interpolated: Option<bool>,
+}
+
+/// Response for [MoveNode].
+#[typeshare]
+pub type MoveNodeResponse = NodeEntity;
 
 //
 

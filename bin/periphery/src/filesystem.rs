@@ -7,7 +7,10 @@ use anyhow::Context as _;
 use cicada_client::{
   api::{
     read::{FindNode, FindNodeWithPath, ListNodes},
-    write::{CreateNode, DeleteNode, UpdateNode, UpdateNodeData},
+    write::{
+      CreateNode, DeleteNode, UpdateNode, UpdateNodeData,
+      UpdateNodeDataBytes,
+    },
   },
   entities::{
     filesystem::FilesystemId,
@@ -495,54 +498,16 @@ impl fuser::Filesystem for CicadaFs {
       return;
     }
     let ino = if ino == 1 { self.root.ino.0 } else { ino };
-    let node = match cicada().read(FindNode::with_inode(
-      self.filesystem.clone(),
-      ino,
-      true,
-    )) {
-      Ok(node) => node,
-      Err(e) => {
-        debug!(
-          "WRITE FAILED: Could not find node | inode: {ino} | {e:#}"
-        );
-        reply.error(Errno::ENOENT);
-        return;
-      }
-    };
 
-    let Ok(new_data) = std::str::from_utf8(data) else {
-      debug!("WRITE FAILED: Data is not valid UTF-8 | inode: {ino}");
-      reply.error(Errno::EINVAL);
-      return;
-    };
-
-    // Merge the write into existing data at the given offset
-    let mut current = node.data.unwrap_or_default().into_bytes();
-    let offset = offset as usize;
-    let end = offset + data.len();
-    if current.len() < end {
-      current.resize(end, 0);
-    }
-    current[offset..end].copy_from_slice(data);
-
-    let merged = match String::from_utf8(current) {
-      Ok(s) => s,
-      Err(_) => {
-        debug!(
-          "WRITE FAILED: Merged data is not valid UTF-8 | inode: {ino}"
-        );
-        reply.error(Errno::EINVAL);
-        return;
-      }
-    };
-
-    match cicada().write(UpdateNodeData {
-      id: node.id,
-      data: merged,
+    match cicada().write(UpdateNodeDataBytes {
+      filesystem: self.filesystem.clone(),
+      inode: ino,
+      data: data.to_vec(),
+      offset,
       interpolated: self.interpolated,
       ..Default::default()
     }) {
-      Ok(_) => reply.written(new_data.len() as u32),
+      Ok(_) => reply.written(data.len() as u32),
       Err(e) => {
         error!(
           "WRITE FAILED: Could not update node data | inode: {ino} | {e:#}"
@@ -626,17 +591,24 @@ impl fuser::Filesystem for CicadaFs {
           return;
         }
       };
-      if let Err(e) = cicada().write(UpdateNodeData {
+      match cicada().write(UpdateNodeData {
         id: node.id.clone(),
         data: truncated,
         interpolated: self.interpolated,
         ..Default::default()
       }) {
-        error!(
-          "SETATTR FAILED: Could not truncate node | inode: {ino} | {e:#}"
-        );
-        reply.error(Errno::EIO);
-        return;
+        Ok(node) => {
+          let attr = self.node_to_file_attr(node);
+          reply.attr(&CicadaFs::TTL, &attr);
+          return;
+        }
+        Err(e) => {
+          error!(
+            "SETATTR FAILED: Could not truncate node | inode: {ino} | {e:#}"
+          );
+          reply.error(Errno::EIO);
+          return;
+        }
       }
     }
 

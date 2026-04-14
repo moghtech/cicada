@@ -65,6 +65,7 @@ pub enum WriteRequest {
   CreateNode(CreateNode),
   UpdateNode(UpdateNode),
   UpdateNodeData(UpdateNodeData),
+  UpdateNodeDataBytes(UpdateNodeDataBytes),
   UpdateNodeEncryptionKey(UpdateNodeEncryptionKey),
   RotateNodeEnvelopeKey(RotateNodeEnvelopeKey),
   MoveNode(MoveNode),

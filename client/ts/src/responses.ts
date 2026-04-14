@@ -77,6 +77,7 @@ export type WriteResponses = {
   CreateNode: Types.CreateNodeResponse;
   UpdateNode: Types.UpdateNodeResponse;
   UpdateNodeData: Types.UpdateNodeDataResponse;
+  UpdateNodeDataBytes: Types.UpdateNodeDataBytesResponse;
   UpdateNodeEncryptionKey: Types.UpdateNodeEncryptionKeyResponse;
   RotateNodeEnvelopeKey: Types.RotateNodeEnvelopeKeyResponse;
   MoveNode: Types.MoveNodeResponse;

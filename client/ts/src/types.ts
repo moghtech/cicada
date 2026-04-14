@@ -750,6 +750,9 @@ export type UpdateEncryptionKeyResponse = EncryptionKeyRecord;
 /** Response for [UpdateFilesystem]. */
 export type UpdateFilesystemResponse = FilesystemRecord;
 
+/** Response for [UpdateNodeDataBytes]. */
+export type UpdateNodeDataBytesResponse = NodeEntity;
+
 /** Response for [UpdateNodeData]. */
 export type UpdateNodeDataResponse = NodeEntity;
 
@@ -1623,6 +1626,35 @@ export interface UpdateNodeData {
 	interpolated?: boolean;
 }
 
+/**
+ * Update a filesystem node's encrypted data using bytes + offset.
+ * This is more efficient method than sending entire new data for every write.
+ * Response: [UpdateNodeDataBytesResponse].
+ */
+export interface UpdateNodeDataBytes {
+	/** The filesystem id */
+	filesystem: FilesystemId;
+	/** The inode number. */
+	inode: U64;
+	/** The node data bytes */
+	data: number[];
+	/** The update offset */
+	offset: U64;
+	/** Optionally update the encryption key used as master in the envelope encryption. */
+	encryption_key?: EncryptionKeyId;
+	/**
+	 * Whether to store the contents as a restorable checkpoint.
+	 * This will always be done if checkpointing is enabled on the node.
+	 */
+	checkpoint?: boolean;
+	/** Save the checkpoint with this name. */
+	checkpoint_name?: string;
+	/** Save the checkpoint with this description */
+	checkpoint_description?: string;
+	/** Whether to interpolate secrets into returned file contents */
+	interpolated?: boolean;
+}
+
 /** Update a filesystem node's encryption key. Response: [UpdateNodeEncryptionKeyResponse]. */
 export interface UpdateNodeEncryptionKey {
 	/** The node id */
@@ -1833,6 +1865,7 @@ export type WriteRequest =
 	| { type: "CreateNode", params: CreateNode }
 	| { type: "UpdateNode", params: UpdateNode }
 	| { type: "UpdateNodeData", params: UpdateNodeData }
+	| { type: "UpdateNodeDataBytes", params: UpdateNodeDataBytes }
 	| { type: "UpdateNodeEncryptionKey", params: UpdateNodeEncryptionKey }
 	| { type: "RotateNodeEnvelopeKey", params: RotateNodeEnvelopeKey }
 	| { type: "MoveNode", params: MoveNode }

@@ -72,8 +72,10 @@ mod write {
     write::create_node,
     write::update_node,
     write::update_node_data,
+    write::update_node_data_bytes,
     write::update_node_encryption_key,
     write::rotate_node_envelope_key,
+    write::move_node,
     write::delete_node,
     write::batch_delete_nodes,
     // CHECKPOINT

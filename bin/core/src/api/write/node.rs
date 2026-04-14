@@ -1,8 +1,11 @@
 use cicada_client::{
-  api::write::{
-    BatchDeleteNodes, CreateNode, DeleteNode, MoveNode,
-    RotateNodeEnvelopeKey, UpdateNode, UpdateNodeData,
-    UpdateNodeEncryptionKey,
+  api::{
+    read::FindNode,
+    write::{
+      BatchDeleteNodes, CreateNode, DeleteNode, MoveNode,
+      RotateNodeEnvelopeKey, UpdateNode, UpdateNodeData,
+      UpdateNodeDataBytes, UpdateNodeEncryptionKey,
+    },
   },
   entities::{checkpoint::CheckpointTarget, node::NodeKind},
 };
@@ -190,6 +193,107 @@ impl Resolve<WriteArgs> for UpdateNodeData {
           query::checkpoint::create_checkpoint(
             CreateCheckpointQuery {
               target: CheckpointTarget::Node(node.id),
+              name: self.checkpoint_name,
+              description: self.checkpoint_description,
+              encryption_key,
+              data,
+            },
+          )
+          .await
+          .map(|_| ())
+        } else {
+          Ok(())
+        }
+      },
+    )?;
+
+    decrypt_node(node, self.interpolated).await
+  }
+}
+
+//
+
+impl Resolve<WriteArgs> for UpdateNodeDataBytes {
+  async fn resolve(
+    self,
+    WriteArgs { client }: &WriteArgs,
+  ) -> Result<Self::Response, Self::Error> {
+    let node = query::node::find_node(FindNode {
+      filesystem: self.filesystem,
+      inode: Some(self.inode),
+      name: None,
+      parent: None,
+      // Does nothing in this context
+      interpolated: false,
+    })
+    .await?;
+    ensure_client_filesystem_permission(
+      client,
+      node.filesystem.clone(),
+      true,
+    )
+    .await?;
+
+    let filesystem =
+      query::filesystem::get_filesystem(node.filesystem.0.clone())
+        .await?;
+
+    let encryption_key = if let Some(id) = self
+      .encryption_key
+      .or(node.encryption_key.clone())
+      .or(filesystem.encryption_key)
+    {
+      id
+    } else {
+      // Takes the first available encryption key
+      query::encryption_key::list_all_encryption_keys()
+        .await?
+        .pop()
+        .context("No encryption keys")?
+        .id
+    };
+
+    let checkpointing = node.checkpointing;
+
+    let node_id = node.id.clone();
+
+    let mut data = decrypt_node(node, false)
+      .await?
+      .data
+      .unwrap_or_default()
+      .into_bytes();
+
+    let offset = self.offset as usize;
+    let end = offset + self.data.len();
+    if data.len() < end {
+      data.resize(end, 0);
+    }
+    data[offset..end].copy_from_slice(&self.data);
+
+    let data =
+      encrypt_data(&encryption_key.0, &data, &node_id.0).await?;
+
+    let checkpoint = self
+      .checkpoint
+      .unwrap_or_else(|| {
+        checkpointing
+          .maybe_inherit(filesystem.checkpointing)
+          .enabled()
+      })
+      // Doing like this only clones when necessary
+      .then(|| (encryption_key.clone(), data.clone()));
+
+    let (node, _) = tokio::try_join!(
+      query::node::update_node_data(
+        node_id.clone(),
+        encryption_key,
+        data
+      ),
+      async {
+        if let Some((encryption_key, data)) = checkpoint {
+          query::checkpoint::create_checkpoint(
+            CreateCheckpointQuery {
+              target: CheckpointTarget::Node(node_id),
               name: self.checkpoint_name,
               description: self.checkpoint_description,
               encryption_key,
