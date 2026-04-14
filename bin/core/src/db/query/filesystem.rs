@@ -10,10 +10,16 @@ use crate::db::DB;
 
 pub async fn list_all_filesystems()
 -> mogh_error::Result<Vec<FilesystemRecord>> {
-  DB.select("Filesystem")
-    .await
-    .context("Failed to query for Filesystems")
-    .map_err(Into::into)
+  DB.query(
+    "
+SELECT * FROM Filesystem
+ORDER BY name COLLATE ASC;",
+  )
+  .await
+  .context("Failed to query database for filesystems")?
+  .take(0)
+  .context("Failed to get filesystem query result")
+  .map_err(Into::into)
 }
 
 pub async fn get_filesystem(

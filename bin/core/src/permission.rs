@@ -32,13 +32,17 @@ pub async fn list_filesystems_for_client(
     .flat_map(|p| p.filesystems)
     .collect::<HashSet<_>>();
 
-  DB.query("SELECT * FROM Filesystem WHERE id IN $ids")
-    .bind(("ids", filesystem_ids))
-    .await
-    .context("Failed to query database for filesystems")?
-    .take::<Vec<FilesystemRecord>>(0)
-    .context("Failed to get filesystem query result")
-    .map_err(Into::into)
+  DB.query(
+    "
+SELECT * FROM Filesystem WHERE id IN $ids
+ORDER BY name COLLATE ASC;",
+  )
+  .bind(("ids", filesystem_ids))
+  .await
+  .context("Failed to query database for filesystems")?
+  .take::<Vec<FilesystemRecord>>(0)
+  .context("Failed to get filesystem query result")
+  .map_err(Into::into)
 }
 
 pub async fn ensure_client_filesystem_permission(
