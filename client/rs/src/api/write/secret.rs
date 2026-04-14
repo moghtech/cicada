@@ -47,6 +47,10 @@ pub struct CreateSecret {
   /// Choose a specific encryption key.
   /// Otherwise chooses the current global default.
   pub encryption_key: Option<EncryptionKeyId>,
+  /// Save the checkpoint with this name.
+  pub checkpoint_name: Option<String>,
+  /// Save the checkpoint with this description
+  pub checkpoint_description: Option<String>,
 }
 
 /// Response for [CreateSecret].
@@ -123,6 +127,10 @@ pub struct UpdateSecretData {
   pub data: String,
   /// Optionally update the encryption key used as master in the envelope encryption.
   pub encryption_key: Option<EncryptionKeyId>,
+  /// Save the checkpoint with this name.
+  pub checkpoint_name: Option<String>,
+  /// Save the checkpoint with this description
+  pub checkpoint_description: Option<String>,
 }
 
 /// Response for [UpdateSecretData].

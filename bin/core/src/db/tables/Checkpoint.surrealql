@@ -4,10 +4,10 @@
 
 DEFINE TABLE IF NOT EXISTS Checkpoint SCHEMAFULL;
 
--- node
-DEFINE FIELD OVERWRITE node
+-- target
+DEFINE FIELD OVERWRITE target
   ON TABLE Checkpoint
-  TYPE record<Node>
+  TYPE record<Node> | record<Secret>
   REFERENCE ON DELETE CASCADE;
 
 -- name

@@ -4,7 +4,9 @@
 
 export type CheckpointId = string;
 
-export type NodeId = string;
+export type CheckpointTarget = 
+	| { type: "Node", id: NodeId }
+	| { type: "Secret", id: SecretId };
 
 export type EncryptionKeyId = string;
 
@@ -14,8 +16,8 @@ export type Iso8601Timestamp = string;
 export interface CheckpointEntity {
 	/** The unique checkpoint id */
 	id: CheckpointId;
-	/** The associated node */
-	node: NodeId;
+	/** The associated node or secret */
+	target: CheckpointTarget;
 	/** The optional name of the checkpoint */
 	name: string;
 	/** The optional description for the checkpoint */
@@ -174,6 +176,8 @@ export interface FilesystemRecord {
 /** Response for [BatchDeleteFilesystems]. */
 export type BatchDeleteFilesystemsResponse = FilesystemRecord[];
 
+export type NodeId = string;
+
 export type U64 = number;
 
 /** Nodes can be either folders or files. */
@@ -319,7 +323,7 @@ export interface SecretEntity {
 	 * If data is null, it means
 	 * the encryption key is not initialized.
 	 */
-	encryption_key: EncryptionKeyId;
+	encryption_key?: EncryptionKeyId;
 	/** Data associated with the secret. */
 	data?: string;
 	/** Created at as ISO8601 timestamp. */
@@ -579,8 +583,8 @@ export type InitializeEncryptionKeyResponse = NoData;
 export interface CheckpointListItem {
 	/** The unique checkpoint id */
 	id: CheckpointId;
-	/** The associated node */
-	node: NodeId;
+	/** The associated node or secret */
+	target: CheckpointTarget;
 	/** The optional name of the checkpoint */
 	name: string;
 	/** The optional description for the checkpoint */
@@ -681,7 +685,7 @@ export interface SecretListItem {
 	/** An optional description for the secret */
 	description: string;
 	/** The master encryption key for this secret. */
-	encryption_key: EncryptionKeyId;
+	encryption_key?: EncryptionKeyId;
 	/** Created at as ISO8601 timestamp. */
 	created_at: Iso8601Timestamp;
 	/** Updated at as ISO8601 timestamp. */
@@ -858,8 +862,8 @@ export interface EncryptedData {
 export interface CheckpointRecord {
 	/** The unique checkpoint id */
 	id: CheckpointId;
-	/** The associated node */
-	node: NodeId;
+	/** The associated node or secret */
+	target: CheckpointTarget;
 	/** The optional name of the checkpoint */
 	name: string;
 	/** The optional description for the checkpoint */
@@ -1059,6 +1063,10 @@ export interface CreateSecret {
 	 * Otherwise chooses the current global default.
 	 */
 	encryption_key?: EncryptionKeyId;
+	/** Save the checkpoint with this name. */
+	checkpoint_name?: string;
+	/** Save the checkpoint with this description */
+	checkpoint_description?: string;
 }
 
 /** Create a local user with username and password. Response: [CreateUserResponse]. */
@@ -1306,8 +1314,8 @@ export interface InitializeEncryptionKey {
 
 /** List checkpoints. Response: [ListCheckpointsResponse]. */
 export interface ListCheckpoints {
-	/** Get checkpoints for this filesystem node */
-	node: NodeId;
+	/** Get checkpoints for this node (file) or secret */
+	target: CheckpointTarget;
 }
 
 /** List devices. Response: [ListDevicesResponse]. */
@@ -1448,9 +1456,9 @@ export interface SecretRecord {
 	/** Optional description for the secret. */
 	description: string;
 	/** The master encryption key for the data. */
-	encryption_key: EncryptionKeyId;
+	encryption_key?: EncryptionKeyId;
 	/** Data associated with the secret. */
-	data: EncryptedData;
+	data?: EncryptedData;
 	/** Created at as ISO8601 timestamp. */
 	created_at: Iso8601Timestamp;
 	/** Updated at as ISO8601 timestamp. */
@@ -1670,6 +1678,10 @@ export interface UpdateSecretData {
 	data: string;
 	/** Optionally update the encryption key used as master in the envelope encryption. */
 	encryption_key?: EncryptionKeyId;
+	/** Save the checkpoint with this name. */
+	checkpoint_name?: string;
+	/** Save the checkpoint with this description */
+	checkpoint_description?: string;
 }
 
 /** Update a secret's encryption key. Response: [UpdateSecretEncryptionKeyResponse]. */

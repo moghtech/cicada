@@ -3,7 +3,7 @@ use cicada_client::{
     BatchDeleteNodes, CreateNode, DeleteNode, RotateNodeEnvelopeKey,
     UpdateNode, UpdateNodeData, UpdateNodeEncryptionKey,
   },
-  entities::node::NodeKind,
+  entities::{checkpoint::CheckpointTarget, node::NodeKind},
 };
 use futures_util::{StreamExt, stream::FuturesUnordered};
 use mogh_error::anyhow::Context as _;
@@ -80,7 +80,7 @@ impl Resolve<WriteArgs> for CreateNode {
           if let Some((node, encryption_key, data)) = checkpoint {
             query::checkpoint::create_checkpoint(
               CreateCheckpointQuery {
-                node,
+                target: CheckpointTarget::Node(node),
                 name: self
                   .checkpoint_name
                   .unwrap_or_else(|| String::from("Create file"))
@@ -188,7 +188,7 @@ impl Resolve<WriteArgs> for UpdateNodeData {
         if let Some((encryption_key, data)) = checkpoint {
           query::checkpoint::create_checkpoint(
             CreateCheckpointQuery {
-              node: node.id,
+              target: CheckpointTarget::Node(node.id),
               name: self.checkpoint_name,
               description: self.checkpoint_description,
               encryption_key,
@@ -247,7 +247,7 @@ impl Resolve<WriteArgs> for UpdateNodeEncryptionKey {
       data,
     )
     .await?;
-  
+
     decrypt_node(node, self.interpolated).await
   }
 }
@@ -277,12 +277,9 @@ impl Resolve<WriteArgs> for RotateNodeEnvelopeKey {
     let data =
       rotate_envelope_key(&encryption_key.0, data, &node.id.0)
         .await?;
-    let node = query::node::update_node_data(
-      self.id,
-      encryption_key,
-      data,
-    )
-    .await?;
+    let node =
+      query::node::update_node_data(self.id, encryption_key, data)
+        .await?;
     decrypt_node(node, self.interpolated).await
   }
 }

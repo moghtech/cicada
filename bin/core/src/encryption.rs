@@ -253,12 +253,12 @@ pub async fn decrypt_checkpoint(
   let data = decrypt_data(
     &checkpoint.encryption_key.0,
     checkpoint.data,
-    &checkpoint.node.0,
+    checkpoint.target.associated_data(),
   )
   .await?;
   Ok(CheckpointEntity {
     id: checkpoint.id,
-    node: checkpoint.node,
+    target: checkpoint.target,
     name: checkpoint.name,
     description: checkpoint.description,
     created_at: checkpoint.created_at,

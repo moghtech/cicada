@@ -1,16 +1,17 @@
 import { DataTable, SortableHeader } from "mogh_ui";
 import { useRead } from "@/lib/hooks";
 import CheckpointLink from "./checkpoint-link";
+import { Types } from "cicada_client";
 
 export interface CheckpointsProps {
-  node: string | undefined;
+  target: Types.CheckpointTarget | undefined;
 }
 
-export default function Checkpoints({ node }: CheckpointsProps) {
+export default function Checkpoints({ target }: CheckpointsProps) {
   const { data: checkpoints } = useRead(
     "ListCheckpoints",
-    { node: node! },
-    { enabled: !!node },
+    { target: target! },
+    { enabled: !!target },
   );
 
   return (
@@ -24,7 +25,7 @@ export default function Checkpoints({ node }: CheckpointsProps) {
           ),
           accessorKey: "name",
           cell: ({ row }) => (
-            <CheckpointLink id={row.original.id} nodeId={row.original.node} />
+            <CheckpointLink id={row.original.id} target={row.original.target} />
           ),
         },
         // {

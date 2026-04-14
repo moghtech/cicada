@@ -1,16 +1,17 @@
 import { useRead } from "@/lib/hooks";
 import { ICONS } from "@/lib/icons";
 import { Group } from "@mantine/core";
+import { Types } from "cicada_client";
 import { hexColorByIntention } from "mogh_ui";
 import { Link } from "react-router-dom";
 
 export interface CheckpointLinkProps {
   id: string;
-  nodeId: string;
+  target: Types.CheckpointTarget;
 }
 
-export default function CheckpointLink({ id, nodeId }: CheckpointLinkProps) {
-  const checkpoint = useRead("ListCheckpoints", { node: nodeId }).data?.find(
+export default function CheckpointLink({ id, target }: CheckpointLinkProps) {
+  const checkpoint = useRead("ListCheckpoints", { target }).data?.find(
     (r) => r.id === id,
   );
   const encryptionKeys = useRead("ListEncryptionKeys", {}).data;

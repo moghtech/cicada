@@ -42,7 +42,7 @@ impl Resolve<WriteArgs> for UpdateCheckpointEncryptionKey {
     let data = rotate_encryption_key(
       &checkpoint.encryption_key.0,
       checkpoint.data,
-      &checkpoint.node.0,
+      checkpoint.target.associated_data(),
       &self.encryption_key.0,
     )
     .await?;
@@ -70,7 +70,7 @@ impl Resolve<WriteArgs> for RotateCheckpointEnvelopeKey {
     let data = rotate_envelope_key(
       &checkpoint.encryption_key.0,
       checkpoint.data,
-      &checkpoint.node.0,
+      checkpoint.target.associated_data(),
     )
     .await?;
     let checkpoint = query::checkpoint::update_checkpoint_data(

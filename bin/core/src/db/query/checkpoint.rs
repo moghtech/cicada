@@ -5,9 +5,9 @@ use cicada_client::{
     EncryptedData,
     checkpoint::{
       CheckpointId, CheckpointListItem, CheckpointRecord,
+      CheckpointTarget,
     },
     encryption_key::EncryptionKeyId,
-    node::NodeId,
   },
 };
 use mogh_error::AddStatusCode as _;
@@ -17,15 +17,15 @@ use surrealdb_types::SurrealValue;
 use crate::db::DB;
 
 pub async fn list_checkpoints(
-  node: NodeId,
+  target: CheckpointTarget,
 ) -> mogh_error::Result<Vec<CheckpointListItem>> {
   DB.query(
     "
 SELECT * OMIT data FROM Checkpoint
-WHERE node = $node
+WHERE target = $target
 ORDER BY created_at DESC;",
   )
-  .bind(("node", node))
+  .bind(("target", target))
   .await
   .context("Failed to query database for checkpoints")?
   .take(0)
@@ -45,7 +45,7 @@ pub async fn get_checkpoint(
 
 #[derive(SurrealValue)]
 pub struct CreateCheckpointQuery {
-  pub node: NodeId,
+  pub target: CheckpointTarget,
   pub name: Option<String>,
   pub description: Option<String>,
   pub encryption_key: EncryptionKeyId,

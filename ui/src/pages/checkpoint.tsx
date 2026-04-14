@@ -19,6 +19,7 @@ import ConfirmFileSave from "@/components/confirm-file-save";
 import { useState } from "react";
 import CheckpointSelector from "@/components/checkpoint-selector";
 import Checkpoints from "@/components/checkpoints";
+import ConfirmSecretSave from "@/components/confirm-secret-save";
 
 export default function CheckpointPage() {
   const { checkpoint: _checkpoint } = useParams() as {
@@ -36,18 +37,18 @@ export default function CheckpointPage() {
   });
 
   const {
-    data: node,
-    isPending: nodePending,
-    isRefetching: nodeRefetching,
+    data: target,
+    isPending: targetPending,
+    isRefetching: targetRefetching,
   } = useRead(
-    "GetNode",
+    `Get${checkpoint?.target.type ?? "Node"}`,
     {
-      id: checkpoint?.node!,
+      id: checkpoint?.target.id!,
     },
-    { enabled: !!checkpoint?.node },
+    { enabled: !!checkpoint?.target.id },
   );
 
-  useSetTitle(checkpoint?.name + (node ? " | " + node?.name : ""));
+  useSetTitle(checkpoint?.name + (target ? " | " + target?.name : ""));
 
   const { mutateAsync: updateCheckpoint } = useWrite("UpdateCheckpoint", {
     onSuccess: () => {
@@ -63,8 +64,8 @@ export default function CheckpointPage() {
   const missingKey = encryptionKeys?.find(
     (key) => checkpoint?.data === null && key.id === checkpoint?.encryption_key,
   );
-  const missingNodeKey = encryptionKeys?.find(
-    (key) => node?.data === null && key.id === node?.encryption_key,
+  const missingTargetKey = encryptionKeys?.find(
+    (key) => target?.data === null && key.id === target?.encryption_key,
   );
 
   const {
@@ -101,18 +102,23 @@ export default function CheckpointPage() {
 
   return (
     <PageGuard
-      isPending={isPending || isRefetching || nodePending || nodeRefetching}
+      isPending={isPending || isRefetching || targetPending || targetRefetching}
       error={
         !checkpoint
           ? "404: No checkpoint found"
-          : !node
-            ? "404: No node found associated with checkpoint"
+          : !target
+            ? "404: No target found associated with checkpoint"
             : undefined
       }
     >
       {checkpoint && (
         <EntityPage
-          backTo={node && `/filesystems/${node?.filesystem}/${node?.inode}`}
+          backTo={
+            target &&
+            (checkpoint.target.type === "Node"
+              ? `/filesystems/${(target as Types.NodeEntity)?.filesystem}/${(target as Types.NodeEntity)?.inode}`
+              : `/secrets/${target.id}`)
+          }
         >
           <EntityHeader
             name={checkpoint?.name || "Checkpoint"}
@@ -136,16 +142,26 @@ export default function CheckpointPage() {
           />
 
           <Group>
-            {checkpoint.data && (
-              <ConfirmFileSave
-                node={node}
-                data={checkpoint.data}
-                initName="Restore checkpoint"
-                initDescription={`Restored contents at checkpoint "${checkpoint.name || checkpoint.id}"`}
-                disabled={node?.data === checkpoint.data}
-                restore
-              />
-            )}
+            {checkpoint.data &&
+              (checkpoint.target.type === "Node" ? (
+                <ConfirmFileSave
+                  node={target as Types.NodeEntity}
+                  data={checkpoint.data}
+                  initName="Restore checkpoint"
+                  initDescription={`Restored contents at checkpoint "${checkpoint.name || checkpoint.id}"`}
+                  disabled={target?.data === checkpoint.data}
+                  restore
+                />
+              ) : (
+                <ConfirmSecretSave
+                  secret={target as Types.SecretEntity}
+                  data={checkpoint.data}
+                  initName="Restore checkpoint"
+                  initDescription={`Restored contents at checkpoint "${checkpoint.name || checkpoint.id}"`}
+                  disabled={target?.data === checkpoint.data}
+                  restore
+                />
+              ))}
             <EncryptionKeySelector
               selected={checkpoint.encryption_key}
               onSelect={(encryption_key) =>
@@ -160,7 +176,7 @@ export default function CheckpointPage() {
               }}
             />
             <CheckpointSelector
-              node={checkpoint.node}
+              target={checkpoint.target}
               selected={compare}
               onSelect={setCompare}
               placeholder="Compare"
@@ -186,16 +202,16 @@ export default function CheckpointPage() {
                 </Group>
               )}
             </>
-          ) : missingNodeKey ? (
+          ) : missingTargetKey ? (
             <>
               <Text fz="h2">
                 Failed to read data: missing encryption key{" "}
-                <b>{missingNodeKey.name}</b>
+                <b>{missingTargetKey.name}</b>
               </Text>
-              {missingNodeKey?.kind === Types.EncryptionKeyKind.Memory && (
+              {missingTargetKey?.kind === Types.EncryptionKeyKind.Memory && (
                 <Group>
                   <InitializeEncryptionKey
-                    key_id={missingNodeKey.id}
+                    key_id={missingTargetKey.id}
                     onInit={() => inv(["GetNode"])}
                   />
                 </Group>
@@ -203,20 +219,24 @@ export default function CheckpointPage() {
             </>
           ) : compareCheckpoint ? (
             <MonacoDiffEditor
-              language={node?.name ? languageFromPath(node?.name) : undefined}
+              language={
+                target?.name ? languageFromPath(target?.name) : undefined
+              }
               original={checkpoint.data ?? ""}
               modified={compareCheckpoint?.data ?? ""}
               readOnly
             />
           ) : (
             <MonacoEditor
-              language={node?.name ? languageFromPath(node?.name) : undefined}
+              language={
+                target?.name ? languageFromPath(target?.name) : undefined
+              }
               value={checkpoint.data ?? ""}
               readOnly
             />
           )}
 
-          <Checkpoints node={checkpoint.node} />
+          <Checkpoints target={checkpoint.target} />
         </EntityPage>
       )}
     </PageGuard>

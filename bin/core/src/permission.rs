@@ -1,8 +1,9 @@
 use std::collections::HashSet;
 
 use axum::http::StatusCode;
-use cicada_client::entities::filesystem::{
-  FilesystemId, FilesystemRecord,
+use cicada_client::entities::{
+  checkpoint::CheckpointTarget,
+  filesystem::{FilesystemId, FilesystemRecord},
 };
 use mogh_error::{AddStatusCodeError as _, anyhow::Context as _};
 
@@ -75,4 +76,24 @@ pub async fn ensure_client_filesystem_permission(
     mogh_error::anyhow::anyhow!("Permission denied")
       .status_code(StatusCode::FORBIDDEN),
   )
+}
+
+pub async fn ensure_client_checkpoint_target_permission(
+  client: &Client,
+  target: &CheckpointTarget,
+) -> mogh_error::Result<()> {
+  match target {
+    CheckpointTarget::Node(id) => {
+      let node = crate::db::query::node::get_node(&id.0).await?;
+      // Don't know filesystem id for perm check until node query.
+      ensure_client_filesystem_permission(
+        client,
+        node.filesystem.clone(),
+        false,
+      )
+      .await
+    }
+    // All users can list secret checkpoints, this does not get data
+    CheckpointTarget::Secret(_) => Ok(()),
+  }
 }

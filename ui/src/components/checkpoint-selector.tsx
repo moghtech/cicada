@@ -13,9 +13,10 @@ import { ChevronsUpDown } from "lucide-react";
 import { ReactNode } from "react";
 import { ICONS } from "@/lib/icons";
 import { hexColorByIntention, useSearchCombobox, filterBySplit } from "mogh_ui";
+import { Types } from "cicada_client";
 
 export interface CheckpointSelectorProps extends ComboboxProps {
-  node: string;
+  target: Types.CheckpointTarget;
   label?: ReactNode;
   defaultKey?: string;
   selected: string | undefined;
@@ -29,7 +30,7 @@ export interface CheckpointSelectorProps extends ComboboxProps {
 }
 
 export default function CheckpointSelector({
-  node,
+  target,
   label,
   defaultKey,
   selected,
@@ -45,7 +46,7 @@ export default function CheckpointSelector({
   ...comboboxProps
 }: CheckpointSelectorProps) {
   const { data: _checkpoints, isPending } = useRead("ListCheckpoints", {
-    node,
+    target,
   });
   const checkpoints = excludeId
     ? _checkpoints?.filter((c) => c.id !== excludeId)

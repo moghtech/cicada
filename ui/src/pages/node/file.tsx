@@ -254,7 +254,7 @@ export default function FilePage({
               value={data ?? node.data ?? ""}
               onValueChange={(data) => setEdit({ data })}
             />
-            <Checkpoints node={node.id} />
+            <Checkpoints target={{ type: "Node", id: node.id }} />
           </>
         )
       )}

@@ -4,14 +4,17 @@ use cicada_client::{
     RotateSecretEnvelopeKey, UpdateSecret, UpdateSecretData,
     UpdateSecretEncryptionKey,
   },
-  entities::secret::SecretEntity,
+  entities::{checkpoint::CheckpointTarget, secret::SecretEntity},
 };
 use mogh_error::anyhow::Context as _;
 use mogh_resolver::Resolve;
 
 use crate::{
   api::write::WriteArgs,
-  db::query::{self, secret::CreateSecretQuery},
+  db::query::{
+    self, checkpoint::CreateCheckpointQuery,
+    secret::CreateSecretQuery,
+  },
   encryption::{
     decrypt_secret, decrypt_secrets, encrypt_data,
     rotate_encryption_key, rotate_envelope_key,
@@ -24,7 +27,7 @@ impl Resolve<WriteArgs> for CreateSecret {
     WriteArgs { client }: &WriteArgs,
   ) -> Result<Self::Response, Self::Error> {
     client.admin_only()?;
-    
+
     let secret = query::secret::create_secret(CreateSecretQuery {
       name: self.name,
       description: self.description,
@@ -48,12 +51,24 @@ impl Resolve<WriteArgs> for CreateSecret {
     )
     .await?;
 
-    let secret = query::secret::update_secret_data(
-      secret.id,
-      encryption_key,
-      data,
-    )
-    .await?;
+    let (secret, _) = tokio::try_join!(
+      query::secret::update_secret_data(
+        secret.id.clone(),
+        encryption_key.clone(),
+        data.clone(),
+      ),
+      query::checkpoint::create_checkpoint(CreateCheckpointQuery {
+        target: CheckpointTarget::Secret(secret.id),
+        name: self
+          .checkpoint_name
+          .unwrap_or_else(|| String::from("Create secret"))
+          .into(),
+        description: self.checkpoint_description,
+        encryption_key,
+        data,
+      })
+    )?;
+
     decrypt_secret(secret).await
   }
 }
@@ -94,18 +109,29 @@ impl Resolve<WriteArgs> for UpdateSecretData {
         .context("No encryption keys")?
         .id
     };
+
     let data = encrypt_data(
       &encryption_key.0,
       self.data.as_bytes(),
       &self.id.0,
     )
     .await?;
-    let secret = query::secret::update_secret_data(
-      self.id,
-      encryption_key,
-      data,
-    )
-    .await?;
+
+    let (secret, _) = tokio::try_join!(
+      query::secret::update_secret_data(
+        self.id.clone(),
+        encryption_key.clone(),
+        data.clone(),
+      ),
+      query::checkpoint::create_checkpoint(CreateCheckpointQuery {
+        target: CheckpointTarget::Secret(self.id),
+        name: self.checkpoint_name,
+        description: self.checkpoint_description,
+        encryption_key,
+        data,
+      })
+    )?;
+
     decrypt_secret(secret).await
   }
 }

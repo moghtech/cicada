@@ -3,7 +3,6 @@ import { Button, Group, Text } from "@mantine/core";
 import { useNavigate, useParams } from "react-router-dom";
 import { History } from "lucide-react";
 import { useLocalStorage } from "@mantine/hooks";
-import ConfirmSave from "@/components/confirm-save";
 import ConfirmDelete from "@/components/confirm-delete";
 import { Types } from "cicada_client";
 import { notifications } from "@mantine/notifications";
@@ -17,6 +16,8 @@ import {
 } from "mogh_ui";
 import { ICONS } from "@/lib/icons";
 import EncryptionKeySelector from "@/components/encryption-key-selector";
+import Checkpoints from "@/components/checkpoints";
+import ConfirmSecretSave from "@/components/confirm-secret-save";
 
 export default function SecretPage() {
   const { secret: _secret } = useParams() as {
@@ -52,17 +53,6 @@ export default function SecretPage() {
         message: "Saved changes to secret.",
         color: "green",
       });
-    },
-  });
-
-  const { mutateAsync: updateSecretData } = useWrite("UpdateSecretData", {
-    onSuccess: () => {
-      notifications.show({
-        message: "Saved changes to secret.",
-        color: "green",
-      });
-      inv(["GetSecret", { id: _secret }]);
-      setEdit({ data: undefined });
     },
   });
 
@@ -122,15 +112,7 @@ export default function SecretPage() {
             >
               Reset
             </Button>
-            <ConfirmSave
-              name={secret.name}
-              disabled={!data}
-              original={secret.data ?? ""}
-              modified={data ?? ""}
-              onConfirm={() =>
-                updateSecretData({ id: secret.id, data: data ?? "" })
-              }
-            />
+            <ConfirmSecretSave secret={secret} data={data} setEdit={setEdit} />
             <EncryptionKeySelector
               selected={secret.encryption_key}
               onSelect={(encryption_key) =>
@@ -159,11 +141,14 @@ export default function SecretPage() {
               )}
             </>
           ) : (
-            <MonacoEditor
-              language={languageFromPath(secret.name)}
-              value={data ?? secret.data ?? ""}
-              onValueChange={(data) => setEdit({ data })}
-            />
+            <>
+              <MonacoEditor
+                language={languageFromPath(secret.name)}
+                value={data ?? secret.data ?? ""}
+                onValueChange={(data) => setEdit({ data })}
+              />
+              <Checkpoints target={{ type: "Secret", id: secret.id }} />
+            </>
           )}
         </EntityPage>
       )}
