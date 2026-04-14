@@ -18,7 +18,7 @@ pub struct SecretListItem {
   /// An optional description for the secret
   pub description: String,
   /// The master encryption key for this secret.
-  pub encryption_key: EncryptionKeyId,
+  pub encryption_key: Option<EncryptionKeyId>,
   /// Created at as ISO8601 timestamp.
   #[cfg_attr(feature = "utoipa", schema(value_type = String))]
   pub created_at: Iso8601Timestamp,
@@ -42,7 +42,7 @@ pub struct SecretEntity {
   /// The master encryption key for the data.
   /// If data is null, it means
   /// the encryption key is not initialized.
-  pub encryption_key: EncryptionKeyId,
+  pub encryption_key: Option<EncryptionKeyId>,
   /// Data associated with the secret.
   pub data: Option<String>,
   /// Created at as ISO8601 timestamp.
@@ -66,9 +66,9 @@ pub struct SecretRecord {
   /// Optional description for the secret.
   pub description: String,
   /// The master encryption key for the data.
-  pub encryption_key: EncryptionKeyId,
+  pub encryption_key: Option<EncryptionKeyId>,
   /// Data associated with the secret.
-  pub data: EncryptedData,
+  pub data: Option<EncryptedData>,
   /// Created at as ISO8601 timestamp.
   #[cfg_attr(feature = "utoipa", schema(value_type = String))]
   pub created_at: Iso8601Timestamp,

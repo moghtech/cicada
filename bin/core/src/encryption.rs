@@ -295,9 +295,16 @@ pub async fn decrypt_checkpoints(
 pub async fn decrypt_secret(
   secret: SecretRecord,
 ) -> mogh_error::Result<SecretEntity> {
-  let data =
-    decrypt_data(&secret.encryption_key.0, secret.data, &secret.id.0)
-      .await?;
+  let data = if let Some(data) = secret.data {
+    let encryption_key = secret
+      .encryption_key
+      .as_ref()
+      .context("Secret with data missing encryption key")?;
+    decrypt_data(&encryption_key.0, data, &secret.id.0).await?
+  } else {
+    None
+  };
+
   Ok(SecretEntity {
     id: secret.id,
     name: secret.name,

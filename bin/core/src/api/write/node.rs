@@ -215,19 +215,23 @@ impl Resolve<WriteArgs> for UpdateNodeEncryptionKey {
     WriteArgs { client }: &WriteArgs,
   ) -> Result<Self::Response, Self::Error> {
     let node = query::node::get_node(&self.id.0).await?;
+
     ensure_client_filesystem_permission(
       client,
       node.filesystem.clone(),
       true,
     )
     .await?;
+
     // No-op if node has no data.
     let Some(data) = node.data else {
       return Ok(node.into_entity(None));
     };
+
     let encryption_key = node
       .encryption_key
       .context("Node has data but no encryption key")?;
+
     // Re encrypt the envelope keys with new master key
     let data = rotate_encryption_key(
       &encryption_key.0,
@@ -236,12 +240,14 @@ impl Resolve<WriteArgs> for UpdateNodeEncryptionKey {
       &self.encryption_key.0,
     )
     .await?;
+
     let node = query::node::update_node_data(
       self.id,
       self.encryption_key,
       data,
     )
     .await?;
+  
     decrypt_node(node, self.interpolated).await
   }
 }
