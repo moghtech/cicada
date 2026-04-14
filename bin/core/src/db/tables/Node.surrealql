@@ -52,7 +52,7 @@ DEFINE FIELD OVERWRITE interpolation
   DEFAULT "Inherit";
 
 -- data
-fn::define_encrypted_data_field("Node", "data");
+fn::define_encrypted_data_fields("Node");
 
 -- Standard timestamp fields 'created_at', 'updated_at'
 fn::define_timestamp_fields("Node");

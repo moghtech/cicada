@@ -6,6 +6,7 @@ use cicada_client::{
   },
   entities::{
     CheckpointingMode, EncryptedData, InterpolationMode,
+    encryption_key::EncryptionKeyId,
     filesystem::FilesystemId,
     node::{NodeId, NodeKind, NodeListItem, NodeRecord},
   },
@@ -22,7 +23,7 @@ pub async fn list_child_nodes(
 ) -> mogh_error::Result<Vec<NodeListItem>> {
   DB.query(
     "
-SELECT *, data.encryption_key AS encryption_key OMIT data FROM Node 
+SELECT * OMIT data FROM Node 
 WHERE filesystem = $filesystem AND parent = $parent
 ORDER BY kind DESC, name COLLATE ASC;",
   )
@@ -153,14 +154,19 @@ pub async fn update_node(
 
 pub async fn update_node_data(
   id: NodeId,
+  encryption_key: EncryptionKeyId,
   data: EncryptedData,
 ) -> mogh_error::Result<NodeRecord> {
   #[derive(SurrealValue)]
   struct UpdateNodeDataQuery {
+    encryption_key: EncryptionKeyId,
     data: EncryptedData,
   }
   DB.update(id.as_record_id())
-    .merge(UpdateNodeDataQuery { data })
+    .merge(UpdateNodeDataQuery {
+      encryption_key,
+      data,
+    })
     .await
     .context("Failed to update Node on database")?
     .context("Failed to update Node on database: No update result")

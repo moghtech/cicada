@@ -22,7 +22,7 @@ pub struct CheckpointListItem {
   /// The optional description for the checkpoint
   pub description: String,
   /// The encryption key used with data
-  pub encryption_key: Option<EncryptionKeyId>,
+  pub encryption_key: EncryptionKeyId,
   /// Created at as ISO8601 timestamp.
   #[cfg_attr(feature = "utoipa", schema(value_type = String))]
   pub created_at: Iso8601Timestamp,
@@ -45,10 +45,12 @@ pub struct CheckpointEntity {
   pub name: String,
   /// The optional description for the checkpoint
   pub description: String,
+  /// The master encryption key for the data.
+  /// If data is null, it means
+  /// the encryption key is not initialized.
+  pub encryption_key: EncryptionKeyId,
   /// Data associated with the checkpoint.
   pub data: Option<String>,
-  /// The encryption key used with data
-  pub encryption_key: Option<EncryptionKeyId>,
   /// Created at as ISO8601 timestamp.
   #[cfg_attr(feature = "utoipa", schema(value_type = String))]
   pub created_at: Iso8601Timestamp,
@@ -71,33 +73,18 @@ pub struct CheckpointRecord {
   pub name: String,
   /// The optional description for the checkpoint
   pub description: String,
+  /// The master encryption key for this secret, if set.
+  /// If this is not null while data is, it means
+  /// the encryption key is not initialized.
+  pub encryption_key: EncryptionKeyId,
   /// Data associated with the checkpoint.
-  pub data: Option<EncryptedData>,
+  pub data: EncryptedData,
   /// Created at as ISO8601 timestamp.
   #[cfg_attr(feature = "utoipa", schema(value_type = String))]
   pub created_at: Iso8601Timestamp,
   /// Updated at as ISO8601 timestamp.
   #[cfg_attr(feature = "utoipa", schema(value_type = String))]
   pub updated_at: Iso8601Timestamp,
-}
-
-impl CheckpointRecord {
-  pub fn into_entity(
-    self,
-    data: Option<String>,
-    encryption_key: Option<EncryptionKeyId>,
-  ) -> CheckpointEntity {
-    CheckpointEntity {
-      id: self.id,
-      node: self.node,
-      name: self.name,
-      description: self.description,
-      created_at: self.created_at,
-      updated_at: self.updated_at,
-      data,
-      encryption_key,
-    }
-  }
 }
 
 #[typeshare(serialized_as = "string")]

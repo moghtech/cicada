@@ -36,20 +36,20 @@ impl Resolve<WriteArgs> for UpdateCheckpointEncryptionKey {
   ) -> Result<Self::Response, Self::Error> {
     let checkpoint =
       query::checkpoint::get_checkpoint(&self.id.0).await?;
-    // No-op if checkpoint has no data.
-    let Some(data) = checkpoint.data else {
-      return Ok(checkpoint.into_entity(None, None));
-    };
     // Re encrypt the envelope keys with new master key
     let data = rotate_encryption_key(
-      data,
-      &checkpoint.id.0,
-      self.encryption_key.0,
+      &checkpoint.encryption_key.0,
+      checkpoint.data,
+      &checkpoint.node.0,
+      &self.encryption_key.0,
     )
     .await?;
-    let checkpoint =
-      query::checkpoint::update_checkpoint_data(self.id, data.into())
-        .await?;
+    let checkpoint = query::checkpoint::update_checkpoint_data(
+      self.id,
+      self.encryption_key,
+      data,
+    )
+    .await?;
     decrypt_checkpoint(checkpoint).await
   }
 }
@@ -63,15 +63,19 @@ impl Resolve<WriteArgs> for RotateCheckpointEnvelopeKey {
   ) -> Result<Self::Response, Self::Error> {
     let checkpoint =
       query::checkpoint::get_checkpoint(&self.id.0).await?;
-    // No-op if checkpoint has no data.
-    let Some(data) = checkpoint.data else {
-      return Ok(checkpoint.into_entity(None, None));
-    };
     // Re encrypt data with new envelope key
-    let data = rotate_envelope_key(data, &checkpoint.id.0).await?;
-    let checkpoint =
-      query::checkpoint::update_checkpoint_data(self.id, data.into())
-        .await?;
+    let data = rotate_envelope_key(
+      &checkpoint.encryption_key.0,
+      checkpoint.data,
+      &checkpoint.node.0,
+    )
+    .await?;
+    let checkpoint = query::checkpoint::update_checkpoint_data(
+      self.id,
+      checkpoint.encryption_key,
+      data,
+    )
+    .await?;
     decrypt_checkpoint(checkpoint).await
   }
 }

@@ -1,16 +1,17 @@
--- Easily initialize encrypted fields on other tables.
-DEFINE FUNCTION OVERWRITE fn::define_encrypted_data_field(
+DEFINE FUNCTION OVERWRITE fn::define_encrypted_data_fields(
   $table: string,
-  $field: string,
 ) {
-  DEFINE FIELD OVERWRITE $field
+  DEFINE FIELD OVERWRITE encryption_key
+  ON TABLE $table
+  TYPE option<record<EncryptionKey>>
+  REFERENCE ON DELETE REJECT;
+
+  DEFINE FIELD OVERWRITE data
   ON TABLE $table
   TYPE option<{
-    encryption_key: record<EncryptionKey>,
     key: string,
     key_nonce: string,
     data: string,
     data_nonce: string,
-  }>
-  REFERENCE ON DELETE REJECT;
+  }>;
 };

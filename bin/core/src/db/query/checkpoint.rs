@@ -6,6 +6,7 @@ use cicada_client::{
     checkpoint::{
       CheckpointId, CheckpointListItem, CheckpointRecord,
     },
+    encryption_key::EncryptionKeyId,
     node::NodeId,
   },
 };
@@ -20,7 +21,7 @@ pub async fn list_checkpoints(
 ) -> mogh_error::Result<Vec<CheckpointListItem>> {
   DB.query(
     "
-SELECT *, data.encryption_key AS encryption_key OMIT data FROM Checkpoint
+SELECT * OMIT data FROM Checkpoint
 WHERE node = $node
 ORDER BY created_at DESC;",
   )
@@ -47,6 +48,7 @@ pub struct CreateCheckpointQuery {
   pub node: NodeId,
   pub name: Option<String>,
   pub description: Option<String>,
+  pub encryption_key: EncryptionKeyId,
   pub data: EncryptedData,
 }
 
@@ -79,14 +81,19 @@ pub async fn update_checkpoint(
 
 pub async fn update_checkpoint_data(
   id: CheckpointId,
-  data: Option<EncryptedData>,
+  encryption_key: EncryptionKeyId,
+  data: EncryptedData,
 ) -> mogh_error::Result<CheckpointRecord> {
   #[derive(SurrealValue)]
   struct UpdateCheckpointDataQuery {
-    data: Option<EncryptedData>,
+    encryption_key: EncryptionKeyId,
+    data: EncryptedData,
   }
   DB.update(id.as_record_id())
-    .merge(UpdateCheckpointDataQuery { data })
+    .merge(UpdateCheckpointDataQuery {
+      encryption_key,
+      data,
+    })
     .await
     .context("Failed to update Checkpoint on database")?
     .context(

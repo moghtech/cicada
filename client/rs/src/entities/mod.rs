@@ -6,8 +6,6 @@ use strum::{AsRefStr, Display, EnumString};
 use surrealdb_types::SurrealValue;
 use typeshare::typeshare;
 
-use crate::entities::encryption_key::EncryptionKeyId;
-
 /// Restorable history of changes to files
 pub mod checkpoint;
 /// Configuration for Cicada
@@ -48,7 +46,7 @@ pub type JsonValue = serde_json::Value;
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 pub struct NoData {}
 
-/// Stored as nested record fields for data the requires application level encryption.
+/// Stored as nested record field for data that requires application level encryption.
 /// Implements envelope encryption, ensuring encryption master key rotation
 /// doesn't require re-encrypting the data itself.
 #[typeshare]
@@ -56,8 +54,6 @@ pub struct NoData {}
 #[surreal(crate = "surrealdb_types")]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 pub struct EncryptedData {
-  // /// The master encryption key
-  pub encryption_key: EncryptionKeyId,
   /// The field key, encrypted with encryption key,
   /// and base64 encoded.
   pub key: String,

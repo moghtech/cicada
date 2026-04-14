@@ -61,7 +61,7 @@ export default function FilePage({
   });
 
   const missingKey = useRead("ListEncryptionKeys", {}).data?.find(
-    (key) => node?.missing_key && key.id === node?.encryption_key,
+    (key) => node?.data === null && key.id === node?.encryption_key,
   );
 
   const { mutateAsync: updateNode } = useWrite("UpdateNode", {
@@ -105,7 +105,7 @@ export default function FilePage({
         name={node?.name}
         state="File"
         icon={ICONS.File}
-        intent={node?.missing_key ? "Critical" : "Good"}
+        intent={node?.data === null ? "Critical" : "Good"}
         onRename={async (name) =>
           node && (await updateNode({ id: node?.id, name }))
         }
@@ -231,7 +231,7 @@ export default function FilePage({
             readOnly
           />
         </Stack>
-      ) : node?.missing_key ? (
+      ) : node?.data === null ? (
         <>
           <Text fz="h2">
             Failed to read data: missing encryption key{" "}

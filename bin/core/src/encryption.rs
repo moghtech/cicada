@@ -3,7 +3,7 @@ use std::sync::OnceLock;
 use cicada_client::entities::{
   EncryptedData, InterpolationMode,
   checkpoint::{CheckpointEntity, CheckpointRecord},
-  encryption_key::{EncryptionKeyId, EncryptionKeyKind},
+  encryption_key::EncryptionKeyKind,
   node::{NodeEntity, NodeRecord},
   secret::{SecretEntity, SecretRecord},
 };
@@ -79,17 +79,16 @@ pub fn encryption_keys() -> &'static EncryptionKeys {
 }
 
 pub async fn encrypt_data<A: AssociatedData>(
-  encryption_key_id: String,
+  encryption_key_id: &str,
   data: &[u8],
   associated_data: &A,
 ) -> mogh_error::Result<EncryptedData> {
   let master_key =
-    encryption_keys().get_or_insert(&encryption_key_id).await?;
+    encryption_keys().get_or_insert(encryption_key_id).await?;
   let EnvelopeEncryptedData { key, data } =
     xchacha20poly1305::EncryptionProvider::default()
       .envelope_encrypt(data, master_key, associated_data)?;
   Ok(EncryptedData {
-    encryption_key: EncryptionKeyId(encryption_key_id),
     key: key.data,
     key_nonce: key.nonce,
     data: data.data,
@@ -100,15 +99,15 @@ pub async fn encrypt_data<A: AssociatedData>(
 /// If Err, decryption failed.
 /// If None, missing encryption key.
 pub async fn decrypt_data<A: AssociatedData, T: TryFrom<Vec<u8>>>(
+  encryption_key_id: &str,
   data: EncryptedData,
   associated_data: &A,
 ) -> mogh_error::Result<Option<T>>
 where
   T::Error: Send + Sync + std::error::Error + 'static,
 {
-  let Ok(master_key) = encryption_keys()
-    .get_or_insert(&data.encryption_key.0)
-    .await
+  let Ok(master_key) =
+    encryption_keys().get_or_insert(encryption_key_id).await
   else {
     return Ok(None);
   };
@@ -135,15 +134,15 @@ where
 
 /// Re-encrypts the envelope keys using new master. Does not re-encrypt the data itself, so its cheap.
 pub async fn rotate_encryption_key<A: AssociatedData>(
+  encryption_key_id: &str,
   data: EncryptedData,
   associated_data: &A,
-  new_encryption_key_id: String,
+  new_encryption_key_id: &str,
 ) -> mogh_error::Result<EncryptedData> {
-  let old_master_key = encryption_keys()
-    .get_or_insert(&data.encryption_key.0)
-    .await?;
+  let old_master_key =
+    encryption_keys().get_or_insert(encryption_key_id).await?;
   let new_master_key = encryption_keys()
-    .get_or_insert(&new_encryption_key_id)
+    .get_or_insert(new_encryption_key_id)
     .await?;
   // Decrypt just the envelope keys using old master
   let key = xchacha20poly1305::decrypt(
@@ -163,7 +162,6 @@ pub async fn rotate_encryption_key<A: AssociatedData>(
     associated_data,
   )?;
   Ok(EncryptedData {
-    encryption_key: EncryptionKeyId(new_encryption_key_id),
     key,
     key_nonce,
     data: data.data,
@@ -173,25 +171,32 @@ pub async fn rotate_encryption_key<A: AssociatedData>(
 
 /// Decrypts data, regenerates envelope key, re-encrypts
 pub async fn rotate_envelope_key<A: AssociatedData>(
+  encryption_key_id: &str,
   data: EncryptedData,
   associated_data: &A,
 ) -> mogh_error::Result<EncryptedData> {
-  let encryption_key = data.encryption_key.clone();
-  let data = decrypt_data::<A, Vec<u8>>(data, associated_data)
-    .await?
-    .context("Cannot rotate envelope key without master key")?;
-  encrypt_data(encryption_key.0, &data, associated_data).await
+  let data = decrypt_data::<A, Vec<u8>>(
+    encryption_key_id,
+    data,
+    associated_data,
+  )
+  .await?
+  .context("Cannot rotate envelope key without master key")?;
+  encrypt_data(encryption_key_id, &data, associated_data).await
 }
 
 pub async fn decrypt_node(
   mut node: NodeRecord,
   interpolated: bool,
 ) -> mogh_error::Result<NodeEntity> {
-  let (data, encryption_key, missing_key) = if let Some(data) =
-    node.data
-  {
-    let key = data.encryption_key.clone();
-    if let Some(data) = decrypt_data(data, &node.id.0).await? {
+  let data = if let Some(data) = node.data {
+    let encryption_key = node
+      .encryption_key
+      .as_ref()
+      .context("Node with data missing encryption key")?;
+    if let Some(data) =
+      decrypt_data(&encryption_key.0, data, &node.id.0).await?
+    {
       if interpolated {
         let mode =
           if let InterpolationMode::Inherit = node.interpolation {
@@ -205,19 +210,19 @@ pub async fn decrypt_node(
           };
         let data =
           crate::interpolate::interpolate_secrets(data, mode).await?;
-        (Some(data), Some(key), false)
+        Some(data)
       } else {
-        (Some(data), Some(key), false)
+        Some(data)
       }
     } else {
-      (None, Some(key), true)
+      None
     }
   } else {
-    (None, None, false)
+    None
   };
   // node.data has been moved, need to assign something back so compiler doesn't complain.
   node.data = None;
-  Ok(node.into_entity(data, encryption_key, missing_key))
+  Ok(node.into_entity(data))
 }
 
 pub async fn decrypt_nodes(
@@ -243,23 +248,24 @@ pub async fn decrypt_nodes(
 }
 
 pub async fn decrypt_checkpoint(
-  mut checkpoint: CheckpointRecord,
+  checkpoint: CheckpointRecord,
 ) -> mogh_error::Result<CheckpointEntity> {
-  let (data, encryption_key) = if let Some(data) = checkpoint.data {
-    let key = data.encryption_key.clone();
-    // Checkpoint data still uses node id as associated data
-    if let Some(data) = decrypt_data(data, &checkpoint.node.0).await?
-    {
-      (Some(data), Some(key))
-    } else {
-      (None, Some(key))
-    }
-  } else {
-    (None, None)
-  };
-  // checkpoint.data has been moved, need to assign something back so compiler doesn't complain.
-  checkpoint.data = None;
-  Ok(checkpoint.into_entity(data, encryption_key))
+  let data = decrypt_data(
+    &checkpoint.encryption_key.0,
+    checkpoint.data,
+    &checkpoint.node.0,
+  )
+  .await?;
+  Ok(CheckpointEntity {
+    id: checkpoint.id,
+    node: checkpoint.node,
+    name: checkpoint.name,
+    description: checkpoint.description,
+    created_at: checkpoint.created_at,
+    updated_at: checkpoint.updated_at,
+    encryption_key: checkpoint.encryption_key,
+    data,
+  })
 }
 
 pub async fn decrypt_checkpoints(
@@ -287,21 +293,20 @@ pub async fn decrypt_checkpoints(
 }
 
 pub async fn decrypt_secret(
-  mut secret: SecretRecord,
+  secret: SecretRecord,
 ) -> mogh_error::Result<SecretEntity> {
-  let (encryption_key, data) = if let Some(data) = secret.data {
-    let key = data.encryption_key.clone();
-    if let Some(data) = decrypt_data(data, &secret.id.0).await? {
-      (Some(key), Some(data))
-    } else {
-      (Some(key), None)
-    }
-  } else {
-    (None, None)
-  };
-  // secret.data has been moved, need to assign something back so compiler doesn't complain.
-  secret.data = None;
-  Ok(secret.into_entity(data, encryption_key))
+  let data =
+    decrypt_data(&secret.encryption_key.0, secret.data, &secret.id.0)
+      .await?;
+  Ok(SecretEntity {
+    id: secret.id,
+    name: secret.name,
+    description: secret.description,
+    created_at: secret.created_at,
+    updated_at: secret.updated_at,
+    encryption_key: secret.encryption_key,
+    data,
+  })
 }
 
 pub async fn decrypt_secrets(

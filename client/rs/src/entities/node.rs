@@ -83,13 +83,13 @@ pub struct NodeEntity {
   pub checkpointing: CheckpointingMode,
   /// The interpolation mode
   pub interpolation: InterpolationMode,
+  /// The master encryption key for the data.
+  /// If this is not null while data is, it means
+  /// the encryption key is not initialized.
+  pub encryption_key: Option<EncryptionKeyId>,
   /// Data associated with the node.
   /// For files, this contains the file contents.
   pub data: Option<String>,
-  /// The encryption key used with data
-  pub encryption_key: Option<EncryptionKeyId>,
-  /// Whether encryption key is not initialized
-  pub missing_key: bool,
   /// Created at as ISO8601 timestamp.
   #[cfg_attr(feature = "utoipa", schema(value_type = String))]
   pub created_at: Iso8601Timestamp,
@@ -131,6 +131,8 @@ pub struct NodeRecord {
   pub checkpointing: CheckpointingMode,
   /// The interpolation mode
   pub interpolation: InterpolationMode,
+  /// The encryption key used with data
+  pub encryption_key: Option<EncryptionKeyId>,
   /// Data associated with the node.
   /// For files, this contains the file contents.
   pub data: Option<EncryptedData>,
@@ -143,12 +145,7 @@ pub struct NodeRecord {
 }
 
 impl NodeRecord {
-  pub fn into_entity(
-    self,
-    data: Option<String>,
-    encryption_key: Option<EncryptionKeyId>,
-    missing_key: bool,
-  ) -> NodeEntity {
+  pub fn into_entity(self, data: Option<String>) -> NodeEntity {
     NodeEntity {
       id: self.id,
       filesystem: self.filesystem,
@@ -161,9 +158,8 @@ impl NodeRecord {
       interpolation: self.interpolation,
       created_at: self.created_at,
       updated_at: self.updated_at,
+      encryption_key: self.encryption_key,
       data,
-      encryption_key,
-      missing_key,
     }
   }
 }

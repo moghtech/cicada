@@ -63,19 +63,21 @@ impl Resolve<WriteArgs> for CreateNode {
       };
 
       let data =
-        encrypt_data(encryption_key.0, data.as_bytes(), &node.id.0)
+        encrypt_data(&encryption_key.0, data.as_bytes(), &node.id.0)
           .await?;
 
       let checkpoint = self
         .checkpoint
         .unwrap_or_else(|| filesystem.checkpointing.enabled())
         // Doing like this only clones when necessary
-        .then(|| (node.id.clone(), data.clone()));
+        .then(|| {
+          (node.id.clone(), encryption_key.clone(), data.clone())
+        });
 
       let (node, _) = tokio::try_join!(
-        query::node::update_node_data(node.id, data),
+        query::node::update_node_data(node.id, encryption_key, data),
         async {
-          if let Some((node, data)) = checkpoint {
+          if let Some((node, encryption_key, data)) = checkpoint {
             query::checkpoint::create_checkpoint(
               CreateCheckpointQuery {
                 node,
@@ -84,6 +86,7 @@ impl Resolve<WriteArgs> for CreateNode {
                   .unwrap_or_else(|| String::from("Create file"))
                   .into(),
                 description: self.checkpoint_description,
+                encryption_key,
                 data,
               },
             )
@@ -162,7 +165,7 @@ impl Resolve<WriteArgs> for UpdateNodeData {
     };
 
     let data = encrypt_data(
-      encryption_key.0,
+      &encryption_key.0,
       self.data.as_bytes(),
       &self.id.0,
     )
@@ -177,17 +180,18 @@ impl Resolve<WriteArgs> for UpdateNodeData {
           .enabled()
       })
       // Doing like this only clones when necessary
-      .then(|| data.clone());
+      .then(|| (encryption_key.clone(), data.clone()));
 
     let (node, _) = tokio::try_join!(
-      query::node::update_node_data(self.id, data),
+      query::node::update_node_data(self.id, encryption_key, data),
       async {
-        if let Some(data) = checkpoint {
+        if let Some((encryption_key, data)) = checkpoint {
           query::checkpoint::create_checkpoint(
             CreateCheckpointQuery {
               node: node.id,
               name: self.checkpoint_name,
               description: self.checkpoint_description,
+              encryption_key,
               data,
             },
           )
@@ -219,14 +223,25 @@ impl Resolve<WriteArgs> for UpdateNodeEncryptionKey {
     .await?;
     // No-op if node has no data.
     let Some(data) = node.data else {
-      return Ok(node.into_entity(None, None, false));
+      return Ok(node.into_entity(None));
     };
+    let encryption_key = node
+      .encryption_key
+      .context("Node has data but no encryption key")?;
     // Re encrypt the envelope keys with new master key
-    let data =
-      rotate_encryption_key(data, &node.id.0, self.encryption_key.0)
-        .await?;
-    let node =
-      query::node::update_node_data(self.id, data.into()).await?;
+    let data = rotate_encryption_key(
+      &encryption_key.0,
+      data,
+      &node.id.0,
+      &self.encryption_key.0,
+    )
+    .await?;
+    let node = query::node::update_node_data(
+      self.id,
+      self.encryption_key,
+      data.into(),
+    )
+    .await?;
     decrypt_node(node, self.interpolated).await
   }
 }
@@ -247,12 +262,21 @@ impl Resolve<WriteArgs> for RotateNodeEnvelopeKey {
     .await?;
     // No-op if node has no data.
     let Some(data) = node.data else {
-      return Ok(node.into_entity(None, None, false));
+      return Ok(node.into_entity(None));
     };
+    let encryption_key = node
+      .encryption_key
+      .context("Node has data but no encryption key")?;
     // Re encrypt data with new envelope key
-    let data = rotate_envelope_key(data, &node.id.0).await?;
-    let node =
-      query::node::update_node_data(self.id, data.into()).await?;
+    let data =
+      rotate_envelope_key(&encryption_key.0, data, &node.id.0)
+        .await?;
+    let node = query::node::update_node_data(
+      self.id,
+      encryption_key,
+      data.into(),
+    )
+    .await?;
     decrypt_node(node, self.interpolated).await
   }
 }

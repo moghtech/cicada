@@ -16,8 +16,8 @@ pub async fn list_secrets() -> mogh_error::Result<Vec<SecretListItem>>
 {
   DB.query(
     "
-SELECT *, data.encryption_key AS encryption_key OMIT data FROM Secret
-ORDER BY kind DESC, name COLLATE ASC;",
+SELECT * OMIT data FROM Secret
+ORDER BY name COLLATE ASC;",
   )
   .await
   .context("Failed to query database for secrets")?
@@ -36,7 +36,7 @@ pub async fn list_secrets_matching(
     "
 SELECT * FROM Secret
 WHERE name IN $names
-ORDER BY kind DESC, name COLLATE ASC;",
+ORDER BY name COLLATE ASC;",
   )
   .bind(("names", names))
   .await
