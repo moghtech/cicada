@@ -2,6 +2,7 @@ use cicada_client::api::write::{
   BatchDeleteFilesystems, CreateFilesystem, DeleteFilesystem,
   UpdateFilesystem,
 };
+use futures_util::{StreamExt as _, stream::FuturesUnordered};
 use mogh_resolver::Resolve;
 
 use crate::{
@@ -43,7 +44,12 @@ impl Resolve<WriteArgs> for DeleteFilesystem {
     self,
     WriteArgs { client }: &WriteArgs,
   ) -> Result<Self::Response, Self::Error> {
-    client.admin_only()?;
+    ensure_client_filesystem_permission(
+      client,
+      self.id.clone(),
+      true,
+    )
+    .await?;
     query::filesystem::delete_filesystem(self.id).await
   }
 }
@@ -53,8 +59,32 @@ impl Resolve<WriteArgs> for DeleteFilesystem {
 impl Resolve<WriteArgs> for BatchDeleteFilesystems {
   async fn resolve(
     self,
-    _: &WriteArgs,
+    WriteArgs { client }: &WriteArgs,
   ) -> Result<Self::Response, Self::Error> {
-    query::filesystem::batch_delete_filesystems(self.ids).await
+    let ids = if client.is_admin_user() {
+      self.ids
+    } else {
+      // filter out any ids client doesn't
+      // have necessary access to
+      self
+        .ids
+        .into_iter()
+        .map(|id| async {
+          ensure_client_filesystem_permission(
+            client,
+            id.clone(),
+            true,
+          )
+          .await?;
+          Result::<_, mogh_error::Error>::Ok(id)
+        })
+        .collect::<FuturesUnordered<_>>()
+        .collect::<Vec<_>>()
+        .await
+        .into_iter()
+        .flatten()
+        .collect::<Vec<_>>()
+    };
+    query::filesystem::batch_delete_filesystems(ids).await
   }
 }

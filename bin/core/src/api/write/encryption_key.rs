@@ -153,8 +153,9 @@ impl Resolve<WriteArgs> for UninitializeEncryptionKey {
 impl Resolve<WriteArgs> for DeleteEncryptionKey {
   async fn resolve(
     self,
-    _: &WriteArgs,
+    WriteArgs { client }: &WriteArgs,
   ) -> Result<Self::Response, Self::Error> {
+    client.admin_only()?;
     let deleted =
       query::encryption_key::delete_encryption_key(self.id.0).await?;
     Ok(convert_encryption_key(deleted))
@@ -166,8 +167,9 @@ impl Resolve<WriteArgs> for DeleteEncryptionKey {
 impl Resolve<WriteArgs> for BatchDeleteEncryptionKeys {
   async fn resolve(
     self,
-    _: &WriteArgs,
+    WriteArgs { client }: &WriteArgs,
   ) -> Result<Self::Response, Self::Error> {
+    client.admin_only()?;
     let deleted =
       query::encryption_key::batch_delete_encryption_keys(self.ids)
         .await?

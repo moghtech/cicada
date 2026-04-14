@@ -21,8 +21,10 @@ use crate::{
 impl Resolve<WriteArgs> for CreateSecret {
   async fn resolve(
     self,
-    _: &WriteArgs,
+    WriteArgs { client }: &WriteArgs,
   ) -> Result<Self::Response, Self::Error> {
+    client.admin_only()?;
+    
     let secret = query::secret::create_secret(CreateSecretQuery {
       name: self.name,
       description: self.description,
@@ -61,8 +63,9 @@ impl Resolve<WriteArgs> for CreateSecret {
 impl Resolve<WriteArgs> for UpdateSecret {
   async fn resolve(
     self,
-    _: &WriteArgs,
+    WriteArgs { client }: &WriteArgs,
   ) -> Result<Self::Response, Self::Error> {
+    client.admin_only()?;
     let secret = query::secret::update_secret(self).await?;
     decrypt_secret(secret).await
   }
@@ -73,8 +76,10 @@ impl Resolve<WriteArgs> for UpdateSecret {
 impl Resolve<WriteArgs> for UpdateSecretData {
   async fn resolve(
     self,
-    _: &WriteArgs,
+    WriteArgs { client }: &WriteArgs,
   ) -> Result<Self::Response, Self::Error> {
+    client.admin_only()?;
+
     let encryption_key = if let Some(id) = self.encryption_key {
       id
     } else if let Some(id) =
@@ -110,8 +115,10 @@ impl Resolve<WriteArgs> for UpdateSecretData {
 impl Resolve<WriteArgs> for UpdateSecretEncryptionKey {
   async fn resolve(
     self,
-    _: &WriteArgs,
+    WriteArgs { client }: &WriteArgs,
   ) -> Result<Self::Response, Self::Error> {
+    client.admin_only()?;
+
     let secret = query::secret::get_secret(&self.id.0).await?;
 
     let Some(data) = secret.data else {
@@ -155,8 +162,10 @@ impl Resolve<WriteArgs> for UpdateSecretEncryptionKey {
 impl Resolve<WriteArgs> for RotateSecretEnvelopeKey {
   async fn resolve(
     self,
-    _: &WriteArgs,
+    WriteArgs { client }: &WriteArgs,
   ) -> Result<Self::Response, Self::Error> {
+    client.admin_only()?;
+
     let secret = query::secret::get_secret(&self.id.0).await?;
 
     let Some(data) = secret.data else {
@@ -196,8 +205,9 @@ impl Resolve<WriteArgs> for RotateSecretEnvelopeKey {
 impl Resolve<WriteArgs> for DeleteSecret {
   async fn resolve(
     self,
-    _: &WriteArgs,
+    WriteArgs { client }: &WriteArgs,
   ) -> Result<Self::Response, Self::Error> {
+    client.admin_only()?;
     let deleted = query::secret::delete_secret(self.id.0).await?;
     decrypt_secret(deleted).await
   }
@@ -208,8 +218,9 @@ impl Resolve<WriteArgs> for DeleteSecret {
 impl Resolve<WriteArgs> for BatchDeleteSecrets {
   async fn resolve(
     self,
-    _: &WriteArgs,
+    WriteArgs { client }: &WriteArgs,
   ) -> Result<Self::Response, Self::Error> {
+    client.admin_only()?;
     let deleted =
       query::secret::batch_delete_secrets(self.ids).await?;
     Ok(decrypt_secrets(deleted).await)
