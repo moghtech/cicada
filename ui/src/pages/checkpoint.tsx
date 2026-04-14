@@ -18,7 +18,7 @@ import EncryptionKeySelector from "@/components/encryption-key-selector";
 import ConfirmFileSave from "@/components/confirm-file-save";
 import { useState } from "react";
 import CheckpointSelector from "@/components/checkpoint-selector";
-import Checkpoints from "@/components/checkpoints";
+import CheckpointTable from "@/components/checkpoint-table";
 import ConfirmSecretSave from "@/components/confirm-secret-save";
 
 export default function CheckpointPage() {
@@ -236,7 +236,7 @@ export default function CheckpointPage() {
             />
           )}
 
-          <Checkpoints target={checkpoint.target} />
+          <CheckpointTable target={checkpoint.target} />
         </EntityPage>
       )}
     </PageGuard>

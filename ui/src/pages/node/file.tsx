@@ -28,7 +28,7 @@ import InterpolationModeSelector from "@/components/interpolation-mode-selector"
 import EncryptionKeySelector from "@/components/encryption-key-selector";
 import { ICONS } from "@/lib/icons";
 import CheckpointingModeSelector from "@/components/checkpointing-mode-selector";
-import Checkpoints from "@/components/checkpoints";
+import CheckpointTable from "@/components/checkpoint-table";
 import ConfirmFileSave from "@/components/confirm-file-save";
 
 export default function FilePage({
@@ -254,7 +254,7 @@ export default function FilePage({
               value={data ?? node.data ?? ""}
               onValueChange={(data) => setEdit({ data })}
             />
-            <Checkpoints target={{ type: "Node", id: node.id }} />
+            <CheckpointTable target={{ type: "Node", id: node.id }} />
           </>
         )
       )}

@@ -7,7 +7,7 @@ export interface CheckpointsProps {
   target: Types.CheckpointTarget | undefined;
 }
 
-export default function Checkpoints({ target }: CheckpointsProps) {
+export default function CheckpointTable({ target }: CheckpointsProps) {
   const { data: checkpoints } = useRead(
     "ListCheckpoints",
     { target: target! },
@@ -28,10 +28,12 @@ export default function Checkpoints({ target }: CheckpointsProps) {
             <CheckpointLink id={row.original.id} target={row.original.target} />
           ),
         },
-        // {
-        //   header: "Description",
-        //   accessorKey: "description",
-        // },
+        {
+          header: ({ column }) => (
+            <SortableHeader column={column} title="Description" />
+          ),
+          accessorKey: "description",
+        },
         {
           header: ({ column }) => (
             <SortableHeader column={column} title="Created At" />

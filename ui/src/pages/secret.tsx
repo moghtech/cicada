@@ -16,7 +16,7 @@ import {
 } from "mogh_ui";
 import { ICONS } from "@/lib/icons";
 import EncryptionKeySelector from "@/components/encryption-key-selector";
-import Checkpoints from "@/components/checkpoints";
+import CheckpointTable from "@/components/checkpoint-table";
 import ConfirmSecretSave from "@/components/confirm-secret-save";
 
 export default function SecretPage() {
@@ -147,7 +147,7 @@ export default function SecretPage() {
                 value={data ?? secret.data ?? ""}
                 onValueChange={(data) => setEdit({ data })}
               />
-              <Checkpoints target={{ type: "Secret", id: secret.id }} />
+              <CheckpointTable target={{ type: "Secret", id: secret.id }} />
             </>
           )}
         </EntityPage>
