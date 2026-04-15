@@ -174,6 +174,8 @@ pub struct Env {
   pub cicada_logging_location: Option<bool>,
   /// Override `logging.ansi`
   pub cicada_logging_ansi: Option<bool>,
+  /// Override `logging.timestamps`
+  pub cicada_logging_timestamps: Option<bool>,
   /// Override `logging.otlp_endpoint`
   pub cicada_logging_otlp_endpoint: Option<String>,
   /// Override `logging.opentelemetry_service_name`
@@ -241,17 +243,6 @@ pub struct CoreConfig {
   #[serde(default = "default_core_bind_ip")]
   pub bind_ip: String,
 
-  /// Optionally provide a specific jwt secret.
-  /// Passing nothing or an empty string will cause one to be generated.
-  /// Default: "" (empty string)
-  #[serde(default)]
-  pub jwt_secret: String,
-
-  /// Control how long distributed JWT remain valid for.
-  /// Default: `1-day`.
-  #[serde(default = "default_jwt_ttl")]
-  pub jwt_ttl: Timelength,
-
   /// Private key to use with Noise handshake to authenticate with Periphery agents.
   ///
   /// Supports openssl generated pem file, `openssl genpkey -algorithm X25519 -out private.key`.
@@ -275,14 +266,14 @@ pub struct CoreConfig {
   #[serde(default)]
   pub local_auth: bool,
 
+  /// New users will be automatically enabled.
+  #[serde(default)]
+  pub enable_new_users: bool,
+
   /// Normally new users will be registered, but not enabled until an Admin enables them.
   /// With `disable_user_registration = true`, only the first user to sign up will be registered as a user.
   #[serde(default)]
   pub disable_user_registration: bool,
-
-  /// New users will be automatically enabled.
-  #[serde(default)]
-  pub enable_new_users: bool,
 
   /// List of usernames for which the update username / password
   /// APIs are disabled. Used by demo to lock the 'demo' : 'demo' login.
@@ -290,6 +281,17 @@ pub struct CoreConfig {
   /// To lock the api for all users, use `lock_login_credentials_for = ["__ALL__"]`
   #[serde(default, skip_serializing_if = "Vec::is_empty")]
   pub lock_login_credentials_for: Vec<String>,
+
+  /// Optionally provide a specific jwt secret.
+  /// Passing nothing or an empty string will cause one to be generated.
+  /// Default: "" (empty string)
+  #[serde(default)]
+  pub jwt_secret: String,
+
+  /// Control how long distributed JWT remain valid for.
+  /// Default: `1-day`.
+  #[serde(default = "default_jwt_ttl")]
+  pub jwt_ttl: Timelength,
 
   /// OIDC login configuration
   #[serde(default)]
@@ -526,7 +528,7 @@ impl CoreConfig {
 #[derive(Debug, Clone, PartialEq, Deserialize)]
 pub struct DatabaseConfig {
   /// Surreal uri string:
-  /// - Local: `rocksdb:/database/database.db`
+  /// - Local: `rocksdb:/database`
   /// - Remote: `wss://my.surreal.db`
   #[serde(
     default = "default_database_uri",
@@ -549,7 +551,7 @@ pub struct DatabaseConfig {
 }
 
 fn default_database_uri() -> String {
-  String::from("rocksdb:/database/database.db")
+  String::from("rocksdb:/database")
 }
 
 fn default_database_namespace() -> String {

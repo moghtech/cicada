@@ -25,6 +25,10 @@ pub struct LogConfig {
   #[serde(default = "default_ansi")]
   pub ansi: bool,
 
+  /// Logs include timestamps. (default: true)
+  #[serde(default = "default_timestamps")]
+  pub timestamps: bool,
+
   /// Enable opentelemetry exporting
   #[serde(default)]
   pub otlp_endpoint: String,
@@ -52,6 +56,10 @@ fn default_ansi() -> bool {
   true
 }
 
+fn default_timestamps() -> bool {
+  true
+}
+
 impl Default for LogConfig {
   fn default() -> Self {
     Self {
@@ -60,6 +68,7 @@ impl Default for LogConfig {
       pretty: Default::default(),
       location: default_location(),
       ansi: default_ansi(),
+      timestamps: default_timestamps(),
       otlp_endpoint: Default::default(),
       opentelemetry_service_name: default_opentelemetry_service_name(
       ),
@@ -170,6 +179,9 @@ impl mogh_logger::LogConfig for &LogConfig {
   }
   fn location(&self) -> bool {
     self.location
+  }
+  fn timestamps(&self) -> bool {
+    self.timestamps
   }
   fn opentelemetry_scope_name(&self) -> String {
     self.opentelemetry_scope_name.clone()

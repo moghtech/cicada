@@ -153,6 +153,9 @@ pub fn periphery_config() -> &'static PeripheryConfig {
           .cicada_logging_location
           .unwrap_or(config.logging.location),
         ansi: env.cicada_logging_ansi.unwrap_or(config.logging.ansi),
+        timestamps: env
+          .cicada_logging_timestamps
+          .unwrap_or(config.logging.timestamps),
         otlp_endpoint: env
           .cicada_logging_otlp_endpoint
           .unwrap_or(config.logging.otlp_endpoint),

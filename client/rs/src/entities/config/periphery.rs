@@ -98,6 +98,8 @@ pub struct Env {
   pub cicada_logging_location: Option<bool>,
   /// Override `logging.ansi`
   pub cicada_logging_ansi: Option<bool>,
+  /// Override `logging.timestamps`
+  pub cicada_logging_timestamps: Option<bool>,
   /// Override `logging.otlp_endpoint`
   pub cicada_logging_otlp_endpoint: Option<String>,
   /// Override `logging.opentelemetry_service_name`
