@@ -35,11 +35,11 @@ async_timing_util = "1.1.0"
 
 # ASYNC
 reqwest = { version = "0.13.2", default-features = false, features = ["json", "rustls"] }
-tokio = { version = "1.51.1", features = ["full"] }
+tokio = { version = "1.52.0", features = ["full"] }
 futures-util = "0.3.32"
 
 # SERVER
-axum = { version = "0.8.8", features = ["ws", "json", "macros"] }
+axum = { version = "0.8.9", features = ["ws", "json", "macros"] }
 http = "1.4.0"
 
 # OPENAPI
@@ -59,7 +59,7 @@ dotenvy = "0.15.7"
 envy = "0.4.2"
 
 # CRYPTO / AUTH
-rustls = { version = "0.23.37", features = ["aws-lc-rs"] }
+rustls = { version = "0.23.38", features = ["aws-lc-rs"] }
 bcrypt = "0.19.0"
 
 # ERROR
@@ -75,5 +75,5 @@ colored = "3.1.1"
 dashmap = "6.1.0"
 fuser = "0.17.0"
 regex = "1.12.3"
-libc = "0.2.184"
+libc = "0.2.185"
 rand = "0.10.1"
