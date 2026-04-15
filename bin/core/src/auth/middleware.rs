@@ -155,6 +155,13 @@ pub async fn get_client_from_auth(
     RequestAuthentication::KeyAndSecret { key, secret } => {
       let key = find_api_key(key).await?;
 
+      if !key.enabled {
+        return Err(
+          anyhow!("Invalid client credentials")
+            .status_code(StatusCode::UNAUTHORIZED),
+        );
+      }
+
       if let Some(expires) = key.expires
         && expires < Iso8601Timestamp::now()
       {
@@ -203,7 +210,9 @@ pub async fn get_client_from_auth(
         .parse::<ClientType>()
         .context("X-API-TYPE is invalid")?;
       match client_type {
-        ClientType::User => todo!(),
+        ClientType::User => {
+          return Err(anyhow!("Not implemented").into());
+        }
         ClientType::Device => {
           let device =
             query::device::find_device_with_public_key(public_key)
