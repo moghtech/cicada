@@ -1,7 +1,7 @@
 services:
 
   cicada-periphery:
-    image: ghcr.io/moghtech/cicada-periphery
+    image: ghcr.io/moghtech/cicada-periphery:0
     restart: unless-stopped
     devices:
       - /dev/fuse
