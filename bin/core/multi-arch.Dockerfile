@@ -2,8 +2,8 @@
 ## Sets up the necessary runtime container dependencies for Cicada Core.
 ## Since theres no heavy build here, QEMU multi-arch builds are fine for this image.
 
-ARG BINARIES_IMAGE=ghcr.io/moghtech/cicada-binaries:2
-ARG UI_IMAGE=ghcr.io/moghtech/cicada-ui:2
+ARG BINARIES_IMAGE=ghcr.io/moghtech/cicada-binaries:0
+ARG UI_IMAGE=ghcr.io/moghtech/cicada-ui:0
 ARG X86_64_BINARIES=${BINARIES_IMAGE}-x86_64
 ARG AARCH64_BINARIES=${BINARIES_IMAGE}-aarch64
 
