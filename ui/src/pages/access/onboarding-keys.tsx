@@ -27,6 +27,7 @@ export default function OnboardingKeysPage() {
     onSuccess: (deleted) => {
       notifications.show({
         message: `Deleted ${deleted.length} onboarding key${deleted.length === 1 ? "" : "s"}.`,
+        color: "green",
       });
       inv(["ListOnboardingKeys"]);
       setSelected({});

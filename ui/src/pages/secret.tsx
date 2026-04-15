@@ -71,7 +71,7 @@ export default function SecretPage() {
   const { mutateAsync: deleteSecret, isPending: deleteSecretPending } =
     useWrite("DeleteSecret", {
       onSuccess: () => {
-        notifications.show({ message: "Secret deleted." });
+        notifications.show({ message: "Secret deleted.", color: "green" });
         inv(["ListSecrets"]);
         nav("/secrets");
       },

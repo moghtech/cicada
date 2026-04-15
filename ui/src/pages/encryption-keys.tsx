@@ -34,6 +34,7 @@ const EncryptionKeysPage = () => {
     onSuccess: (deleted) => {
       notifications.show({
         message: `Deleted ${deleted.length} encryption key${deleted.length === 1 ? "" : "s"}.`,
+        color: "green",
       });
       inv(["ListEncryptionKeys"]);
       setSelected({});

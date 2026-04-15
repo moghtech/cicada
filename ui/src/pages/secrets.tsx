@@ -43,6 +43,7 @@ export default function SecretsPage() {
     onSuccess: (deleted) => {
       notifications.show({
         message: `Deleted ${deleted.length} secret${deleted.length === 1 ? "" : "s"}.`,
+        color: "green",
       });
       inv(["ListSecrets"]);
       setSelected({});

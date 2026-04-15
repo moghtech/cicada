@@ -3,11 +3,11 @@ import { useRead } from "@/lib/hooks";
 import CheckpointLink from "./checkpoint-link";
 import { Types } from "cicada_client";
 
-export interface CheckpointsProps {
+export interface CheckpointTableProps {
   target: Types.CheckpointTarget | undefined;
 }
 
-export default function CheckpointTable({ target }: CheckpointsProps) {
+export default function CheckpointTable({ target }: CheckpointTableProps) {
   const { data: checkpoints } = useRead(
     "ListCheckpoints",
     { target: target! },

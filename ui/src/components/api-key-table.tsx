@@ -1,4 +1,3 @@
-import ConfirmDelete from "@/components/confirm-delete";
 import {
   DataTable,
   EnableSwitch,
@@ -6,48 +5,61 @@ import {
   SearchInput,
   SortableHeader,
 } from "mogh_ui";
-import { useInvalidate, useRead, useSetTitle, useWrite } from "@/lib/hooks";
-import { Group, List, Text } from "@mantine/core";
-import { notifications } from "@mantine/notifications";
-import { RowSelectionState } from "@tanstack/react-table";
+import { useInvalidate, useRead, useWrite } from "@/lib/hooks";
 import { useMemo, useState } from "react";
-import GroupMultiSelector from "@/components/group-multi-selector";
-import ResourceLink from "@/components/resource-link";
+import { RowSelectionState } from "@tanstack/react-table";
+import { notifications } from "@mantine/notifications";
+import { Group, List, Stack, Text } from "@mantine/core";
+import CreateApiKey from "@/create/api-key";
+import ConfirmDelete from "./confirm-delete";
 
-export default function DevicesPage() {
-  useSetTitle("Devices");
-  
+export interface ApiKeyTableProps {}
+
+export default function ApiKeyTable({}: ApiKeyTableProps) {
   const inv = useInvalidate();
-  const { data } = useRead("ListDevices", {});
+
+  const { data } = useRead("ListApiKeys", {});
+
   const byId = useMemo(
-    () =>
-      data &&
-      Object.fromEntries(data.map((device) => [device.id, device.name])),
+    () => data && Object.fromEntries(data.map((ok) => [ok.id, ok.name])),
     [data],
   );
   const [selected, setSelected] = useState<RowSelectionState>({});
   const selectedIds = useMemo(() => Object.keys(selected), [selected]);
-  const { mutateAsync: batchDelete } = useWrite("BatchDeleteDevices", {
+
+  const { mutate: update } = useWrite("UpdateApiKey", {
+    onSuccess: () => {
+      inv(["ListApiKeys"]);
+    },
+  });
+
+  const { mutateAsync: batchDelete } = useWrite("BatchDeleteApiKeys", {
     onSuccess: (deleted) => {
       notifications.show({
-        message: `Deleted ${deleted.length} device${deleted.length === 1 ? "" : "s"}.`,
+        message: `Deleted ${deleted.length} api key${deleted.length === 1 ? "" : "s"}.`,
         color: "green",
       });
-      inv(["ListDevices"]);
+      inv(["ListApiKeys"]);
       setSelected({});
     },
   });
-  const { mutate: updateDevice } = useWrite("UpdateDevice", {
-    onSuccess: () => inv(["ListDevices"]),
-  });
+
   const [search, setSearch] = useState("");
-  const devices = filterBySplit(data, search, (device) => device.name);
+  const apiKeys = filterBySplit(data, search, (k) => k.name);
+
   return (
-    <>
+    <Stack>
       <Group>
+        <CreateApiKey />
         <ConfirmDelete
           name=""
-          entityType={"Device" + (selectedIds.length === 1 ? "" : "s")}
+          entityType={selectedIds.length === 1 ? "Api Key" : "Api Keys"}
+          onConfirm={async () => {
+            if (selectedIds.length) {
+              await batchDelete({ ids: selectedIds });
+            }
+          }}
+          disabled={!selectedIds.length}
           info={
             <>
               <Text fw="bold" fz="lg">
@@ -60,18 +72,12 @@ export default function DevicesPage() {
               </List>
             </>
           }
-          onConfirm={async () => {
-            if (selectedIds.length) {
-              await batchDelete({ ids: selectedIds });
-            }
-          }}
-          disabled={!selectedIds.length}
         />
         <SearchInput value={search} onSearch={setSearch} />
       </Group>
       <DataTable
-        tableKey="devices-table-v1"
-        data={devices}
+        tableKey="api-key-table-v1"
+        data={apiKeys}
         selectOptions={{
           selectKey: (row) => row.id,
           state: [selected, setSelected],
@@ -82,9 +88,12 @@ export default function DevicesPage() {
               <SortableHeader column={column} title="Name" />
             ),
             accessorKey: "name",
-            cell: ({ row }) => (
-              <ResourceLink type="Device" id={row.original.id} />
+          },
+          {
+            header: ({ column }) => (
+              <SortableHeader column={column} title="Key" />
             ),
+            accessorKey: "key",
           },
           {
             header: ({ column }) => (
@@ -95,21 +104,8 @@ export default function DevicesPage() {
               <EnableSwitch
                 checked={row.original.enabled}
                 onCheckedChange={(enabled) =>
-                  updateDevice({ id: row.original.id, enabled })
+                  update({ id: row.original.id, enabled })
                 }
-              />
-            ),
-          },
-          {
-            header: "Groups",
-            accessorKey: "groups",
-            cell: ({ row }) => (
-              <GroupMultiSelector
-                value={row.original.groups}
-                onChange={(groups) =>
-                  updateDevice({ id: row.original.id, groups })
-                }
-                onClick={(e) => e.stopPropagation()}
               />
             ),
           },
@@ -131,6 +127,6 @@ export default function DevicesPage() {
           },
         ]}
       />
-    </>
+    </Stack>
   );
 }

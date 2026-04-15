@@ -33,6 +33,7 @@ const FilesystemsPage = () => {
     onSuccess: (deleted) => {
       notifications.show({
         message: `Deleted ${deleted.length} filesystem${deleted.length === 1 ? "" : "s"}.`,
+        color: "green",
       });
       inv(["ListFilesystems"]);
       setSelected({});

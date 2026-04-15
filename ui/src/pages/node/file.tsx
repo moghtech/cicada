@@ -88,7 +88,7 @@ export default function FilePage({
     "DeleteNode",
     {
       onSuccess: () => {
-        notifications.show({ message: "File deleted." });
+        notifications.show({ message: "File deleted.", color: "green" });
         nav(`/filesystems/${node?.filesystem}/${node?.parent}`);
       },
     },

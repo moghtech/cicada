@@ -118,6 +118,6 @@ export type WriteResponses = {
   BatchDeletePolicies: Types.BatchDeletePoliciesResponse;
 
   // ==== API KEY ====
-  UpdateApiKey: Types.UpdateApiKey;
-  BatchDeleteApiKeys: Types.BatchDeleteApiKeys;
+  UpdateApiKey: Types.UpdateApiKeyResponse;
+  BatchDeleteApiKeys: Types.BatchDeleteApiKeysResponse;
 };

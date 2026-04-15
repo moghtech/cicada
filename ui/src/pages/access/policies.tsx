@@ -19,7 +19,7 @@ import CreatePolicy from "@/create/policy";
 
 export default function PoliciesPage() {
   useSetTitle("Policies");
-  
+
   const inv = useInvalidate();
   const { data } = useRead("ListPolicies", {});
   const byId = useMemo(
@@ -32,6 +32,7 @@ export default function PoliciesPage() {
     onSuccess: (deleted) => {
       notifications.show({
         message: `Deleted ${deleted.length} ${deleted.length === 1 ? "policy" : "policies"}.`,
+        color: "green",
       });
       inv(["ListPolicies"]);
       setSelected({});

@@ -33,6 +33,7 @@ export default function UsersPage() {
     onSuccess: (deleted) => {
       notifications.show({
         message: `Deleted ${deleted.length} user${deleted.length === 1 ? "" : "s"}.`,
+        color: "green",
       });
       inv(["ListUsers"]);
       setSelected({});

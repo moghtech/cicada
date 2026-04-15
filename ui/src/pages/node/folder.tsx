@@ -72,6 +72,7 @@ const FolderPage = ({
     onSuccess: (deleted) => {
       notifications.show({
         message: `Deleted ${deleted.length} filesystem node${deleted.length === 1 ? "" : "s"}.`,
+        color: "green",
       });
       inv(["ListNodes"]);
       setSelected({});

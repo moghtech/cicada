@@ -84,7 +84,7 @@ export default function CheckpointPage() {
   const { mutateAsync: deleteCheckpoint, isPending: deleteCheckpointPending } =
     useWrite("DeleteCheckpoint", {
       onSuccess: () => {
-        notifications.show({ message: "Checkpoint deleted." });
+        notifications.show({ message: "Checkpoint deleted.", color: "green" });
         inv(["ListCheckpoints"]);
         nav(-1);
       },

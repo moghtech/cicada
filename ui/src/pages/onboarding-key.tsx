@@ -37,7 +37,10 @@ export default function OnboardingKeyPage() {
     isPending: deleteOnboardingKeyPending,
   } = useWrite("DeleteOnboardingKey", {
     onSuccess: () => {
-      notifications.show({ message: "Onboarding key deleted." });
+      notifications.show({
+        message: "Onboarding key deleted.",
+        color: "green",
+      });
       inv(["ListOnboardingKeys"]);
       nav("/secrets");
     },

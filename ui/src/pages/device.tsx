@@ -31,6 +31,7 @@ export default function DevicePage() {
       inv(["ListDevices"], ["GetDevice"]);
       notifications.show({
         message: "Device updated.",
+        color: "green",
       });
     },
   });
@@ -40,6 +41,7 @@ export default function DevicePage() {
       onSuccess: () => {
         notifications.show({
           message: "Device deleted.",
+          color: "green",
         });
         inv(["ListDevices"]);
         nav("/devices");

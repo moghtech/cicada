@@ -23,6 +23,7 @@ import {
   useLoginOptions,
   useManageAuth,
 } from "mogh_ui";
+import ApiKeyTable from "@/components/api-key-table";
 
 export default function ProfilePage() {
   useSetTitle("Profile");
@@ -47,13 +48,13 @@ function ProfileInner({ user }: { user: Types.UserEntity }) {
   const [password, setPassword] = useState("");
   const { mutate: updateUsername } = useManageAuth("UpdateUsername", {
     onSuccess: () => {
-      notifications.show({ message: "Username updated." });
+      notifications.show({ message: "Username updated.", color: "green" });
       refetchUser();
     },
   });
   const { mutate: updatePassword } = useManageAuth("UpdatePassword", {
     onSuccess: () => {
-      notifications.show({ message: "Password updated." });
+      notifications.show({ message: "Password updated.", color: "green" });
       setPassword("");
       refetchUser();
     },
@@ -64,6 +65,7 @@ function ProfileInner({ user }: { user: Types.UserEntity }) {
       onSuccess: () => {
         notifications.show({
           message: "External login skip 2fa mode updated.",
+          color: "green",
         });
         refetchUser();
       },
@@ -154,6 +156,10 @@ function ProfileInner({ user }: { user: Types.UserEntity }) {
             />
           )}
         </Group>
+      </Fieldset>
+
+      <Fieldset legend={<Text size="lg">API Keys</Text>}>
+        <ApiKeyTable />
       </Fieldset>
     </Page>
   );
