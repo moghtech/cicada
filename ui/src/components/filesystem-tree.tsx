@@ -135,11 +135,9 @@ const renderNode: (
           e.dataTransfer.dropEffect = "move";
           e.currentTarget.style.outline =
             "2px solid var(--mantine-color-blue-5)";
-          e.currentTarget.style.borderRadius = "var(--mantine-radius-default)";
         }}
         onDragLeave={(e: DragEvent<HTMLButtonElement>) => {
           e.currentTarget.style.outline = "";
-          e.currentTarget.style.borderRadius = "";
         }}
         onDrop={async (e: DragEvent<HTMLButtonElement>) => {
           e.preventDefault();
@@ -153,6 +151,7 @@ const renderNode: (
         variant={selectedInode === inode ? "default" : "subtle"}
         p="0rem 0.5rem"
         mb="0.25rem"
+        ml="2"
         justify="space-between"
         fullWidth
         rightSection={

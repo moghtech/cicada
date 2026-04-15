@@ -3,7 +3,7 @@ import { DataTable, EntityHeader, EntityPage, SortableHeader } from "mogh_ui";
 import CreateNode from "@/create/node";
 import { useInvalidate, useRead, useSetTitle, useWrite } from "@/lib/hooks";
 import { ICONS } from "@/lib/icons";
-import { Button, Flex, Group, List, Text } from "@mantine/core";
+import { Flex, Group, List, Text } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { RowSelectionState } from "@tanstack/react-table";
 import { Types } from "cicada_client";
@@ -13,6 +13,7 @@ import InterpolationModeSelector from "@/components/interpolation-mode-selector"
 import EncryptionKeySelector from "@/components/encryption-key-selector";
 import ResourceLink from "@/components/resource-link";
 import CheckpointingModeSelector from "@/components/checkpointing-mode-selector";
+import NodeLink from "@/components/node-link";
 
 const FolderPage = ({
   filesystem,
@@ -187,7 +188,7 @@ const FolderPage = ({
       </Group>
 
       <DataTable
-        tableKey="filesystem-table-v1"
+        tableKey="folder-table-v1"
         data={children}
         onRowClick={(node) =>
           nav(`/filesystems/${filesystem?.id}/${node.inode}`)
@@ -202,18 +203,7 @@ const FolderPage = ({
               <SortableHeader column={column} title="Name" />
             ),
             accessorKey: "name",
-            cell: ({ row: { original: node } }) => {
-              const Icon = ICONS[node.kind];
-              return (
-                <Button
-                  variant="transparent"
-                  c="inherit"
-                  leftSection={<Icon size="1rem" />}
-                >
-                  {node.name}
-                </Button>
-              );
-            },
+            cell: ({ row: { original: node } }) => <NodeLink node={node} />,
           },
           {
             header: ({ column }) => (
