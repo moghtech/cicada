@@ -2,16 +2,20 @@ services:
 
   cicada-periphery:
     image: ghcr.io/moghtech/cicada-periphery
-    cap_add:
-      - SYS_ADMIN
+    restart: unless-stopped
     devices:
       - /dev/fuse
+    cap_add:
+      - SYS_ADMIN
     security_opt:
-      - apparmor:unconfined
+      # Install the apparmor profile before starting. It persists on reboots:
+      #   sudo cp ./apparmor-docker-cicada /etc/apparmor.d/docker-cicada
+      #   sudo apparmor_parser -r -W /etc/apparmor.d/docker-cicada
+      - apparmor:docker-cicada
     volumes:
-      # Persist communication keys
+      # Store the auto generated key pair
       - keys:/config/keys
-      # Mount the fuse directory
+      # Use 'rshared' so FUSE mounts are visible to the host / other containers
       - /cicada:/cicada:rshared
       # Optional: Mount an additional root CA for trust
       # - /path/to/root_ca.crt:/usr/local/share/ca-certificates/root_ca.crt

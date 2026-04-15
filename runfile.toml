@@ -14,7 +14,7 @@ cmd = "CICADA_CONFIG_PATH=.dev/periphery.config.toml cargo run -p cicada_periphe
 alias = "dpc"
 description = "runs periphery in container"
 path = ".dev"
-cmd = "docker compose run -it --pull=always --rm --remove-orphans cperiphery"
+cmd = "docker compose run -it --pull=always --rm --remove-orphans cicada"
 
 [yarn-install]
 description = "downloads latest javacript dependencies for client and frontend"
