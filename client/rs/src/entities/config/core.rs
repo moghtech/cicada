@@ -234,7 +234,7 @@ pub struct CoreConfig {
   pub host: String,
 
   /// Port the core web server runs on.
-  /// Default: 9120.
+  /// Default: 9220.
   #[serde(default = "default_core_port")]
   pub port: u16,
 

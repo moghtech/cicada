@@ -26,15 +26,15 @@
 title = "Cicada"
 
 ## This should be the url used to access Cicada in browser, potentially behind DNS.
-## Eg https://cicada.example.com or http://12.34.56.78:9120. This should match the address configured in your Oauth app.
+## Eg https://cicada.example.com or http://12.34.56.78:9220. This should match the address configured in your Oauth app.
 ## Env: CICADA_HOST
 ## Required, no default.
 host = "https://cicada.example.com"
 
 ## The port the core system will run on.
 ## Env: CICADA_PORT
-## Default: 9120
-port = 9120
+## Default: 9220
+port = 9220
 
 ## The IP address the core server will bind to.
 ## The default will allow it to accept external IPv4 and IPv6 connections.
