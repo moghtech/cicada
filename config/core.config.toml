@@ -1,0 +1,337 @@
+######################
+# CICADA CORE CONFIG #
+######################
+
+## This is the offical "Default" config file for Cicada Core.
+## It serves as documentation for the meaning of the fields.
+## It is located at `https://github.com/moghtech/cicada/blob/main/config/core.config.toml`.
+
+## All fields with a "Default" provided are optional. If they are
+## left out of the file, the "Default" value will be used.
+
+## This file is bundled into the official image, `ghcr.io/moghtech/cicada-core`,
+## as the default config at `/config/.default.config.toml`.
+## Cicada Core can start with no external config file mounted.
+
+## Most fields can also be configured using environment variables.
+## Environment variables will override values set in this file.
+
+## Can also use JSON or YAML if preferred. You can convert here:
+##   - YAML: https://it-tools.tech/toml-to-yaml
+##   - JSON: https://it-tools.tech/toml-to-json
+
+## This will be the document title on the web page.
+## Env: CICADA_TITLE
+## Default: 'Cicada'
+title = "Cicada"
+
+## This should be the url used to access Cicada in browser, potentially behind DNS.
+## Eg https://cicada.example.com or http://12.34.56.78:9120. This should match the address configured in your Oauth app.
+## Env: CICADA_HOST
+## Required, no default.
+host = "https://cicada.example.com"
+
+## The port the core system will run on.
+## Env: CICADA_PORT
+## Default: 9120
+port = 9120
+
+## The IP address the core server will bind to.
+## The default will allow it to accept external IPv4 and IPv6 connections.
+## Env: CICADA_BIND_IP
+## Default: [::]
+bind_ip = "[::]"
+
+## Default private key to use with Noise handshake to authenticate with Periphery agents.
+## If using `file:/path/to/file` and the file doesn't exist yet,
+## Core will generate and write new key to the path.
+## Env: CICADA_PRIVATE_KEY or CICADA_PRIVATE_KEY_FILE
+## Default: file:/config/keys/core.key
+private_key = "file:/config/keys/core.key"
+
+################
+# AUTH / LOGIN #
+################
+
+## Allow user login with a username / password.
+## The password will be hashed and stored in the db for login comparison.
+##
+## NOTE:
+## Cicada has no API to recover account logins, but if this happens you can doctor the database using Mongo Compass.
+## Create a new Cicada user (Sign Up button), login to the database with Compass, note down your old users username and _id.
+## Then delete the old user, and update the new user to have the same username and _id. 
+## Make sure to set `enabled: true` and maybe `admin: true` on the new user as well, while using Compass.
+##
+## Env: CICADA_LOCAL_AUTH
+## Default: false
+local_auth = false
+
+## New users will be automatically enabled when they sign up.
+## Otherwise, new users will be disabled on first login.
+## The first user to login will always be enabled on creation.
+## Env: CICADA_ENABLE_NEW_USERS
+## Default: false
+enable_new_users = false
+
+## Normally new users will be registered, but not enabled until an Admin enables them.
+## With `disable_user_registration = true`, only the first user to log in will registered as a user.
+## Env: CICADA_DISABLE_USER_REGISTRATION
+## Default: false
+disable_user_registration = false
+
+## Normally users can update their username / password using the API.
+## This will disable this ability for specific users or all users.
+## Example:
+##  - `lock_login_credentials_for = []` will allow all users to update username / password.
+##  - `lock_login_credentials_for = ["demo"]` will block the demo user from doing so.
+##  - `lock_login_credentials_for = ["__ALL__"]` will block all users.
+## Env: CICADA_LOCK_LOGIN_CREDENTIALS_FOR
+## Default: empty list
+lock_login_credentials_for = []
+
+## Optionally provide a specific jwt secret.
+## Passing nothing or an empty string will cause one to be generated on every startup.
+## This means users will have to log in again if Cicada restarts.
+## Env: CICADA_JWT_SECRET or CICADA_JWT_SECRET_FILE
+## Default: empty string, meaning a random secret will be generated at startup.
+jwt_secret = ""
+
+## Specify how long a user can stay logged in before they have to log in again.
+## All jwts are invalidated on application restart unless `jwt_secret` is set.
+## Env: CICADA_JWT_TTL
+## Options: https://docs.rs/cicada_client/latest/cicada_client/entities/enum.Timelength.html
+## Default: 1-day. 
+jwt_ttl = "1-day"
+
+#############
+# OIDC Auth #
+#############
+
+## Enable logins with configured OIDC provider.
+## Env: CICADA_OIDC_ENABLED
+## Default: false
+oidc_enabled = false
+
+## Give the provider address.
+##
+## The path, ie /application/o/cicada for Authentik,
+## is provider and configuration specific.
+##
+## Note. this address must be reachable from Cicada Core container.
+##
+## Env: CICADA_OIDC_PROVIDER
+## Optional, no default.
+oidc_provider = "https://oidc.provider.internal/application/o/cicada"
+
+## Configure OIDC user redirect host.
+##
+## This is the host address users are redirected to in their browser,
+## and may be different from `oidc_provider` host depending on your networking.
+## If not provided (or empty string ""), the `oidc_provider` will be used.
+##
+## Note. DO NOT include the `path` part of the URL.
+## Example: `https://oidc.provider.external`
+##
+## Env: CICADA_OIDC_REDIRECT_HOST
+## Optional, no default.
+oidc_redirect_host = ""
+
+## Set the OIDC Client ID.
+## Env: CICADA_OIDC_CLIENT_ID or CICADA_OIDC_CLIENT_ID_FILE
+oidc_client_id = ""
+
+## Set the OIDC Client Secret.
+## If the OIDC provider supports PKCE-only flow,
+## the client secret is not necessary and can be ommitted or left empty.
+## Env: CICADA_OIDC_CLIENT_SECRET or CICADA_OIDC_CLIENT_SECRET_FILE
+oidc_client_secret = ""
+
+## If true, use the full email for usernames.
+## Otherwise, the @address will be stripped,
+## making usernames more concise.
+## Note. This does not work for all OIDC providers.
+## Env: CICADA_OIDC_USE_FULL_EMAIL
+## Default: false.
+oidc_use_full_email = false
+
+## Some providers attach other audiences in addition to the client_id.
+## If you have this issue, `Invalid audiences: `...` is not a trusted audience"`,
+## you can add the audience `...` to the list here (assuming it should be trusted).
+## Env: CICADA_OIDC_ADDITIONAL_AUDIENCES or CICADA_OIDC_ADDITIONAL_AUDIENCES_FILE
+## Default: empty
+oidc_additional_audiences = []
+
+#########
+# OAUTH #
+#########
+
+## Google
+
+## Env: CICADA_GOOGLE_OAUTH_ENABLED
+## Default: false
+google_oauth.enabled = false
+
+## Env: CICADA_GOOGLE_OAUTH_ID or CICADA_GOOGLE_OAUTH_ID_FILE
+## Required if google_oauth is enabled.
+google_oauth.id = ""
+
+## Env: CICADA_GOOGLE_OAUTH_SECRET or CICADA_GOOGLE_OAUTH_SECRET_FILE
+## Required if google_oauth is enabled.
+google_oauth.secret = ""
+
+## Github
+
+## Env: CICADA_GITHUB_OAUTH_ENABLED
+## Default: false
+github_oauth.enabled = false
+
+## Env: CICADA_GITHUB_OAUTH_ID or CICADA_GITHUB_OAUTH_ID_FILE
+## Required if github_oauth is enabled.
+github_oauth.id = ""
+
+## Env: CICADA_GITHUB_OAUTH_SECRET or CICADA_GITHUB_OAUTH_SECRET_FILE
+## Required if github_oauth is enabled.
+github_oauth.secret = ""
+
+######################
+# AUTH RATE LIMITING #
+######################
+
+## By default, all authenticated requests have a global failure rate limiter
+## by client IP address (X-FORWARDED-FOR, X-REAL-IP headers).
+## If clients try too many calls which fail to authenticate,
+## they will be temporarily blocked from making further attempts,
+## mitigating brute force attacks. 
+
+## Disable the auth rate limiting.
+## Env: CICADA_AUTH_RATE_LIMIT_DISABLED
+## Default: false
+auth_rate_limit_disabled = false
+
+## Configure the max attempts allowed within the given 'window_seconds'.
+## Env: CICADA_AUTH_RATE_LIMIT_MAX_ATTEMPTS
+## Default: 5
+auth_rate_limit_max_attempts = 5
+
+## Set the rate limiting window in seconds.
+## Env: CICADA_AUTH_RATE_LIMIT_WINDOW_SECONDS
+## Default: 15
+auth_rate_limit_window_seconds = 15
+
+##################
+# CORS / SESSION #
+##################
+
+## Specifically set list of CORS allowed origins.
+## If empty, allows all origins (`*`).
+## Production setups should configure this explicitly.
+## Env: CICADA_CORS_ALLOWED_ORIGINS
+## Default: empty
+cors_allowed_origins = []
+
+## Tell CORS to allow credentials in requests.
+## Set true only if needed for authentication proxy.
+## Env: CICADA_CORS_ALLOW_CREDENTIALS
+## Default: false
+cors_allow_credentials = false
+
+## Enabling this sets 'SameSite=None', which allows externally
+## hosted UIs to use the login flows.
+session_allow_cross_site = false
+
+############
+# Security #
+############
+
+## Enable HTTPS server using the given key and cert.
+## Env: CICADA_SSL_ENABLED
+## Default: false
+ssl_enabled = false
+
+## Path to the ssl key.
+## Env: CICADA_SSL_KEY_FILE
+## Default: /config/ssl/key.pem
+ssl_key_file = "/config/ssl/key.pem"
+
+## Path to the ssl cert.
+## Env: CICADA_SSL_CERT_FILE
+## Default: /config/ssl/cert.pem
+ssl_cert_file = "/config/ssl/cert.pem"
+
+############
+# DATABASE #
+############
+
+## Configure the database connection in one of the following ways:
+
+## Pass a full Mongo URI to the database.
+## Example: mongodb://username:password@localhost:27017
+## Env: CICADA_DATABASE_URI or CICADA_DATABASE_URI_FILE
+## Optional, can usually use `address`, `username`, `password` instead.
+database.uri = ""
+## Env: CICADA_DATABASE_USERNAME or CICADA_DATABASE_USERNAME_FILE
+database.username = ""
+## Env: CICADA_DATABASE_PASSWORD or CICADA_DATABASE_PASSWORD_FILE
+database.password = ""
+
+## ==== other ====
+
+## Cicada will create its database under this namespace.
+## Env: CICADA_DATABASE_NAMESPACE
+## Default: cicada.
+database.namespace = "cicada"
+
+## Cicada will create its tables under this database name.
+## The only reason to change this is if multiple Cicada Cores share the same db.
+## Env: CICADA_DATABASE_DB_NAME
+## Default: cicada.
+database.db_name = "cicada"
+
+###########
+# LOGGING #
+###########
+
+## Specify the logging verbosity
+## Env: CICADA_LOGGING_LEVEL
+## Options: off, error, warn, info, debug, trace
+## Default: info
+logging.level = "info"
+
+## Specify the logging format.
+## Env: CICADA_LOGGING_STDIO
+## Options: standard, json, none
+## Default: standard
+logging.stdio = "standard"
+
+## Enable log timestamps
+## Env: CICADA_LOGGING_TIMESTAMPS
+logging.timestamps = true
+
+## Optionally specify a opentelemetry otlp endpoint to send traces to.
+## Example: http://localhost:4317
+## Env: CICADA_LOGGING_OTLP_ENDPOINT
+logging.otlp_endpoint = ""
+
+## Set the opentelemetry service name.
+## This will be attached to the telemetry Cicada will send.
+## Env: CICADA_LOGGING_OPENTELEMETRY_SERVICE_NAME
+## Default: "Cicada"
+logging.opentelemetry_service_name = "Cicada"
+
+## Set the opentelemetry scope name.
+## This will be attached to the telemetry Cicada will send.
+## Env: CICADA_LOGGING_OPENTELEMETRY_SCOPE_NAME
+## Default: "Cicada"
+logging.opentelemetry_scope_name = "Cicada"
+
+## Specify whether logging is more human readable.
+## Note. Single logs will span multiple lines.
+## Env: CICADA_LOGGING_PRETTY
+## Default: false
+logging.pretty = false
+
+## Specify whether startup config log
+## is more human readable (multi-line)
+## Env: CICADA_PRETTY_STARTUP_CONFIG
+## Default: false
+pretty_startup_config = false

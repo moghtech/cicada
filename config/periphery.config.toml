@@ -1,0 +1,138 @@
+######################
+# CICADA CORE CONFIG #
+######################
+
+## This is the offical "Default" config file for Cicada Periphery.
+## It serves as documentation for the meaning of the fields.
+## It is located at `https://github.com/moghtech/cicada/blob/main/config/periphery.config.toml`.
+
+## All fields with a "Default" provided are optional. If they are
+## left out of the file, the "Default" value will be used.
+
+## Most fields can also be configured using environment variables.
+## Environment variables will override values set in this file.
+
+## Can also use JSON or YAML if preferred. You can convert here:
+##   - YAML: https://it-tools.tech/toml-to-yaml
+##   - JSON: https://it-tools.tech/toml-to-json
+
+## The address of Cicada Core. Must be reachable from this host.
+## Env: CICADA_CORE_ADDRESS
+## Required.
+core_address = "https://cicada.example.com"
+
+## Skip TLS certificate verification when communicating with Cicada Core.
+## Env: CICADA_CORE_TLS_INSECURE_SKIP_VERIFY
+## Default: false
+core_tls_insecure_skip_verify = false
+
+## The private key used with Cicada Core authentication.
+## If using `file:/path/to/file` and the file doesn't exist yet,
+## Periphery will generate and write new key to the path.
+## Env: PERIPHERY_PRIVATE_KEY or PERIPHERY_PRIVATE_KEY_FILE
+## Default: "file:/config/keys/periphery.key"
+private_key = "file:/config/keys/periphery.key"
+
+## Make Onboarding Keys in Access page.
+## Not needed if device is already onboarded.
+## Env: CICADA_ONBOARDING_KEY
+# onboarding_key = "O_MYKEY_O"
+
+## When onboarding, create the device with this name.
+## Not needed if device is already onboarded.
+## Env: CICADA_DEVICE_NAME
+# device_name = "my-device"
+
+## Specify the filesystems to mount using `filesystem_name|mount=/path/to/mount|uid=$UID|gid=$GID|rw=true` syntax.
+##
+## After the `filesystem_name`, the order of the parameters does not matter.
+##
+## For the `mount` paramter, relative paths are relative to the default mount root.
+## If the path is ommitted, will mount to $filesystem_root/$name.
+##
+## Example:
+##
+## ```
+## default_mount_root = "/cicada"
+## filesystems = [
+##   "app1",                                      # mounts app1 to /cicada/app1
+##   "app2|mount=relative/path",                  # mounts app2 to /cicada/relative/path
+##   "app3|mount=/custom/app3",                   # mounts app3 to /custom/app3
+##   "app4|mount=/custom/app4|uid=1000|rw=true",  # mounts app4 to /custom/app4 with files owned by UID 1000 and GID 1000 with rw
+##   "app5|mount=/custom/app5|uid=1000|gid=999",  # mounts app5 to /custom/app5 with files owned by UID 1000 and GID 999
+## ]
+## ```
+## Env: CICADA_FILESYSTEMS
+## Default: []
+filesystems = []
+
+## Allow specific UIDs to access the mounted filesystems.
+##
+## To allow user other than mount owner rw, must also specify rw=true.
+##
+## Example:
+##
+## ```toml
+## allow_uids = [
+##   "1001",
+##   "1002|rw=true"
+## ]
+## ```
+## Env: CICADA_ALLOW_UIDS
+## Default: []
+allow_uids = []
+
+## Specify the default filesystem mount root when
+## mount points are ommitted or relative.
+## Env: CICADA_DEFAULT_MOUNT_ROOT
+## Default: `/cicada`
+default_mount_root = "/cicada"
+
+###########
+# LOGGING #
+###########
+
+## Specify the logging verbosity
+## Env: CICADA_LOGGING_LEVEL
+## Options: off, error, warn, info, debug, trace
+## Default: info
+logging.level = "info"
+
+## Specify the logging format.
+## Env: CICADA_LOGGING_STDIO
+## Options: standard, json, none
+## Default: standard
+logging.stdio = "standard"
+
+## Enable log timestamps
+## Env: CICADA_LOGGING_TIMESTAMPS
+logging.timestamps = true
+
+## Optionally specify a opentelemetry otlp endpoint to send traces to.
+## Example: http://localhost:4317
+## Env: CICADA_LOGGING_OTLP_ENDPOINT
+logging.otlp_endpoint = ""
+
+## Set the opentelemetry service name.
+## This will be attached to the telemetry Cicada will send.
+## Env: CICADA_LOGGING_OPENTELEMETRY_SERVICE_NAME
+## Default: "Cicada"
+logging.opentelemetry_service_name = "Periphery"
+
+## Set the opentelemetry scope name.
+## This will be attached to the telemetry Cicada will send.
+## Env: CICADA_LOGGING_OPENTELEMETRY_SCOPE_NAME
+## Default: "Cicada"
+logging.opentelemetry_scope_name = "Cicada"
+
+## Specify whether logging is more human readable.
+## Note. Single logs will span multiple lines.
+## Env: CICADA_LOGGING_PRETTY
+## Default: false
+logging.pretty = false
+
+## Specify whether startup config log
+## is more human readable (multi-line)
+## Env: CICADA_PRETTY_STARTUP_CONFIG
+## Default: false
+pretty_startup_config = false
