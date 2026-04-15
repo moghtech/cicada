@@ -50,6 +50,8 @@ mod write {
     read::get_policy,
     // GROUP
     read::list_groups,
+    // API KEY
+    read::list_api_keys,
     // =======
     //  WRITE
     // =======
@@ -104,6 +106,9 @@ mod write {
     write::update_policy,
     write::delete_policy,
     write::batch_delete_policies,
+    // API KEY
+    write::update_api_key,
+    write::batch_delete_api_keys,
   ),
 )]
 pub struct CicadaApi;

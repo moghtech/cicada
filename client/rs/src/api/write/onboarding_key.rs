@@ -43,13 +43,16 @@ pub struct CreateOnboardingKey {
   /// generate fresh key. This key is not stored directly,
   /// only the public key.
   pub private_key: Option<String>,
-  /// Whether device is enabled. Default: true
+  /// Whether onboarding key is enabled. Default: true
   #[serde(default = "default_enabled")]
   pub enabled: bool,
   /// Expiry timestamp in unix milliseconds.
   /// Passing 0 or ommiting means no expiry.
   #[serde(default)]
   pub expires: U64,
+  /// Devices which onboard using this key will automatically
+  /// get these groups.
+  pub groups: Option<Vec<String>>,
 }
 
 fn default_enabled() -> bool {

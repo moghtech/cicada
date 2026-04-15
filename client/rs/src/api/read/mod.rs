@@ -2,6 +2,7 @@ use mogh_resolver::{HasResponse, Resolve};
 use serde::{Deserialize, Serialize};
 use typeshare::typeshare;
 
+mod api_key;
 mod checkpoint;
 mod device;
 mod encryption_key;
@@ -14,6 +15,7 @@ mod search;
 mod secret;
 mod user;
 
+pub use api_key::*;
 pub use checkpoint::*;
 pub use device::*;
 pub use encryption_key::*;

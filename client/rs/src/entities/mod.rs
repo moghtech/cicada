@@ -6,6 +6,8 @@ use strum::{AsRefStr, Display, EnumString};
 use surrealdb_types::SurrealValue;
 use typeshare::typeshare;
 
+/// Call the Cicada API using API keys.
+pub mod api_key;
 /// Restorable history of changes to files
 pub mod checkpoint;
 /// Configuration for Cicada

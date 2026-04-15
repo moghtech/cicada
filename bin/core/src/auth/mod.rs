@@ -4,6 +4,7 @@ use async_timing_util::{Timelength, get_timelength_in_ms};
 use cicada_client::{
   api::write::CreateUser,
   entities::{
+    Iso8601Timestamp,
     external_login::ExternalLoginKind,
     user::{UserId, UserRecord},
   },
@@ -29,7 +30,13 @@ use mogh_rate_limit::RateLimiter;
 use crate::{
   auth::middleware::get_client_from_auth,
   config::{core_config, core_keys},
-  db::query::user::*,
+  db::query::{
+    api_key::{
+      CreateApiKeyQuery, create_api_key, delete_api_key_with_key,
+      find_api_key,
+    },
+    user::*,
+  },
 };
 
 pub mod middleware;
@@ -602,5 +609,51 @@ impl AuthImpl for CicadaAuthImpl {
 
   fn server_private_key(&self) -> Option<&RotatableKeyPair> {
     Some(core_keys())
+  }
+
+  // ============
+  // = API KEYS =
+  // ============
+
+  fn get_api_key_user_id(
+    &self,
+    key: String,
+  ) -> mogh_auth_server::DynFuture<mogh_error::Result<String>> {
+    Box::pin(async move { find_api_key(key).await.map(|k| k.user.0) })
+  }
+
+  fn create_api_key(
+    &self,
+    user_id: String,
+    body: mogh_auth_client::api::manage::CreateApiKey,
+    key: String,
+    hashed_secret: String,
+  ) -> mogh_auth_server::DynFuture<mogh_error::Result<()>> {
+    let expires = if body.expires == 0 {
+      None
+    } else {
+      Iso8601Timestamp::from_timestamp(body.expires as i64 / 1_000, 0)
+    };
+    Box::pin(async move {
+      create_api_key(CreateApiKeyQuery {
+        user: UserId(user_id),
+        name: body.name,
+        key,
+        secret: hashed_secret,
+        enabled: true,
+        expires,
+      })
+      .await
+      .map(|_| ())
+    })
+  }
+
+  fn delete_api_key(
+    &self,
+    key: String,
+  ) -> mogh_auth_server::DynFuture<mogh_error::Result<()>> {
+    Box::pin(
+      async move { delete_api_key_with_key(key).await.map(|_| ()) },
+    )
   }
 }

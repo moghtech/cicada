@@ -18,7 +18,7 @@ DEFINE FIELD OVERWRITE public_key
 DEFINE FIELD OVERWRITE enabled
   ON TABLE OnboardingKey
   TYPE bool
-  DEFAULT false;
+  DEFAULT true;
 
 -- groups
 DEFINE FIELD OVERWRITE groups

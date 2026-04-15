@@ -9,7 +9,7 @@ use mogh_error::{
   anyhow::{Context as _, anyhow},
 };
 
-use crate::db::query;
+use crate::db::query::{self, api_key::find_api_key};
 
 #[derive(Clone)]
 pub enum Client {
@@ -152,8 +152,45 @@ pub async fn get_client_from_auth(
         )
       }
     }
-    RequestAuthentication::KeyAndSecret { key: _, secret: _ } => {
-      todo!()
+    RequestAuthentication::KeyAndSecret { key, secret } => {
+      let key = find_api_key(key).await?;
+
+      if let Some(expires) = key.expires
+        && expires < Iso8601Timestamp::now()
+      {
+        return Err(
+          anyhow!("Invalid client credentials")
+            .status_code(StatusCode::UNAUTHORIZED),
+        );
+      }
+
+      let Some(secret_hash) = key.secret else {
+        return Err(
+          anyhow!("Invalid client credentials")
+            .status_code(StatusCode::UNAUTHORIZED),
+        );
+      };
+
+      if !bcrypt::verify(secret, &secret_hash).map_err(|_| {
+        anyhow!("Invalid user credentials")
+          .status_code(StatusCode::UNAUTHORIZED)
+      })? {
+        // secret mismatch
+        return Err(
+          anyhow!("Invalid user credentials")
+            .status_code(StatusCode::UNAUTHORIZED),
+        );
+      }
+
+      let user = query::user::get_user_entity(key.user.0).await?;
+      if !require_user_enabled || user.enabled {
+        Ok(Client::User(user))
+      } else {
+        Err(
+          anyhow!("Invalid client credentials")
+            .status_code(StatusCode::UNAUTHORIZED),
+        )
+      }
     }
     RequestAuthentication::PublicKey(public_key) => {
       let client_type = headers

@@ -13,6 +13,7 @@ use typeshare::typeshare;
 use crate::auth::CicadaAuthImpl;
 use crate::{api::Variant, auth::middleware::Client};
 
+pub mod api_key;
 pub mod checkpoint;
 pub mod device;
 pub mod encryption_key;
@@ -101,6 +102,10 @@ pub enum WriteRequest {
   UpdatePolicy(UpdatePolicy),
   DeletePolicy(DeletePolicy),
   BatchDeletePolicies(BatchDeletePolicies),
+
+  // ==== API KEY ====
+  UpdateApiKey(UpdateApiKey),
+  BatchDeleteApiKeys(BatchDeleteApiKeys),
 }
 
 pub fn router() -> Router {

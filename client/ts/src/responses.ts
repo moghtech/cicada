@@ -46,6 +46,9 @@ export type ReadResponses = {
   // ==== ENCRYPTION KEY ====
   ListEncryptionKeys: Types.ListEncryptionKeysResponse;
   GetEncryptionKey: Types.GetEncryptionKeyResponse;
+
+  // ==== API KEY ====
+  ListApiKeys: Types.ListApiKeysResponse;
 };
 
 export type WriteResponses = {
@@ -108,9 +111,13 @@ export type WriteResponses = {
   DeleteEncryptionKey: Types.DeleteEncryptionKeyResponse;
   BatchDeleteEncryptionKeys: Types.BatchDeleteEncryptionKeysResponse;
 
-  // ==== FILESYSTEM ====
+  // ==== POLICY ====
   CreatePolicy: Types.CreatePolicyResponse;
   UpdatePolicy: Types.UpdatePolicyResponse;
   DeletePolicy: Types.DeletePolicyResponse;
   BatchDeletePolicies: Types.BatchDeletePoliciesResponse;
+
+  // ==== API KEY ====
+  UpdateApiKey: Types.UpdateApiKey;
+  BatchDeleteApiKeys: Types.BatchDeleteApiKeys;
 };

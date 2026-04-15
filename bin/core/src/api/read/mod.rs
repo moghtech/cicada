@@ -15,6 +15,7 @@ use crate::{
   api::Variant, auth::middleware::Client, db::query::user::get_user,
 };
 
+pub mod api_key;
 pub mod checkpoint;
 pub mod device;
 pub mod encryption_key;
@@ -86,6 +87,9 @@ enum ReadRequest {
   // ==== ENCRYPTION KEY ====
   ListEncryptionKeys(ListEncryptionKeys),
   GetEncryptionKey(GetEncryptionKey),
+
+  // ==== API KEY ====
+  ListApiKeys(ListApiKeys),
 }
 
 pub fn router() -> Router {

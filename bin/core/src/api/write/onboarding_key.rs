@@ -47,6 +47,7 @@ impl Resolve<WriteArgs> for CreateOnboardingKey {
       CreateOnboardingKeyQuery {
         name: self.name,
         enabled: self.enabled,
+        groups: self.groups,
         public_key,
         expires,
       },

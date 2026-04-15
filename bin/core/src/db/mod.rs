@@ -39,16 +39,12 @@ pub async fn init() -> mogh_error::Result<()> {
     .context("Failed to initialize EncryptionKey table")?;
   DB.query(include_str!("tables/functions/encrypted_data.surrealql"))
     .await
-    .context(
-      "Failed to initialize encrypted_data_field function.",
-    )?;
+    .context("Failed to initialize encrypted_data_field function.")?;
   DB.query(include_str!(
     "tables/functions/object_strip_none.surrealql"
   ))
   .await
-  .context(
-    "Failed to initialize object_strip_none function.",
-  )?;
+  .context("Failed to initialize object_strip_none function.")?;
 
   DB.query(include_str!("tables/User.surrealql"))
     .await
@@ -56,6 +52,9 @@ pub async fn init() -> mogh_error::Result<()> {
   DB.query(include_str!("tables/ExternalLogin.surrealql"))
     .await
     .context("Failed to initialize ExternalLogin table")?;
+  DB.query(include_str!("tables/ApiKey.surrealql"))
+    .await
+    .context("Failed to initialize ApiKey table")?;
   DB.query(include_str!("tables/Device.surrealql"))
     .await
     .context("Failed to initialize Device table")?;

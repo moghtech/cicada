@@ -1,3 +1,4 @@
+pub mod api_key;
 pub mod checkpoint;
 pub mod device;
 pub mod encryption_key;

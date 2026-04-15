@@ -1,5 +1,6 @@
 use mogh_resolver::HasResponse;
 
+mod api_key;
 mod checkpoint;
 mod device;
 mod encryption_key;
@@ -10,6 +11,7 @@ mod policy;
 mod secret;
 mod user;
 
+pub use api_key::*;
 pub use checkpoint::*;
 pub use device::*;
 pub use encryption_key::*;

@@ -1,0 +1,69 @@
+-- ========
+--  ApiKey
+-- ========
+
+DEFINE TABLE IF NOT EXISTS ApiKey SCHEMAFULL;
+
+-- user
+DEFINE FIELD OVERWRITE user
+  ON TABLE ApiKey
+  TYPE record<User>
+  REFERENCE ON DELETE CASCADE;
+
+-- name
+DEFINE FIELD OVERWRITE name
+  ON TABLE ApiKey
+  TYPE string
+  DEFAULT "";
+
+-- key
+DEFINE FIELD OVERWRITE key
+  ON TABLE ApiKey
+  TYPE string;
+
+-- secret
+DEFINE FIELD OVERWRITE secret
+  ON TABLE ApiKey
+  TYPE string;
+
+-- enabled
+DEFINE FIELD OVERWRITE enabled
+  ON TABLE ApiKey
+  TYPE bool
+  DEFAULT true;
+
+-- expires
+DEFINE FIELD OVERWRITE expires
+  ON TABLE ApiKey
+  TYPE option<datetime>;
+
+-- Standard timestamp fields 'created_at', 'updated_at'
+fn::define_timestamp_fields("ApiKey");
+
+-------------
+-- Indexes --
+-------------
+
+-- key | unique
+DEFINE INDEX OVERWRITE KeyUnique
+  ON TABLE ApiKey
+  FIELDS key
+  UNIQUE;
+
+-- user + name | unique
+DEFINE INDEX OVERWRITE UserNameUnique
+  ON TABLE ApiKey
+  FIELDS user, name
+  UNIQUE;
+
+---------------
+-- Functions --
+---------------
+
+DEFINE FUNCTION OVERWRITE fn::list_api_keys(
+  $user: record<User>
+) {
+  RETURN SELECT * OMIT secret FROM ApiKey
+    WHERE user = $user
+    ORDER BY name COLLATE ASC;
+};

@@ -55,6 +55,7 @@ pub struct CreateOnboardingKeyQuery {
   pub public_key: String,
   pub enabled: bool,
   pub expires: Option<Iso8601Timestamp>,
+  pub groups: Option<Vec<String>>,
 }
 
 pub async fn create_onboarding_key(
