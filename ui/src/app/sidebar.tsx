@@ -2,7 +2,8 @@ import FilesystemTree from "@/components/filesystem-tree";
 import { useRead } from "@/lib/hooks";
 import { ICONS } from "@/lib/icons";
 import { Button, Divider, Group, ScrollArea, Stack, Text } from "@mantine/core";
-import { useNavigate, useParams } from "react-router-dom";
+import { ReactNode } from "react";
+import { Link, useParams } from "react-router-dom";
 
 export default function Sidebar({ close }: { close: () => void }) {
   const accessPage =
@@ -25,53 +26,43 @@ export default function Sidebar({ close }: { close: () => void }) {
   const nSelectedInode = _selectedInode ? Number(_selectedInode) : undefined;
   const selectedInode = nSelectedInode ? nSelectedInode : undefined;
 
-  const _nav = useNavigate();
-  const nav = (to: string) => {
-    close();
-    _nav(to);
-  };
-
   return (
     <Stack justify="space-between" gap="md" h="96%" m="xl" mt="24" mr="md">
       {/* TOP AREA (scrolling) */}
       <ScrollArea>
         <Stack gap="0.15rem" mr="md">
-          <Button
-            variant={filesystemPage ? "default" : "subtle"}
-            onClick={() => nav("/filesystems")}
-            leftSection={<ICONS.Filesystem size="1rem" />}
-            justify="flex-start"
-            fullWidth
+          <SidebarLink
+            selected={filesystemPage}
+            to="/filesystems"
+            icon={ICONS.Filesystem}
+            close={close}
           >
             Filesystems
-          </Button>
-          <Button
-            variant={secretPage ? "default" : "subtle"}
-            onClick={() => nav("/secrets")}
-            leftSection={<ICONS.Secret size="1rem" />}
-            justify="flex-start"
-            fullWidth
+          </SidebarLink>
+          <SidebarLink
+            selected={secretPage}
+            to="/secrets"
+            icon={ICONS.Secret}
+            close={close}
           >
             Secrets
-          </Button>
-          <Button
-            variant={encryptionPage ? "default" : "subtle"}
-            onClick={() => nav("/encryption-keys")}
-            leftSection={<ICONS.EncryptionKey size="1rem" />}
-            justify="flex-start"
-            fullWidth
+          </SidebarLink>
+          <SidebarLink
+            selected={encryptionPage}
+            to="/encryption-keys"
+            icon={ICONS.EncryptionKey}
+            close={close}
           >
             Encryption
-          </Button>
-          <Button
-            variant={accessPage ? "default" : "subtle"}
-            onClick={() => nav("/access")}
-            leftSection={<ICONS.Access size="1rem" />}
-            justify="flex-start"
-            fullWidth
+          </SidebarLink>
+          <SidebarLink
+            selected={accessPage}
+            to="/access"
+            icon={ICONS.Access}
+            close={close}
           >
             Access
-          </Button>
+          </SidebarLink>
 
           <Divider
             label={
@@ -105,5 +96,34 @@ export default function Sidebar({ close }: { close: () => void }) {
         </Button> */}
       </Stack>
     </Stack>
+  );
+}
+
+function SidebarLink({
+  to,
+  children,
+  selected,
+  icon: Icon,
+  close,
+}: {
+  to: string;
+  children: ReactNode;
+  selected: boolean;
+  icon: (props: { size: string }) => ReactNode;
+  close: () => void;
+}) {
+  return (
+    <Button
+      component={Link}
+      to={to}
+      onClick={close}
+      variant={selected ? "default" : "subtle"}
+      leftSection={<Icon size="1rem" />}
+      className="hover-underline"
+      justify="flex-start"
+      fullWidth
+    >
+      {children}
+    </Button>
   );
 }
