@@ -222,15 +222,12 @@ auth_rate_limit_window_seconds = 15
 # CORS / SESSION #
 ##################
 
-## Specifically set list of CORS allowed origins.
-## If empty, allows all origins (`*`).
-## Production setups should configure this explicitly.
+## Set additional CORS allowed origins.
 ## Env: CICADA_CORS_ALLOWED_ORIGINS
 ## Default: empty
 cors_allowed_origins = []
 
 ## Tell CORS to allow credentials in requests.
-## Set true only if needed for authentication proxy.
 ## Env: CICADA_CORS_ALLOW_CREDENTIALS
 ## Default: false
 cors_allow_credentials = false
