@@ -12,6 +12,14 @@ FROM ${X86_64_BINARIES} AS x86_64
 FROM ${AARCH64_BINARIES} AS aarch64
 FROM ${UI_IMAGE} AS ui
 
+# Choose right binary
+FROM debian:trixie-slim AS binary
+
+# Copy both binaries initially, but only keep appropriate one for the TARGETPLATFORM.
+COPY --from=x86_64 /ccore /app/arch/linux/amd64
+COPY --from=aarch64 /ccore /app/arch/linux/arm64
+RUN mv /app/arch/${TARGETPLATFORM} /ccore
+
 # Final Image
 FROM gcr.io/distroless/cc
 
@@ -19,10 +27,8 @@ WORKDIR /app
 
 ARG TARGETPLATFORM
 
-# Copy both binaries initially, but only keep appropriate one for the TARGETPLATFORM.
-COPY --from=x86_64 /ccore /app/arch/linux/amd64
-COPY --from=aarch64 /ccore /app/arch/linux/arm64
-RUN mv /app/arch/${TARGETPLATFORM} /usr/local/bin/ccore && rm -r /app/arch
+# Copy binary
+COPY --from=binary /ccore /usr/local/bin/ccore
 
 # Copy default config / static ui
 COPY ./config/core.config.toml /config/.default.config.toml
