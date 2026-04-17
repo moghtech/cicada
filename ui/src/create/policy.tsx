@@ -1,12 +1,10 @@
-import { useInvalidate, useRead, useWrite } from "@/lib/hooks";
+import { useInvalidate, useWrite } from "@/lib/hooks";
 import {
   Button,
   Group,
-  MultiSelect,
   Popover,
   Stack,
   Stepper,
-  TagsInput,
   Text,
   TextInput,
 } from "@mantine/core";
@@ -16,6 +14,10 @@ import { notifications } from "@mantine/notifications";
 import { ArrowLeft, ArrowRight, Plus } from "lucide-react";
 import { useState } from "react";
 import { EnableSwitch, useShiftKeyListener } from "mogh_ui";
+import GroupMultiSelector from "@/components/group-multi-selector";
+import UserMultiSelector from "@/components/user-multi-selector";
+import DeviceMultiSelector from "@/components/device-multi-selector";
+import FilesystemMultiSelector from "@/components/filesystem-multi-selector";
 
 export default function CreatePolicy() {
   const [opened, { open, close, toggle }] = useDisclosure(false);
@@ -51,11 +53,6 @@ function CreatePolicyForm({ close }: { close: () => void }) {
       close();
     },
   });
-
-  const { data: users } = useRead("ListUsers", {});
-  const { data: devices } = useRead("ListDevices", {});
-  const { data: groups } = useRead("ListGroups", {});
-  const { data: filesystems } = useRead("ListFilesystems", {});
 
   const form = useForm({
     mode: "controlled",
@@ -95,40 +92,26 @@ function CreatePolicyForm({ close }: { close: () => void }) {
           <Text size="lg" c="dimmed">
             Select clients which gain access by this policy.
           </Text>
-          <TagsInput
+          <GroupMultiSelector
             {...form.getInputProps("groups")}
             label="Groups"
-            placeholder="Select or create groups"
-            data={groups?.map((g) => g.name) ?? []}
             comboboxProps={{ withinPortal: false }}
-            clearable
             key={form.key("groups")}
             mt="md"
-            onKeyDown={(e) => e.stopPropagation()}
           />
-          <MultiSelect
+          <UserMultiSelector
             {...form.getInputProps("users")}
             label="Users"
-            placeholder="Select users"
-            data={users?.map((u) => ({ value: u.id, label: u.username })) ?? []}
             comboboxProps={{ withinPortal: false }}
-            searchable
-            clearable
             key={form.key("users")}
             mt="md"
-            onKeyDown={(e) => e.stopPropagation()}
           />
-          <MultiSelect
+          <DeviceMultiSelector
             {...form.getInputProps("devices")}
             label="Devices"
-            placeholder="Select devices"
-            data={devices?.map((d) => ({ value: d.id, label: d.name })) ?? []}
             comboboxProps={{ withinPortal: false }}
-            searchable
-            clearable
             key={form.key("devices")}
             mt="md"
-            onKeyDown={(e) => e.stopPropagation()}
           />
         </Stepper.Step>
 
@@ -136,19 +119,13 @@ function CreatePolicyForm({ close }: { close: () => void }) {
           <Text size="lg" c="dimmed">
             Select filesystems which clients can access.
           </Text>
-          <MultiSelect
+          <FilesystemMultiSelector
             {...form.getInputProps("filesystems")}
             label="Filesystems"
             placeholder="Select filesystems"
-            data={
-              filesystems?.map((f) => ({ value: f.id, label: f.name })) ?? []
-            }
             comboboxProps={{ withinPortal: false }}
-            searchable
-            clearable
             key={form.key("filesystems")}
             mt="md"
-            onKeyDown={(e) => e.stopPropagation()}
           />
           <Group justify="end">
             <EnableSwitch

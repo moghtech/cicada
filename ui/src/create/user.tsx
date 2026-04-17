@@ -1,4 +1,5 @@
-import { useInvalidate, useRead, useWrite } from "@/lib/hooks";
+import GroupMultiSelector from "@/components/group-multi-selector";
+import { useInvalidate, useWrite } from "@/lib/hooks";
 import {
   Button,
   Group,
@@ -6,7 +7,6 @@ import {
   Popover,
   Stack,
   Stepper,
-  TagsInput,
   Text,
   TextInput,
 } from "@mantine/core";
@@ -51,8 +51,6 @@ function CreateUserForm({ close }: { close: () => void }) {
       close();
     },
   });
-
-  const { data: groups } = useRead("ListGroups", {});
 
   const form = useForm({
     mode: "controlled",
@@ -125,16 +123,12 @@ function CreateUserForm({ close }: { close: () => void }) {
             Configure user permissions.
           </Text>
           <Stack gap="xs">
-            <TagsInput
+            <GroupMultiSelector
               {...form.getInputProps("groups")}
               label="Groups"
-              placeholder="Select or create groups"
-              data={groups?.map((g) => g.name) ?? []}
               comboboxProps={{ withinPortal: false }}
-              clearable
               key={form.key("groups")}
               mt="md"
-              onKeyDown={(e) => e.stopPropagation()}
             />
             <Group justify="space-between">
               <Text>Admin</Text>
