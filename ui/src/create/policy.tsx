@@ -24,7 +24,7 @@ export default function CreatePolicy() {
     <Popover
       opened={opened}
       position="bottom-start"
-      offset={21}
+      offset={16}
       onChange={toggle}
       trapFocus
       closeOnEscape={false}

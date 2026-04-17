@@ -15,7 +15,7 @@ export default function CreateEncryptionKey() {
     <Popover
       opened={opened}
       position="bottom-start"
-      offset={21}
+      offset={16}
       width="400"
       onChange={toggle}
       trapFocus
