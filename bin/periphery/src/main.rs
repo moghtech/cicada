@@ -1,7 +1,10 @@
 #[macro_use]
 extern crate tracing;
 
-use std::sync::{OnceLock, atomic::AtomicBool};
+use std::{
+  sync::{OnceLock, atomic::AtomicBool},
+  time::Duration,
+};
 
 use cicada_client::{CicadaClient, entities::ClientType};
 use tracing::Instrument;
@@ -86,11 +89,14 @@ async fn main() -> anyhow::Result<()> {
     }
   };
 
+  let mut app = tokio::spawn(app());
+
   tokio::select! {
-    res = tokio::spawn(app()) => res?,
+    res = &mut app => res?,
     _ = shutdown => {
       SHOULD_SHUTDOWN.store(true, std::sync::atomic::Ordering::SeqCst);
       unmount::all();
+      tokio::time::timeout(Duration::from_secs(1), app).await???;
       Ok(())
     },
   }

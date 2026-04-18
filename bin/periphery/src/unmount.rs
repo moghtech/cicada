@@ -31,6 +31,7 @@ fn unmount_with_retries(mountpoint: &Path) {
       error!(
         "Failed to unmount {mountpoint:?} | Too many retries, exiting."
       );
+      return;
     }
   }
 }
