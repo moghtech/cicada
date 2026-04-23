@@ -215,7 +215,7 @@ pub struct PeripheryConfig {
 }
 
 fn default_private_key() -> String {
-  String::from("file:/config/keys/periphery.key")
+  String::from("file:/config/keys/cperiphery.key")
 }
 
 fn default_mount_root() -> PathBuf {

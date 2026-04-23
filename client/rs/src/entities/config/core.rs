@@ -403,7 +403,7 @@ fn default_core_bind_ip() -> String {
 }
 
 fn default_private_key() -> String {
-  String::from("file:/config/keys/core.key")
+  String::from("file:/config/keys/ccore.key")
 }
 
 fn default_jwt_ttl() -> Timelength {
