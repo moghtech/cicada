@@ -12,7 +12,7 @@ repository.workspace = true
 blocking = ["reqwest/blocking", "mogh_auth_client/blocking"]
 logger = ["dep:mogh_logger"]
 utoipa = ["dep:utoipa", "mogh_auth_client/utoipa", "mogh_error/utoipa"]
-core = ["logger", "utoipa", "dep:mogh_server"]
+core = ["blocking", "logger", "utoipa", "dep:mogh_server"]
 periphery = ["blocking", "logger"]
 
 [dependencies]
