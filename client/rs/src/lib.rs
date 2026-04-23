@@ -1,3 +1,12 @@
+//! # Cicada
+//!
+//! This is a client library for the Cicada Core API.
+//! It contains:
+//! - Definitions for the application [api] and [entities].
+//! - A [client][CicadaClient] to interact with the Cicada Core API.
+//! - Information on configuring Cicada [Core][entities::config::core] and [Periphery][entities::config::periphery].
+//!
+
 use http::{Method, Uri};
 use mogh_error::anyhow;
 use mogh_pki::{Pkcs8PrivateKey, SpkiPublicKey};
