@@ -211,7 +211,7 @@ pub async fn get_client_from_auth(
         .context("X-API-TYPE is invalid")?;
       match client_type {
         ClientType::User => {
-          return Err(anyhow!("Not implemented").into());
+          Err(anyhow!("Not implemented").into())
         }
         ClientType::Device => {
           let device =
