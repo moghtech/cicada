@@ -863,13 +863,34 @@ dependencies = [
 ]
 
 [[package]]
+name = "cicada_client"
+version = "0.5.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "33d3b757ad0af0614d7a754287e9e7a38fc9bbeb5bf1fc002ab0df671450d759"
+dependencies = [
+ "async_timing_util",
+ "http 1.4.0",
+ "mogh_auth_client",
+ "mogh_error",
+ "mogh_pki",
+ "mogh_resolver",
+ "reqwest 0.13.2",
+ "serde",
+ "serde_json",
+ "strum",
+ "surrealdb-types",
+ "tracing",
+ "typeshare",
+]
+
+[[package]]
 name = "cicada_core"
 version = "0.5.1"
 dependencies = [
  "async_timing_util",
  "axum 0.8.9",
  "bcrypt 0.19.0",
- "cicada_client",
+ "cicada_client 0.5.1",
  "colored",
  "dashmap",
  "dotenvy",
@@ -906,7 +927,7 @@ name = "cicada_loader"
 version = "0.5.1"
 dependencies = [
  "anyhow",
- "cicada_client",
+ "cicada_client 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "envy",
  "mogh_pki",
  "serde",
@@ -918,7 +939,7 @@ name = "cicada_periphery"
 version = "0.5.1"
 dependencies = [
  "anyhow",
- "cicada_client",
+ "cicada_client 0.5.1",
  "colored",
  "dotenvy",
  "envy",

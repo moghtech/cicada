@@ -9,7 +9,7 @@ repository.workspace = true
 homepage.workspace = true
 
 [dependencies]
-cicada_client = { workspace = true, features = ["blocking"] }
+cicada_client = { version = "0.5.1", features = ["blocking"] }
 mogh_pki.workspace = true
 tracing.workspace = true
 anyhow.workspace = true
