@@ -134,7 +134,7 @@ pub struct PeripheryConfig {
   /// If a file is specified and does not exist, will try to generate one at the path
   /// and use it going forward.
   ///
-  /// Default: file:/config/keys/periphery.key
+  /// Default: file:/config/keys/cperiphery.key
   #[serde(default = "default_private_key")]
   pub private_key: String,
 
