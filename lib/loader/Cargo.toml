@@ -1,0 +1,17 @@
+[package]
+name = "cicada_loader"
+description = "Enable apps to load configurations from Cicada"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+
+[dependencies]
+cicada_client = { workspace = true, features = ["blocking"] }
+mogh_pki.workspace = true
+tracing.workspace = true
+anyhow.workspace = true
+serde.workspace = true
+envy.workspace = true

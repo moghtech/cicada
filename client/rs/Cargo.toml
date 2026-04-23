@@ -24,8 +24,8 @@ mogh_auth_client.workspace = true
 mogh_resolver.workspace = true
 mogh_pki.workspace = true
 # EXTERNAL
-surrealdb-types = { workspace = true, optional = false }
 utoipa = { workspace = true, optional = true }
+surrealdb-types.workspace = true
 serde_json.workspace = true
 typeshare.workspace = true
 reqwest.workspace = true
