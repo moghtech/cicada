@@ -13,6 +13,7 @@ COPY Cargo.toml Cargo.lock ./
 COPY ./client/rs ./client/rs
 COPY ./bin/core ./bin/core
 COPY ./bin/periphery ./bin/periphery
+COPY ./lib ./lib
 
 # Compile bin
 RUN \
