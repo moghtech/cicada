@@ -14,12 +14,17 @@ use crate::{
 /// Make sure auth is valid, if not then try onboarding device.
 pub async fn ensure_onboarded() -> anyhow::Result<()> {
   tokio::task::spawn_blocking(|| {
-    if cicada().read(GetVersion{}).is_ok() {
-      info!("Authenticated with Cicada Core");
+    match cicada().read(GetVersion{}) {
+      Ok(_) => {
+        info!("Authenticated with Cicada Core");
       return Ok(());
+      }
+      Err(e) => {
+        info!("Failed to authenticate with Cicada Core | {e:#}");
+      }
     }
 
-    info!("Failed to authenticate with Cicada Core, attempting onboarding...");
+    info!("Attempting onboarding...");
 
     let config = periphery_config();
     let Some(onboarding_key) = &config.onboarding_key else {
