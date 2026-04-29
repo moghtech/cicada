@@ -39,13 +39,15 @@ export default function NodeLink({ node }: NodeLinkProps) {
 
   return (
     <Group
-      draggable={node.kind === Types.NodeKind.File}
+      draggable={true}
       onDragStart={(e) => {
         e.dataTransfer.setData("application/node-id", node.id);
         e.dataTransfer.effectAllowed = "move";
       }}
       onDragOver={(e) => {
         if (node.kind === Types.NodeKind.File) return;
+        const draggedNodeId = e.dataTransfer.getData("application/node-id");
+        if (!draggedNodeId || node.id === draggedNodeId) return;
         e.preventDefault();
         e.dataTransfer.dropEffect = "move";
         e.currentTarget.style.outline = "2px solid var(--mantine-color-blue-5)";
@@ -56,12 +58,11 @@ export default function NodeLink({ node }: NodeLinkProps) {
       }}
       onDrop={async (e) => {
         if (node.kind === Types.NodeKind.File) return;
+        const draggedNodeId = e.dataTransfer.getData("application/node-id");
+        if (!draggedNodeId || node.id === draggedNodeId) return;
         e.preventDefault();
         e.currentTarget.style.outline = "";
         e.currentTarget.style.borderRadius = "";
-        const draggedNodeId = e.dataTransfer.getData("application/node-id");
-        if (!draggedNodeId) return;
-        if (draggedNodeId === node.id) return;
         await moveNode({
           id: draggedNodeId,
           filesystem: node.filesystem,
