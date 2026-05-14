@@ -1,0 +1,19 @@
+[dev-docsite]
+alias = "dd"
+description = "starts the documentation site in dev mode"
+cmd = "yarn && yarn start"
+
+[build-docsite]
+alias = "bd"
+description = "builds the documentation site"
+cmd = "yarn && yarn build"
+
+[serve-docsite]
+alias = "sd"
+description = "builds and serves the built documentation site"
+after = ["build-docsite"]
+cmd = "yarn serve"
+
+[publish-docsite]
+description = "publishes the documentation site to github pages"
+cmd = "yarn && yarn deploy"
