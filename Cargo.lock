@@ -853,7 +853,7 @@ dependencies = [
 
 [[package]]
 name = "cicada_client"
-version = "0.6.1-dev-1"
+version = "0.6.1-dev-2"
 dependencies = [
  "async_timing_util",
  "http",
@@ -875,12 +875,12 @@ dependencies = [
 
 [[package]]
 name = "cicada_core"
-version = "0.6.1-dev-1"
+version = "0.6.1-dev-2"
 dependencies = [
  "async_timing_util",
  "axum",
  "bcrypt 0.19.2",
- "cicada_client 0.6.1-dev-1",
+ "cicada_client 0.6.1-dev-2",
  "colored",
  "dashmap",
  "dotenvy",
@@ -928,7 +928,7 @@ dependencies = [
 
 [[package]]
 name = "cicada_loader"
-version = "0.6.1-dev-1"
+version = "0.6.1-dev-2"
 dependencies = [
  "anyhow",
  "cicada_client 0.5.1",
@@ -940,10 +940,10 @@ dependencies = [
 
 [[package]]
 name = "cicada_periphery"
-version = "0.6.1-dev-1"
+version = "0.6.1-dev-2"
 dependencies = [
  "anyhow",
- "cicada_client 0.6.1-dev-1",
+ "cicada_client 0.6.1-dev-2",
  "colored",
  "dotenvy",
  "envy",
