@@ -3,7 +3,6 @@ name = "cicada_loader"
 description = "Enable apps to load configurations from Cicada"
 version.workspace = true
 edition.workspace = true
-authors.workspace = true
 license.workspace = true
 repository.workspace = true
 homepage.workspace = true

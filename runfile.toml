@@ -17,6 +17,7 @@ path = ".dev"
 cmd = "docker compose run -it --pull=always --rm --remove-orphans cicada"
 
 [yarn-install]
+alias = "yi"
 description = "downloads latest javacript dependencies for client and frontend"
 cmd = """
 cd client/ts && yarn &&
