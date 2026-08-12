@@ -1,6 +1,6 @@
 ## All in one, multi stage compile + runtime Docker build for your architecture.
 
-FROM rust:1.96.1-trixie AS builder
+FROM rust:1.97.1-trixie AS builder
 RUN cargo install cargo-strip
 
 WORKDIR /builder
@@ -8,6 +8,11 @@ COPY Cargo.toml Cargo.lock ./
 COPY ./lib ./lib
 COPY ./client/rs ./client/rs
 COPY ./bin/periphery ./bin/periphery
+
+# Set Version
+ARG VERSION="0.0.0"
+ARG IMAGE_TAG=""
+RUN cargo set-version ${VERSION}${IMAGE_TAG:+-${IMAGE_TAG}}
 
 # Compile app
 RUN cargo build -p cicada_periphery --release && cargo strip

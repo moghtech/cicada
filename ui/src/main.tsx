@@ -15,7 +15,7 @@ import "./index.scss";
 import "mogh_ui/index.scss";
 
 export const CICADA_BASE_URL =
-  import.meta.env.VITE_CICADA_HOST ?? location.origin;
+  import.meta.env.VITE_CICADA_HOST || location.origin;
 const client = new QueryClient({
   defaultOptions: { queries: { retry: false } },
 });
