@@ -1,14 +1,19 @@
 ## All in one, multi stage compile + runtime Docker build for your architecture.
 
 # Build Core
-FROM rust:1.96.1-trixie AS core-builder
-RUN cargo install cargo-strip
+FROM rust:1.97.1-trixie AS core-builder
+RUN cargo install cargo-strip cargo-edit
 
 WORKDIR /builder
 COPY Cargo.toml Cargo.lock ./
 COPY ./lib ./lib
 COPY ./client/rs ./client/rs
 COPY ./bin/core ./bin/core
+
+# Set Version
+ARG VERSION="0.0.0"
+ARG IMAGE_TAG=""
+RUN cargo set-version ${VERSION}${IMAGE_TAG:+-${IMAGE_TAG}}
 
 # Compile app
 RUN cargo build -p cicada_core --release && \

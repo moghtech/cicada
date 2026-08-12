@@ -356,7 +356,6 @@ checksum = "31b698c5f9a010f6573133b09e0de5408834d0c82f8d7475a89fc1867a71cd90"
 dependencies = [
  "axum-core",
  "axum-macros",
- "base64 0.22.1",
  "bytes",
  "form_urlencoded",
  "futures-util",
@@ -375,10 +374,8 @@ dependencies = [
  "serde_json",
  "serde_path_to_error",
  "serde_urlencoded",
- "sha1 0.10.6",
  "sync_wrapper",
  "tokio",
- "tokio-tungstenite 0.29.0",
  "tower",
  "tower-layer",
  "tower-service",
@@ -847,28 +844,7 @@ dependencies = [
 
 [[package]]
 name = "cicada_client"
-version = "0.5.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "33d3b757ad0af0614d7a754287e9e7a38fc9bbeb5bf1fc002ab0df671450d759"
-dependencies = [
- "async_timing_util",
- "http",
- "mogh_auth_client",
- "mogh_error",
- "mogh_pki",
- "mogh_resolver",
- "reqwest 0.13.4",
- "serde",
- "serde_json",
- "strum",
- "surrealdb-types",
- "tracing",
- "typeshare",
-]
-
-[[package]]
-name = "cicada_client"
-version = "0.7.0-dev-1"
+version = "0.0.0"
 dependencies = [
  "async_timing_util",
  "http",
@@ -889,13 +865,34 @@ dependencies = [
 ]
 
 [[package]]
+name = "cicada_client"
+version = "0.5.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "33d3b757ad0af0614d7a754287e9e7a38fc9bbeb5bf1fc002ab0df671450d759"
+dependencies = [
+ "async_timing_util",
+ "http",
+ "mogh_auth_client",
+ "mogh_error",
+ "mogh_pki",
+ "mogh_resolver",
+ "reqwest 0.13.4",
+ "serde",
+ "serde_json",
+ "strum",
+ "surrealdb-types",
+ "tracing",
+ "typeshare",
+]
+
+[[package]]
 name = "cicada_core"
-version = "0.7.0-dev-1"
+version = "0.0.0"
 dependencies = [
  "async_timing_util",
  "axum",
  "bcrypt 0.19.3",
- "cicada_client 0.7.0-dev-1",
+ "cicada_client 0.0.0",
  "colored",
  "dashmap",
  "dotenvy",
@@ -929,6 +926,18 @@ dependencies = [
 
 [[package]]
 name = "cicada_loader"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "cicada_client 0.5.1",
+ "envy",
+ "mogh_pki",
+ "serde",
+ "tracing",
+]
+
+[[package]]
+name = "cicada_loader"
 version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7bb16dc5b83f5fe25ae62f6e685b660dee3d7e7bb574485cca9edca1b171b2f8"
@@ -942,23 +951,11 @@ dependencies = [
 ]
 
 [[package]]
-name = "cicada_loader"
-version = "0.7.0-dev-1"
-dependencies = [
- "anyhow",
- "cicada_client 0.5.1",
- "envy",
- "mogh_pki",
- "serde",
- "tracing",
-]
-
-[[package]]
 name = "cicada_periphery"
-version = "0.7.0-dev-1"
+version = "0.0.0"
 dependencies = [
  "anyhow",
- "cicada_client 0.7.0-dev-1",
+ "cicada_client 0.0.0",
  "colored",
  "dotenvy",
  "envy",
@@ -5532,7 +5529,7 @@ dependencies = [
  "surrealdb-types",
  "surrealdb-types-derive",
  "tokio",
- "tokio-tungstenite 0.28.0",
+ "tokio-tungstenite",
  "tokio-tungstenite-wasm",
  "tokio-util",
  "tracing",
@@ -6062,20 +6059,8 @@ dependencies = [
  "tokio",
  "tokio-native-tls",
  "tokio-rustls",
- "tungstenite 0.28.0",
+ "tungstenite",
  "webpki-roots 0.26.11",
-]
-
-[[package]]
-name = "tokio-tungstenite"
-version = "0.29.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8f72a05e828585856dacd553fba484c242c46e391fb0e58917c942ee9202915c"
-dependencies = [
- "futures-util",
- "log",
- "tokio",
- "tungstenite 0.29.0",
 ]
 
 [[package]]
@@ -6092,7 +6077,7 @@ dependencies = [
  "js-sys",
  "thiserror 2.0.18",
  "tokio",
- "tokio-tungstenite 0.28.0",
+ "tokio-tungstenite",
  "wasm-bindgen",
  "web-sys",
 ]
@@ -6481,22 +6466,6 @@ dependencies = [
  "thiserror 2.0.18",
  "url",
  "utf-8",
-]
-
-[[package]]
-name = "tungstenite"
-version = "0.29.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6c01152af293afb9c7c2a57e4b559c5620b421f6d133261c60dd2d0cdb38e6b8"
-dependencies = [
- "bytes",
- "data-encoding",
- "http",
- "httparse",
- "log",
- "rand 0.9.4",
- "sha1 0.10.6",
- "thiserror 2.0.18",
 ]
 
 [[package]]

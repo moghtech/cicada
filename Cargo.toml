@@ -7,13 +7,11 @@ members = [
 ]
 
 [workspace.package]
-version = "0.7.0-dev-1"
+version = "0.0.0"
 edition = "2024"
 license = "GPL-3.0-or-later"
 repository = "https://github.com/moghtech/cicada"
 homepage = "https://mogh.tech/cicada"
-
-
 
 [workspace.dependencies]
 cicada_client = { path = "client/rs" }
@@ -38,7 +36,7 @@ tokio = { version = "1.53.1", features = ["full"] }
 futures-util = "0.3.34"
 
 # SERVER
-axum = { version = "0.8.9", features = ["ws", "json", "macros"] }
+axum = { version = "0.8.9", features = ["json", "macros"] }
 http = "1.5.0"
 
 # OPENAPI
