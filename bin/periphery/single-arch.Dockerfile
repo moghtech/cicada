@@ -1,10 +1,7 @@
 ## Assumes the latest binaries for the required arch are already built (by binaries.Dockerfile).
 ## Sets up the necessary runtime container dependencies for Cicada Periphery.
 
-ARG VERSION="0.0.0"
-ARG IMAGE_TAG=""
-
-ARG BINARIES_IMAGE=ghcr.io/moghtech/cicada-binaries:${VERSION}${IMAGE_TAG:+-${IMAGE_TAG}}
+ARG BINARIES_IMAGE=ghcr.io/moghtech/cicada-binaries:0
 
 # This is required to work with COPY --from
 FROM ${BINARIES_IMAGE} AS binaries

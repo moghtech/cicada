@@ -2,11 +2,7 @@
 ## Sets up the necessary runtime container dependencies for Cicada Periphery.
 ## Since theres no heavy build here, QEMU multi-arch builds are fine for this image.
 
-
-ARG VERSION="0.0.0"
-ARG IMAGE_TAG=""
-
-ARG BINARIES_IMAGE=ghcr.io/moghtech/cicada-binaries:${VERSION}${IMAGE_TAG:+-${IMAGE_TAG}}
+ARG BINARIES_IMAGE=ghcr.io/moghtech/cicada-binaries:0
 ARG X86_64_BINARIES=${BINARIES_IMAGE}-x86_64
 ARG AARCH64_BINARIES=${BINARIES_IMAGE}-aarch64
 
