@@ -1,6 +1,6 @@
 {
   "name": "cicada_client",
-  "version": "2.0.0",
+  "version": "0.7.0",
   "description": "Cicada client package",
   "homepage": "https://mogh.tech/cicada",
   "main": "dist/lib.js",
@@ -13,9 +13,9 @@
     "build": "tsc"
   },
   "dependencies": {
-    "mogh_auth_client": "^1.3.0"
+    "mogh_auth_client": "^1.7.1"
   },
   "devDependencies": {
-    "typescript": "^6.0.2"
+    "typescript": "^7.0.2"
   }
 }
