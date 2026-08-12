@@ -21,7 +21,7 @@ cicada_client = { path = "client/rs" }
 # MOGH
 mogh_error = { version = "1.0.4", default-features = false }
 mogh_auth_client = "1.7.0"
-mogh_auth_server = "1.7.0"
+mogh_auth_server = "1.8.0"
 mogh_secret_file = "1.0.1"
 mogh_config = "1.1.0"
 mogh_encryption = "0.1.1"
@@ -34,21 +34,21 @@ async_timing_util = "1.1.0"
 
 # ASYNC
 reqwest = { version = "0.13.4", default-features = false, features = ["json", "rustls"] }
-tokio = { version = "1.52.3", features = ["full"] }
-futures-util = "0.3.32"
+tokio = { version = "1.53.1", features = ["full"] }
+futures-util = "0.3.34"
 
 # SERVER
 axum = { version = "0.8.9", features = ["ws", "json", "macros"] }
-http = "1.4.2"
+http = "1.5.0"
 
 # OPENAPI
 utoipa-scalar = { version = "0.3.0", features = ["axum"] }
 utoipa = "5.5.0"
 
 # SER/DE
-serde = { version = "1.0.228", features = ["derive"] }
+serde = { version = "1.0.229", features = ["derive"] }
 strum = { version = "0.28.0", features = ["derive"] }
-serde_json = "1.0.150"
+serde_json = "1.0.151"
 
 # LOGGING
 tracing = "0.1.44"
@@ -58,23 +58,23 @@ dotenvy = "0.15.7"
 envy = "0.4.2"
 
 # CRYPTO / AUTH
-rustls = { version = "0.23.41", features = ["aws-lc-rs"] }
-bcrypt = "0.19.2"
+rustls = { version = "0.23.43", features = ["aws-lc-rs"] }
+bcrypt = "0.19.3"
 
 # ERROR
-anyhow = "1.0.103"
+anyhow = "1.0.104"
 
 # DATABASE
-surrealdb = { version = "3.2.0", features = ["native-tls", "kv-rocksdb", "kv-tikv"] }
-surrealdb-types = { version = "3.2.0" }
+surrealdb = { version = "3.2.4", features = ["native-tls", "kv-rocksdb", "kv-tikv"] }
+surrealdb-types = { version = "3.2.4" }
 
 # MISC
 typeshare = "1.0.5"
 colored = "3.1.1"
 dashmap = "6.2.1"
-fuser = "0.17.0"
-regex = "1.12.4"
-libc = "0.2.186"
+fuser = "0.18.0"
+regex = "1.13.1"
+libc = "0.2.189"
 rand = "0.10.2"
 
 
